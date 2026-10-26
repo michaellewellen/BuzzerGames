@@ -6,4 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- The question files ship inside the assembly, so there are no file paths to get wrong on Railway. -->
+    <EmbeddedResource Include="Data\Jeopardy\*.json" />
+  </ItemGroup>
+
 </Project>

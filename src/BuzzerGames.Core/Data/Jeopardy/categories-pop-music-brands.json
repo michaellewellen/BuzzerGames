@@ -1,0 +1,232 @@
+[
+  {
+    "title": "Taylor Swift Albums", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The 2014 album named for the year she was born", "answer": "1989" },
+      { "clue": "The 2008 album with 'Love Story' and 'You Belong with Me'", "answer": "Fearless" },
+      { "clue": "The 2012 album named for a color, home to 'We Are Never Ever Getting Back Together'", "answer": "Red" },
+      { "clue": "The 2020 surprise album, recorded in quarantine, that includes 'Cardigan'", "answer": "Folklore" },
+      { "clue": "The 2017 album with 'Look What You Made Me Do'", "answer": "Reputation" }
+    ]
+  },
+  {
+    "title": "Swiftie 101", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The record-breaking concert tour that covered every period of her career", "answer": "The Eras Tour", "alt": ["Eras Tour"] },
+      { "clue": "Her lucky number", "answer": "13", "alt": ["Thirteen"] },
+      { "clue": "The state where she was born, in West Reading", "answer": "Pennsylvania" },
+      { "clue": "Her cat Olivia Benson is named for a character in this TV series", "answer": "Law & Order: SVU", "alt": ["Law and Order SVU", "Special Victims Unit", "SVU"] },
+      { "clue": "The NFL team of her partner, tight end Travis Kelce", "answer": "Kansas City Chiefs", "alt": ["Chiefs"] }
+    ]
+  },
+  {
+    "title": "Catchphrases", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "'D'oh!'", "answer": "Homer Simpson", "alt": ["Homer"] },
+      { "clue": "'Yabba dabba doo!'", "answer": "Fred Flintstone", "alt": ["Fred"] },
+      { "clue": "'How you doin'?'", "answer": "Joey Tribbiani", "alt": ["Joey"] },
+      { "clue": "'Hasta la vista, baby'", "answer": "The Terminator", "alt": ["Terminator", "Arnold Schwarzenegger"] },
+      { "clue": "'Make it so'", "answer": "Captain Picard", "alt": ["Picard", "Jean-Luc Picard"] }
+    ]
+  },
+  {
+    "title": "Logos", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "Golden arches", "answer": "McDonald's", "alt": ["McDonalds"] },
+      { "clue": "A swoosh", "answer": "Nike" },
+      { "clue": "A silhouette of a fruit with a bite taken out of it", "answer": "Apple" },
+      { "clue": "A curved arrow underneath the name, running from A to Z", "answer": "Amazon" },
+      { "clue": "A three-pointed star in a circle", "answer": "Mercedes-Benz", "alt": ["Mercedes"] }
+    ]
+  },
+  {
+    "title": "Famous Siblings", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "Venus and Serena", "answer": "Williams" },
+      { "clue": "Orville and Wilbur", "answer": "Wright" },
+      { "clue": "Jacob and Wilhelm, collectors of fairy tales", "answer": "Grimm" },
+      { "clue": "Charlotte, Emily and Anne, authors of Jane Eyre and Wuthering Heights", "answer": "Bronte", "alt": ["Brontë"] },
+      { "clue": "Joel and Ethan, the directors of Fargo and The Big Lebowski", "answer": "Coen" }
+    ]
+  },
+  {
+    "title": "Famous Cats", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The orange cartoon cat who loves lasagna and hates Mondays", "answer": "Garfield" },
+      { "clue": "The grinning feline who fades away in Alice in Wonderland", "answer": "The Cheshire Cat", "alt": ["Cheshire Cat", "Cheshire"] },
+      { "clue": "The swashbuckling orange cat voiced by Antonio Banderas in the Shrek films", "answer": "Puss in Boots" },
+      { "clue": "The black cartoon feline with a bag of tricks, a star of the silent film era", "answer": "Felix the Cat", "alt": ["Felix"] },
+      { "clue": "Sabrina the Teenage Witch's sarcastic cat", "answer": "Salem" }
+    ]
+  },
+  {
+    "title": "Make-Believe Places", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The school of witchcraft and wizardry", "answer": "Hogwarts" },
+      { "clue": "The land through the wardrobe", "answer": "Narnia" },
+      { "clue": "Batman's home city", "answer": "Gotham City", "alt": ["Gotham"] },
+      { "clue": "The hidden African nation of Black Panther", "answer": "Wakanda" },
+      { "clue": "The island where Peter Pan and the Lost Boys live", "answer": "Neverland", "alt": ["Never Never Land"] }
+    ]
+  },
+  {
+    "title": "Famous Dogs", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The collie who always saved Timmy", "answer": "Lassie" },
+      { "clue": "Dorothy's companion on the road to Oz", "answer": "Toto" },
+      { "clue": "Charlie Brown's beagle", "answer": "Snoopy" },
+      { "clue": "The Akita who waited at a Tokyo train station for his dead owner", "answer": "Hachiko", "alt": ["Hachi"] },
+      { "clue": "The three-headed hound guarding the gates of the underworld", "answer": "Cerberus" }
+    ]
+  },
+  {
+    "title": "The Beatles", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The English city the band came from", "answer": "Liverpool" },
+      { "clue": "The drummer born Richard Starkey, better known as Ringo ___", "answer": "Starr" },
+      { "clue": "Their 1964 movie, named for a long day of work", "answer": "A Hard Day's Night" },
+      { "clue": "Their 1967 album with a famous collage cover, featuring a fictional band", "answer": "Sgt. Pepper's Lonely Hearts Club Band", "alt": ["Sgt. Pepper", "Sgt Pepper's"] },
+      { "clue": "The producer sometimes called 'the fifth Beatle'", "answer": "George Martin" }
+    ]
+  },
+  {
+    "title": "Rock Bands", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The band behind 'Stairway to Heaven,' with Jimmy Page and Robert Plant", "answer": "Led Zeppelin" },
+      { "clue": "Freddie Mercury's band, behind 'Bohemian Rhapsody'", "answer": "Queen" },
+      { "clue": "Mick Jagger and Keith Richards's band, behind '(I Can't Get No) Satisfaction'", "answer": "The Rolling Stones", "alt": ["Rolling Stones"] },
+      { "clue": "The Australian band behind 'Back in Black'", "answer": "AC/DC", "alt": ["ACDC"] },
+      { "clue": "The band behind the album The Dark Side of the Moon", "answer": "Pink Floyd" }
+    ]
+  },
+  {
+    "title": "90s Music", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "Kurt Cobain's band, behind 'Smells Like Teen Spirit'", "answer": "Nirvana" },
+      { "clue": "The British group behind 'Wannabe'", "answer": "The Spice Girls", "alt": ["Spice Girls"] },
+      { "clue": "The boy band behind 'I Want It That Way'", "answer": "Backstreet Boys", "alt": ["The Backstreet Boys"] },
+      { "clue": "The trio behind 'Waterfalls'", "answer": "TLC" },
+      { "clue": "The singer of 'You Oughta Know' on the album Jagged Little Pill", "answer": "Alanis Morissette" }
+    ]
+  },
+  {
+    "title": "Country Music", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "She wrote and sang 'Jolene' and '9 to 5'", "answer": "Dolly Parton", "alt": ["Dolly"] },
+      { "clue": "The 'Man in Black' who sang 'Ring of Fire'", "answer": "Johnny Cash" },
+      { "clue": "He sang 'On the Road Again' and wears a braid and bandanna", "answer": "Willie Nelson", "alt": ["Willie"] },
+      { "clue": "The Canadian star of 'Man! I Feel Like a Woman!'", "answer": "Shania Twain", "alt": ["Shania"] },
+      { "clue": "The star of 'The Dance' and a record-breaking Central Park concert", "answer": "Garth Brooks", "alt": ["Garth"] }
+    ]
+  },
+  {
+    "title": "Pop Stars", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "She asked you to 'Hit Me Baby One More Time'", "answer": "Britney Spears", "alt": ["Britney"] },
+      { "clue": "The *NSYNC member who went solo with 'Cry Me a River'", "answer": "Justin Timberlake", "alt": ["Timberlake"] },
+      { "clue": "She arrived at the 2010 Grammys in an egg and sang 'Poker Face'", "answer": "Lady Gaga", "alt": ["Gaga"] },
+      { "clue": "The Destiny's Child alum behind 'Single Ladies'", "answer": "Beyonce", "alt": ["Beyoncé"] },
+      { "clue": "The singer who teamed with Mark Ronson for 'Uptown Funk'", "answer": "Bruno Mars" }
+    ]
+  },
+  {
+    "title": "One-Hit Wonders", "tag": "pop", "round": "double",
+    "clues": [
+      { "clue": "'Mickey,' the 1982 cheerleader anthem", "answer": "Toni Basil" },
+      { "clue": "'Take On Me,' with a famous sketch-animation video", "answer": "a-ha", "alt": ["A-ha", "Aha"] },
+      { "clue": "'99 Luftballons,' sung in German", "answer": "Nena" },
+      { "clue": "'Funkytown'", "answer": "Lipps Inc.", "alt": ["Lipps Inc", "Lipps, Inc."] },
+      { "clue": "'Come On Eileen'", "answer": "Dexys Midnight Runners", "alt": ["Dexys"] }
+    ]
+  },
+  {
+    "title": "Cereal Mascots", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "The Frosted Flakes mascot who says 'They're grrreat!'", "answer": "Tony the Tiger", "alt": ["Tony"] },
+      { "clue": "The Froot Loops bird with a rainbow beak", "answer": "Toucan Sam", "alt": ["Sam"] },
+      { "clue": "The cartoon hare forever denied a bowl of his favorite fruity cereal", "answer": "The Trix Rabbit", "alt": ["Trix Rabbit"] },
+      { "clue": "The three elves of Rice Krispies", "answer": "Snap, Crackle and Pop", "alt": ["Snap Crackle Pop"] },
+      { "clue": "The vampire mascot of a chocolate cereal", "answer": "Count Chocula" }
+    ]
+  },
+  {
+    "title": "Fast Food", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "McDonald's burger with two all-beef patties, special sauce, lettuce, cheese, pickles, onions on a sesame seed bun", "answer": "Big Mac" },
+      { "clue": "Burger King's flagship burger, 'flame-broiled'", "answer": "Whopper", "alt": ["The Whopper"] },
+      { "clue": "Wendy's frozen dessert you dip fries into", "answer": "Frosty", "alt": ["The Frosty"] },
+      { "clue": "The chicken chain closed on Sundays, with cows urging you to 'Eat Mor Chikin'", "answer": "Chick-fil-A", "alt": ["Chick fil A"] },
+      { "clue": "The California chain with a 'secret menu' that includes 'Animal Style'", "answer": "In-N-Out", "alt": ["In-N-Out Burger", "In N Out"] }
+    ]
+  },
+  {
+    "title": "Candy", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "'Melts in your mouth, not in your hand'", "answer": "M&M's", "alt": ["M&Ms", "M and Ms"] },
+      { "clue": "The chocolate-and-peanut-butter cups from Hershey's", "answer": "Reese's", "alt": ["Reese's Peanut Butter Cups", "Reeses"] },
+      { "clue": "'Taste the Rainbow'", "answer": "Skittles" },
+      { "clue": "The lollipop with a chewy center that asks 'How many licks?'", "answer": "Tootsie Pop", "alt": ["Tootsie Roll Pop"] },
+      { "clue": "The candy that crackles and fizzes in your mouth", "answer": "Pop Rocks" }
+    ]
+  },
+  {
+    "title": "Soft Drinks", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "The Atlanta-based cola with polar bears in its holiday ads", "answer": "Coca-Cola", "alt": ["Coke", "Coca Cola"] },
+      { "clue": "The cola whose 'Challenge' taste tests pitted it against Coke", "answer": "Pepsi" },
+      { "clue": "The lemon-lime soda with a green bottle, 'Obey Your Thirst'", "answer": "Sprite" },
+      { "clue": "The neon-green citrus soda introduced in Tennessee in the 1940s and once marketed with hillbilly cartoons", "answer": "Mountain Dew" },
+      { "clue": "The orange soda created in Germany in 1940", "answer": "Fanta" }
+    ]
+  },
+  {
+    "title": "Advertising Slogans", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "'Just Do It'", "answer": "Nike" },
+      { "clue": "'I'm Lovin' It'", "answer": "McDonald's", "alt": ["McDonalds"] },
+      { "clue": "'Think Different'", "answer": "Apple" },
+      { "clue": "'Because You're Worth It'", "answer": "L'Oreal", "alt": ["L'Oréal", "Loreal"] },
+      { "clue": "'Where's the Beef?'", "answer": "Wendy's", "alt": ["Wendys"] }
+    ]
+  },
+  {
+    "title": "Social Media", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "Mark Zuckerberg's site that began as a Harvard dorm project", "answer": "Facebook" },
+      { "clue": "The short-video app owned by ByteDance", "answer": "TikTok" },
+      { "clue": "The site where posts are called tweets, renamed 'X' in 2023", "answer": "Twitter", "alt": ["X"] },
+      { "clue": "The app with a ghost logo where photos disappear", "answer": "Snapchat" },
+      { "clue": "The video site founded in 2005 by three former PayPal employees", "answer": "YouTube" }
+    ]
+  },
+  {
+    "title": "Tech Companies", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "Founded in a garage by Steve Jobs and Steve Wozniak", "answer": "Apple" },
+      { "clue": "Founded by Bill Gates and Paul Allen", "answer": "Microsoft" },
+      { "clue": "Founded by Larry Page and Sergey Brin, named for a very large number", "answer": "Google" },
+      { "clue": "Started in 1994 as an online bookstore by Jeff Bezos", "answer": "Amazon" },
+      { "clue": "Started by mailing DVDs, now streams shows like Stranger Things", "answer": "Netflix" }
+    ]
+  },
+  {
+    "title": "Video Games", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The Nintendo series starring a mustached plumber and his brother Luigi", "answer": "Super Mario Bros.", "alt": ["Mario", "Super Mario"] },
+      { "clue": "The Nintendo series in which a green-clad hero named Link rescues a princess in Hyrule", "answer": "The Legend of Zelda", "alt": ["Zelda", "Legend of Zelda"] },
+      { "clue": "The block-stacking game created in the Soviet Union by Alexey Pajitnov", "answer": "Tetris" },
+      { "clue": "The blocky sandbox game with creepers, made by Mojang", "answer": "Minecraft" },
+      { "clue": "The franchise whose slogan is 'Gotta catch 'em all'", "answer": "Pokemon", "alt": ["Pokémon"] }
+    ]
+  },
+  {
+    "title": "The Simpsons", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The nuclear plant worker and father of the family", "answer": "Homer" },
+      { "clue": "The family's hometown", "answer": "Springfield" },
+      { "clue": "The evil boss of the nuclear plant, Mr. ___", "answer": "Burns" },
+      { "clue": "The convenience store where Apu works, the Kwik-E-___", "answer": "Mart" },
+      { "clue": "Creator Matt Groening named Bart as an anagram for this word", "answer": "Brat" }
+    ]
+  }
+]

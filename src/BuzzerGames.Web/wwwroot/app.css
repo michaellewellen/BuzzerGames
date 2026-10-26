@@ -351,3 +351,6 @@ a.game-tile:hover { border-color: var(--gold); }
     z-index: 1000;
 }
 #blazor-error-ui .reload { margin-left: .5rem; color: #00e; }
+
+.holiday-toggle { display: flex; align-items: center; justify-content: center; gap: .6rem; margin: 0 0 1rem; font-size: 1.05rem; cursor: pointer; }
+.holiday-toggle input { width: 1.3rem; height: 1.3rem; }

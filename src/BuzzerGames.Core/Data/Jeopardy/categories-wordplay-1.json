@@ -1,0 +1,162 @@
+[
+  {
+    "title": "Also a Game", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "Surgeons perform it, and in the board game you'd rather not touch the sides", "answer": "Operation" },
+      { "clue": "A word for danger or chance, it's also Parker Brothers' game of world domination", "answer": "Risk" },
+      { "clue": "The Moor of Venice, driven to jealous rage by the scheming Iago", "answer": "Othello" },
+      { "clue": "The Bismarck and the Yamato, naval giants armed with the biggest guns afloat", "answer": "Battleship" },
+      { "clue": "This ancient board game of black and white stones shares its name with an option at a stoplight", "answer": "Go" }
+    ]
+  },
+  {
+    "title": "Also a Color", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "Florida's signature citrus fruit, squeezed into breakfast juice", "answer": "Orange" },
+      { "clue": "Pink-fleshed fish that swims upstream to spawn", "answer": "Salmon" },
+      { "clue": "The fruit pressed for oil, or Popeye's sweetheart, Miss Oyl", "answer": "Olive" },
+      { "clue": "A small freshwater duck", "answer": "Teal" },
+      { "clue": "The French word for 'mole,' the burrowing animal", "answer": "Taupe" }
+    ]
+  },
+  {
+    "title": "The K Is Silent", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "You cut your steak with it", "answer": "Knife" },
+      { "clue": "Sir Lancelot held this rank", "answer": "Knight" },
+      { "clue": "A sailor's unit of speed, and something a sailor ties", "answer": "Knot" },
+      { "clue": "The joint at the base of a finger, and what you rap on a door with", "answer": "Knuckle" },
+      { "clue": "Israel's parliament, which meets in Jerusalem", "answer": "Knesset" }
+    ]
+  },
+  {
+    "title": "Book Numbers", "tag": "wordplay", "round": "any",
+    "clues": [
+      { "clue": "Orwell's dystopia, in which Big Brother is watching", "answer": "1984", "alt": ["Nineteen Eighty-Four"] },
+      { "clue": "Joseph Heller's WWII satire, whose title became a term for a no-win paradox", "answer": "Catch-22", "alt": ["Catch 22"] },
+      { "clue": "Jules Verne's wager story, in which Phileas Fogg races across the globe", "answer": "Around the World in Eighty Days", "alt": ["Around the World in 80 Days"] },
+      { "clue": "Ray Bradbury's book-burning novel, named for the temperature at which paper is said to ignite", "answer": "Fahrenheit 451" },
+      { "clue": "Vonnegut's novel of Billy Pilgrim, who comes unstuck in time after the bombing of Dresden", "answer": "Slaughterhouse-Five", "alt": ["Slaughterhouse 5"] }
+    ]
+  },
+  {
+    "title": "Letter Perfect", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "Salty expanse that covers most of the planet", "answer": "Sea" },
+      { "clue": "Insect that makes honey", "answer": "Bee" },
+      { "clue": "Round green seed that grows in a pod, and the thing under the princess's mattress", "answer": "Pea" },
+      { "clue": "Noisy, often blue member of the crow family", "answer": "Jay" },
+      { "clue": "British word for a line of people waiting their turn", "answer": "Queue" }
+    ]
+  },
+  {
+    "title": "Palindromes", "tag": "wordplay", "round": "double",
+    "clues": [
+      { "clue": "Inuit-origin boat you paddle sitting down", "answer": "Kayak" },
+      { "clue": "A carpenter's bubble-vial tool, or a stage in a video game", "answer": "Level" },
+      { "clue": "Of a city or its citizens, and a Honda compact", "answer": "Civic" },
+      { "clue": "A principle or belief, and Christopher Nolan's 2020 time-inversion thriller", "answer": "Tenet" },
+      { "clue": "Made into a god", "answer": "Deified" }
+    ]
+  },
+  {
+    "title": "Acronyms", "tag": "wordplay", "round": "double",
+    "clues": [
+      { "clue": "Divers breathe from this tank-and-regulator gear", "answer": "Scuba" },
+      { "clue": "Focused beam of light used in eye surgery and barcode scanners", "answer": "Laser" },
+      { "clue": "Air traffic controllers watch this to track planes", "answer": "Radar" },
+      { "clue": "Submarines use it to ping the depths with sound", "answer": "Sonar" },
+      { "clue": "A police stun device whose name nods to Tom Swift, boy inventor of old adventure novels", "answer": "Taser" }
+    ]
+  },
+  {
+    "title": "Three of a Kind", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "A shape with three sides", "answer": "Triangle" },
+      { "clue": "Competition in which you swim, bike, then run", "answer": "Triathlon" },
+      { "clue": "Three-legged stand for a camera", "answer": "Tripod" },
+      { "clue": "Three-part work, like The Lord of the Rings", "answer": "Trilogy" },
+      { "clue": "Neptune's three-pronged spear", "answer": "Trident" }
+    ]
+  },
+  {
+    "title": "One-Name Wonders", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "The Material Girl", "answer": "Madonna" },
+      { "clue": "Sonny's former partner, an Oscar winner for Moonstruck, and the voice behind 'Believe'", "answer": "Cher" },
+      { "clue": "British singer behind the hit 'Rolling in the Deep'", "answer": "Adele" },
+      { "clue": "U2's frontman, born Paul Hewson", "answer": "Bono" },
+      { "clue": "Stage name of Gordon Sumner, former lead singer of The Police", "answer": "Sting" }
+    ]
+  },
+  {
+    "title": "Birds That Are Also Verbs", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "To lower your head quickly", "answer": "Duck" },
+      { "clue": "To gulp down food or drink", "answer": "Swallow" },
+      { "clue": "To complain", "answer": "Grouse" },
+      { "clue": "To mimic without understanding", "answer": "Parrot" },
+      { "clue": "To peddle goods by calling them out", "answer": "Hawk" }
+    ]
+  },
+  {
+    "title": "Flower Girls", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "Kate Winslet's Titanic heroine, DeWitt Bukater", "answer": "Rose" },
+      { "clue": "Harry Potter's mother", "answer": "Lily" },
+      { "clue": "The love Jay Gatsby can't let go of, Buchanan", "answer": "Daisy" },
+      { "clue": "Greek goddess of the rainbow, and the colored part of your eye", "answer": "Iris" },
+      { "clue": "Willy Wonka's gum-chewing girl who swells up like a blueberry, Beauregarde", "answer": "Violet" }
+    ]
+  },
+  {
+    "title": "Words That Mean Their Own Opposites", "tag": "wordplay", "round": "double",
+    "clues": [
+      { "clue": "To approve, or to penalize", "answer": "Sanction" },
+      { "clue": "To split apart, or to stick together", "answer": "Cleave" },
+      { "clue": "To remove fine powder, or to sprinkle it", "answer": "Dust" },
+      { "clue": "Careful supervision, or a failure to notice", "answer": "Oversight" },
+      { "clue": "To flee, or to fasten securely", "answer": "Bolt" }
+    ]
+  },
+  {
+    "title": "Word Origins", "tag": "wordplay", "round": "double",
+    "clues": [
+      { "clue": "From the Greek for 'river horse'", "answer": "Hippopotamus" },
+      { "clue": "From the Spanish 'el lagarto,' meaning 'the lizard'", "answer": "Alligator" },
+      { "clue": "From a Dutch word meaning 'little cake'", "answer": "Cookie" },
+      { "clue": "From the Latin for 'little mouse,' for how it looks flexing under the skin", "answer": "Muscle" },
+      { "clue": "From the Hindi word for 'plunder'", "answer": "Loot" }
+    ]
+  },
+  {
+    "title": "They Come in Groups", "tag": "wordplay", "round": "any",
+    "clues": [
+      { "clue": "What a group of lions is called", "answer": "Pride" },
+      { "clue": "A group of crows, ominously", "answer": "Murder" },
+      { "clue": "A group of owls, politically", "answer": "Parliament" },
+      { "clue": "Geese on the ground, noisy", "answer": "Gaggle" },
+      { "clue": "A group of larks, uplifting", "answer": "Exaltation" }
+    ]
+  },
+  {
+    "title": "Named After a Person", "tag": "wordplay", "round": "any",
+    "clues": [
+      { "clue": "Lunch item named for a gambling-loving English earl", "answer": "Sandwich" },
+      { "clue": "Knitted jacket named for the earl who led the Charge of the Light Brigade", "answer": "Cardigan" },
+      { "clue": "To shun in protest, after an Irish land agent in County Mayo", "answer": "Boycott" },
+      { "clue": "Beheading device named for a French physician who proposed it", "answer": "Guillotine" },
+      { "clue": "Engine named for a German inventor who vanished from a steamer in 1913", "answer": "Diesel" }
+    ]
+  },
+  {
+    "title": "1 Word, 2 Meanings", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "A flying mammal, or a wooden club used in baseball", "answer": "Bat" },
+      { "clue": "A river's edge, or a place to keep your money", "answer": "Bank" },
+      { "clue": "The covering of a tree, or the sound a dog makes", "answer": "Bark" },
+      { "clue": "A baseball player who throws, or a container for lemonade", "answer": "Pitcher" },
+      { "clue": "The covering of a fish, or a series of musical notes", "answer": "Scale" }
+    ]
+  }
+]

@@ -8,6 +8,11 @@
     <h1>Jeopardy</h1>
     <p class="muted">Create the game on the big screen (the TV). Everyone else scans its QR code, or opens this site on their phone and types the room code below.</p>
 
+    <label class="holiday-toggle">
+        <input type="checkbox" @bind="_holiday" />
+        Include a holiday category
+    </label>
+
     <button class="btn btn-start" @onclick="CreateGame">Create a new game</button>
 
     <hr />
@@ -30,11 +35,14 @@
     private string _code = "";
     private string? _error;
 
+    // Ticked automatically in December (Mountain time), but you can tick it any time, such as for a rehearsal.
+    private bool _holiday = HolidaySeason.IsActive(DateTimeOffset.UtcNow);
+
     private void CreateGame()
     {
         // Whoever creates the game is setting up the big screen, so they land on the /board address.
         // Phones use the plain /jeopardy/ABCD address (that's what the QR code points to).
-        var game = Rooms.Create();
+        var game = Rooms.Create(new GameOptions(_holiday));
         Navigation.NavigateTo($"/jeopardy/{game.Code}/board");
     }
 

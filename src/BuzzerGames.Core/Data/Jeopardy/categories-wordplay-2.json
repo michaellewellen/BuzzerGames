@@ -1,0 +1,172 @@
+[
+  {
+    "title": "Bird Sounds", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "A duck's call, and what a fake doctor is called", "answer": "Quack" },
+      { "clue": "An owl's call, and a very funny person", "answer": "Hoot" },
+      { "clue": "Geese in a V make this noise, and so does a car horn", "answer": "Honk" },
+      { "clue": "A turkey's sound, and what you do to your dinner when you're in a hurry", "answer": "Gobble" },
+      { "clue": "A pigeon's soft murmur, and what you do to a baby", "answer": "Coo" }
+    ]
+  },
+  {
+    "title": "Things With Teeth", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "You run this through your hair to untangle it", "answer": "Comb" },
+      { "clue": "It closes with a pull tab on jeans and jackets", "answer": "Zipper" },
+      { "clue": "A carpenter's cutting tool", "answer": "Saw" },
+      { "clue": "Meshing wheels inside a clock or a bicycle", "answer": "Gear", "alt": ["Cog"] },
+      { "clue": "Garden tool for gathering leaves", "answer": "Rake" }
+    ]
+  },
+  {
+    "title": "Famous Duos", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "Batman's sidekick", "answer": "Robin" },
+      { "clue": "Abbott's partner in the 'Who's on First?' routine", "answer": "Costello" },
+      { "clue": "Thelma's partner in the 1991 road-trip movie", "answer": "Louise" },
+      { "clue": "Meriwether Lewis's co-leader of the Corps of Discovery", "answer": "Clark" },
+      { "clue": "The cartoon mouse who always outwits Tom", "answer": "Jerry" }
+    ]
+  },
+  {
+    "title": "Known by Their Initials", "tag": "wordplay", "round": "any",
+    "clues": [
+      { "clue": "Author of the Harry Potter books", "answer": "J.K. Rowling" },
+      { "clue": "Creator of Winnie-the-Pooh", "answer": "A.A. Milne" },
+      { "clue": "He wrote The Lion, the Witch and the Wardrobe", "answer": "C.S. Lewis" },
+      { "clue": "Author of The Catcher in the Rye", "answer": "J.D. Salinger" },
+      { "clue": "Poet of The Waste Land, whose book of cat poems inspired a Broadway musical", "answer": "T.S. Eliot" }
+    ]
+  },
+  {
+    "title": "Sounds Like a Number", "tag": "wordplay", "round": "any",
+    "clues": [
+      { "clue": "Past tense of win", "answer": "Won" },
+      { "clue": "Past tense of eat", "answer": "Ate" },
+      { "clue": "As well, or excessively", "answer": "Too" },
+      { "clue": "A golfer's shout of warning", "answer": "Fore" },
+      { "clue": "German for 'no'", "answer": "Nein" }
+    ]
+  },
+  {
+    "title": "Hot ___", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "Ballpark sausage in a bun", "answer": "Dog" },
+      { "clue": "Bubbling soak in the backyard", "answer": "Tub" },
+      { "clue": "Tabasco is one", "answer": "Sauce" },
+      { "clue": "A customized, souped-up car", "answer": "Rod" },
+      { "clue": "Natural pool heated by the earth, like those at Yellowstone", "answer": "Spring" }
+    ]
+  },
+  {
+    "title": "Red ___", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "Moses parted it", "answer": "Sea" },
+      { "clue": "Humanitarian organization with a plus-sign emblem", "answer": "Cross" },
+      { "clue": "Where the stars walk before the Oscars", "answer": "Carpet" },
+      { "clue": "A misleading clue in a mystery, and a smoked fish", "answer": "Herring" },
+      { "clue": "Bureaucratic delay", "answer": "Tape" }
+    ]
+  },
+  {
+    "title": "Two Sets of Double Letters", "tag": "wordplay", "round": "double",
+    "clues": [
+      { "clue": "Party item filled with helium", "answer": "Balloon" },
+      { "clue": "Where you live, or to speak to an audience", "answer": "Address" },
+      { "clue": "The opposite of failure", "answer": "Success" },
+      { "clue": "The state with a great river that is notoriously tricky to spell", "answer": "Mississippi" },
+      { "clue": "Congressional group that studies a bill before the full vote", "answer": "Committee" }
+    ]
+  },
+  {
+    "title": "City Nicknames", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "Nicknamed The Big Apple", "answer": "New York City", "alt": ["New York"] },
+      { "clue": "Nicknamed The Windy City", "answer": "Chicago" },
+      { "clue": "Nicknamed Motor City, for its car makers", "answer": "Detroit" },
+      { "clue": "Nicknamed The Big Easy", "answer": "New Orleans" },
+      { "clue": "Nicknamed The City of Brotherly Love", "answer": "Philadelphia" }
+    ]
+  },
+  {
+    "title": "Jobs as Last Names", "tag": "wordplay", "round": "double",
+    "clues": [
+      { "clue": "Occupation of someone who makes bread", "answer": "Baker" },
+      { "clue": "Occupation of someone who grinds grain into flour", "answer": "Miller" },
+      { "clue": "Occupation of someone who makes barrels", "answer": "Cooper" },
+      { "clue": "Occupation of someone who makes arrows", "answer": "Fletcher" },
+      { "clue": "Occupation of someone who builds wagons", "answer": "Wainwright" }
+    ]
+  },
+  {
+    "title": "Words Hiding an Animal", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "A book listing items for sale", "answer": "Catalog" },
+      { "clue": "Power source inside a flashlight", "answer": "Battery" },
+      { "clue": "Wall-to-wall floor covering", "answer": "Carpet" },
+      { "clue": "Substance that gives something its color", "answer": "Pigment" },
+      { "clue": "An angry look", "answer": "Scowl" }
+    ]
+  },
+  {
+    "title": "Words Hiding a Body Part", "tag": "wordplay", "round": "double",
+    "clues": [
+      { "clue": "Device that wakes you in the morning", "answer": "Alarm" },
+      { "clue": "Strip of fabric you tie around a gift", "answer": "Ribbon" },
+      { "clue": "Equipment with moving parts, like a washer", "answer": "Machine" },
+      { "clue": "Hanging light fixture dripping with crystals", "answer": "Chandelier" },
+      { "clue": "The U.S. capital, named for its first president", "answer": "Washington" }
+    ]
+  },
+  {
+    "title": "Words Hiding a Number", "tag": "wordplay", "round": "single",
+    "clues": [
+      { "clue": "Device you call people on", "answer": "Phone" },
+      { "clue": "Frequently", "answer": "Often" },
+      { "clue": "Group of connected computers", "answer": "Network" },
+      { "clue": "How heavy something is", "answer": "Weight" },
+      { "clue": "A dog's pointed tooth, or the dog family", "answer": "Canine" }
+    ]
+  },
+  {
+    "title": "Word Partners", "tag": "wordplay", "round": "double",
+    "clues": [
+      { "clue": "Foot, base and basket all go before this", "answer": "Ball" },
+      { "clue": "Gold, cat and star all go before this", "answer": "Fish" },
+      { "clue": "Green, light and white all go before this", "answer": "House" },
+      { "clue": "Day, flash and spot all go before this", "answer": "Light" },
+      { "clue": "Cook, note and scrap all go before this", "answer": "Book" }
+    ]
+  },
+  {
+    "title": "Same First and Last Initial", "tag": "wordplay", "round": "any",
+    "clues": [
+      { "clue": "Disney's sailor-suited waterfowl with a lisp, Mickey's grumpy pal", "answer": "Donald Duck" },
+      { "clue": "Spider-Man's secret identity", "answer": "Peter Parker" },
+      { "clue": "Superman's reporter girlfriend at the Daily Planet", "answer": "Lois Lane" },
+      { "clue": "Star of Some Like It Hot and Gentlemen Prefer Blondes", "answer": "Marilyn Monroe" },
+      { "clue": "Hobbit hero of The Hobbit, uncle of Frodo", "answer": "Bilbo Baggins" }
+    ]
+  },
+  {
+    "title": "Famous Nicknames", "tag": "wordplay", "round": "any",
+    "clues": [
+      { "clue": "Known as 'Honest Abe'", "answer": "Abraham Lincoln", "alt": ["Lincoln"] },
+      { "clue": "Known as 'The Boss,' this New Jersey rocker sang 'Born in the U.S.A.'", "answer": "Bruce Springsteen" },
+      { "clue": "Known as 'The Great One' in hockey", "answer": "Wayne Gretzky" },
+      { "clue": "Known as 'The Gipper,' a nod to his role in a football movie", "answer": "Ronald Reagan", "alt": ["Reagan"] },
+      { "clue": "Known as 'The Sultan of Swat'", "answer": "Babe Ruth" }
+    ]
+  },
+  {
+    "title": "Band Name Adjectives", "tag": "wordplay", "round": "double",
+    "clues": [
+      { "clue": "The adjective before 'Day' in the band behind 'American Idiot'", "answer": "Green" },
+      { "clue": "The adjective before 'Stones' in Mick Jagger's band", "answer": "Rolling" },
+      { "clue": "The adjective before 'Dead' in Jerry Garcia's band", "answer": "Grateful" },
+      { "clue": "The adjective before 'Pumpkins' in Billy Corgan's band", "answer": "Smashing" },
+      { "clue": "The adjective before 'Purple' in the band behind 'Smoke on the Water'", "answer": "Deep" }
+    ]
+  }
+]

@@ -1,0 +1,172 @@
+[
+  {
+    "title": "Little House on the Prairie", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The Minnesota town where the Ingalls family lived on TV", "answer": "Walnut Grove" },
+      { "clue": "The spoiled daughter of the town's store owners, played by Alison Arngrim", "answer": "Nellie Oleson", "alt": ["Nellie"] },
+      { "clue": "Ma Ingalls's first name", "answer": "Caroline" },
+      { "clue": "The Ingalls family's brindle bulldog", "answer": "Jack" },
+      { "clue": "Nellie's mother, who ran Oleson's Mercantile", "answer": "Harriet Oleson", "alt": ["Harriet"] }
+    ]
+  },
+  {
+    "title": "The Waltons", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The Virginia mountain where the family lived", "answer": "Walton's Mountain", "alt": ["Waltons Mountain"] },
+      { "clue": "The eldest Walton child, an aspiring writer played by Richard Thomas", "answer": "John-Boy", "alt": ["John Boy"] },
+      { "clue": "The kind of mill the family ran", "answer": "Sawmill" },
+      { "clue": "The Walton mother, played by Michael Learned", "answer": "Olivia" },
+      { "clue": "The show's creator, who also narrated as the grown-up John-Boy", "answer": "Earl Hamner Jr.", "alt": ["Earl Hamner"] }
+    ]
+  },
+  {
+    "title": "Happy Days", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The leather-jacketed cool guy played by Henry Winkler", "answer": "Fonzie", "alt": ["The Fonz", "Arthur Fonzarelli"] },
+      { "clue": "The drive-in where the gang hung out", "answer": "Arnold's" },
+      { "clue": "Played Richie Cunningham before directing Apollo 13", "answer": "Ron Howard" },
+      { "clue": "Richie's little sister", "answer": "Joanie" },
+      { "clue": "Robin Williams first appeared as this alien, who then got his own show", "answer": "Mork" }
+    ]
+  },
+  {
+    "title": "Laverne & Shirley", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The Midwestern city where the roommates lived", "answer": "Milwaukee" },
+      { "clue": "Shirley's last name, played by Cindy Williams", "answer": "Feeney" },
+      { "clue": "Laverne's last name, played by Penny Marshall", "answer": "De Fazio", "alt": ["DeFazio"] },
+      { "clue": "Lenny's pal and fellow neighbor with the slicked-back hair", "answer": "Squiggy" },
+      { "clue": "Penny Marshall's brother, who also created this show's parent series, Happy Days, and later directed Pretty Woman", "answer": "Garry Marshall" }
+    ]
+  },
+  {
+    "title": "The Brady Bunch", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "The total number of Brady kids", "answer": "Six" },
+      { "clue": "The Bradys' live-in housekeeper", "answer": "Alice" },
+      { "clue": "Mike Brady's profession", "answer": "Architect" },
+      { "clue": "The middle sister, who was tired of hearing about her older sister Marcia", "answer": "Jan" },
+      { "clue": "Cousin ___, added in the final season to boost ratings", "answer": "Oliver" }
+    ]
+  },
+  {
+    "title": "The Partridge Family", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The Oscar-winning star of Oklahoma! and The Music Man who played the Partridge family's mom", "answer": "Shirley Jones" },
+      { "clue": "The teen idol who played Keith Partridge", "answer": "David Cassidy" },
+      { "clue": "Their 1970 number-one hit", "answer": "I Think I Love You" },
+      { "clue": "The wisecracking redheaded middle brother, played by Bonaduce", "answer": "Danny" },
+      { "clue": "The family's put-upon manager, played by Dave Madden", "answer": "Reuben Kincaid", "alt": ["Reuben"] }
+    ]
+  },
+  {
+    "title": "Charlie's Angels", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The unseen boss who gave the Angels their assignments over the speakerphone", "answer": "Charlie", "alt": ["Charlie Townsend"] },
+      { "clue": "The Angels' liaison, played by David Doyle", "answer": "Bosley" },
+      { "clue": "Farrah Fawcett's character", "answer": "Jill Munroe", "alt": ["Jill"] },
+      { "clue": "Jaclyn Smith's character", "answer": "Kelly Garrett", "alt": ["Kelly"] },
+      { "clue": "Kate Jackson's character", "answer": "Sabrina Duncan", "alt": ["Sabrina"] }
+    ]
+  },
+  {
+    "title": "Three's Company", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "John Ritter's klutzy cook, Jack ___", "answer": "Tripper" },
+      { "clue": "Janet's last name, played by Joyce DeWitt", "answer": "Wood" },
+      { "clue": "Suzanne Somers's ditzy blonde, Chrissy ___", "answer": "Snow" },
+      { "clue": "The roommates' grumpy first landlord, Mr. ___", "answer": "Roper" },
+      { "clue": "The flamboyant landlord played by Don Knotts, Ralph ___", "answer": "Furley" }
+    ]
+  },
+  {
+    "title": "M*A*S*H", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The war the hospital unit was stationed in", "answer": "Korean War", "alt": ["Korea"] },
+      { "clue": "Alan Alda's wisecracking surgeon", "answer": "Hawkeye Pierce", "alt": ["Hawkeye"] },
+      { "clue": "Corporal Klinger tried to get discharged by wearing these", "answer": "Dresses", "alt": ["Women's clothing"] },
+      { "clue": "Colonel Potter's horse", "answer": "Sophie" },
+      { "clue": "The nickname Hawkeye gave to Major Margaret Houlihan", "answer": "Hot Lips" }
+    ]
+  },
+  {
+    "title": "All in the Family", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "Carroll O'Connor's bigoted, cigar-chomping Queens patriarch", "answer": "Archie Bunker", "alt": ["Archie"] },
+      { "clue": "Archie's sweet wife, whom he called a 'dingbat'", "answer": "Edith" },
+      { "clue": "Archie's daughter, played by Sally Struthers", "answer": "Gloria" },
+      { "clue": "Archie's son-in-law, whom he nicknamed 'Meathead'", "answer": "Mike Stivic", "alt": ["Mike", "Michael Stivic"] },
+      { "clue": "The spin-off about neighbors who 'moved on up' to a deluxe apartment", "answer": "The Jeffersons", "alt": ["Jeffersons"] }
+    ]
+  },
+  {
+    "title": "The Mary Tyler Moore Show", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The city where Mary Richards worked at WJM-TV", "answer": "Minneapolis" },
+      { "clue": "What Mary tossed in the air in the opening credits", "answer": "Her hat", "alt": ["Hat", "Tam"] },
+      { "clue": "Her gruff boss, played by Ed Asner", "answer": "Lou Grant" },
+      { "clue": "The actor who played vain anchorman Ted Baxter", "answer": "Ted Knight" },
+      { "clue": "The spin-off starring Valerie Harper as Mary's wisecracking neighbor", "answer": "Rhoda" }
+    ]
+  },
+  {
+    "title": "The Love Boat", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The Love Boat sailed as this kind of vessel", "answer": "Cruise ship", "alt": ["Cruise liner", "Ocean liner"] },
+      { "clue": "The ship's captain, played by Gavin MacLeod", "answer": "Stubing", "alt": ["Captain Stubing", "Merrill Stubing"] },
+      { "clue": "The ship's bartender, played by Ted Lange", "answer": "Isaac" },
+      { "clue": "The perky cruise director, played by Lauren Tewes", "answer": "Julie McCoy", "alt": ["Julie"] },
+      { "clue": "The real ship that gave the show its setting", "answer": "Pacific Princess" }
+    ]
+  },
+  {
+    "title": "Donny & Marie and The Osmonds", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The home state of the Osmond family", "answer": "Utah" },
+      { "clue": "Donny's 1972 solo hit 'Puppy ___'", "answer": "Love" },
+      { "clue": "Marie's 1973 country hit about fading flowers", "answer": "Paper Roses" },
+      { "clue": "The Osmonds' 1971 number-one hit 'One Bad ___'", "answer": "Apple" },
+      { "clue": "The youngest Osmond, whose 'Long Haired Lover from Liverpool' topped the UK charts", "answer": "Jimmy" }
+    ]
+  },
+  {
+    "title": "Saturday Morning Cartoons", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The Great Dane who solves mysteries with Shaggy", "answer": "Scooby-Doo", "alt": ["Scooby Doo", "Scooby"] },
+      { "clue": "The Stone Age family from Bedrock", "answer": "The Flintstones", "alt": ["Flintstones"] },
+      { "clue": "Blue village dwellers, three apples tall", "answer": "The Smurfs", "alt": ["Smurfs"] },
+      { "clue": "Robots in disguise: the Autobots and the Decepticons", "answer": "Transformers", "alt": ["The Transformers"] },
+      { "clue": "The home planet of He-Man", "answer": "Eternia" }
+    ]
+  },
+  {
+    "title": "Sesame Street and The Muppets", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "The googly-eyed blue Sesame Street puppet obsessed with baked treats", "answer": "Cookie Monster" },
+      { "clue": "Kermit the Frog's glamorous, karate-chopping love interest", "answer": "Miss Piggy" },
+      { "clue": "The green, cranky Sesame Street resident who lives in a trash can", "answer": "Oscar the Grouch", "alt": ["Oscar"] },
+      { "clue": "The Muppet comedian in a porkpie hat known for the line 'Wocka wocka!'", "answer": "Fozzie Bear", "alt": ["Fozzie"] },
+      { "clue": "The creator of the Muppets", "answer": "Jim Henson" }
+    ]
+  },
+  {
+    "title": "Schoolhouse Rock!", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "In the song about how a law is made, he's 'just a ___' on Capitol Hill", "answer": "Bill" },
+      { "clue": "The part of speech taught by 'Conjunction Junction'", "answer": "Conjunctions", "alt": ["Conjunction"] },
+      { "clue": "The part of speech in 'Lolly, Lolly, Lolly' that modifies verbs", "answer": "Adverbs", "alt": ["Adverb"] },
+      { "clue": "The network that aired Schoolhouse Rock! between Saturday morning cartoons", "answer": "ABC" },
+      { "clue": "The song about the U.S. Constitution's opening words, 'We the People'", "answer": "The Preamble", "alt": ["Preamble"] }
+    ]
+  },
+  {
+    "title": "Lawrence Welk", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The instrument bandleader Lawrence Welk played", "answer": "Accordion" },
+      { "clue": "Welk's signature word of praise, said in a thick accent", "answer": "Wunnerful", "alt": ["Wonderful"] },
+      { "clue": "A machine on the Welk stage filled the air with these", "answer": "Bubbles" },
+      { "clue": "The singing family of four girls from Venice, California, who were Welk regulars", "answer": "The Lennon Sisters", "alt": ["Lennon Sisters", "Lennon"] },
+      { "clue": "Welk's home state", "answer": "North Dakota" }
+    ]
+  }
+]

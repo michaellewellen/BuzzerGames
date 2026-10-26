@@ -52,6 +52,7 @@ public sealed class JeopardyGame
     private readonly object _gate = new();
     private readonly IGameDataSource _source;
     private readonly Random _rng;
+    private readonly GameOptions _options;
 
     private readonly List<PlayerState> _players = [];
     private Guid? _emceeToken;
@@ -72,10 +73,11 @@ public sealed class JeopardyGame
 
     // ---- Public surface ------------------------------------------------------------------
 
-    public JeopardyGame(string code, IGameDataSource source, Random? rng = null)
+    public JeopardyGame(string code, IGameDataSource source, Random? rng = null, GameOptions? options = null)
     {
         Code = code;
         _source = source;
+        _options = options ?? GameOptions.Default;
         _rng = rng ?? new Random();
     }
 
@@ -118,7 +120,7 @@ public sealed class JeopardyGame
         if (_phase != GamePhase.Lobby) return Result.Fail("The game has already started.");
         if (!IsFull()) return Result.Fail("We need 1 emcee and 3 players first.");
 
-        _data = _source.CreateGame(_rng);
+        _data = _source.CreateGame(_rng, _options);
         ValidateData(_data);
 
         _round = 1;

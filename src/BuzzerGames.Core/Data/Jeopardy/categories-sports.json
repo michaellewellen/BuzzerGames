@@ -1,0 +1,102 @@
+[
+  {
+    "title": "Golf Lingo", "tag": "sports", "round": "any",
+    "clues": [
+      { "clue": "One stroke under par", "answer": "Birdie" },
+      { "clue": "One stroke over par", "answer": "Bogey" },
+      { "clue": "Two under par, and a bird of prey", "answer": "Eagle" },
+      { "clue": "Three under par, and a big seabird", "answer": "Albatross", "alt": ["Double eagle"] },
+      { "clue": "A friendly do-over shot", "answer": "Mulligan" }
+    ]
+  },
+  {
+    "title": "Baseball", "tag": "sports", "round": "any",
+    "clues": [
+      { "clue": "A hit over the outfield fence", "answer": "Home run", "alt": ["Homer"] },
+      { "clue": "When a batter goes down on three strikes", "answer": "Strikeout" },
+      { "clue": "The infielder positioned between second and third base", "answer": "Shortstop" },
+      { "clue": "The Orioles star who broke Lou Gehrig's record for consecutive games played", "answer": "Cal Ripken Jr.", "alt": ["Cal Ripken", "Ripken"] },
+      { "clue": "When a pitcher doesn't allow a single opponent to reach base", "answer": "Perfect game" }
+    ]
+  },
+  {
+    "title": "Football", "tag": "sports", "round": "single",
+    "clues": [
+      { "clue": "Six points for reaching the end zone", "answer": "Touchdown" },
+      { "clue": "The player who calls the plays and throws the ball", "answer": "Quarterback" },
+      { "clue": "The championship game numbered with Roman numerals", "answer": "The Super Bowl", "alt": ["Super Bowl"] },
+      { "clue": "Three points, scored by kicking the ball through the uprights", "answer": "Field goal" },
+      { "clue": "The two-point play when a ball carrier is tackled in his own end zone", "answer": "Safety" }
+    ]
+  },
+  {
+    "title": "Basketball Legends", "tag": "sports", "round": "any",
+    "clues": [
+      { "clue": "Number 23 of the Chicago Bulls, winner of six titles", "answer": "Michael Jordan", "alt": ["Jordan"] },
+      { "clue": "Utah's own point guard, the NBA's all-time assists leader, who played with Karl Malone", "answer": "John Stockton", "alt": ["Stockton"] },
+      { "clue": "He passed Kareem Abdul-Jabbar for the NBA's all-time scoring record in 2023", "answer": "LeBron James", "alt": ["LeBron"] },
+      { "clue": "The Lakers center whose 'skyhook' shot was unstoppable", "answer": "Kareem Abdul-Jabbar", "alt": ["Kareem"] },
+      { "clue": "The Lakers point guard who led 'Showtime' and shared a rivalry with Larry Bird", "answer": "Magic Johnson", "alt": ["Magic"] }
+    ]
+  },
+  {
+    "title": "The Olympics", "tag": "sports", "round": "any",
+    "clues": [
+      { "clue": "The number of rings in the Olympic symbol", "answer": "Five", "alt": ["5"] },
+      { "clue": "The Greek capital that hosted the first modern Games in 1896", "answer": "Athens" },
+      { "clue": "The Jamaican sprinter who set the 100-meter world record of 9.58 seconds", "answer": "Usain Bolt", "alt": ["Bolt"] },
+      { "clue": "The swimmer with 23 Olympic gold medals", "answer": "Michael Phelps", "alt": ["Phelps"] },
+      { "clue": "The Utah city that hosted the 2002 Winter Games", "answer": "Salt Lake City" }
+    ]
+  },
+  {
+    "title": "Tennis", "tag": "sports", "round": "any",
+    "clues": [
+      { "clue": "The grass-court tournament in England, known for strawberries and cream", "answer": "Wimbledon" },
+      { "clue": "She won 23 Grand Slam singles titles, the most in the Open era", "answer": "Serena Williams", "alt": ["Serena"] },
+      { "clue": "The Swiss star who won 20 Grand Slam titles", "answer": "Roger Federer", "alt": ["Federer"] },
+      { "clue": "A score of zero", "answer": "Love" },
+      { "clue": "Winning all four majors: the Australian, French, Wimbledon and U.S. Open", "answer": "A Grand Slam", "alt": ["Grand Slam"] }
+    ]
+  },
+  {
+    "title": "Soccer", "tag": "sports", "round": "any",
+    "clues": [
+      { "clue": "The Brazilian legend who won three World Cups", "answer": "Pele", "alt": ["Pelé"] },
+      { "clue": "The Argentine star who finally won the World Cup in 2022", "answer": "Lionel Messi", "alt": ["Messi"] },
+      { "clue": "The tournament held every four years for national teams", "answer": "The World Cup", "alt": ["World Cup"] },
+      { "clue": "The rule that keeps an attacker from being closer to the goal than the last defender", "answer": "Offside" },
+      { "clue": "Three goals in one game by one player", "answer": "Hat trick" }
+    ]
+  },
+  {
+    "title": "Hockey", "tag": "sports", "round": "any",
+    "clues": [
+      { "clue": "The silver trophy awarded to the NHL champion", "answer": "The Stanley Cup", "alt": ["Stanley Cup"] },
+      { "clue": "The hard rubber disc players hit around the ice", "answer": "Puck" },
+      { "clue": "The machine that resurfaces the ice between periods", "answer": "Zamboni", "alt": ["Ice resurfacer"] },
+      { "clue": "Where players serve time for penalties", "answer": "Penalty box", "alt": ["The penalty box"] },
+      { "clue": "When one team has an extra skater because an opponent is in the box", "answer": "Power play" }
+    ]
+  },
+  {
+    "title": "Card Games", "tag": "sports", "round": "single",
+    "clues": [
+      { "clue": "The one-player game of building suits in order", "answer": "Solitaire" },
+      { "clue": "The kids' game where you ask 'Got any sevens?'", "answer": "Go Fish" },
+      { "clue": "The casino game where you try to get closer to 21 than the dealer", "answer": "Blackjack" },
+      { "clue": "The game of Texas Hold 'Em", "answer": "Poker" },
+      { "clue": "The partnership trick-taking game with bidding, played by four", "answer": "Bridge" }
+    ]
+  },
+  {
+    "title": "Chess", "tag": "sports", "round": "any",
+    "clues": [
+      { "clue": "The piece that must be protected from capture", "answer": "King", "alt": ["The king"] },
+      { "clue": "The game-ending position when the king cannot escape", "answer": "Checkmate" },
+      { "clue": "The piece that moves in an L-shape and can jump", "answer": "Knight" },
+      { "clue": "The move in which the king and a rook swap positions", "answer": "Castling" },
+      { "clue": "The American who beat Boris Spassky in the 1972 'Match of the Century'", "answer": "Bobby Fischer", "alt": ["Fischer"] }
+    ]
+  }
+]

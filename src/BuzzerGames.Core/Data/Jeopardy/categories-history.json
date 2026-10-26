@@ -1,0 +1,232 @@
+[
+  {
+    "title": "U.S. Presidents", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "His profile is on the penny", "answer": "Abraham Lincoln", "alt": ["Lincoln"] },
+      { "clue": "The only president to resign", "answer": "Richard Nixon", "alt": ["Nixon"] },
+      { "clue": "The only president elected to four terms", "answer": "Franklin D. Roosevelt", "alt": ["Franklin Roosevelt", "FDR"] },
+      { "clue": "The only president to serve two nonconsecutive terms, as the 22nd and 24th", "answer": "Grover Cleveland", "alt": ["Cleveland"] },
+      { "clue": "The only president who later served as Chief Justice of the United States", "answer": "William Howard Taft", "alt": ["Taft"] }
+    ]
+  },
+  {
+    "title": "First Ladies", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The longest-serving First Lady, wife of FDR, who was also a UN delegate", "answer": "Eleanor Roosevelt" },
+      { "clue": "Famous for her pillbox hats and her restoration of the White House", "answer": "Jacqueline Kennedy", "alt": ["Jackie Kennedy", "Jackie Onassis"] },
+      { "clue": "She saved a portrait of George Washington as the British burned the capital in 1814", "answer": "Dolley Madison" },
+      { "clue": "Her letters to her husband urged him to 'remember the ladies'", "answer": "Abigail Adams" },
+      { "clue": "Her anti-drug campaign had the slogan 'Just Say No'", "answer": "Nancy Reagan" }
+    ]
+  },
+  {
+    "title": "Ancient Rome", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The dictator assassinated on the Ides of March", "answer": "Julius Caesar", "alt": ["Caesar"] },
+      { "clue": "The first Roman emperor, Caesar's adopted heir", "answer": "Augustus", "alt": ["Octavian"] },
+      { "clue": "The emperor said to have fiddled while Rome burned", "answer": "Nero" },
+      { "clue": "The emperor who built a wall across northern Britain", "answer": "Hadrian" },
+      { "clue": "The first Christian emperor, who moved the capital to Byzantium", "answer": "Constantine", "alt": ["Constantine the Great"] }
+    ]
+  },
+  {
+    "title": "Ancient Egypt", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The last active ruler of Ptolemaic Egypt, famous for her alliances with Caesar and Antony", "answer": "Cleopatra" },
+      { "clue": "The boy king whose tomb was found nearly intact in 1922", "answer": "Tutankhamun", "alt": ["King Tut", "Tut"] },
+      { "clue": "The pharaoh for whom the Great Pyramid at Giza was built", "answer": "Khufu", "alt": ["Cheops"] },
+      { "clue": "The picture-based writing system deciphered with the help of the Rosetta Stone", "answer": "Hieroglyphics", "alt": ["Hieroglyphs"] },
+      { "clue": "The pharaoh nicknamed 'the Great,' who built Abu Simbel and ruled for 66 years", "answer": "Ramses II", "alt": ["Ramesses II", "Ramses the Great", "Ramses"] }
+    ]
+  },
+  {
+    "title": "Ancient Greece", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The city-state named for the goddess of wisdom", "answer": "Athens" },
+      { "clue": "The warrior city-state whose 300 held the pass at Thermopylae", "answer": "Sparta" },
+      { "clue": "The philosopher sentenced to drink hemlock", "answer": "Socrates" },
+      { "clue": "The Macedonian king who conquered Persia, a student of Aristotle", "answer": "Alexander the Great", "alt": ["Alexander"] },
+      { "clue": "The site in the western Peloponnese of the original Olympic Games", "answer": "Olympia" }
+    ]
+  },
+  {
+    "title": "The Middle Ages", "tag": "history", "round": "double",
+    "clues": [
+      { "clue": "The plague that killed a third of Europe starting in 1347", "answer": "The Black Death", "alt": ["Black Death", "Bubonic plague"] },
+      { "clue": "The religious wars to take the Holy Land, beginning in 1096", "answer": "The Crusades", "alt": ["Crusades"] },
+      { "clue": "The Frankish king crowned emperor on Christmas Day in the year 800", "answer": "Charlemagne" },
+      { "clue": "The French 'Maid of Orleans' burned at the stake in 1431", "answer": "Joan of Arc" },
+      { "clue": "The German who introduced the printing press to Europe around 1450", "answer": "Johannes Gutenberg", "alt": ["Gutenberg"] }
+    ]
+  },
+  {
+    "title": "The American Revolution", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The 1773 protest in which colonists disguised as Mohawk raiders threw cargo off British ships into a harbor", "answer": "The Boston Tea Party", "alt": ["Boston Tea Party"] },
+      { "clue": "The silversmith whose midnight ride warned of British troops", "answer": "Paul Revere" },
+      { "clue": "The main author of the Declaration of Independence", "answer": "Thomas Jefferson", "alt": ["Jefferson"] },
+      { "clue": "The Pennsylvania camp where Washington's army endured the winter of 1777-78", "answer": "Valley Forge" },
+      { "clue": "The Virginia town where Cornwallis surrendered in 1781", "answer": "Yorktown" }
+    ]
+  },
+  {
+    "title": "The Civil War", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The South Carolina fort where the first shots were fired in 1861", "answer": "Fort Sumter" },
+      { "clue": "The 1863 Pennsylvania battle, followed by Lincoln's famous address", "answer": "Gettysburg" },
+      { "clue": "The Union general who later became president", "answer": "Ulysses S. Grant", "alt": ["Grant"] },
+      { "clue": "The Confederate general who surrendered at Appomattox", "answer": "Robert E. Lee", "alt": ["Lee"] },
+      { "clue": "The Virginia courthouse where Lee surrendered in April 1865", "answer": "Appomattox", "alt": ["Appomattox Court House"] }
+    ]
+  },
+  {
+    "title": "World War I", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The archduke whose 1914 assassination in Sarajevo set off the war", "answer": "Franz Ferdinand", "alt": ["Archduke Franz Ferdinand"] },
+      { "clue": "The muddy, rat-filled ditches in which soldiers fought on the Western Front", "answer": "Trenches" },
+      { "clue": "The British liner sunk by a German U-boat in 1915", "answer": "Lusitania", "alt": ["The Lusitania"] },
+      { "clue": "The month and day, at eleven o'clock, the Armistice began in 1918", "answer": "November 11", "alt": ["11th of November", "11/11"] },
+      { "clue": "The 1919 treaty that formally ended the war with Germany", "answer": "Treaty of Versailles", "alt": ["Versailles"] }
+    ]
+  },
+  {
+    "title": "World War II", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The Hawaiian naval base attacked on December 7, 1941", "answer": "Pearl Harbor" },
+      { "clue": "The June 6, 1944 Allied invasion of Normandy", "answer": "D-Day", "alt": ["D Day"] },
+      { "clue": "The British prime minister famous for his V-for-victory sign and cigar", "answer": "Winston Churchill", "alt": ["Churchill"] },
+      { "clue": "The 1940 air campaign in which the RAF defended the UK against the Luftwaffe", "answer": "The Battle of Britain", "alt": ["Battle of Britain"] },
+      { "clue": "The German cipher machine whose code was cracked at Bletchley Park", "answer": "Enigma", "alt": ["The Enigma machine"] }
+    ]
+  },
+  {
+    "title": "The Cold War", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The wall that divided a city from 1961 to 1989", "answer": "The Berlin Wall", "alt": ["Berlin Wall"] },
+      { "clue": "The 1962 standoff over Soviet missiles in this island country", "answer": "Cuba" },
+      { "clue": "Churchill's phrase for the line dividing East and West Europe", "answer": "The Iron Curtain", "alt": ["Iron Curtain"] },
+      { "clue": "The military alliance formed in 1949 by the U.S., Canada, and Western European nations", "answer": "NATO" },
+      { "clue": "The last leader of the Soviet Union, who championed glasnost and perestroika", "answer": "Mikhail Gorbachev", "alt": ["Gorbachev"] }
+    ]
+  },
+  {
+    "title": "The Space Race", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The Soviet satellite that beeped from orbit in 1957", "answer": "Sputnik" },
+      { "clue": "The first human in space, in 1961", "answer": "Yuri Gagarin", "alt": ["Gagarin"] },
+      { "clue": "The first person to walk on the Moon", "answer": "Neil Armstrong", "alt": ["Armstrong"] },
+      { "clue": "The NASA mission that landed humans on the Moon in July 1969", "answer": "Apollo 11" },
+      { "clue": "The first woman in space, a Soviet cosmonaut in 1963", "answer": "Valentina Tereshkova", "alt": ["Tereshkova"] }
+    ]
+  },
+  {
+    "title": "Explorers", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "He sailed the ocean blue in 1492", "answer": "Christopher Columbus", "alt": ["Columbus"] },
+      { "clue": "His expedition first circled the globe, though he died in the Philippines", "answer": "Ferdinand Magellan", "alt": ["Magellan"] },
+      { "clue": "The Corps of Discovery was led by these two men, with the help of Sacagawea", "answer": "Lewis and Clark", "alt": ["Meriwether Lewis and William Clark"] },
+      { "clue": "The Venetian who traveled to the court of Kublai Khan", "answer": "Marco Polo" },
+      { "clue": "The Norwegian who first reached the South Pole, in 1911", "answer": "Roald Amundsen", "alt": ["Amundsen"] }
+    ]
+  },
+  {
+    "title": "Famous Battles", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "Napoleon's final defeat in 1815", "answer": "Waterloo", "alt": ["The Battle of Waterloo"] },
+      { "clue": "The 1836 siege of a Texas mission, remembered with the cry 'Remember ___!'", "answer": "The Alamo", "alt": ["Alamo"] },
+      { "clue": "The 1066 battle that began the Norman conquest of England", "answer": "Hastings", "alt": ["The Battle of Hastings"] },
+      { "clue": "Custer's Last Stand took place at this Montana river's valley", "answer": "Little Bighorn", "alt": ["Battle of the Little Bighorn", "Little Big Horn"] },
+      { "clue": "The pass where 300 Spartans held off the Persian army", "answer": "Thermopylae" }
+    ]
+  },
+  {
+    "title": "The Wild West", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The outlaw born Henry McCarty, killed by Sheriff Pat Garrett", "answer": "Billy the Kid" },
+      { "clue": "The lawman who took part in the gunfight at the O.K. Corral", "answer": "Wyatt Earp" },
+      { "clue": "The 1860-61 mail service using young riders on fast horses", "answer": "Pony Express", "alt": ["The Pony Express"] },
+      { "clue": "The Lakota leader who defeated Custer alongside Crazy Horse", "answer": "Sitting Bull" },
+      { "clue": "The Golden Spike joined the transcontinental railroad at Promontory Summit in this state", "answer": "Utah" }
+    ]
+  },
+  {
+    "title": "Pirates", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The skull-and-crossbones flag", "answer": "Jolly Roger", "alt": ["The Jolly Roger"] },
+      { "clue": "The fearsome bearded pirate Edward Teach", "answer": "Blackbeard" },
+      { "clue": "Robert Louis Stevenson's adventure novel featuring Long John Silver", "answer": "Treasure Island" },
+      { "clue": "The Scottish captain hanged in London in 1701, supposedly leaving treasure buried", "answer": "Captain Kidd", "alt": ["William Kidd", "Kidd"] },
+      { "clue": "She and Mary Read sailed with 'Calico Jack' Rackham", "answer": "Anne Bonny" }
+    ]
+  },
+  {
+    "title": "Vikings", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The Norse explorer who reached North America around the year 1000", "answer": "Leif Erikson", "alt": ["Leif Ericson", "Leif Eriksson"] },
+      { "clue": "The long, narrow boats Vikings sailed", "answer": "Longships", "alt": ["Longship"] },
+      { "clue": "The great hall in Norse myth where slain warriors feast", "answer": "Valhalla" },
+      { "clue": "The angular alphabet carved into stone by Norse people", "answer": "Runes", "alt": ["Runic"] },
+      { "clue": "Leif's father, exiled from Iceland, who founded the first Norse settlement in Greenland", "answer": "Erik the Red", "alt": ["Eric the Red"] }
+    ]
+  },
+  {
+    "title": "British Monarchs", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The king who had six wives", "answer": "Henry VIII", "alt": ["Henry the Eighth"] },
+      { "clue": "The 'Virgin Queen' whose navy defeated the Spanish Armada", "answer": "Elizabeth I", "alt": ["Queen Elizabeth I", "Elizabeth the First"] },
+      { "clue": "The queen who reigned 63 years, until 1901", "answer": "Victoria", "alt": ["Queen Victoria"] },
+      { "clue": "The king during the American Revolution", "answer": "George III", "alt": ["King George III", "George the Third"] },
+      { "clue": "He became king in 2022 after his mother's death", "answer": "Charles III", "alt": ["King Charles III", "Charles"] }
+    ]
+  },
+  {
+    "title": "The 1920s", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The aviator who flew solo across the Atlantic in 1927", "answer": "Charles Lindbergh", "alt": ["Lindbergh"] },
+      { "clue": "F. Scott Fitzgerald's 1925 novel of Jay and Daisy", "answer": "The Great Gatsby", "alt": ["Great Gatsby"] },
+      { "clue": "The Yankees slugger who hit 60 home runs in 1927", "answer": "Babe Ruth" },
+      { "clue": "The independent young women with bobbed hair and short skirts", "answer": "Flappers", "alt": ["Flapper"] },
+      { "clue": "The 'Black Tuesday' event of October 1929", "answer": "The stock market crash", "alt": ["Stock market crash", "Wall Street Crash"] }
+    ]
+  },
+  {
+    "title": "The 1960s", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The 1969 music festival held on a farm in upstate New York", "answer": "Woodstock" },
+      { "clue": "The youngest man elected president, in 1960", "answer": "John F. Kennedy", "alt": ["JFK", "Kennedy"] },
+      { "clue": "The civil rights leader who gave the 'I Have a Dream' speech in 1963", "answer": "Martin Luther King Jr.", "alt": ["Martin Luther King", "MLK"] },
+      { "clue": "The Ford pony car introduced in 1964", "answer": "Mustang", "alt": ["Ford Mustang"] },
+      { "clue": "The variety show host who introduced the Beatles to America in February 1964", "answer": "Ed Sullivan" }
+    ]
+  },
+  {
+    "title": "The 1980s", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "The wall that came down in 1989", "answer": "The Berlin Wall", "alt": ["Berlin Wall"] },
+      { "clue": "The former actor elected president in 1980", "answer": "Ronald Reagan", "alt": ["Reagan"] },
+      { "clue": "Sony's portable cassette player introduced in 1979 that let people take music anywhere", "answer": "Walkman", "alt": ["Sony Walkman"] },
+      { "clue": "The 1985 dual-continent concert to fight famine in Ethiopia", "answer": "Live Aid" },
+      { "clue": "The 1986 nuclear accident in Ukraine", "answer": "Chernobyl" }
+    ]
+  },
+  {
+    "title": "Inventors and Inventions", "tag": "history", "round": "any",
+    "clues": [
+      { "clue": "He perfected the light bulb and invented the phonograph", "answer": "Thomas Edison", "alt": ["Edison"] },
+      { "clue": "He patented the telephone in 1876", "answer": "Alexander Graham Bell", "alt": ["Bell"] },
+      { "clue": "The brothers who made the first powered airplane flight at Kitty Hawk", "answer": "The Wright Brothers", "alt": ["Wright Brothers", "Orville and Wilbur Wright"] },
+      { "clue": "The British scientist who invented the World Wide Web in 1989", "answer": "Tim Berners-Lee", "alt": ["Berners-Lee"] },
+      { "clue": "The Serbian-American inventor of the AC induction motor, with a unit of magnetic flux density named after him", "answer": "Nikola Tesla", "alt": ["Tesla"] }
+    ]
+  },
+  {
+    "title": "The Supreme Court", "tag": "history", "round": "double",
+    "clues": [
+      { "clue": "The number of justices on the Court", "answer": "Nine", "alt": ["9"] },
+      { "clue": "The first woman on the Court, appointed in 1981", "answer": "Sandra Day O'Connor", "alt": ["O'Connor"] },
+      { "clue": "The first Black justice, appointed in 1967", "answer": "Thurgood Marshall" },
+      { "clue": "The 1954 case that declared segregated public schools unconstitutional", "answer": "Brown v. Board of Education", "alt": ["Brown v. Board", "Brown vs. Board of Education"] },
+      { "clue": "The 1803 case that established judicial review", "answer": "Marbury v. Madison", "alt": ["Marbury vs. Madison"] }
+    ]
+  }
+]

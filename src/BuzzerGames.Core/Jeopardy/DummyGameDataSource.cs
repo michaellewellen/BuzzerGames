@@ -7,7 +7,7 @@ namespace BuzzerGames.Core.Jeopardy;
 /// </summary>
 public sealed class DummyGameDataSource : IGameDataSource
 {
-    public GameData CreateGame(Random rng)
+    public GameData CreateGame(Random rng, GameOptions? options = null)
     {
         var shuffled = Pool.OrderBy(_ => rng.Next()).ToList();
         var final = Finals[rng.Next(Finals.Count)];

@@ -1,0 +1,192 @@
+[
+  {
+    "title": "Family Ties", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "Michael J. Fox's young, ambitious Republican son, Alex P. ___", "answer": "Keaton" },
+      { "clue": "The Keaton mother, an ex-hippie played by Meredith Baxter", "answer": "Elyse" },
+      { "clue": "The youngest Keaton daughter", "answer": "Jennifer" },
+      { "clue": "Mallory's artistic boyfriend, played by Scott Valentine", "answer": "Nick" },
+      { "clue": "The Midwestern state where the Keatons lived, in Columbus", "answer": "Ohio" }
+    ]
+  },
+  {
+    "title": "The Facts of Life", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The boarding school where the girls lived", "answer": "Eastland" },
+      { "clue": "The housemother, Mrs. ___, played by Charlotte Rae", "answer": "Garrett" },
+      { "clue": "The youngest girl, played by Kim Fields", "answer": "Tootie" },
+      { "clue": "The rich, snobby roommate played by Lisa Whelchel", "answer": "Blair" },
+      { "clue": "The gourmet shop the girls opened after school", "answer": "Edna's Edibles" }
+    ]
+  },
+  {
+    "title": "Diff'rent Strokes", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "Gary Coleman's pint-sized character, famous for his sassy catchphrase", "answer": "Arnold" },
+      { "clue": "Arnold's older brother, to whom he asked 'Whatchu talkin' 'bout?'", "answer": "Willis" },
+      { "clue": "The wealthy widower, Mr. ___, who adopted the brothers", "answer": "Drummond" },
+      { "clue": "Drummond's daughter, played by Dana Plato", "answer": "Kimberly" },
+      { "clue": "The big city where the Drummonds' penthouse stood", "answer": "New York City", "alt": ["New York", "Manhattan"] }
+    ]
+  },
+  {
+    "title": "The A-Team", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "Mr. T's mohawked, chain-wearing tough guy, B.A. ___", "answer": "Baracus" },
+      { "clue": "The cigar-chomping leader who loved it when a plan came together", "answer": "Hannibal Smith", "alt": ["Hannibal"] },
+      { "clue": "The team's vehicle, black with a red stripe", "answer": "Van", "alt": ["GMC Van"] },
+      { "clue": "The smooth-talking con man Templeton Peck's nickname", "answer": "Face", "alt": ["Faceman"] },
+      { "clue": "The team's wacky pilot, 'Howling Mad' ___", "answer": "Murdock" }
+    ]
+  },
+  {
+    "title": "Knight Rider", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The talking, crime-fighting car", "answer": "KITT", "alt": ["K.I.T.T."] },
+      { "clue": "David Hasselhoff's character, Michael ___", "answer": "Knight" },
+      { "clue": "The make of KITT, a black Pontiac Firebird", "answer": "Trans Am", "alt": ["Firebird", "Pontiac"] },
+      { "clue": "KITT's evil twin", "answer": "KARR" },
+      { "clue": "What KITT stands for: Knight Industries ___", "answer": "Two Thousand" }
+    ]
+  },
+  {
+    "title": "The Dukes of Hazzard", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The make of the orange General Lee", "answer": "Dodge Charger", "alt": ["Charger", "Dodge"] },
+      { "clue": "The Dukes' cousin in cutoff jeans, played by Catherine Bach", "answer": "Daisy" },
+      { "clue": "The corrupt county commissioner, 'Boss' ___", "answer": "Hogg" },
+      { "clue": "The bumbling sheriff, Rosco P. ___", "answer": "Coltrane" },
+      { "clue": "The country singer who narrated as 'The Balladeer'", "answer": "Waylon Jennings" }
+    ]
+  },
+  {
+    "title": "John Hughes Movies", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "Five students spend a Saturday in this in The Breakfast Club", "answer": "Detention" },
+      { "clue": "Molly Ringwald's 1984 film about a birthday everyone forgets", "answer": "Sixteen Candles" },
+      { "clue": "Matthew Broderick plays a teen who skips school in Chicago", "answer": "Ferris Bueller's Day Off" },
+      { "clue": "The band behind 'Don't You (Forget About Me),' the Breakfast Club theme", "answer": "Simple Minds" },
+      { "clue": "He wrote this 1990 comedy about a boy left behind when his family flies to Paris", "answer": "Home Alone" }
+    ]
+  },
+  {
+    "title": "Back to the Future", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The time machine car", "answer": "DeLorean", "alt": ["DMC DeLorean"] },
+      { "clue": "Michael J. Fox's skateboarding teen", "answer": "Marty McFly", "alt": ["Marty"] },
+      { "clue": "Doc Brown's first name", "answer": "Emmett" },
+      { "clue": "The amount of power, in gigawatts, needed to time travel", "answer": "1.21", "alt": ["1.21 gigawatts", "Jigowatts"] },
+      { "clue": "The mall where Marty first meets Doc in 1985", "answer": "Twin Pines Mall", "alt": ["Twin Pines"] }
+    ]
+  },
+  {
+    "title": "Indiana Jones", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The creatures Indy fears most", "answer": "Snakes" },
+      { "clue": "The hat Harrison Ford wears", "answer": "Fedora" },
+      { "clue": "Raiders of the Lost ___", "answer": "Ark" },
+      { "clue": "Indy's young sidekick in Temple of Doom", "answer": "Short Round" },
+      { "clue": "Indy's real first name", "answer": "Henry" }
+    ]
+  },
+  {
+    "title": "Ghostbusters", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The slimy green ghost who haunts the hotel", "answer": "Slimer" },
+      { "clue": "Bill Murray's character, Dr. Peter ___", "answer": "Venkman" },
+      { "clue": "The team's converted ambulance", "answer": "Ecto-1", "alt": ["Ecto 1"] },
+      { "clue": "The giant marshmallow man's name", "answer": "Stay Puft" },
+      { "clue": "The Gatekeeper that possesses Dana Barrett, played by Sigourney Weaver", "answer": "Zuul" }
+    ]
+  },
+  {
+    "title": "E.T. the Extra-Terrestrial", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The director of E.T.", "answer": "Steven Spielberg", "alt": ["Spielberg"] },
+      { "clue": "The candy Elliott uses to lure E.T. out of hiding", "answer": "Reese's Pieces" },
+      { "clue": "Elliott's little sister, played by a young Drew Barrymore", "answer": "Gertie" },
+      { "clue": "The young actor who played Elliott", "answer": "Henry Thomas" },
+      { "clue": "The composer of the film's soaring score", "answer": "John Williams" }
+    ]
+  },
+  {
+    "title": "Grease", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "John Travolta's leather-jacketed greaser, Danny ___", "answer": "Zuko" },
+      { "clue": "Olivia Newton-John's good-girl character", "answer": "Sandy" },
+      { "clue": "The high school in the story", "answer": "Rydell High", "alt": ["Rydell"] },
+      { "clue": "The name of Danny's gang", "answer": "The T-Birds", "alt": ["T-Birds", "Thunderbirds"] },
+      { "clue": "The song the T-Birds sing about a souped-up car", "answer": "Greased Lightnin'", "alt": ["Greased Lightning"] }
+    ]
+  },
+  {
+    "title": "80s Rock", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The band that was 'Livin' on a Prayer'", "answer": "Bon Jovi" },
+      { "clue": "The band that sang 'Jump,' with Eddie on guitar", "answer": "Van Halen" },
+      { "clue": "The British band behind 'Pour Some Sugar on Me'", "answer": "Def Leppard" },
+      { "clue": "The band whose singer Steve Perry told you 'Don't Stop Believin''", "answer": "Journey" },
+      { "clue": "The band behind 'Sweet Child o' Mine'", "answer": "Guns N' Roses", "alt": ["Guns and Roses"] }
+    ]
+  },
+  {
+    "title": "Hair Bands", "tag": "pop", "round": "double",
+    "clues": [
+      { "clue": "The band behind 'Every Rose Has Its Thorn'", "answer": "Poison" },
+      { "clue": "Dee Snider's band, 'We're Not Gonna Take It'", "answer": "Twisted Sister" },
+      { "clue": "The band behind 'Round and Round'", "answer": "Ratt" },
+      { "clue": "David Coverdale's band, 'Here I Go Again'", "answer": "Whitesnake" },
+      { "clue": "The band behind 'Don't Know What You've Got (Till It's Gone)'", "answer": "Cinderella" }
+    ]
+  },
+  {
+    "title": "Michael Jackson", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "His 1982 album, the best-selling of all time", "answer": "Thriller" },
+      { "clue": "The gliding dance move he debuted on the Motown 25 special", "answer": "Moonwalk", "alt": ["The moonwalk"] },
+      { "clue": "The guitarist who played the solo on 'Beat It'", "answer": "Eddie Van Halen" },
+      { "clue": "His family group, which started with 'I Want You Back'", "answer": "The Jackson 5", "alt": ["Jackson 5", "Jackson Five", "The Jackson Five"] },
+      { "clue": "His 1987 album with 'Smooth Criminal,' whose title means the opposite of good", "answer": "Bad" }
+    ]
+  },
+  {
+    "title": "Prince", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "His 1984 film and album, named for a color and a kind of weather", "answer": "Purple Rain" },
+      { "clue": "The state where he was born and stayed his whole life", "answer": "Minnesota" },
+      { "clue": "His 1984 number-one hit about birds in mourning", "answer": "When Doves Cry" },
+      { "clue": "His backing band during the Purple Rain era", "answer": "The Revolution", "alt": ["Revolution"] },
+      { "clue": "His studio complex in Chanhassen, Minnesota", "answer": "Paisley Park" }
+    ]
+  },
+  {
+    "title": "MTV", "tag": "pop", "round": "double",
+    "clues": [
+      { "clue": "What the letters M-T-V stand for", "answer": "Music Television" },
+      { "clue": "The first video MTV aired in 1981 was 'Video Killed the Radio Star' by these folks", "answer": "The Buggles", "alt": ["Buggles"] },
+      { "clue": "The statuette handed out at the Video Music Awards", "answer": "Moonman", "alt": ["Moon man", "Moon Person"] },
+      { "clue": "One of the original five VJs, with the first name Martha", "answer": "Martha Quinn" },
+      { "clue": "She rolled on the stage in a wedding dress at the first Video Music Awards in 1984", "answer": "Madonna" }
+    ]
+  },
+  {
+    "title": "Arcade Games", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "The yellow circle that gobbles dots and runs from ghosts", "answer": "Pac-Man", "alt": ["Pac Man", "Pacman"] },
+      { "clue": "The 1981 game in which a carpenter named Jumpman, later Mario, climbs to rescue a damsel", "answer": "Donkey Kong" },
+      { "clue": "Atari's 1972 tennis-like game with two paddles and a square ball", "answer": "Pong" },
+      { "clue": "Rows of pixelated aliens march down toward your cannon in this 1978 game", "answer": "Space Invaders" },
+      { "clue": "Hop across traffic and over logs to bring a green amphibian home", "answer": "Frogger" }
+    ]
+  },
+  {
+    "title": "Toys of the 70s and 80s", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The six-colored puzzle invented in 1974 by a Hungarian architecture professor", "answer": "Rubik's Cube", "alt": ["Rubiks Cube"] },
+      { "clue": "Plush dolls sold with adoption papers that sparked holiday store stampedes", "answer": "Cabbage Patch Kids", "alt": ["Cabbage Patch"] },
+      { "clue": "The electronic game with four colored buttons that repeat a growing pattern", "answer": "Simon" },
+      { "clue": "The 1975 fad of a smooth stone sold in a cardboard carrier with air holes", "answer": "Pet Rock" },
+      { "clue": "The talking educational toy that E.T. used to phone home", "answer": "Speak & Spell", "alt": ["Speak and Spell"] }
+    ]
+  }
+]

@@ -14,13 +14,13 @@ public sealed class GameRoomManager(IGameDataSource source)
 
     private readonly ConcurrentDictionary<string, JeopardyGame> _games = new(StringComparer.OrdinalIgnoreCase);
 
-    public JeopardyGame Create()
+    public JeopardyGame Create(GameOptions? options = null)
     {
         RemoveOldGames();
         while (true)
         {
             var code = NewCode();
-            var game = new JeopardyGame(code, source);
+            var game = new JeopardyGame(code, source, options: options);
             if (_games.TryAdd(code, game)) return game;   // on the (rare) chance of a clash, loop and try another code
         }
     }

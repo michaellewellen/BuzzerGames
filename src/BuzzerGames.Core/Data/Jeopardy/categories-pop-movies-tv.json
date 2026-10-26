@@ -1,0 +1,182 @@
+[
+  {
+    "title": "Name That Carmaker", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "Maker of the Mustang and the F-150", "answer": "Ford" },
+      { "clue": "Maker of the Corvette and the Silverado", "answer": "Chevrolet", "alt": ["Chevy"] },
+      { "clue": "Maker of the Prius and the Camry", "answer": "Toyota" },
+      { "clue": "German maker of the Beetle and the Golf", "answer": "Volkswagen", "alt": ["VW"] },
+      { "clue": "Japanese maker of the Outback and Forester, whose logo shows stars from the Pleiades", "answer": "Subaru" }
+    ]
+  },
+  {
+    "title": "J.J. Abrams, Busy Man", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "He co-created this 2004 series about plane crash survivors on a mysterious island", "answer": "Lost" },
+      { "clue": "He directed the 2009 reboot of this franchise, starring Chris Pine as Kirk", "answer": "Star Trek" },
+      { "clue": "He directed the 2015 Star Wars film that brought back Han, Leia and Luke", "answer": "The Force Awakens", "alt": ["Star Wars: The Force Awakens"] },
+      { "clue": "He created this spy drama starring Jennifer Garner as Sydney Bristow", "answer": "Alias" },
+      { "clue": "His 2011 sci-fi film, produced by Spielberg, about kids making a monster movie", "answer": "Super 8" }
+    ]
+  },
+  {
+    "title": "Steven Spielberg, Busy Man", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "His 1975 thriller in which a great white shark terrorizes Amity Island", "answer": "Jaws" },
+      { "clue": "His 1993 film in which dinosaurs run wild on an island theme park", "answer": "Jurassic Park" },
+      { "clue": "His 1998 war film that opens with the landing at Omaha Beach", "answer": "Saving Private Ryan" },
+      { "clue": "His 2002 film with Leonardo DiCaprio as con man Frank Abagnale Jr.", "answer": "Catch Me If You Can" },
+      { "clue": "His 2002 film in which Tom Cruise runs from a police unit that predicts crimes", "answer": "Minority Report" }
+    ]
+  },
+  {
+    "title": "Tom Hanks, Busy Man", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "He's the voice of the cowboy Woody in this animated series", "answer": "Toy Story" },
+      { "clue": "He played the slow-talking Alabama man who says 'Life was like a box of chocolates'", "answer": "Forrest Gump" },
+      { "clue": "He plays a FedEx employee stranded on an island with a volleyball named Wilson", "answer": "Cast Away" },
+      { "clue": "His 1988 comedy in which a boy wakes up in a grown man's body", "answer": "Big" },
+      { "clue": "His 1995 space drama in which he plays astronaut Jim Lovell", "answer": "Apollo 13" }
+    ]
+  },
+  {
+    "title": "Alfred Hitchcock", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "His 1960 thriller set at the Bates Motel", "answer": "Psycho" },
+      { "clue": "His 1963 film in which gulls and crows attack the town of Bodega Bay", "answer": "The Birds" },
+      { "clue": "His 1954 film in which Jimmy Stewart spies on his neighbors from a wheelchair", "answer": "Rear Window" },
+      { "clue": "His 1959 film in which Cary Grant is chased by a crop-dusting plane", "answer": "North by Northwest" },
+      { "clue": "His 1958 film about a detective with a fear of heights", "answer": "Vertigo" }
+    ]
+  },
+  {
+    "title": "Best Picture Winners", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The 1997 winner about a ship that hit an iceberg in 1912", "answer": "Titanic" },
+      { "clue": "The 1994 winner starring Tom Hanks on a bench with a box of chocolates", "answer": "Forrest Gump" },
+      { "clue": "The 1976 winner about a Philadelphia boxer named Balboa", "answer": "Rocky" },
+      { "clue": "The 1993 winner, shot in black and white, about a factory owner who saved Jewish workers", "answer": "Schindler's List" },
+      { "clue": "The 2019 winner, the first non-English film to take the top prize", "answer": "Parasite" }
+    ]
+  },
+  {
+    "title": "Disney Movies", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The 1994 hit about a young cat named Simba who must reclaim Pride Rock", "answer": "The Lion King" },
+      { "clue": "The 1992 film with a street thief, a lamp, and a Robin Williams genie", "answer": "Aladdin" },
+      { "clue": "The 1989 film about a red-haired sea princess who trades her voice to the sea witch Ursula", "answer": "The Little Mermaid" },
+      { "clue": "The 1991 film that became the first animated movie nominated for Best Picture", "answer": "Beauty and the Beast" },
+      { "clue": "The 1937 film that was the first full-length cel-animated feature", "answer": "Snow White and the Seven Dwarfs", "alt": ["Snow White"] }
+    ]
+  },
+  {
+    "title": "Pixar", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The 1995 film, the first fully computer-animated feature", "answer": "Toy Story" },
+      { "clue": "A worried clownfish crosses the ocean to find his son", "answer": "Finding Nemo" },
+      { "clue": "A family of superheroes is forced into hiding", "answer": "The Incredibles" },
+      { "clue": "A rat named Remy dreams of cooking in a Paris restaurant", "answer": "Ratatouille" },
+      { "clue": "The emotions Joy, Sadness, Anger, Fear and Disgust live in a girl's head", "answer": "Inside Out" }
+    ]
+  },
+  {
+    "title": "Movie Villains", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "Green-skinned, flying monkeys, and bucket-of-water trouble in Oz", "answer": "The Wicked Witch of the West", "alt": ["Wicked Witch of the West", "Wicked Witch"] },
+      { "clue": "Black armor, a heavy breather, and Luke's father", "answer": "Darth Vader", "alt": ["Vader"] },
+      { "clue": "She wants a coat made from 101 puppies", "answer": "Cruella de Vil", "alt": ["Cruella", "Cruella DeVil"] },
+      { "clue": "Alan Rickman's German terrorist at Nakatomi Plaza", "answer": "Hans Gruber" },
+      { "clue": "Simba's treacherous uncle", "answer": "Scar" }
+    ]
+  },
+  {
+    "title": "Secret Identities", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "Bruce Wayne's alter ego", "answer": "Batman" },
+      { "clue": "Tony Stark's armored alter ego", "answer": "Iron Man" },
+      { "clue": "Steve Rogers, the super-soldier with a shield", "answer": "Captain America" },
+      { "clue": "Diana Prince, the Amazon princess", "answer": "Wonder Woman" },
+      { "clue": "Barry Allen, the fastest man alive", "answer": "The Flash", "alt": ["Flash"] }
+    ]
+  },
+  {
+    "title": "Star Wars", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The desert planet where Luke Skywalker grew up", "answer": "Tatooine" },
+      { "clue": "The ship Han Solo claims made the Kessel Run in less than twelve parsecs", "answer": "The Millennium Falcon", "alt": ["Millennium Falcon"] },
+      { "clue": "Chewbacca's species", "answer": "Wookiee", "alt": ["Wookie"] },
+      { "clue": "Princess Leia's home planet, destroyed by the Death Star", "answer": "Alderaan" },
+      { "clue": "The forest moon where the Ewoks live", "answer": "Endor" }
+    ]
+  },
+  {
+    "title": "Star Trek", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The starship captained by James T. Kirk", "answer": "The Enterprise", "alt": ["USS Enterprise", "Enterprise"] },
+      { "clue": "Spock's home planet", "answer": "Vulcan" },
+      { "clue": "The warrior race with ridged foreheads, led by Worf in The Next Generation", "answer": "Klingons", "alt": ["Klingon"] },
+      { "clue": "The bald captain of The Next Generation, played by Patrick Stewart", "answer": "Jean-Luc Picard", "alt": ["Picard"] },
+      { "clue": "The creator of the original series", "answer": "Gene Roddenberry", "alt": ["Roddenberry"] }
+    ]
+  },
+  {
+    "title": "Game Shows", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "Pat Sajak and Vanna White's puzzle-solving show", "answer": "Wheel of Fortune" },
+      { "clue": "The Canadian-born host of Jeopardy! for 36 years", "answer": "Alex Trebek", "alt": ["Trebek"] },
+      { "clue": "Bob Barker told contestants to 'come on down' on this show", "answer": "The Price Is Right", "alt": ["Price Is Right"] },
+      { "clue": "'Survey says!' is a signature line of this show, first hosted by Richard Dawson", "answer": "Family Feud" },
+      { "clue": "Monty Hall hosted this show where costumed contestants picked doors and boxes", "answer": "Let's Make a Deal" }
+    ]
+  },
+  {
+    "title": "Saturday Night Live", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "The city the show comes 'Live' from", "answer": "New York", "alt": ["New York City"] },
+      { "clue": "The creator and executive producer since 1975", "answer": "Lorne Michaels" },
+      { "clue": "The Mike Myers and Dana Carvey sketch about two heavy-metal fans that became a movie", "answer": "Wayne's World" },
+      { "clue": "The first anchor of Weekend Update, who also fell down a lot", "answer": "Chevy Chase" },
+      { "clue": "Christopher Walken needed 'more' of this instrument in a famous sketch", "answer": "Cowbell", "alt": ["More Cowbell"] }
+    ]
+  },
+  {
+    "title": "Movie Taglines", "tag": "pop", "round": "double",
+    "clues": [
+      { "clue": "'In space no one can hear you scream'", "answer": "Alien" },
+      { "clue": "'Just when you thought it was safe to go back in the water'", "answer": "Jaws 2", "alt": ["Jaws II"] },
+      { "clue": "'Be afraid. Be very afraid.'", "answer": "The Fly", "alt": ["Fly"] },
+      { "clue": "'A family comedy without the family'", "answer": "Home Alone" },
+      { "clue": "'An adventure 65 million years in the making'", "answer": "Jurassic Park" }
+    ]
+  },
+  {
+    "title": "Disney Princesses", "tag": "pop", "round": "any",
+    "clues": [
+      { "clue": "She loses a glass slipper at the ball", "answer": "Cinderella" },
+      { "clue": "She loves books and falls for a Beast", "answer": "Belle" },
+      { "clue": "She disguises herself as a man to fight the Huns", "answer": "Mulan" },
+      { "clue": "The Polynesian girl who sails to restore the heart of Te Fiti", "answer": "Moana" },
+      { "clue": "The first Black Disney princess, a waitress in New Orleans", "answer": "Tiana" }
+    ]
+  },
+  {
+    "title": "Wicked", "tag": "pop", "round": "double",
+    "clues": [
+      { "clue": "The green-skinned witch of Oz, played by Cynthia Erivo in the 2024 film", "answer": "Elphaba" },
+      { "clue": "The good witch who floats in a bubble, played by Ariana Grande", "answer": "Glinda" },
+      { "clue": "The song at the end of Act One that gets Elphaba off the ground, 'Defying ___'", "answer": "Gravity" },
+      { "clue": "The author of the 1995 novel behind the musical", "answer": "Gregory Maguire" },
+      { "clue": "The composer and lyricist of the Broadway score", "answer": "Stephen Schwartz" }
+    ]
+  },
+  {
+    "title": "Barbie", "tag": "pop", "round": "single",
+    "clues": [
+      { "clue": "The toy company that makes the doll", "answer": "Mattel" },
+      { "clue": "Barbie's longtime boyfriend", "answer": "Ken" },
+      { "clue": "The director of the 2023 film", "answer": "Greta Gerwig" },
+      { "clue": "The actor who played Ken in the 2023 film", "answer": "Ryan Gosling" },
+      { "clue": "Barbie's full first and middle names, Barbara Millicent ___", "answer": "Roberts" }
+    ]
+  }
+]

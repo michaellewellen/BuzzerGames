@@ -1,0 +1,212 @@
+[
+  {
+    "title": "\"G\"eography", "tag": "geography", "round": "single",
+    "clues": [
+      { "clue": "The country whose capital is Athens", "answer": "Greece" },
+      { "clue": "The West African nation whose capital is Accra", "answer": "Ghana" },
+      { "clue": "The canyon in Arizona carved by the Colorado River", "answer": "The Grand Canyon", "alt": ["Grand Canyon"] },
+      { "clue": "The British territory on the southern tip of Spain, guarded by a famous rock", "answer": "Gibraltar" },
+      { "clue": "The world's largest island, mostly covered in ice", "answer": "Greenland" }
+    ]
+  },
+  {
+    "title": "States by Attractions", "tag": "geography", "round": "single",
+    "clues": [
+      { "clue": "Walt Disney World, near Orlando", "answer": "Florida" },
+      { "clue": "Mount Rushmore", "answer": "South Dakota" },
+      { "clue": "Old Faithful geyser, in the Yellowstone National Park", "answer": "Wyoming" },
+      { "clue": "The Gateway Arch, in St. Louis", "answer": "Missouri" },
+      { "clue": "Acadia National Park, near Bar Harbor", "answer": "Maine" }
+    ]
+  },
+  {
+    "title": "Tales of the Windy City", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "The Great Lake on Chicago's eastern shore", "answer": "Lake Michigan" },
+      { "clue": "The skyscraper formerly known by the name of its department-store founder, once the world's tallest", "answer": "Willis Tower", "alt": ["Sears Tower"] },
+      { "clue": "The Cubs' ivy-covered ballpark", "answer": "Wrigley Field" },
+      { "clue": "The legendary culprit of the Great Chicago Fire of 1871", "answer": "Mrs. O'Leary's cow", "alt": ["A cow", "O'Leary's cow"] },
+      { "clue": "The mirrored Millennium Park sculpture by Anish Kapoor, nicknamed 'The Bean'", "answer": "Cloud Gate" }
+    ]
+  },
+  {
+    "title": "State Nicknames", "tag": "geography", "round": "single",
+    "clues": [
+      { "clue": "The Sunshine State", "answer": "Florida" },
+      { "clue": "The Lone Star State", "answer": "Texas" },
+      { "clue": "The Aloha State", "answer": "Hawaii" },
+      { "clue": "The Land of 10,000 Lakes", "answer": "Minnesota" },
+      { "clue": "The Beehive State, with Salt Lake City as its capital", "answer": "Utah" }
+    ]
+  },
+  {
+    "title": "U.S. State Capitals", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "The capital of Texas", "answer": "Austin" },
+      { "clue": "California's capital, in the Central Valley, is not Los Angeles or San Francisco", "answer": "Sacramento" },
+      { "clue": "New York's capital, not New York City", "answer": "Albany" },
+      { "clue": "The capital of Alaska, reachable only by boat or plane", "answer": "Juneau" },
+      { "clue": "Michigan's state capital, a modest city west of Detroit that is not Ann Arbor or Grand Rapids", "answer": "Lansing" }
+    ]
+  },
+  {
+    "title": "World Capitals", "tag": "geography", "round": "double",
+    "clues": [
+      { "clue": "Home of the Eiffel Tower", "answer": "Paris" },
+      { "clue": "Canada's capital, on the Ontario-Quebec border", "answer": "Ottawa" },
+      { "clue": "Australia's capital, and not Sydney", "answer": "Canberra" },
+      { "clue": "Turkey's capital, and not Istanbul", "answer": "Ankara" },
+      { "clue": "Burkina Faso's capital", "answer": "Ouagadougou" }
+    ]
+  },
+  {
+    "title": "Rivers", "tag": "geography", "round": "single",
+    "clues": [
+      { "clue": "Egypt's lifeline", "answer": "The Nile", "alt": ["Nile"] },
+      { "clue": "Flows through London", "answer": "The Thames", "alt": ["Thames"] },
+      { "clue": "Budapest straddles this river", "answer": "The Danube", "alt": ["Danube"] },
+      { "clue": "The largest river by volume in the world, flowing through Brazil", "answer": "The Amazon", "alt": ["Amazon"] },
+      { "clue": "The longest river in Europe, flowing through Russia", "answer": "The Volga", "alt": ["Volga"] }
+    ]
+  },
+  {
+    "title": "Mountains", "tag": "geography", "round": "single",
+    "clues": [
+      { "clue": "The highest mountain on Earth", "answer": "Mount Everest", "alt": ["Everest"] },
+      { "clue": "The second-highest mountain, known as the Savage Mountain", "answer": "K2" },
+      { "clue": "Africa's highest peak, in Tanzania", "answer": "Kilimanjaro", "alt": ["Mount Kilimanjaro"] },
+      { "clue": "North America's highest peak, in Alaska, formerly called Mount McKinley", "answer": "Denali", "alt": ["Mount McKinley"] },
+      { "clue": "The pyramid-shaped Alpine peak on the Swiss-Italian border", "answer": "The Matterhorn", "alt": ["Matterhorn"] }
+    ]
+  },
+  {
+    "title": "Islands", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "The island off Africa's east coast famed for its lemurs", "answer": "Madagascar" },
+      { "clue": "The 'land of fire and ice,' with Reykjavik as its capital", "answer": "Iceland" },
+      { "clue": "The largest island in the Caribbean", "answer": "Cuba" },
+      { "clue": "The island at the toe of Italy's boot", "answer": "Sicily" },
+      { "clue": "The Australian island state, home of a famous devil", "answer": "Tasmania" }
+    ]
+  },
+  {
+    "title": "Deserts", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "The largest hot desert in the world, in northern Africa", "answer": "The Sahara", "alt": ["Sahara"] },
+      { "clue": "The cold desert spanning Mongolia and China", "answer": "The Gobi", "alt": ["Gobi"] },
+      { "clue": "The California desert with Joshua trees and Death Valley", "answer": "The Mojave", "alt": ["Mojave"] },
+      { "clue": "The driest place on Earth, in northern Chile", "answer": "The Atacama", "alt": ["Atacama"] },
+      { "clue": "The desert of Botswana and Namibia in southern Africa", "answer": "The Kalahari", "alt": ["Kalahari"] }
+    ]
+  },
+  {
+    "title": "Lakes", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "The briny Utah lake you can float on like a cork", "answer": "Great Salt Lake", "alt": ["The Great Salt Lake"] },
+      { "clue": "The largest of the Great Lakes", "answer": "Lake Superior", "alt": ["Superior"] },
+      { "clue": "Africa's largest lake, named for a British queen", "answer": "Lake Victoria", "alt": ["Victoria"] },
+      { "clue": "The highest navigable lake in the world, shared by Peru and Bolivia", "answer": "Lake Titicaca", "alt": ["Titicaca"] },
+      { "clue": "The deepest lake on Earth, in Siberia", "answer": "Lake Baikal", "alt": ["Baikal"] }
+    ]
+  },
+  {
+    "title": "Oceans and Seas", "tag": "geography", "round": "single",
+    "clues": [
+      { "clue": "The largest ocean on Earth", "answer": "The Pacific Ocean", "alt": ["Pacific", "Pacific Ocean"] },
+      { "clue": "The ocean the Titanic sank in", "answer": "The Atlantic Ocean", "alt": ["Atlantic", "Atlantic Ocean"] },
+      { "clue": "The only ocean named for a country", "answer": "The Indian Ocean", "alt": ["Indian", "Indian Ocean"] },
+      { "clue": "The lowest point on land, so salty you float in it", "answer": "The Dead Sea", "alt": ["Dead Sea"] },
+      { "clue": "The sea between Europe and Africa whose name means 'middle of the land'", "answer": "The Mediterranean", "alt": ["Mediterranean Sea", "Mediterranean"] }
+    ]
+  },
+  {
+    "title": "Countries by Their Flags", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "A red circle on a white field", "answer": "Japan" },
+      { "clue": "A red maple leaf between two red bars", "answer": "Canada" },
+      { "clue": "A white cross on a red square", "answer": "Switzerland" },
+      { "clue": "A yellow diamond and blue globe on a green field", "answer": "Brazil" },
+      { "clue": "An eagle on a cactus, eating a snake", "answer": "Mexico" }
+    ]
+  },
+  {
+    "title": "U.S. National Parks", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "The first national park, established in 1872", "answer": "Yellowstone" },
+      { "clue": "The Arizona park with the mile-deep gorge", "answer": "Grand Canyon", "alt": ["The Grand Canyon"] },
+      { "clue": "The California park with Half Dome and El Capitan", "answer": "Yosemite" },
+      { "clue": "The Utah park with the hike called Angels Landing", "answer": "Zion" },
+      { "clue": "The Florida park that is a vast wetland of sawgrass and alligators", "answer": "Everglades", "alt": ["The Everglades"] }
+    ]
+  },
+  {
+    "title": "Famous Bridges", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "San Francisco's orange suspension bridge", "answer": "The Golden Gate Bridge", "alt": ["Golden Gate"] },
+      { "clue": "The 1883 bridge linking Manhattan and a borough named for it", "answer": "The Brooklyn Bridge", "alt": ["Brooklyn Bridge"] },
+      { "clue": "London's famous drawbridge over the Thames with two Victorian turrets, often mistaken for another bridge", "answer": "Tower Bridge" },
+      { "clue": "Sydney's steel arch nicknamed 'the Coathanger'", "answer": "Sydney Harbour Bridge", "alt": ["Sydney Harbor Bridge"] },
+      { "clue": "The stone bridge over Venice's Grand Canal, lined with shops", "answer": "The Rialto Bridge", "alt": ["Rialto"] }
+    ]
+  },
+  {
+    "title": "World Landmarks", "tag": "geography", "round": "single",
+    "clues": [
+      { "clue": "The iron tower built for the 1889 World's Fair", "answer": "The Eiffel Tower", "alt": ["Eiffel Tower"] },
+      { "clue": "Rome's ancient amphitheater, home to gladiator fights", "answer": "The Colosseum", "alt": ["Colosseum", "Coliseum"] },
+      { "clue": "The white marble tomb in Agra built by Shah Jahan", "answer": "The Taj Mahal", "alt": ["Taj Mahal"] },
+      { "clue": "The Inca citadel high in the Peruvian Andes", "answer": "Machu Picchu" },
+      { "clue": "The world's largest religious monument, a temple complex in Cambodia", "answer": "Angkor Wat" }
+    ]
+  },
+  {
+    "title": "Africa", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "The country of the Pyramids and the Sphinx", "answer": "Egypt" },
+      { "clue": "The East African nation of Nairobi and safaris", "answer": "Kenya" },
+      { "clue": "The most populous country in Africa", "answer": "Nigeria" },
+      { "clue": "The North African country of Marrakesh and Casablanca", "answer": "Morocco" },
+      { "clue": "The East African country of the Serengeti, Zanzibar, and Kilimanjaro", "answer": "Tanzania" }
+    ]
+  },
+  {
+    "title": "South America", "tag": "geography", "round": "any",
+    "clues": [
+      { "clue": "The largest country in South America, where they speak Portuguese", "answer": "Brazil" },
+      { "clue": "The country of Buenos Aires and the tango", "answer": "Argentina" },
+      { "clue": "The land of the Incas, with Lima as its capital", "answer": "Peru" },
+      { "clue": "The long, thin country squeezed between the Andes and the Pacific", "answer": "Chile" },
+      { "clue": "The landlocked country whose seat of government, La Paz, is the highest in the world", "answer": "Bolivia" }
+    ]
+  },
+  {
+    "title": "Canada", "tag": "geography", "round": "single",
+    "clues": [
+      { "clue": "The country's largest city, home of the CN Tower", "answer": "Toronto" },
+      { "clue": "The red-coated officers of the RCMP", "answer": "Mounties", "alt": ["The Mounties", "Royal Canadian Mounted Police"] },
+      { "clue": "The nickname for the one-dollar coin, which has a bird on it", "answer": "Loonie", "alt": ["The Loonie"] },
+      { "clue": "The French-speaking province home to Montreal", "answer": "Quebec" },
+      { "clue": "The easternmost province, an island plus Labrador", "answer": "Newfoundland", "alt": ["Newfoundland and Labrador"] }
+    ]
+  },
+  {
+    "title": "Utah", "tag": "geography", "round": "single",
+    "clues": [
+      { "clue": "The state capital", "answer": "Salt Lake City" },
+      { "clue": "The NBA team in the capital, named for a music style that doesn't fit the desert", "answer": "Utah Jazz", "alt": ["Jazz"] },
+      { "clue": "The resort town that hosts the Sundance Film Festival", "answer": "Park City" },
+      { "clue": "The flat white desert near Wendover where land speed records are set", "answer": "Bonneville Salt Flats", "alt": ["The Bonneville Salt Flats"] },
+      { "clue": "The adventure town near Arches and Canyonlands National Parks", "answer": "Moab" }
+    ]
+  },
+  {
+    "title": "Landlocked Countries", "tag": "geography", "round": "double",
+    "clues": [
+      { "clue": "The neutral Alpine country of chocolate and watches", "answer": "Switzerland" },
+      { "clue": "The huge country between Russia and China, with Ulaanbaatar as its capital", "answer": "Mongolia" },
+      { "clue": "The Himalayan country that is home to most of Mount Everest's south side", "answer": "Nepal" },
+      { "clue": "The South American country whose capital is Asuncion", "answer": "Paraguay" },
+      { "clue": "The Central African 'land of a thousand hills,' with Kigali as its capital", "answer": "Rwanda" }
+    ]
+  }
+]

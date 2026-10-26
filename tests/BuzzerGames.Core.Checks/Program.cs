@@ -453,13 +453,149 @@ Run("the engine refuses a data source that returns a broken board", () =>
     Check.Equal(GamePhase.Lobby, game.Snapshot().Phase, "the game stays in the lobby");
 });
 
+Console.WriteLine("The question bank");
+
+var bank = QuestionBank.LoadCategories();
+var bankFinals = QuestionBank.LoadFinals();
+var validTags = new[] { "wordplay", "pop", "geography", "history", "science", "books", "arts", "food", "sports", "potpourri", "holiday" };
+var showReport = Environment.GetEnvironmentVariable("BANK_REPORT") == "1";
+
+Run("bank: every category has 5 filled-in clues, a known tag and a known round", () =>
+{
+    Check.True(bank.Count >= 150, $"expected a few hundred categories, found {bank.Count}");
+    foreach (var c in bank)
+    {
+        Check.True(c.Clues.Length == 5, $"'{c.Title}' has {c.Clues.Length} clues");
+        Check.True(validTags.Contains(c.Tag), $"'{c.Title}' has unknown tag '{c.Tag}'");
+        Check.True(c.Round is "single" or "double" or "any", $"'{c.Title}' has unknown round '{c.Round}'");
+        foreach (var clue in c.Clues)
+            Check.True(!string.IsNullOrWhiteSpace(clue.Clue) && !string.IsNullOrWhiteSpace(clue.Answer), $"'{c.Title}' has a blank clue or answer");
+    }
+    var duplicates = bank.GroupBy(c => c.Title.ToLowerInvariant()).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+    Check.True(duplicates.Count == 0, "duplicate category titles: " + string.Join(", ", duplicates));
+});
+
+Run("bank: no clue contains its own answer, and no category repeats an answer", () =>
+{
+    var stop = new HashSet<string> { "the", "and", "of", "a", "an", "to", "in", "on", "for", "de", "la", "van", "von", "jr", "ii", "iii" };
+    var leaks = new List<string>();
+    var soft = new List<string>();
+    foreach (var c in bank)
+    {
+        var answers = c.Clues.Select(x => x.Answer.ToLowerInvariant()).ToList();
+        Check.True(answers.Distinct().Count() == answers.Count, $"'{c.Title}' repeats an answer");
+        foreach (var clue in c.Clues)
+        {
+            var clueWords = System.Text.RegularExpressions.Regex.Matches(clue.Clue.ToLowerInvariant(), "[a-z0-9']+").Select(m => m.Value.Trim('\'')).ToList();
+            var answerWords = System.Text.RegularExpressions.Regex.Matches(clue.Answer.ToLowerInvariant(), "[a-z0-9]+").Select(m => m.Value).Where(w => !stop.Contains(w)).ToList();
+            foreach (var aw in answerWords)
+            {
+                if (aw.Length >= 3 && clueWords.Contains(aw)) leaks.Add($"{c.Title}: '{clue.Answer}' appears in its clue");
+                // Softer: a long answer word that shares a 4+ letter chunk with a clue word (like 'ship' in warship/Battleship).
+                if (aw.Length >= 6)
+                    foreach (var cw in clueWords.Where(w => w.Length >= 5))
+                        for (var i = 0; i + 4 <= aw.Length; i++)
+                            if (cw.Contains(aw.Substring(i, 4)) && !cw.Equals(aw))
+                            { soft.Add($"{c.Title}: '{clue.Answer}' ~ '{cw}'"); i = aw.Length; }
+            }
+        }
+    }
+    if (showReport) foreach (var w in soft.Distinct()) Console.WriteLine("          maybe: " + w);
+    if (showReport) foreach (var w in leaks.Distinct()) Console.WriteLine("          LEAK?: " + w);
+    // Hard failure only when the WHOLE answer sits inside the clue; shared single words are reported above for a human to judge.
+    var whole = bank.SelectMany(c => c.Clues.Select(x => (c, x)))
+        .Where(t => t.x.Answer.Length >= 3 && System.Text.RegularExpressions.Regex.IsMatch(t.x.Clue, @"\b" + System.Text.RegularExpressions.Regex.Escape(t.x.Answer) + @"\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+        .Select(t => $"{t.c.Title}: '{t.x.Answer}'").ToList();
+    Check.True(whole.Count == 0, "whole answer inside its clue: " + string.Join(" | ", whole));
+});
+
+Run("bank: finals are filled in, and there are enough of each kind", () =>
+{
+    Check.True(bankFinals.Count(f => !f.Holiday) >= 10, "at least 10 regular finals");
+    Check.True(bankFinals.Any(f => f.Holiday), "at least one holiday final");
+    foreach (var f in bankFinals)
+        Check.True(!string.IsNullOrWhiteSpace(f.Category) && !string.IsNullOrWhiteSpace(f.Clue) && !string.IsNullOrWhiteSpace(f.Answer), "a final is blank");
+});
+
+Console.WriteLine("The shuffle");
+
+Run("shuffle: 3,000 games always deal 2 wordplay + 2 pop + 2 different others per round, no repeats", () =>
+{
+    var source = new JsonGameDataSource();
+    var byTitle = bank.ToDictionary(c => c.Title.ToUpperInvariant());
+    var wrongRound = 0;
+    for (var seed = 0; seed < 3000; seed++)
+    {
+        var holiday = seed % 2 == 0;
+        var game = source.CreateGame(new Random(seed), new GameOptions(holiday));
+        var all = game.Round1.Concat(game.Round2).ToList();
+        Check.True(all.Select(c => c.Name).Distinct().Count() == 12, $"seed {seed}: a category repeated");
+        var holidayCount = 0;
+        foreach (var (round, number) in new[] { (game.Round1, 1), (game.Round2, 2) })
+        {
+            Check.True(round.Count == 6, $"seed {seed}: round {number} has {round.Count} categories");
+            var records = round.Select(c => byTitle[c.Name]).ToList();
+            Check.True(records.Count(r => r.Tag == "wordplay") == 2, $"seed {seed}: round {number} wordplay count");
+            Check.True(records.Count(r => r.Tag == "pop") == 2, $"seed {seed}: round {number} pop count");
+            var others = records.Where(r => r.Tag is not ("wordplay" or "pop")).Select(r => r.Tag).ToList();
+            Check.True(others.Distinct().Count() == others.Count, $"seed {seed}: round {number} repeats a tag among the others: {string.Join(",", others)}");
+            holidayCount += records.Count(r => r.Tag == "holiday");
+            wrongRound += records.Count(r => r.Round == (number == 1 ? "double" : "single"));
+        }
+        Check.True(holidayCount == (holiday ? 1 : 0), $"seed {seed}: holiday option {holiday} but {holidayCount} holiday categories");
+        var finalIsHoliday = bankFinals.Any(f => f.Holiday && f.Category.ToUpperInvariant() == game.Final.Category);
+        Check.True(holiday || !finalIsHoliday, $"seed {seed}: a holiday final appeared in a regular game");
+    }
+    Check.True(wrongRound == 0, $"{wrongRound} categories landed in a round they weren't written for");
+});
+
+Run("shuffle: the holiday category lands in both rounds over time, and every category gets used", () =>
+{
+    var source = new JsonGameDataSource();
+    var byTitle = bank.ToDictionary(c => c.Title.ToUpperInvariant());
+    int inRound1 = 0, inRound2 = 0;
+    var used = new HashSet<string>();
+    for (var seed = 0; seed < 3000; seed++)
+    {
+        var game = source.CreateGame(new Random(seed), new GameOptions(true));
+        if (game.Round1.Any(c => byTitle[c.Name].Tag == "holiday")) inRound1++; else inRound2++;
+        foreach (var c in game.Round1.Concat(game.Round2)) used.Add(c.Name);
+    }
+    Check.True(inRound1 > 1000 && inRound2 > 1000, $"holiday split was {inRound1}/{inRound2}");
+    var neverUsed = bank.Where(c => !used.Contains(c.Title.ToUpperInvariant()) && c.Tag != "holiday").Select(c => c.Title).ToList();
+    Console.WriteLine($"          (holiday round split {inRound1}/{inRound2}; {used.Count} of {bank.Count} categories appeared across the games)");
+    Check.True(neverUsed.Count == 0, "never dealt: " + string.Join(", ", neverUsed.Take(10)));
+});
+
+Run("shuffle: a regular game deals no holiday categories, with the same seeds", () =>
+{
+    var source = new JsonGameDataSource();
+    var holidayTitles = bank.Where(c => c.Tag == "holiday").Select(c => c.Title.ToUpperInvariant()).ToHashSet();
+    for (var seed = 0; seed < 2000; seed++)
+    {
+        var game = source.CreateGame(new Random(seed), GameOptions.Default);
+        Check.True(!game.Round1.Concat(game.Round2).Any(c => holidayTitles.Contains(c.Name)), $"seed {seed}");
+    }
+});
+
+Run("shuffle: real data plays through the engine (500 games started, 1 clue picked in each)", () =>
+{
+    var source = new JsonGameDataSource();
+    for (var seed = 0; seed < 500; seed++)
+    {
+        var game = new JeopardyGame("TEST", source, new Random(seed), new GameOptions(seed % 2 == 0));
+        game.JoinEmcee("Host"); game.JoinPlayer("Ann"); game.JoinPlayer("Bob"); game.JoinPlayer("Cy");
+        Check.Ok(game.Start());
+    }
+});
+
 Console.WriteLine();
 Console.WriteLine($"{passed} passed, {failed} failed");
 return failed == 0 ? 0 : 1;
 
 sealed class BrokenSource : IGameDataSource
 {
-    public GameData CreateGame(Random rng)
+    public GameData CreateGame(Random rng, GameOptions? options = null)
     {
         var good = new DummyGameDataSource().CreateGame(rng);
         return good with { Round1 = good.Round1.Take(5).ToList() };

@@ -16,7 +16,7 @@ builder.Services.AddRazorComponents()
 
 // Where Jeopardy questions come from. To use a real dataset later, write a class that
 // implements IGameDataSource and swap it in on this one line.
-builder.Services.AddSingleton<IGameDataSource, DummyGameDataSource>();
+builder.Services.AddSingleton<IGameDataSource, JsonGameDataSource>();
 
 // One shared set of running games. Every phone and the big screen talk to this same object.
 builder.Services.AddSingleton<GameRoomManager>();

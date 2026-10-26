@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Christmas Movies", "tag": "holiday", "round": "any",
+    "clues": [
+      { "clue": "Jimmy Stewart's George Bailey learns that every time a bell rings, an angel gets his wings", "answer": "It's a Wonderful Life" },
+      { "clue": "Will Ferrell is a human raised by elves at the North Pole", "answer": "Elf" },
+      { "clue": "Tom Hanks plays several roles in this animated film about a magical train ride", "answer": "The Polar Express", "alt": ["Polar Express"] },
+      { "clue": "Ralphie wants a Red Ryder BB gun, and his dad wins a leg lamp", "answer": "A Christmas Story" },
+      { "clue": "A department store Santa at Macy's claims to be the real Kris Kringle", "answer": "Miracle on 34th Street" }
+    ]
+  },
+  {
+    "title": "Santa's Reindeer", "tag": "holiday", "round": "any",
+    "clues": [
+      { "clue": "The one with the glowing red nose", "answer": "Rudolph" },
+      { "clue": "The first reindeer named in 'A Visit from St. Nicholas'", "answer": "Dasher" },
+      { "clue": "The reindeer named for the matchmaking god of love", "answer": "Cupid" },
+      { "clue": "The reindeer whose name is German for 'thunder'", "answer": "Donner", "alt": ["Dunder"] },
+      { "clue": "The reindeer whose name is German for 'lightning'", "answer": "Blitzen", "alt": ["Blixem"] }
+    ]
+  },
+  {
+    "title": "Christmas Songs", "tag": "holiday", "round": "any",
+    "clues": [
+      { "clue": "James Lord Pierpont's 1857 song about a one-horse open sleigh", "answer": "Jingle Bells" },
+      { "clue": "Composed by Franz Gruber for an Austrian church in 1818", "answer": "Silent Night" },
+      { "clue": "Bing Crosby's best-selling single of all time", "answer": "White Christmas" },
+      { "clue": "The Welsh tune with a 'fa la la' refrain", "answer": "Deck the Halls" },
+      { "clue": "A Ukrainian folk tune about swallows, with a four-note chime motif", "answer": "Carol of the Bells" }
+    ]
+  },
+  {
+    "title": "Christmas Foods", "tag": "holiday", "round": "single",
+    "clues": [
+      { "clue": "The creamy, nutmeg-topped drink made with milk, eggs and sugar", "answer": "Eggnog" },
+      { "clue": "The dense, candied-fruit cake that is a famous regift", "answer": "Fruitcake" },
+      { "clue": "The striped, hook-shaped peppermint treat", "answer": "Candy cane" },
+      { "clue": "The spiced cookie shaped into men and houses", "answer": "Gingerbread" },
+      { "clue": "The flaming English dessert beloved by Bob Cratchit's family", "answer": "Plum pudding", "alt": ["Christmas pudding", "Figgy pudding"] }
+    ]
+  },
+  {
+    "title": "Holiday Traditions Around the World", "tag": "holiday", "round": "double",
+    "clues": [
+      { "clue": "The Jewish 'Festival of Lights,' celebrated with a menorah for eight nights", "answer": "Hanukkah", "alt": ["Chanukah"] },
+      { "clue": "The day after Christmas in the U.K. and Canada", "answer": "Boxing Day" },
+      { "clue": "The African American holiday celebrated from December 26 to January 1 with seven candles", "answer": "Kwanzaa" },
+      { "clue": "The nine-night Mexican festival reenacting Mary and Joseph's search for lodging", "answer": "Las Posadas", "alt": ["Posadas"] },
+      { "clue": "The Swedish festival on December 13, in which girls wear crowns of candles", "answer": "St. Lucia Day", "alt": ["Saint Lucia Day", "Santa Lucia", "Lucia"] }
+    ]
+  },
+  {
+    "title": "Holiday TV Specials", "tag": "holiday", "round": "any",
+    "clues": [
+      { "clue": "Linus quotes the Gospel of Luke after a round-headed kid picks a scrawny little tree", "answer": "A Charlie Brown Christmas" },
+      { "clue": "Boris Karloff narrated this 1966 cartoon about a green meanie on Mount Crumpit", "answer": "How the Grinch Stole Christmas!", "alt": ["How the Grinch Stole Christmas", "The Grinch"] },
+      { "clue": "Burl Ives narrates this 1964 stop-motion special about the Island of Misfit Toys", "answer": "Rudolph the Red-Nosed Reindeer", "alt": ["Rudolph"] },
+      { "clue": "A top-hatted figure made of snow comes to life when a magician's silk hat lands on his head", "answer": "Frosty the Snowman", "alt": ["Frosty"] },
+      { "clue": "The Heat Miser and Snow Miser feature in this 1974 special", "answer": "The Year Without a Santa Claus", "alt": ["Year Without a Santa Claus"] }
+    ]
+  },
+  {
+    "title": "The Nutcracker", "tag": "holiday", "round": "any",
+    "clues": [
+      { "clue": "The Russian composer of the ballet", "answer": "Tchaikovsky" },
+      { "clue": "The fairy who dances in the Land of Sweets", "answer": "Sugar Plum Fairy", "alt": ["The Sugar Plum Fairy"] },
+      { "clue": "The young girl who receives a toy soldier on Christmas Eve", "answer": "Clara", "alt": ["Marie"] },
+      { "clue": "The multi-headed villain the toy soldier fights", "answer": "Mouse King", "alt": ["The Mouse King"] },
+      { "clue": "The magical kingdom ruled by the Sugar Plum Fairy", "answer": "Land of Sweets", "alt": ["The Land of Sweets", "Kingdom of Sweets"] }
+    ]
+  },
+  {
+    "title": "Winter Wonderland", "tag": "holiday", "round": "single",
+    "clues": [
+      { "clue": "Each frozen crystal has six sides, and no two are said to be alike", "answer": "Snowflake" },
+      { "clue": "The Inuit dome-shaped home made of snow blocks", "answer": "Igloo" },
+      { "clue": "What bears do all winter, in a deep sleep", "answer": "Hibernation", "alt": ["Hibernate"] },
+      { "clue": "A rapid slide of snow down a mountainside", "answer": "Avalanche" },
+      { "clue": "The shimmering green lights in the polar sky, also called the northern lights", "answer": "Aurora borealis", "alt": ["Aurora"] }
+    ]
+  },
+  {
+    "title": "The Nativity", "tag": "holiday", "round": "single",
+    "clues": [
+      { "clue": "The town where Jesus was born", "answer": "Bethlehem" },
+      { "clue": "His mother", "answer": "Mary" },
+      { "clue": "Her husband, a carpenter", "answer": "Joseph" },
+      { "clue": "The travelers who brought gold, frankincense and myrrh", "answer": "The Wise Men", "alt": ["Magi", "Wise Men", "Three Kings"] },
+      { "clue": "The angel who announced his coming to Mary", "answer": "Gabriel" }
+    ]
+  }
+]

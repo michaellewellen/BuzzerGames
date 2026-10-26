@@ -1,0 +1,162 @@
+[
+  {
+    "title": "Children's Books", "tag": "books", "round": "single",
+    "clues": [
+      { "clue": "Dr. Seuss's 1957 book about a mischievous feline in a tall red-and-white striped topper", "answer": "The Cat in the Hat" },
+      { "clue": "Max sails to an island of monsters in this Maurice Sendak book", "answer": "Where the Wild Things Are" },
+      { "clue": "Eric Carle's picture book of a larva that eats through apples, plums and cake before becoming a butterfly", "answer": "The Very Hungry Caterpillar" },
+      { "clue": "Margaret Wise Brown's bedtime story set in a great green room", "answer": "Goodnight Moon" },
+      { "clue": "Mo Willems's book in which a bird begs to take the wheel of a city bus", "answer": "Don't Let the Pigeon Drive the Bus!", "alt": ["Don't Let the Pigeon Drive the Bus"] }
+    ]
+  },
+  {
+    "title": "Shakespeare", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "Prince of Denmark", "answer": "Hamlet" },
+      { "clue": "Verona's star-crossed lovers", "answer": "Romeo and Juliet" },
+      { "clue": "The Scottish king driven to murder by ambition and his wife", "answer": "Macbeth" },
+      { "clue": "Prospero's island is the setting of this late play", "answer": "The Tempest", "alt": ["Tempest"] },
+      { "clue": "Rosalind disguises herself as Ganymede in the Forest of Arden", "answer": "As You Like It" }
+    ]
+  },
+  {
+    "title": "Fairy Tales", "tag": "books", "round": "single",
+    "clues": [
+      { "clue": "A blonde intruder tries the porridge, chairs and beds of a family of bruins", "answer": "Goldilocks and the Three Bears", "alt": ["Goldilocks"] },
+      { "clue": "Straw, sticks and bricks protect three brothers from a huffing wolf", "answer": "The Three Little Pigs", "alt": ["Three Little Pigs"] },
+      { "clue": "A girl in a crimson cloak visits her ailing grandmother and finds a wolf in bed", "answer": "Little Red Riding Hood", "alt": ["Red Riding Hood"] },
+      { "clue": "Siblings leave a trail of crumbs and find a house made of candy", "answer": "Hansel and Gretel" },
+      { "clue": "A miller's daughter must guess the name of the imp who spun straw into gold", "answer": "Rumpelstiltskin" }
+    ]
+  },
+  {
+    "title": "Nursery Rhymes", "tag": "books", "round": "single",
+    "clues": [
+      { "clue": "The egg who sat on a wall and could not be put together again", "answer": "Humpty Dumpty" },
+      { "clue": "A pair who went up a hill to fetch a pail of water", "answer": "Jack and Jill" },
+      { "clue": "She sat on a tuffet, eating curds and whey, until a spider frightened her away", "answer": "Little Miss Muffet", "alt": ["Miss Muffet"] },
+      { "clue": "He had a farm with an E-I-E-I-O", "answer": "Old MacDonald" },
+      { "clue": "In this nursery rhyme, a dark-fleeced animal is asked whether it has any wool, and the answer is three bags full", "answer": "Baa Baa Black Sheep" }
+    ]
+  },
+  {
+    "title": "Greek Mythology", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "King of the gods, wielder of the thunderbolt", "answer": "Zeus" },
+      { "clue": "Goddess of wisdom, born from her father's head", "answer": "Athena" },
+      { "clue": "The winged horse born from Medusa's blood", "answer": "Pegasus" },
+      { "clue": "The nymph who pined away until only her voice remained", "answer": "Echo" },
+      { "clue": "The ferryman who carried the dead across the River Styx", "answer": "Charon" }
+    ]
+  },
+  {
+    "title": "Norse Mythology", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "The god of thunder who wields the hammer Mjolnir", "answer": "Thor" },
+      { "clue": "The one-eyed chief of the gods", "answer": "Odin" },
+      { "clue": "The trickster god, brother of Thor in the movies", "answer": "Loki" },
+      { "clue": "The warrior maidens who choose which slain heroes go to Valhalla", "answer": "Valkyries", "alt": ["Valkyrie"] },
+      { "clue": "The prophesied final battle that ends the world", "answer": "Ragnarok", "alt": ["Ragnarök"] }
+    ]
+  },
+  {
+    "title": "Charles Dickens", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "Ebenezer Scrooge is visited by three ghosts in this novella", "answer": "A Christmas Carol" },
+      { "clue": "An orphan asks for more gruel", "answer": "Oliver Twist" },
+      { "clue": "Pip, Miss Havisham and Estella", "answer": "Great Expectations" },
+      { "clue": "Sydney Carton makes a sacrifice in London and revolutionary Paris", "answer": "A Tale of Two Cities" },
+      { "clue": "His semi-autobiographical novel featuring the villain Uriah Heep", "answer": "David Copperfield" }
+    ]
+  },
+  {
+    "title": "Mark Twain", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "A boy tricks his friends into painting a fence", "answer": "The Adventures of Tom Sawyer", "alt": ["Tom Sawyer"] },
+      { "clue": "A boy and a runaway slave named Jim float down the Mississippi on a raft", "answer": "Adventures of Huckleberry Finn", "alt": ["Huckleberry Finn", "Huck Finn"] },
+      { "clue": "Mark Twain's real name", "answer": "Samuel Clemens", "alt": ["Samuel Langhorne Clemens"] },
+      { "clue": "A Hartford factory foreman is knocked on the head and wakes in sixth-century Camelot", "answer": "A Connecticut Yankee in King Arthur's Court", "alt": ["A Connecticut Yankee"] },
+      { "clue": "The heir to the English throne and a look-alike street boy swap clothes in Tudor London", "answer": "The Prince and the Pauper" }
+    ]
+  },
+  {
+    "title": "Sherlock Holmes", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "The Scottish author who created Holmes", "answer": "Arthur Conan Doyle", "alt": ["Conan Doyle", "Doyle"] },
+      { "clue": "The detective's London address, on Baker Street", "answer": "221B" },
+      { "clue": "Holmes's companion and chronicler, a former army doctor", "answer": "Dr. Watson", "alt": ["Watson", "John Watson"] },
+      { "clue": "Holmes's nemesis, the 'Napoleon of crime'", "answer": "Moriarty", "alt": ["Professor Moriarty"] },
+      { "clue": "The Holmes novel in which a spectral dog haunts the moors of Devon and a family is cursed", "answer": "The Hound of the Baskervilles", "alt": ["Hound of the Baskervilles"] }
+    ]
+  },
+  {
+    "title": "Harry Potter", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "Harry's bookish friend, played by Emma Watson", "answer": "Hermione Granger", "alt": ["Hermione"] },
+      { "clue": "The sport played on flying broomsticks with a Golden Snitch", "answer": "Quidditch" },
+      { "clue": "The wise, long-bearded headmaster of Hogwarts", "answer": "Albus Dumbledore", "alt": ["Dumbledore"] },
+      { "clue": "The Hogwarts house of Draco Malfoy", "answer": "Slytherin" },
+      { "clue": "An object that holds a piece of Voldemort's soul", "answer": "Horcrux", "alt": ["Horcruxes"] }
+    ]
+  },
+  {
+    "title": "The Lord of the Rings", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "The hobbit who carries the One Ring to Mount Doom", "answer": "Frodo", "alt": ["Frodo Baggins"] },
+      { "clue": "The gray wizard who says 'You shall not pass!'", "answer": "Gandalf" },
+      { "clue": "The dark land ruled by Sauron", "answer": "Mordor" },
+      { "clue": "The creature obsessed with 'my precious'", "answer": "Gollum", "alt": ["Smeagol"] },
+      { "clue": "The elven valley home of Elrond", "answer": "Rivendell" }
+    ]
+  },
+  {
+    "title": "Roald Dahl", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "A boy with a golden ticket tours Willy Wonka's candy works with the Oompa-Loompas", "answer": "Charlie and the Chocolate Factory" },
+      { "clue": "A brilliant girl with telekinetic powers battles the tyrannical headmistress Miss Trunchbull", "answer": "Matilda" },
+      { "clue": "A dream-blowing giant kidnaps a girl named Sophie", "answer": "The BFG", "alt": ["BFG", "The Big Friendly Giant"] },
+      { "clue": "A boy travels across the Atlantic inside an enormous fruit with insect friends", "answer": "James and the Giant Peach" },
+      { "clue": "The Grand High one of these creatures turns children into mice", "answer": "The Witches", "alt": ["Witches"] }
+    ]
+  },
+  {
+    "title": "Dr. Seuss", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "Sam-I-Am keeps pushing a plate of an odd breakfast on a grumpy narrator", "answer": "Green Eggs and Ham" },
+      { "clue": "The green grump who tries to steal a holiday from the Whos", "answer": "The Grinch", "alt": ["Grinch", "How the Grinch Stole Christmas!"] },
+      { "clue": "He 'speaks for the trees' and warns about the Once-ler", "answer": "The Lorax", "alt": ["Lorax"] },
+      { "clue": "The elephant who hears a tiny voice on a speck of dust", "answer": "Horton", "alt": ["Horton Hears a Who!"] },
+      { "clue": "The book often given to graduates, about the next steps in life", "answer": "Oh, the Places You'll Go!", "alt": ["Oh the Places You'll Go"] }
+    ]
+  },
+  {
+    "title": "Poets", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "He wrote about two roads diverging in a yellow wood", "answer": "Robert Frost", "alt": ["Frost"] },
+      { "clue": "The reclusive Amherst poet who wrote nearly 1,800 poems, most unpublished in her lifetime", "answer": "Emily Dickinson", "alt": ["Dickinson"] },
+      { "clue": "The author of 'Still I Rise' and I Know Why the Caged Bird Sings", "answer": "Maya Angelou", "alt": ["Angelou"] },
+      { "clue": "The Brooklyn poet who wrote Leaves of Grass", "answer": "Walt Whitman", "alt": ["Whitman"] },
+      { "clue": "His poem about a bird that says 'Nevermore'", "answer": "Edgar Allan Poe", "alt": ["Poe"] }
+    ]
+  },
+  {
+    "title": "Authors by Their Books", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "She wrote Pride and Prejudice", "answer": "Jane Austen", "alt": ["Austen"] },
+      { "clue": "She wrote To Kill a Mockingbird", "answer": "Harper Lee" },
+      { "clue": "He wrote The Old Man and the Sea", "answer": "Ernest Hemingway", "alt": ["Hemingway"] },
+      { "clue": "He wrote One Hundred Years of Solitude", "answer": "Gabriel Garcia Marquez", "alt": ["Gabriel García Márquez", "Garcia Marquez"] },
+      { "clue": "She won the Pulitzer for Beloved", "answer": "Toni Morrison", "alt": ["Morrison"] }
+    ]
+  },
+  {
+    "title": "Book Characters", "tag": "books", "round": "any",
+    "clues": [
+      { "clue": "The principled lawyer who defends Tom Robinson in Maycomb, Alabama", "answer": "Atticus Finch", "alt": ["Atticus"] },
+      { "clue": "She volunteers as tribute in place of her sister Prim", "answer": "Katniss Everdeen", "alt": ["Katniss"] },
+      { "clue": "The Pequod's peg-legged skipper, obsessed with a white whale", "answer": "Captain Ahab", "alt": ["Ahab"] },
+      { "clue": "The teenager narrator of The Catcher in the Rye", "answer": "Holden Caulfield", "alt": ["Holden"] },
+      { "clue": "The headstrong Southern belle who says 'Tomorrow is another day'", "answer": "Scarlett O'Hara", "alt": ["Scarlett"] }
+    ]
+  }
+]

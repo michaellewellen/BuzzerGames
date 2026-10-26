@@ -1,0 +1,112 @@
+[
+  {
+    "title": "Painters", "tag": "arts", "round": "any",
+    "clues": [
+      { "clue": "He painted the Mona Lisa", "answer": "Leonardo da Vinci", "alt": ["Da Vinci", "Leonardo"] },
+      { "clue": "He painted The Starry Night while in an asylum", "answer": "Vincent van Gogh", "alt": ["Van Gogh"] },
+      { "clue": "He painted the ceiling of the Sistine Chapel", "answer": "Michelangelo" },
+      { "clue": "The Spanish painter of Guernica", "answer": "Pablo Picasso", "alt": ["Picasso"] },
+      { "clue": "The Dutch artist of Girl with a Pearl Earring", "answer": "Johannes Vermeer", "alt": ["Vermeer"] }
+    ]
+  },
+  {
+    "title": "Famous Paintings", "tag": "arts", "round": "any",
+    "clues": [
+      { "clue": "The Louvre's most famous resident, with an enigmatic smile", "answer": "Mona Lisa", "alt": ["The Mona Lisa"] },
+      { "clue": "Grant Wood's painting of a stern farmer with a pitchfork beside a woman", "answer": "American Gothic" },
+      { "clue": "Edvard Munch's anguished figure on a bridge", "answer": "The Scream", "alt": ["Scream"] },
+      { "clue": "Salvador Dali's painting of soft, melting pocket watches", "answer": "The Persistence of Memory", "alt": ["Persistence of Memory"] },
+      { "clue": "Leonardo's mural of Jesus and his apostles at a long table in Milan", "answer": "The Last Supper", "alt": ["Last Supper"] }
+    ]
+  },
+  {
+    "title": "Statues and Sculptures", "tag": "arts", "round": "any",
+    "clues": [
+      { "clue": "France's gift to the United States in 1886, standing in New York Harbor", "answer": "Statue of Liberty", "alt": ["The Statue of Liberty"] },
+      { "clue": "Michelangelo's marble masterpiece of a young biblical hero, in Florence", "answer": "David" },
+      { "clue": "Rodin's bronze of a seated man deep in thought", "answer": "The Thinker", "alt": ["Thinker"] },
+      { "clue": "The ancient Greek statue of Aphrodite that has lost her arms, in the Louvre", "answer": "Venus de Milo" },
+      { "clue": "The 98-foot Art Deco statue of Jesus overlooking Rio de Janeiro", "answer": "Christ the Redeemer" }
+    ]
+  },
+  {
+    "title": "Famous Buildings", "tag": "arts", "round": "any",
+    "clues": [
+      { "clue": "The president's home at 1600 Pennsylvania Avenue", "answer": "The White House", "alt": ["White House"] },
+      { "clue": "The New York skyscraper where King Kong climbed", "answer": "Empire State Building", "alt": ["The Empire State Building"] },
+      { "clue": "The Australian landmark with a roof like sails, designed by Jorn Utzon", "answer": "Sydney Opera House", "alt": ["The Sydney Opera House"] },
+      { "clue": "The bell tower in Italy famous for its tilt", "answer": "Leaning Tower of Pisa", "alt": ["Tower of Pisa", "Leaning Tower"] },
+      { "clue": "The tallest building in the world, in Dubai", "answer": "Burj Khalifa" }
+    ]
+  },
+  {
+    "title": "Museums", "tag": "arts", "round": "double",
+    "clues": [
+      { "clue": "The Paris museum with a glass pyramid in its courtyard", "answer": "The Louvre", "alt": ["Louvre"] },
+      { "clue": "The vast set of museums along the National Mall in Washington", "answer": "The Smithsonian", "alt": ["Smithsonian"] },
+      { "clue": "The London museum that holds the Rosetta Stone", "answer": "The British Museum", "alt": ["British Museum"] },
+      { "clue": "The New York museum of Van Gogh's Starry Night, abbreviated with four letters", "answer": "MoMA", "alt": ["Museum of Modern Art", "The Museum of Modern Art"] },
+      { "clue": "The Florence gallery home to Botticelli's The Birth of Venus", "answer": "The Uffizi", "alt": ["Uffizi", "Uffizi Gallery"] }
+    ]
+  },
+  {
+    "title": "Opera", "tag": "arts", "round": "double",
+    "clues": [
+      { "clue": "The Italian tenor famed for 'Nessun dorma' and the Three Tenors", "answer": "Luciano Pavarotti", "alt": ["Pavarotti"] },
+      { "clue": "Bizet's opera of a fiery Spanish cigarette factory worker", "answer": "Carmen" },
+      { "clue": "Mozart's opera with a bird catcher named Papageno and the Queen of the Night", "answer": "The Magic Flute", "alt": ["Magic Flute"] },
+      { "clue": "Puccini's opera of poor artists in Paris, including Mimi and Rodolfo", "answer": "La Boheme", "alt": ["La Bohème"] },
+      { "clue": "Wagner's cycle of four operas about gods and a magic ring", "answer": "The Ring Cycle", "alt": ["Der Ring des Nibelungen", "The Ring of the Nibelung", "Ring Cycle"] }
+    ]
+  },
+  {
+    "title": "Ballet", "tag": "arts", "round": "any",
+    "clues": [
+      { "clue": "Tchaikovsky's ballet about a princess turned into a bird by a sorcerer", "answer": "Swan Lake" },
+      { "clue": "The short, stiff skirt a ballerina wears", "answer": "Tutu" },
+      { "clue": "A spin on one foot", "answer": "Pirouette" },
+      { "clue": "In 2015 she became the first Black female principal dancer at American Ballet Theatre", "answer": "Misty Copeland" },
+      { "clue": "The Russian dancer who defected to the West in 1974, a star of ballet and film", "answer": "Mikhail Baryshnikov", "alt": ["Baryshnikov"] }
+    ]
+  },
+  {
+    "title": "Broadway Musicals", "tag": "arts", "round": "any",
+    "clues": [
+      { "clue": "Julie Andrews as a governess who sings 'Do-Re-Mi' to seven von Trapp children", "answer": "The Sound of Music", "alt": ["Sound of Music"] },
+      { "clue": "Lin-Manuel Miranda's hip-hop musical about a founding father", "answer": "Hamilton" },
+      { "clue": "A masked man haunts a Paris opera house and a chandelier crashes", "answer": "The Phantom of the Opera", "alt": ["Phantom of the Opera", "Phantom"] },
+      { "clue": "Jean Valjean is pursued by Inspector Javert in revolutionary France", "answer": "Les Miserables", "alt": ["Les Misérables", "Les Mis"] },
+      { "clue": "Leonard Bernstein's retelling of Romeo and Juliet among rival New York gangs", "answer": "West Side Story" }
+    ]
+  },
+  {
+    "title": "Composers", "tag": "arts", "round": "any",
+    "clues": [
+      { "clue": "He wrote nine symphonies and kept composing after going deaf", "answer": "Beethoven", "alt": ["Ludwig van Beethoven"] },
+      { "clue": "The child prodigy who wrote The Magic Flute", "answer": "Mozart", "alt": ["Wolfgang Amadeus Mozart"] },
+      { "clue": "The Baroque master of the Brandenburg Concertos", "answer": "Bach", "alt": ["Johann Sebastian Bach", "J.S. Bach"] },
+      { "clue": "The Russian composer of Swan Lake", "answer": "Tchaikovsky", "alt": ["Pyotr Tchaikovsky"] },
+      { "clue": "The French composer of the hypnotic Bolero", "answer": "Ravel", "alt": ["Maurice Ravel"] }
+    ]
+  },
+  {
+    "title": "Musical Instruments", "tag": "arts", "round": "single",
+    "clues": [
+      { "clue": "It has 88 black and white keys", "answer": "Piano" },
+      { "clue": "The four-stringed instrument played with a bow, also called a fiddle", "answer": "Violin", "alt": ["Fiddle"] },
+      { "clue": "The brass instrument with three valves that Louis Armstrong played", "answer": "Trumpet" },
+      { "clue": "The J-shaped reed instrument invented by a Belgian in the 1840s, a jazz staple", "answer": "Saxophone", "alt": ["Sax"] },
+      { "clue": "The large stringed instrument with a triangular frame, plucked by both hands", "answer": "Harp" }
+    ]
+  },
+  {
+    "title": "Jazz", "tag": "arts", "round": "double",
+    "clues": [
+      { "clue": "'Satchmo,' the trumpeter and singer of 'What a Wonderful World'", "answer": "Louis Armstrong", "alt": ["Armstrong"] },
+      { "clue": "The bandleader behind 'Take the A Train'", "answer": "Duke Ellington", "alt": ["Ellington"] },
+      { "clue": "The 'First Lady of Song' with a famous scat style", "answer": "Ella Fitzgerald", "alt": ["Ella"] },
+      { "clue": "The trumpeter behind the album Kind of Blue", "answer": "Miles Davis", "alt": ["Davis"] },
+      { "clue": "The Louisiana city often called the birthplace of jazz", "answer": "New Orleans" }
+    ]
+  }
+]

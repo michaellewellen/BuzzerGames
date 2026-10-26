@@ -1,0 +1,132 @@
+[
+  {
+    "title": "Pasta Shapes", "tag": "food", "round": "double",
+    "clues": [
+      { "clue": "Its name means 'little strings'", "answer": "Spaghetti" },
+      { "clue": "Diagonally cut tubes whose name means 'pens'", "answer": "Penne" },
+      { "clue": "Its name means 'butterflies'", "answer": "Farfalle" },
+      { "clue": "Its name means 'little worms'", "answer": "Vermicelli" },
+      { "clue": "Its name means 'little ears'", "answer": "Orecchiette" }
+    ]
+  },
+  {
+    "title": "Cheese", "tag": "food", "round": "any",
+    "clues": [
+      { "clue": "Orange or white, sharp, and named for an English village in Somerset", "answer": "Cheddar" },
+      { "clue": "The cheese famous for its holes", "answer": "Swiss", "alt": ["Swiss cheese", "Emmental"] },
+      { "clue": "The stretchy white cheese melted on pizza", "answer": "Mozzarella" },
+      { "clue": "The hard Italian cheese grated over pasta, from Parma", "answer": "Parmesan", "alt": ["Parmigiano-Reggiano"] },
+      { "clue": "The crumbly, brined Greek cheese in a village salad", "answer": "Feta" }
+    ]
+  },
+  {
+    "title": "Spices", "tag": "food", "round": "any",
+    "clues": [
+      { "clue": "The sweet spice from tree bark, sprinkled on toast and rolls", "answer": "Cinnamon" },
+      { "clue": "The spice that shares the shaker with salt", "answer": "Pepper", "alt": ["Black pepper"] },
+      { "clue": "The red Hungarian spice made from dried peppers", "answer": "Paprika" },
+      { "clue": "The world's most expensive spice, hand-picked from crocus flowers", "answer": "Saffron" },
+      { "clue": "The spice from the seed of a tropical tree; its covering gives us mace", "answer": "Nutmeg" }
+    ]
+  },
+  {
+    "title": "Fruits", "tag": "food", "round": "single",
+    "clues": [
+      { "clue": "The yellow fruit that grows in bunches called hands", "answer": "Banana" },
+      { "clue": "The red fruit that wears its seeds on the outside", "answer": "Strawberry" },
+      { "clue": "The spiky tropical fruit with a crown of leaves", "answer": "Pineapple" },
+      { "clue": "The green pear-shaped fruit that is the main ingredient in guacamole", "answer": "Avocado" },
+      { "clue": "The fuzzy brown fruit with green flesh, named for a New Zealand bird", "answer": "Kiwi", "alt": ["Kiwifruit"] }
+    ]
+  },
+  {
+    "title": "Vegetables", "tag": "food", "round": "single",
+    "clues": [
+      { "clue": "The orange root vegetable beloved by Bugs Bunny", "answer": "Carrot" },
+      { "clue": "The tree-shaped green vegetable many kids refuse to eat", "answer": "Broccoli" },
+      { "clue": "The tuber that becomes fries, chips and mashed side dishes", "answer": "Potato" },
+      { "clue": "The leafy green that gave Popeye his strength", "answer": "Spinach" },
+      { "clue": "The thistle bud with a tasty heart, steamed and dipped in butter", "answer": "Artichoke" }
+    ]
+  },
+  {
+    "title": "Desserts", "tag": "food", "round": "any",
+    "clues": [
+      { "clue": "The creamy dessert on a graham cracker crust, famous in New York", "answer": "Cheesecake" },
+      { "clue": "The dense chocolate square, served warm with ice cream", "answer": "Brownie" },
+      { "clue": "The French custard topped with a layer of caramelized sugar you crack with a spoon", "answer": "Creme brulee", "alt": ["Crème brûlée"] },
+      { "clue": "The Greek pastry of phyllo layers, nuts and honey", "answer": "Baklava" },
+      { "clue": "The meringue dessert named for a Russian ballerina", "answer": "Pavlova" }
+    ]
+  },
+  {
+    "title": "Breakfast Foods", "tag": "food", "round": "single",
+    "clues": [
+      { "clue": "Flat round cakes stacked with syrup", "answer": "Pancakes", "alt": ["Pancake", "Flapjacks"] },
+      { "clue": "The grid-patterned breakfast treat made in an iron", "answer": "Waffles", "alt": ["Waffle"] },
+      { "clue": "Folded beaten eggs with cheese and veggies inside", "answer": "Omelet", "alt": ["Omelette"] },
+      { "clue": "The boiled-then-baked ring of bread, spread with cream cheese", "answer": "Bagel" },
+      { "clue": "A poached egg and ham on an English muffin, topped with hollandaise sauce", "answer": "Eggs Benedict" }
+    ]
+  },
+  {
+    "title": "Mexican Food", "tag": "food", "round": "single",
+    "clues": [
+      { "clue": "A folded corn tortilla filled with meat, cheese and toppings", "answer": "Taco" },
+      { "clue": "A large flour tortilla wrapped around beans, rice and meat; its name means 'little donkey'", "answer": "Burrito" },
+      { "clue": "The avocado dip made with lime, onion and cilantro", "answer": "Guacamole" },
+      { "clue": "A rolled tortilla baked in chili sauce and cheese", "answer": "Enchilada" },
+      { "clue": "Masa dough filled with meat and steamed in a corn husk", "answer": "Tamale", "alt": ["Tamal"] }
+    ]
+  },
+  {
+    "title": "Japanese Food", "tag": "food", "round": "any",
+    "clues": [
+      { "clue": "Vinegared rice with raw fish or vegetables", "answer": "Sushi" },
+      { "clue": "The noodle soup in a rich broth topped with a soft egg", "answer": "Ramen" },
+      { "clue": "Shrimp and vegetables dipped in light batter and fried", "answer": "Tempura" },
+      { "clue": "The soup made from fermented soybean paste", "answer": "Miso", "alt": ["Miso soup"] },
+      { "clue": "The pungent green paste served with sushi, a type of horseradish", "answer": "Wasabi" }
+    ]
+  },
+  {
+    "title": "Pizza", "tag": "food", "round": "single",
+    "clues": [
+      { "clue": "America's most popular topping, spicy sausage slices", "answer": "Pepperoni" },
+      { "clue": "The pizza with tomato, mozzarella and basil, supposedly honoring an Italian queen", "answer": "Margherita" },
+      { "clue": "The pizza topped with ham and pineapple, invented in Canada", "answer": "Hawaiian" },
+      { "clue": "The Chicago style with a tall crust and sauce on top", "answer": "Deep dish", "alt": ["Deep-dish"] },
+      { "clue": "The original style from Naples, with a soft, charred crust", "answer": "Neapolitan" }
+    ]
+  },
+  {
+    "title": "Famous Chefs", "tag": "food", "round": "any",
+    "clues": [
+      { "clue": "She introduced French cooking to America on TV with 'The French Chef'", "answer": "Julia Child", "alt": ["Child"] },
+      { "clue": "The British chef famous for shouting in the kitchen on Hell's Kitchen", "answer": "Gordon Ramsay", "alt": ["Ramsay"] },
+      { "clue": "The New Orleans chef whose catchphrase was 'Bam!'", "answer": "Emeril Lagasse", "alt": ["Emeril"] },
+      { "clue": "The host of 30 Minute Meals, who coined 'EVOO'", "answer": "Rachael Ray", "alt": ["Rachel Ray"] },
+      { "clue": "The Austrian-born chef behind Spago and the Oscars' Governors Ball", "answer": "Wolfgang Puck", "alt": ["Puck"] }
+    ]
+  },
+  {
+    "title": "Ice Cream Flavors", "tag": "food", "round": "single",
+    "clues": [
+      { "clue": "The flavor made from cacao", "answer": "Chocolate" },
+      { "clue": "The flavor from an orchid pod, America's favorite", "answer": "Vanilla" },
+      { "clue": "The three-stripe block of chocolate, vanilla and strawberry", "answer": "Neapolitan" },
+      { "clue": "Chocolate with marshmallows and nuts, named for a bumpy path", "answer": "Rocky Road" },
+      { "clue": "The Southern favorite, vanilla with toasted nuts in a buttery swirl", "answer": "Butter Pecan" }
+    ]
+  },
+  {
+    "title": "Pies and Pastries", "tag": "food", "round": "any",
+    "clues": [
+      { "clue": "'As American as' this dessert, filled with cinnamon fruit", "answer": "Apple pie" },
+      { "clue": "The orange pie served with whipped cream after Thanksgiving dinner", "answer": "Pumpkin pie" },
+      { "clue": "The Florida pie made with a tart green citrus and a graham crust", "answer": "Key lime pie", "alt": ["Key lime"] },
+      { "clue": "The French crescent-shaped buttery pastry", "answer": "Croissant" },
+      { "clue": "The Sicilian fried pastry tube filled with sweet ricotta", "answer": "Cannoli" }
+    ]
+  }
+]

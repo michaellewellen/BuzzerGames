@@ -1,0 +1,232 @@
+[
+  {
+    "title": "\"F\" in Science", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "A push or a pull, measured in newtons", "answer": "Force" },
+      { "clue": "The resistance you feel when two surfaces rub together", "answer": "Friction" },
+      { "clue": "The preserved remains of ancient life found in rock", "answer": "Fossil" },
+      { "clue": "The reaction that powers the Sun, in which atoms join together", "answer": "Fusion", "alt": ["Nuclear fusion"] },
+      { "clue": "The number of waves that pass a point each second, measured in hertz", "answer": "Frequency" }
+    ]
+  },
+  {
+    "title": "The Periodic Table", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "Symbol Au", "answer": "Gold" },
+      { "clue": "The most abundant gas in Earth's atmosphere", "answer": "Nitrogen" },
+      { "clue": "Symbol Fe, from the Latin 'ferrum'", "answer": "Iron" },
+      { "clue": "The only common metal that is liquid at room temperature", "answer": "Mercury" },
+      { "clue": "Named for Marie Curie's homeland", "answer": "Polonium" }
+    ]
+  },
+  {
+    "title": "What's the Unit?", "tag": "science", "round": "double",
+    "clues": [
+      { "clue": "A Scottish engineer's steam-engine improvements gave his name to this SI unit of power", "answer": "Watt" },
+      { "clue": "One cycle per second", "answer": "Hertz" },
+      { "clue": "The unit of electrical resistance, named for a German physicist", "answer": "Ohm" },
+      { "clue": "The unit of pressure, named for a French mathematician and philosopher", "answer": "Pascal" },
+      { "clue": "The unit of radioactivity, named for the French physicist who discovered it", "answer": "Becquerel" }
+    ]
+  },
+  {
+    "title": "Space", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "Our closest star", "answer": "The Sun", "alt": ["Sun"] },
+      { "clue": "The Red Planet", "answer": "Mars" },
+      { "clue": "The gas giant with a storm called the Great Red Spot", "answer": "Jupiter" },
+      { "clue": "The space telescope launched in 1990, named for an astronomer", "answer": "Hubble", "alt": ["The Hubble Space Telescope", "Hubble Space Telescope"] },
+      { "clue": "Saturn's largest moon, with a thick orange atmosphere", "answer": "Titan" }
+    ]
+  },
+  {
+    "title": "The Planets", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "The largest planet in the solar system", "answer": "Jupiter" },
+      { "clue": "The planet with the famous rings", "answer": "Saturn" },
+      { "clue": "The hottest planet, with a thick carbon dioxide atmosphere", "answer": "Venus" },
+      { "clue": "The smallest planet, which orbits the Sun in just 88 days", "answer": "Mercury" },
+      { "clue": "The farthest planet from the Sun, found with math before it was seen", "answer": "Neptune" }
+    ]
+  },
+  {
+    "title": "The Human Body", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "The body's largest organ", "answer": "Skin", "alt": ["The skin"] },
+      { "clue": "The organ that beats about 100,000 times a day", "answer": "The heart", "alt": ["Heart"] },
+      { "clue": "The gland that makes insulin", "answer": "Pancreas", "alt": ["The pancreas"] },
+      { "clue": "The medical name for the collarbone", "answer": "Clavicle" },
+      { "clue": "Another name for adrenaline", "answer": "Epinephrine" }
+    ]
+  },
+  {
+    "title": "Bones", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "The thigh bone, the longest in the body", "answer": "Femur" },
+      { "clue": "The bony case that protects the brain", "answer": "Skull", "alt": ["Cranium"] },
+      { "clue": "The smallest bone in the body, found in the ear", "answer": "Stapes", "alt": ["Stirrup"] },
+      { "clue": "The kneecap", "answer": "Patella" },
+      { "clue": "The breastbone", "answer": "Sternum" }
+    ]
+  },
+  {
+    "title": "Dinosaurs", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "The 'tyrant lizard king' with tiny arms and a giant bite", "answer": "Tyrannosaurus rex", "alt": ["T. rex", "T-Rex", "Tyrannosaurus"] },
+      { "clue": "The three-horned plant eater with a bony frill", "answer": "Triceratops" },
+      { "clue": "The plated dinosaur with spikes on its tail", "answer": "Stegosaurus" },
+      { "clue": "The pack hunter with a killer claw, made famous by Jurassic Park", "answer": "Velociraptor", "alt": ["Raptor"] },
+      { "clue": "The long-necked giant whose name means 'arm lizard'", "answer": "Brachiosaurus" }
+    ]
+  },
+  {
+    "title": "Weather", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "A funnel cloud that touches the ground", "answer": "Tornado" },
+      { "clue": "A tropical storm with an eye and winds over 74 mph", "answer": "Hurricane" },
+      { "clue": "The sound that follows a flash of lightning", "answer": "Thunder" },
+      { "clue": "A severe snowstorm with strong winds and low visibility", "answer": "Blizzard" },
+      { "clue": "The instrument that measures air pressure", "answer": "Barometer" }
+    ]
+  },
+  {
+    "title": "Baby Animals", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "A baby bear or lion", "answer": "Cub" },
+      { "clue": "A baby kangaroo", "answer": "Joey" },
+      { "clue": "A baby goat", "answer": "Kid" },
+      { "clue": "A baby swan", "answer": "Cygnet" },
+      { "clue": "A baby fish", "answer": "Fry" }
+    ]
+  },
+  {
+    "title": "Animal Homes", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "Where a bird lays its eggs", "answer": "Nest" },
+      { "clue": "Where a swarm of bees lives", "answer": "Hive", "alt": ["Beehive"] },
+      { "clue": "A bear's or lion's lair", "answer": "Den" },
+      { "clue": "A beaver's home, built in a pond", "answer": "Lodge" },
+      { "clue": "A network of rabbit tunnels", "answer": "Warren" }
+    ]
+  },
+  {
+    "title": "Animal Speed", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "The fastest land animal", "answer": "Cheetah" },
+      { "clue": "The fastest dog breed, used for racing", "answer": "Greyhound" },
+      { "clue": "The bird that reaches over 200 mph in a dive, the fastest animal", "answer": "Peregrine falcon", "alt": ["Falcon", "Peregrine"] },
+      { "clue": "North America's fastest land animal, found in Utah's deserts, with forked horns", "answer": "Pronghorn", "alt": ["Pronghorn antelope"] },
+      { "clue": "The slow tree-dweller that sleeps up to 20 hours a day", "answer": "Sloth" }
+    ]
+  },
+  {
+    "title": "Insects", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "It lives in a colony with a queen and can carry many times its weight", "answer": "Ant" },
+      { "clue": "It starts as a caterpillar and spends time in a chrysalis", "answer": "Butterfly" },
+      { "clue": "The red beetle with black spots that eats aphids", "answer": "Ladybug", "alt": ["Ladybird"] },
+      { "clue": "The insect that chirps by rubbing its wings together", "answer": "Cricket" },
+      { "clue": "The insect that sits with its forelegs folded as if in prayer", "answer": "Praying mantis", "alt": ["Mantis"] }
+    ]
+  },
+  {
+    "title": "Sharks and Whales", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "The shark in Jaws", "answer": "Great white shark", "alt": ["Great white"] },
+      { "clue": "The largest animal ever to have lived", "answer": "Blue whale", "alt": ["The blue whale"] },
+      { "clue": "The shark with a T-shaped head", "answer": "Hammerhead" },
+      { "clue": "The black-and-white 'killer whale,' actually a dolphin", "answer": "Orca" },
+      { "clue": "The whale known for its long songs and breaching", "answer": "Humpback", "alt": ["Humpback whale"] }
+    ]
+  },
+  {
+    "title": "Trees", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "The tree that grows acorns", "answer": "Oak" },
+      { "clue": "The tree that gives us syrup", "answer": "Maple" },
+      { "clue": "The tallest trees on Earth, found in California", "answer": "Redwood", "alt": ["Sequoia", "Coast redwood"] },
+      { "clue": "The tree with white, papery bark used for canoes", "answer": "Birch" },
+      { "clue": "The trembling tree whose Utah colony, Pando, may be the largest organism on Earth", "answer": "Aspen", "alt": ["Quaking aspen"] }
+    ]
+  },
+  {
+    "title": "Rocks and Minerals", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "The hardest natural substance", "answer": "Diamond" },
+      { "clue": "The common mineral in sand, also used in watches", "answer": "Quartz" },
+      { "clue": "The metamorphic rock formed from limestone, favored by Michelangelo", "answer": "Marble" },
+      { "clue": "The glassy rock formed when lava cools quickly", "answer": "Obsidian" },
+      { "clue": "The volcanic rock so light it floats on water", "answer": "Pumice" }
+    ]
+  },
+  {
+    "title": "Famous Scientists", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "The physicist behind E equals mc squared", "answer": "Albert Einstein", "alt": ["Einstein"] },
+      { "clue": "The English scientist who, per legend, was inspired by a falling apple", "answer": "Isaac Newton", "alt": ["Newton"] },
+      { "clue": "The only person to win Nobel Prizes in two different sciences, physics and chemistry", "answer": "Marie Curie", "alt": ["Curie"] },
+      { "clue": "The naturalist who wrote On the Origin of Species", "answer": "Charles Darwin", "alt": ["Darwin"] },
+      { "clue": "The Italian astronomer who discovered Jupiter's four largest moons", "answer": "Galileo", "alt": ["Galileo Galilei"] }
+    ]
+  },
+  {
+    "title": "Medicine", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "The antibiotic discovered by Alexander Fleming in 1928", "answer": "Penicillin" },
+      { "clue": "What Edward Jenner developed to prevent smallpox", "answer": "A vaccine", "alt": ["Vaccine", "Vaccination"] },
+      { "clue": "The doctor's tool for listening to your heart", "answer": "Stethoscope" },
+      { "clue": "The imaging method discovered by Wilhelm Rontgen in 1895", "answer": "X-ray", "alt": ["X-rays", "Xray"] },
+      { "clue": "The hormone diabetics may inject, first isolated in 1921", "answer": "Insulin" }
+    ]
+  },
+  {
+    "title": "Chemistry", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "The compound with the formula H2O", "answer": "Water" },
+      { "clue": "The element, symbol O, that we need to breathe", "answer": "Oxygen" },
+      { "clue": "A substance with a pH below 7", "answer": "Acid" },
+      { "clue": "Sodium chloride, found on most dinner tables", "answer": "Salt", "alt": ["Table salt"] },
+      { "clue": "The element that forms the basis of all life, found in diamond and graphite", "answer": "Carbon" }
+    ]
+  },
+  {
+    "title": "Math Terms", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "A number divisible only by 1 and itself, like 7 or 11", "answer": "Prime number", "alt": ["Prime"] },
+      { "clue": "The ratio of a circle's circumference to its diameter, about 3.14159", "answer": "Pi" },
+      { "clue": "The longest side of a right triangle", "answer": "Hypotenuse" },
+      { "clue": "The branch of math invented independently by Newton and Leibniz", "answer": "Calculus" },
+      { "clue": "The number 1 followed by 100 zeros, which inspired a search engine's name", "answer": "Googol" }
+    ]
+  },
+  {
+    "title": "Shapes", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "The five-sided shape, also the headquarters of the U.S. Department of Defense", "answer": "Pentagon" },
+      { "clue": "The six-sided shape in a honeycomb", "answer": "Hexagon" },
+      { "clue": "The eight-sided shape of a stop sign", "answer": "Octagon" },
+      { "clue": "A four-sided shape with equal sides, shaped like a tilted square or a diamond", "answer": "Rhombus" },
+      { "clue": "A four-sided shape with exactly one pair of parallel sides", "answer": "Trapezoid", "alt": ["Trapezium"] }
+    ]
+  },
+  {
+    "title": "Computers and the Internet", "tag": "science", "round": "any",
+    "clues": [
+      { "clue": "The handheld device you click to move the cursor", "answer": "Mouse" },
+      { "clue": "The software, like Chrome or Firefox, that lets you view web pages", "answer": "Browser", "alt": ["Web browser"] },
+      { "clue": "A unit of digital storage equal to eight bits", "answer": "Byte" },
+      { "clue": "The 1971 invention by Ray Tomlinson that used the @ symbol", "answer": "Email", "alt": ["E-mail"] },
+      { "clue": "The number system of computers, using only 0s and 1s", "answer": "Binary" }
+    ]
+  },
+  {
+    "title": "Dog Breeds", "tag": "science", "round": "single",
+    "clues": [
+      { "clue": "The long-haired herding breed of Lassie", "answer": "Collie", "alt": ["Rough collie"] },
+      { "clue": "The spotted firehouse dog, star of 101 films", "answer": "Dalmatian" },
+      { "clue": "The world's smallest breed, named for a Mexican state", "answer": "Chihuahua" },
+      { "clue": "The breed of Scooby-Doo", "answer": "Great Dane" },
+      { "clue": "The low-slung, droopy-eared dog with a famously sad face and a keen sense of smell", "answer": "Basset hound", "alt": ["Basset"] }
+    ]
+  }
+]

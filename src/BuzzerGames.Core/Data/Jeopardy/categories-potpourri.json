@@ -1,0 +1,82 @@
+[
+  {
+    "title": "Currency", "tag": "potpourri", "round": "any",
+    "clues": [
+      { "clue": "Japan's money", "answer": "Yen" },
+      { "clue": "India's money", "answer": "Rupee" },
+      { "clue": "Poland's money", "answer": "Zloty" },
+      { "clue": "South Africa's money", "answer": "Rand" },
+      { "clue": "Vietnam's money", "answer": "Dong" }
+    ]
+  },
+  {
+    "title": "Hello in Other Languages", "tag": "potpourri", "round": "single",
+    "clues": [
+      { "clue": "'Hello' in Spanish", "answer": "Hola" },
+      { "clue": "'Hello' in French", "answer": "Bonjour" },
+      { "clue": "'Hello' or 'goodbye' in Italian", "answer": "Ciao" },
+      { "clue": "'Hello' in Japanese", "answer": "Konnichiwa" },
+      { "clue": "A greeting in Hindi and Nepali, often with hands pressed together", "answer": "Namaste" }
+    ]
+  },
+  {
+    "title": "Counting in Spanish", "tag": "potpourri", "round": "single",
+    "clues": [
+      { "clue": "'Three' in Spanish", "answer": "Tres" },
+      { "clue": "'Five' in Spanish", "answer": "Cinco" },
+      { "clue": "'Seven' in Spanish", "answer": "Siete" },
+      { "clue": "'Ten' in Spanish", "answer": "Diez" },
+      { "clue": "'Twenty' in Spanish", "answer": "Veinte" }
+    ]
+  },
+  {
+    "title": "Birthstones", "tag": "potpourri", "round": "any",
+    "clues": [
+      { "clue": "April's stone, the hardest natural gem", "answer": "Diamond" },
+      { "clue": "May's green stone", "answer": "Emerald" },
+      { "clue": "July's deep red stone", "answer": "Ruby" },
+      { "clue": "September's blue stone", "answer": "Sapphire" },
+      { "clue": "February's purple quartz", "answer": "Amethyst" }
+    ]
+  },
+  {
+    "title": "Greek Letters", "tag": "potpourri", "round": "single",
+    "clues": [
+      { "clue": "The first letter of the Greek alphabet", "answer": "Alpha" },
+      { "clue": "The last letter, meaning 'the end'", "answer": "Omega" },
+      { "clue": "The triangle-shaped letter, also the name of an airline", "answer": "Delta" },
+      { "clue": "The second letter, the name for a test version of software", "answer": "Beta" },
+      { "clue": "The letter that looks like a sideways 'E' and stands for a sum in math", "answer": "Sigma" }
+    ]
+  },
+  {
+    "title": "Roman Numerals", "tag": "potpourri", "round": "single",
+    "clues": [
+      { "clue": "The Roman numeral for 10", "answer": "X" },
+      { "clue": "The Roman numeral for 50", "answer": "L" },
+      { "clue": "The Roman numeral for 100", "answer": "C" },
+      { "clue": "The Roman numeral for 500", "answer": "D" },
+      { "clue": "The Roman numeral for 1,000", "answer": "M" }
+    ]
+  },
+  {
+    "title": "The Radio Alphabet", "tag": "potpourri", "round": "double",
+    "clues": [
+      { "clue": "The word pilots use for the letter C", "answer": "Charlie" },
+      { "clue": "The word pilots use for the letter F, the name of a dance", "answer": "Foxtrot" },
+      { "clue": "The word pilots use for the letter R, a Shakespearean lover", "answer": "Romeo" },
+      { "clue": "The word pilots use for the letter X", "answer": "X-ray", "alt": ["Xray"] },
+      { "clue": "The word pilots use for the letter Z, a South African warrior people", "answer": "Zulu" }
+    ]
+  },
+  {
+    "title": "U.S. Coins and Bills", "tag": "potpourri", "round": "single",
+    "clues": [
+      { "clue": "The one-cent coin with Lincoln on it", "answer": "Penny" },
+      { "clue": "The five-cent coin with Thomas Jefferson on it", "answer": "Nickel" },
+      { "clue": "The smallest coin in size, worth ten cents", "answer": "Dime" },
+      { "clue": "The 25-cent coin, with George Washington on its front", "answer": "Quarter" },
+      { "clue": "The founding father pictured on the $100 bill", "answer": "Benjamin Franklin", "alt": ["Franklin"] }
+    ]
+  }
+]

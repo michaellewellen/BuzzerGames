@@ -8,5 +8,5 @@ namespace BuzzerGames.Core.Jeopardy;
 public interface IGameDataSource
 {
     /// <summary>Builds one complete game: 6 categories for each round and one final clue.</summary>
-    GameData CreateGame(Random rng);
+    GameData CreateGame(Random rng, GameOptions? options = null);
 }
