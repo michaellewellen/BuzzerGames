@@ -1,0 +1,181 @@
+@inject IJSRuntime JS
+
+@*
+    The big screen: the question, the three choices, the Big Board with its flashing light, and the scores.
+    Nothing here is clickable; the emcee and the contestants play from their phones. It shows the correct
+    answer only once the question has been revealed.
+
+    The Big Board is drawn by wwwroot/js/pyl.js. This component's job is to hand it the board when a new one
+    is dealt, tell it when a spin starts, and tell it where the light stopped. The board's <div> is always on
+    the page (just hidden during questions) so the JavaScript never loses it.
+*@
+
+<main class="tv pyl-tv">
+    <header class="tv-top">
+        <span>PRESS YOUR LUCK · Round @Snapshot.Round of @Snapshot.Rounds</span>
+        @if (!_soundOn)
+        {
+            <button class="sound-btn" @onclick="EnableSound">🔊 Click to turn on sound</button>
+        }
+        <span>Room @Snapshot.Code</span>
+    </header>
+
+    @if (Snapshot.Phase == PylPhase.GameOver)
+    {
+        <section class="pyl-panel">
+            <h1 class="pyl-title">GAME OVER</h1>
+            <p class="winner">@WinnerText</p>
+        </section>
+    }
+
+    @if (InQuestions && Snapshot.Question is { } q)
+    {
+        <section class="pyl-panel pyl-question">
+            <p class="clue-meta">@q.Category · Question @q.Number of @q.PerRound</p>
+            <p class="clue-text">@q.Text</p>
+
+            @switch (Snapshot.Phase)
+            {
+                case PylPhase.Question:
+                    <p class="clue-status muted">Buzzers are open…</p>
+                    break;
+                case PylPhase.Answering:
+                    <p class="clue-status">@Snapshot.Guesser?.Name buzzed in…</p>
+                    break;
+                case PylPhase.Picking:
+                case PylPhase.Reveal:
+                    @if (Snapshot.Guesser is { } guesser)
+                    {
+                        <p class="clue-status muted">@guesser.Name's answer is one of these.</p>
+                    }
+                    <div class="pyl-options">
+                        @for (var i = 0; i < Snapshot.Options.Count; i++)
+                        {
+                            var index = i;
+                            var revealed = Snapshot.Phase == PylPhase.Reveal;
+                            <div class="pyl-option @(revealed && index == Snapshot.CorrectIndex ? "correct" : "") @(revealed && index != Snapshot.CorrectIndex ? "dim" : "")">
+                                <span class="letter">@("ABC"[index])</span>
+                                <span class="opt-text">@Snapshot.Options[index]</span>
+                                @if (revealed)
+                                {
+                                    <span class="opt-picks">@string.Join(", ", Snapshot.Players.Where(p => p.PickedIndex == index).Select(p => p.Name))</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                    @if (Snapshot.Phase == PylPhase.Picking)
+                    {
+                        <p class="clue-status">@PickStatus</p>
+                    }
+                    else
+                    {
+                        <p class="clue-status pyl-reveal">@Snapshot.Message</p>
+                    }
+                    break;
+            }
+        </section>
+    }
+
+    <section class="pyl-stage @(OnBoard ? "" : "is-hidden")">
+        <p class="pyl-turn">@TurnText</p>
+        <p class="pyl-message">@MessageText</p>
+        <div id="@BoardDomId" class="pyl-board"></div>
+    </section>
+
+    <PylScoreStrip Players="Snapshot.Players" />
+
+</main>
+
+@code {
+    [Parameter, EditorRequired] public PylSnapshot Snapshot { get; set; } = default!;
+
+    private bool _soundOn;
+    private int _mountedBoardId;
+    private int _startedSpinId;
+    private int _shownResultId;
+
+    private string BoardDomId => $"pyl-board-{Snapshot.Code}";
+
+    private bool InQuestions => Snapshot.Phase is PylPhase.Question or PylPhase.Answering or PylPhase.Picking or PylPhase.Reveal;
+
+    private bool OnBoard => Snapshot.Phase is PylPhase.SpinReady or PylPhase.Spinning or PylPhase.PickCorner or PylPhase.RoundOver;
+
+    private string WinnerText
+    {
+        get
+        {
+            var names = Snapshot.Winners.Select(id => Snapshot.FindPlayer(id)?.Name).Where(n => n is not null).ToList();
+            return names.Count == 0 ? "Everybody got whammied! Nobody wins." : $"{string.Join(" & ", names)} wins!";
+        }
+    }
+
+    private string PickStatus
+    {
+        get
+        {
+            var waiting = Snapshot.Players.Where(p => p.IsPicker && p.PickedIndex is null).Select(p => p.Name).ToList();
+            return waiting.Count == 0 ? "" : $"Waiting on {string.Join(" and ", waiting)}…";
+        }
+    }
+
+    private string TurnText
+    {
+        get
+        {
+            var actor = Snapshot.Acting;
+            return Snapshot.Phase switch
+            {
+                PylPhase.SpinReady when actor is not null =>
+                    $"{actor.Name} · {Snapshot.ActingSpinsLeft} spin{(Snapshot.ActingSpinsLeft == 1 ? "" : "s")} {(Snapshot.ActingIsPassed ? "passed to them" : "to play")}",
+                PylPhase.Spinning when actor is not null => $"{actor.Name}: press your luck!",
+                PylPhase.PickCorner when actor is not null => $"{actor.Name}: pick a corner!",
+                PylPhase.RoundOver => "That's the end of the Big Board round.",
+                _ => ""
+            };
+        }
+    }
+
+    private string MessageText => Snapshot.Phase switch
+    {
+        PylPhase.Spinning => "",
+        PylPhase.PickCorner => "",
+        _ => Snapshot.Message ?? Snapshot.LastSpin?.Message ?? ""
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Snapshot.BoardId == 0) return;
+        try
+        {
+            var mountedNow = false;
+            if (_mountedBoardId != Snapshot.BoardId)
+            {
+                await JS.InvokeVoidAsync("pyl.mount", BoardDomId, Snapshot.Board);
+                _mountedBoardId = Snapshot.BoardId;
+                _startedSpinId = 0;
+                _shownResultId = 0;
+                mountedNow = true;
+            }
+
+            if (Snapshot.Spin is { } spin && spin.Id != _startedSpinId)
+            {
+                _startedSpinId = spin.Id;
+                await JS.InvokeVoidAsync("pyl.start", spin);
+            }
+
+            if (Snapshot.LastSpin is { } result && result.Id != _shownResultId)
+            {
+                _shownResultId = result.Id;
+                // A screen that just opened shows the last result quietly; a live result gets its fanfare.
+                await JS.InvokeVoidAsync(mountedNow ? "pyl.showResult" : "pyl.stop", result);
+            }
+        }
+        catch (JSDisconnectedException) { }
+    }
+
+    private async Task EnableSound()
+    {
+        await JS.InvokeAsync<bool>("pyl.enableSound");
+        _soundOn = true;
+    }
+}

@@ -20,6 +20,7 @@
     <!-- Reuse the table-building helpers from the engine checks instead of copying them. -->
     <Compile Include="..\BuzzerGames.Core.Checks\Table.cs" Link="Table.cs" />
     <Compile Include="..\BuzzerGames.Core.Checks\Check.cs" Link="Check.cs" />
+    <Compile Include="..\BuzzerGames.Core.Checks\PylChecks.cs" Link="PylChecks.cs" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,127 @@
+@page "/press-your-luck/{Code}"
+@page "/press-your-luck/{Code}/board"
+@implements IDisposable
+@inject PylRoomManager Rooms
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<PageTitle>Press Your Luck · @Code.ToUpperInvariant()</PageTitle>
+
+@*
+    This one page is every screen in a Press Your Luck game, and it answers two web addresses, just like Jeopardy's:
+      /press-your-luck/ABCD         for people. Phones scan the QR code and land here.
+      /press-your-luck/ABCD/board   for the big screen. It never joins; it only watches.
+    Then it asks: what phase is the game in, and who is this device? The answers pick the view.
+*@
+
+@if (_game is null)
+{
+    <main class="card center">
+        <h1>Game not found</h1>
+        <p>There's no game with the code <strong>@Code.ToUpperInvariant()</strong>. It may have ended, or the server may have restarted.</p>
+        <a class="btn" href="/press-your-luck">Start or join a game</a>
+    </main>
+}
+else if (!_ready)
+{
+    <main class="card center"><p class="muted">Connecting…</p></main>
+}
+else if (_snapshot.Phase == PylPhase.Lobby)
+{
+    @* Note the @ in Error="@_error". Without it Razor passes the literal text "_error" instead of the variable's value. *@
+    <PylLobbyView Snapshot="_snapshot" Seat="_seat" BoardMode="_boardMode" Error="@_error" OnJoin="JoinAsync" OnStart="Start" />
+}
+else if (_boardMode)
+{
+    <PylTvView Snapshot="_snapshot" />
+}
+else if (_seat.Role == Role.Emcee)
+{
+    <PylEmceeView Game="_game" Snapshot="_snapshot" Token="_token" />
+}
+else if (_seat.Role == Role.Player)
+{
+    <PylPlayerView Game="_game" Snapshot="_snapshot" Token="_token" PlayerId="_seat.PlayerId!.Value" />
+}
+else
+{
+    <PylTvView Snapshot="_snapshot" />
+}
+
+@code {
+    [Parameter] public string Code { get; set; } = "";
+
+    private PressYourLuckGame? _game;
+    private PylSnapshot _snapshot = default!;
+    private Seat _seat = new(Role.Spectator);
+    private Guid _token;
+    private bool _ready;
+    private bool _boardMode;
+    private string? _error;
+
+    private string StorageKey => $"bg.pyl.{Code.ToUpperInvariant()}";
+
+    protected override void OnInitialized()
+    {
+        _boardMode = new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/')
+            .EndsWith("/board", StringComparison.OrdinalIgnoreCase);
+
+        _game = Rooms.Find(Code);
+        if (_game is null) return;
+
+        _snapshot = _game.Snapshot();
+        _game.Changed += OnGameChanged;
+
+        if (_boardMode) _ready = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _game is null || _boardMode) return;
+
+        var saved = await JS.InvokeAsync<string?>("bg.getItem", StorageKey);
+        if (Guid.TryParse(saved, out var token))
+        {
+            _token = token;
+            _seat = _game.GetSeat(token);
+        }
+
+        _ready = true;
+        StateHasChanged();
+    }
+
+    private void OnGameChanged() => _ = InvokeAsync(() =>
+    {
+        _snapshot = _game!.Snapshot();
+        StateHasChanged();
+    });
+
+    private async Task JoinAsync((Role Role, string Name) request)
+    {
+        _error = null;
+        var result = request.Role == Role.Emcee
+            ? _game!.JoinEmcee(request.Name)
+            : _game!.JoinPlayer(request.Name);
+
+        if (!result.Ok)
+        {
+            _error = result.Error;
+            return;
+        }
+
+        _token = result.Token;
+        _seat = _game.GetSeat(_token);
+        await JS.InvokeVoidAsync("bg.setItem", StorageKey, _token.ToString());
+    }
+
+    private void Start()
+    {
+        var result = _game!.Start();
+        _error = result.Ok ? null : result.Error;
+    }
+
+    public void Dispose()
+    {
+        if (_game is not null) _game.Changed -= OnGameChanged;
+    }
+}

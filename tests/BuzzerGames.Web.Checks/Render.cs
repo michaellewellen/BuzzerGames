@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
 using BuzzerGames.Core.Jeopardy;
+using BuzzerGames.Core.PressYourLuck;
 using BuzzerGames.Web.Components.Jeopardy;
+using BuzzerGames.Web.Components.PressYourLuck;
 using BuzzerGames.Web.Components.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -46,6 +48,14 @@ static class Render
             ["Token"] = table.Tokens[player],
             ["PlayerId"] = table.Ids[player]
         });
+
+    public static string PylTv(PylTable t) => Html<PylTvView>(new() { ["Snapshot"] = t.S });
+
+    public static string PylEmcee(PylTable t) =>
+        Html<PylEmceeView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee });
+
+    public static string PylPlayer(PylTable t, int i) =>
+        Html<PylPlayerView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[i], ["PlayerId"] = t.Ids[i] });
 
     /// <summary>The lobby, as seen by a device with the given seat.</summary>
     public static string Lobby(JeopardyGame game, Seat seat, bool boardMode = false) =>

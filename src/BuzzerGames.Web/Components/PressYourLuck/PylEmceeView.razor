@@ -1,0 +1,169 @@
+@*
+    The emcee's phone. It shows the answer (the big screen and players never do until the reveal), and runs
+    the question round: judge the buzzer's answer, type what they said if it was wrong, reveal, continue.
+    During the Big Board the contestants press their own buttons, but every button here also works for them,
+    in case somebody's phone dies.
+*@
+
+<main class="phone emcee pyl-emcee">
+    <header class="phone-header">
+        <span class="pill">EMCEE</span>
+        <span class="phone-sub">Room @Snapshot.Code · Round @Snapshot.Round</span>
+    </header>
+
+    <PylScoreStrip Players="Snapshot.Players" />
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case PylPhase.Question:
+            @QuestionPanel
+            <p class="hint">Buzzers are open. If nobody wants it, the three choices go to everyone.</p>
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.NoBuzz(Token))">Nobody buzzed · show the choices</button>
+            break;
+
+        case PylPhase.Answering:
+            @QuestionPanel
+            <p class="hint"><strong>@Snapshot.Guesser?.Name</strong> buzzed in. Were they right?</p>
+            <div class="judge-buttons">
+                <button class="btn btn-yes" @onclick="() => Judge(true)">✓ Correct<small>3 spins</small></button>
+                <button class="btn btn-no" @onclick="() => Judge(false)">✗ Wrong</button>
+            </div>
+            <label class="hint" for="said">If wrong, what did they say? It becomes one of the choices (optional).</label>
+            <input id="said" class="text-input" placeholder="Their wrong answer" maxlength="40" @bind="_said" @bind:event="oninput" />
+            break;
+
+        case PylPhase.Picking:
+            @QuestionPanel
+            <p class="hint">The choices are on the big screen. Waiting for the picks…</p>
+            <ul class="roster">
+                @foreach (var p in Snapshot.Players.Where(p => p.IsPicker))
+                {
+                    <li class="filled">
+                        <span class="seat-label">@p.Name</span>
+                        <span class="seat-name">@(p.PickedIndex is null ? "thinking…" : "locked in ✓")</span>
+                    </li>
+                }
+            </ul>
+            <ol class="pyl-emcee-options">
+                @for (var i = 0; i < Snapshot.Options.Count; i++)
+                {
+                    <li class="@(i == Snapshot.CorrectIndex ? "right" : "")">@Snapshot.Options[i]@(i == Snapshot.CorrectIndex ? "  ✓" : "")</li>
+                }
+            </ol>
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.RevealNow(Token))">Reveal now</button>
+            break;
+
+        case PylPhase.Reveal:
+            @QuestionPanel
+            <p class="hint">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.ContinueFromQuestion(Token))">Continue</button>
+            break;
+
+        case PylPhase.SpinReady:
+            <p class="big-message">@Snapshot.Acting?.Name's turn</p>
+            <p class="hint">@Snapshot.ActingSpinsLeft spin@(Snapshot.ActingSpinsLeft == 1 ? "" : "s") @(Snapshot.ActingIsPassed ? "passed to them" : "to play"). They spin from their own phone.</p>
+            @if (Snapshot.LastSpin is { } last)
+            {
+                <p class="hint">@last.Message</p>
+            }
+            <button class="btn btn-wide" @onclick="() => Act(Game.Spin(Token))">Spin for @Snapshot.Acting?.Name</button>
+            @if (Snapshot.CanPass)
+            {
+                @foreach (var targetId in Snapshot.PassTargets)
+                {
+                    var id = targetId;
+                    <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.Pass(Token, id))">
+                        Pass their spins to @Snapshot.FindPlayer(id)?.Name
+                    </button>
+                }
+            }
+            break;
+
+        case PylPhase.Spinning:
+            <p class="big-message">@Snapshot.Acting?.Name is spinning</p>
+            <p class="hint">They press from their own phone.</p>
+            <button class="btn btn-wide" @onclick="() => Act(Game.Press(Token))">Stop the light for @Snapshot.Acting?.Name</button>
+            break;
+
+        case PylPhase.PickCorner:
+            <p class="big-message">Pick a Corner!</p>
+            <p class="hint">@Snapshot.Acting?.Name chooses. You can choose for them:</p>
+            <div class="corner-grid">
+                @foreach (var c in Snapshot.Corners)
+                {
+                    var corner = c;
+                    <button class="btn" @onclick="() => Act(Game.PickCorner(Token, corner))">@CornerName(corner)</button>
+                }
+            </div>
+            break;
+
+        case PylPhase.RoundOver:
+            <p class="big-message">Big Board over</p>
+            @if (Snapshot.LastSpin is { } finalSpin)
+            {
+                <p class="hint">@finalSpin.Message</p>
+            }
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.ContinueFromRound(Token))">
+                @(Snapshot.Round >= Snapshot.Rounds ? "Finish the game" : "On to round " + (Snapshot.Round + 1))
+            </button>
+            break;
+
+        case PylPhase.GameOver:
+            <p class="winner">@WinnerText</p>
+            <a class="btn btn-wide" href="/press-your-luck">Start a new game</a>
+            break;
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public PressYourLuckGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public PylSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+
+    private string? _error;
+    private string _said = "";
+    private PylPhase _lastPhase;
+
+    // An error only makes sense for the screen it appeared on.
+    protected override void OnParametersSet()
+    {
+        if (Snapshot.Phase == _lastPhase) return;
+        _lastPhase = Snapshot.Phase;
+        _error = null;
+        _said = "";
+    }
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private void Judge(bool correct) => Act(Game.JudgeGuess(Token, correct, correct ? null : _said));
+
+    private static string CornerName(int corner) => corner switch
+    {
+        0 => "↖ Top left",
+        5 => "↗ Top right",
+        9 => "↘ Bottom right",
+        14 => "↙ Bottom left",
+        _ => $"Square {corner}"
+    };
+
+    private string WinnerText
+    {
+        get
+        {
+            var names = Snapshot.Winners.Select(id => Snapshot.FindPlayer(id)?.Name).Where(n => n is not null).ToList();
+            return names.Count == 0 ? "Nobody wins!" : $"{string.Join(" & ", names)} wins!";
+        }
+    }
+
+    // The question, plus the correct answer. Only the emcee's phone ever draws this.
+    private RenderFragment QuestionPanel => @<div class="emcee-clue">
+        <p class="emcee-clue-meta">@Snapshot.Question?.Category · Question @Snapshot.Question?.Number of @Snapshot.Question?.PerRound</p>
+        <p class="emcee-clue-text">@Snapshot.Question?.Text</p>
+        <p class="emcee-clue-answer">Answer: @Snapshot.Question?.Answer@(Snapshot.Question?.AlsoAccept is { } also ? $" (also accept: {also})" : "")</p>
+    </div>;
+}

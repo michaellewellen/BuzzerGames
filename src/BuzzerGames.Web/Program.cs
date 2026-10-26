@@ -1,4 +1,5 @@
 using BuzzerGames.Core.Jeopardy;
+using BuzzerGames.Core.PressYourLuck;
 using BuzzerGames.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,10 @@ builder.Services.AddSingleton<IGameDataSource, JsonGameDataSource>();
 
 // One shared set of running games. Every phone and the big screen talk to this same object.
 builder.Services.AddSingleton<GameRoomManager>();
+
+// Press Your Luck draws its questions from the same bank. Its own set of running games lives beside Jeopardy's.
+builder.Services.AddSingleton<IPylQuestionSource, JsonPylQuestionSource>();
+builder.Services.AddSingleton<PylRoomManager>();
 
 var app = builder.Build();
 

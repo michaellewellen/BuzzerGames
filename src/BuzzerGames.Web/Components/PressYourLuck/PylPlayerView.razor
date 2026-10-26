@@ -1,0 +1,165 @@
+@*
+    A contestant's phone: a buzzer, then the three choices, then a SPIN button and a big PRESS button.
+    Like Jeopardy's, it deliberately does not show the question. Everyone looks at the big screen.
+*@
+
+<main class="phone player pyl-player">
+    <header class="phone-header">
+        <span class="pill">@Me.Name</span>
+        <span class="my-score">@Money.Format(Me.Score)</span>
+    </header>
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case PylPhase.Question:
+            <button class="buzzer" @onclick="() => Act(Game.Buzz(Token))">BUZZ</button>
+            <p class="hint">First buzz gets to answer out loud.</p>
+            break;
+
+        case PylPhase.Answering:
+            @if (Me.IsGuesser)
+            {
+                <p class="big-message">You buzzed in!</p>
+                <p class="hint">Say your answer out loud.</p>
+            }
+            else
+            {
+                <p class="big-message">@Snapshot.Guesser?.Name buzzed in</p>
+                <p class="hint">Waiting on the emcee's ruling…</p>
+            }
+            break;
+
+        case PylPhase.Picking:
+            @if (!Me.IsPicker)
+            {
+                <p class="big-message">@(Me.IsGuesser ? "Your answer is in" : "Watch the screen")</p>
+                <p class="hint">The others are picking from the choices.</p>
+            }
+            else if (Me.PickedIndex is { } picked)
+            {
+                <p class="big-message">Locked in</p>
+                <p class="hint">You picked <strong>@("ABC"[picked])</strong>. Waiting on the others…</p>
+            }
+            else
+            {
+                <p class="hint">Pick the right answer. A correct pick earns a spin, and a wrong one costs nothing.</p>
+                <div class="pick-choices">
+                    @for (var i = 0; i < Snapshot.Options.Count; i++)
+                    {
+                        var index = i;
+                        <button class="btn pick-choice" @onclick="() => Act(Game.Pick(Token, index))">
+                            <span class="letter">@("ABC"[index])</span> @Snapshot.Options[index]
+                        </button>
+                    }
+                </div>
+            }
+            break;
+
+        case PylPhase.Reveal:
+            <p class="big-message">@Snapshot.Message</p>
+            break;
+
+        case PylPhase.SpinReady:
+            @if (Me.IsActing)
+            {
+                <p class="big-message">Your turn!</p>
+                <p class="hint">@Snapshot.ActingSpinsLeft spin@(Snapshot.ActingSpinsLeft == 1 ? "" : "s") @(Snapshot.ActingIsPassed ? "passed to you. You have to play them." : "to play.")</p>
+                <button class="buzzer spin" @onclick="() => Act(Game.Spin(Token))">SPIN</button>
+                @if (Snapshot.CanPass)
+                {
+                    <p class="hint">Or pass your remaining spins:</p>
+                    @foreach (var targetId in Snapshot.PassTargets)
+                    {
+                        var id = targetId;
+                        <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.Pass(Token, id))">
+                            Pass @Snapshot.ActingSpinsLeft to @Snapshot.FindPlayer(id)?.Name
+                        </button>
+                    }
+                }
+            }
+            else
+            {
+                <p class="big-message">@Snapshot.Acting?.Name's turn</p>
+                <p class="hint">Watch the screen.</p>
+            }
+            break;
+
+        case PylPhase.Spinning:
+            @if (Me.IsActing)
+            {
+                <button class="buzzer press" @onclick="() => Act(Game.Press(Token))">PRESS!</button>
+                <p class="hint">Stop the light on something good.</p>
+            }
+            else
+            {
+                <p class="big-message">@Snapshot.Acting?.Name is spinning</p>
+                <p class="hint">Fingers crossed. No Whammies!</p>
+            }
+            break;
+
+        case PylPhase.PickCorner:
+            @if (Me.IsActing)
+            {
+                <p class="big-message">Pick a corner!</p>
+                <div class="corner-grid">
+                    @foreach (var c in Snapshot.Corners)
+                    {
+                        var corner = c;
+                        <button class="btn corner-btn" @onclick="() => Act(Game.PickCorner(Token, corner))">@CornerName(corner)</button>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="big-message">@Snapshot.Acting?.Name is picking a corner</p>
+            }
+            break;
+
+        case PylPhase.RoundOver:
+            <p class="big-message">Big Board over</p>
+            <p class="hint">Waiting on the emcee…</p>
+            break;
+
+        case PylPhase.GameOver:
+            <p class="big-message">@(Snapshot.Winners.Contains(Me.Id) ? "You won! 🎉" : "Game over")</p>
+            <p class="hint">Final score: @Money.Format(Me.Score)</p>
+            break;
+    }
+
+    <PylScoreStrip Players="Snapshot.Players" />
+</main>
+
+@code {
+    [Parameter, EditorRequired] public PressYourLuckGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public PylSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+    [Parameter, EditorRequired] public Guid PlayerId { get; set; }
+
+    private string? _error;
+    private PylPhase _lastPhase;
+
+    private PylPlayerInfo Me => Snapshot.FindPlayer(PlayerId)!;
+
+    protected override void OnParametersSet()
+    {
+        if (Snapshot.Phase == _lastPhase) return;
+        _lastPhase = Snapshot.Phase;
+        _error = null;
+    }
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private static string CornerName(int corner) => corner switch
+    {
+        0 => "↖ Top left",
+        5 => "↗ Top right",
+        9 => "↘ Bottom right",
+        14 => "↙ Bottom left",
+        _ => $"Square {corner}"
+    };
+}

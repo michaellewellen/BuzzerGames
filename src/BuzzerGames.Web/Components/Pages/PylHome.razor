@@ -1,0 +1,63 @@
+@page "/press-your-luck"
+@inject PylRoomManager Rooms
+@inject NavigationManager Navigation
+
+<PageTitle>Press Your Luck</PageTitle>
+
+<main class="card center jeopardy-home">
+    <h1>Press Your Luck</h1>
+    <p class="muted">Create the game on the big screen (the TV). Everyone else scans its QR code, or opens this site on their phone and types the room code below.</p>
+
+    <label class="holiday-toggle">
+        <input type="checkbox" @bind="_holiday" />
+        Include a holiday question
+    </label>
+
+    <button class="btn btn-start" @onclick="CreateGame">Create a new game</button>
+
+    <hr />
+
+    <h2>Have a room code?</h2>
+    <div class="button-row">
+        <input class="text-input code-input" placeholder="ABCD" maxlength="4"
+               @bind="_code" @bind:event="oninput" @onkeydown="OnKeyDown" />
+        <button class="btn" @onclick="JoinGame">Go</button>
+    </div>
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    <a class="back-link" href="/">All games</a>
+</main>
+
+@code {
+    private string _code = "";
+    private string? _error;
+
+    // Ticked automatically in December (Mountain time), but you can tick it any time.
+    private bool _holiday = HolidaySeason.IsActive(DateTimeOffset.UtcNow);
+
+    private void CreateGame()
+    {
+        // Whoever creates the game is setting up the big screen, so they land on the /board address.
+        var game = Rooms.Create(new GameOptions(_holiday));
+        Navigation.NavigateTo($"/press-your-luck/{game.Code}/board");
+    }
+
+    private void JoinGame()
+    {
+        var game = Rooms.Find(_code);
+        if (game is null)
+        {
+            _error = "We couldn't find a game with that code.";
+            return;
+        }
+        Navigation.NavigateTo($"/press-your-luck/{game.Code}");
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") JoinGame();
+    }
+}

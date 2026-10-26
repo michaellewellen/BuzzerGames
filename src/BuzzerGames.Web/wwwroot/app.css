@@ -354,3 +354,116 @@ a.game-tile:hover { border-color: var(--gold); }
 
 .holiday-toggle { display: flex; align-items: center; justify-content: center; gap: .6rem; margin: 0 0 1rem; font-size: 1.05rem; cursor: pointer; }
 .holiday-toggle input { width: 1.3rem; height: 1.3rem; }
+
+/* ---------- Press Your Luck ---------- */
+
+/* The TV: a question panel, or the Big Board, with the scores underneath. */
+.pyl-tv { background: radial-gradient(ellipse at center, #1b0a5c 0%, #07031f 80%); }
+.pyl-panel {
+    flex: 1;
+    min-height: 0;
+    margin: .5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1vw 4vw;
+    overflow: hidden;
+    background: linear-gradient(#1c25d8, #0a1090);
+    border: .4vw solid #ffd35a;
+    text-shadow: .15vw .15vw 0 #000;
+}
+.pyl-title { font-family: Impact, sans-serif; font-weight: 400; font-size: min(8vw, 14vh); color: var(--value-gold); margin: 0; letter-spacing: .06em; }
+.pyl-question .clue-meta { font-size: min(1.7vw, 3vh); margin-bottom: .4vh; }
+.pyl-question .clue-text { font-size: min(3.5vw, 6vh); margin-bottom: .6vh; }
+.pyl-question .clue-status { font-size: min(2vw, 3.6vh); margin-top: 1vh; }
+.pyl-options { display: grid; gap: 1vh; width: min(80vw, 100%); margin: 1vh 0 .5vh; }
+.pyl-option {
+    display: flex; align-items: center; gap: 1.5vw;
+    padding: 1.1vh 2vw; background: rgba(0, 0, 0, .4); border: .3vw solid transparent;
+    font-size: min(2.8vw, 5vh); font-weight: 800; text-transform: uppercase; text-align: left;
+}
+.pyl-option .letter { display: inline-flex; align-items: center; justify-content: center; width: 1.6em; height: 1.6em; background: var(--value-gold); color: #111; border-radius: 50%; text-shadow: none; flex: none; }
+.pyl-option .opt-text { flex: 1; }
+.pyl-option .opt-picks { font-size: .55em; color: #bfe3ff; text-transform: none; }
+.pyl-option.correct { background: #1f9d5c; border-color: #fff; }
+.pyl-option.dim { opacity: .45; }
+
+.pyl-stage { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: .3vw .5vw; }
+.pyl-stage.is-hidden { display: none; }
+.pyl-turn { margin: 0; text-align: center; font-size: min(2.6vw, 4.6vh); font-weight: 900; color: var(--value-gold); text-transform: uppercase; letter-spacing: .05em; min-height: 1.2em; }
+.pyl-message { margin: 0 0 .6vh; text-align: center; font-size: min(2vw, 3.6vh); min-height: 1.2em; }
+
+/* The Big Board: 6 columns x 5 rows, with the 18 squares around the edge and the result in the middle. */
+.pyl-board {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: .6vw;
+    padding: .8vw;
+    background: #ff3fa4;
+    border-radius: 1.2vw;
+    box-shadow: 0 0 3vw rgba(255, 63, 164, .6) inset;
+}
+.pyl-sq {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    min-width: 0; min-height: 0; overflow: hidden; padding: .3vw;
+    background: linear-gradient(#2b3cff, #121c9a); color: #ffe36e;
+    border: .25vw solid #0a0a40; border-radius: .6vw;
+    font-weight: 900; line-height: 1.05; text-shadow: .1vw .1vw 0 #000;
+}
+.pyl-sq .t { font-size: min(2.5vw, 4.4vh); }
+.pyl-sq small { font-size: min(1.45vw, 2.6vh); color: #fff; letter-spacing: .05em; }
+.pyl-sq.k-prize { background: linear-gradient(#18a05c, #0b5c34); }
+.pyl-sq.k-prize .t { font-size: min(1.5vw, 2.7vh); }
+.pyl-sq.k-corner { background: linear-gradient(#8a2be2, #4b0e8f); color: #fff; }
+.pyl-sq.k-corner .t { font-size: min(1.5vw, 2.7vh); }
+.pyl-sq.k-whammy { background: linear-gradient(#ff3b3b, #a40e17); color: #fff; }
+.pyl-sq.lit { background: #fff; color: #101010; text-shadow: none; box-shadow: 0 0 2.2vw 1vw #ffe36e; transform: scale(1.07); position: relative; z-index: 2; }
+.pyl-sq.lit small { color: #333; }
+.pyl-sq.lit.k-whammy { background: #ff2b2b; color: #fff; box-shadow: 0 0 2.4vw 1.2vw #ff8a8a; }
+.pyl-sq.lit.k-prize { background: #c8ffd8; }
+.pyl-sq.lit.k-corner { background: #e5ccff; color: #3a0a78; }
+
+.pyl-center {
+    grid-area: 2 / 2 / 5 / 6;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle, #281190, #0a0538); border-radius: 1vw;
+}
+.pyl-center .result { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.pyl-center .rt { font-family: Impact, sans-serif; font-size: min(7vw, 12vh); color: var(--value-gold); text-shadow: .25vw .25vw 0 #000; text-transform: uppercase; }
+.pyl-center small { font-size: min(3vw, 5vh); color: #fff; font-weight: 800; }
+.pyl-center .whammy .rt { color: #ff5a5a; }
+.whammy-face { width: min(14vw, 24vh); animation: pyl-bounce .35s ease-in-out infinite alternate; }
+@keyframes pyl-bounce { from { transform: translateY(0) rotate(-6deg); } to { transform: translateY(-1.5vh) rotate(6deg); } }
+.pyl-board.boom { animation: pyl-boom .14s steps(2) 12; }
+@keyframes pyl-boom { 0% { filter: none; } 50% { filter: invert(1) hue-rotate(180deg); } }
+
+.sound-btn { padding: .2vh 1.2vw; font-size: min(1.4vw, 2.6vh); font-weight: 700; background: var(--gold); color: #111; border: 0; border-radius: 2rem; cursor: pointer; }
+
+/* Scores with spins and Whammies (TV and phones). */
+.pyl-scores .score-meta { display: flex; align-items: center; justify-content: center; gap: .6em; font-size: .8rem; opacity: .95; }
+.spins-tag { color: #bff0ff; font-weight: 700; }
+.out-tag { color: #ff8a8a; font-weight: 900; }
+.whams { display: inline-flex; gap: .2em; }
+.wham { width: .8em; height: .8em; border-radius: 50%; border: .12em solid #ff8a8a; display: inline-block; }
+.wham.hit { background: #ff2b2b; border-color: #ff2b2b; box-shadow: 0 0 .5em #ff2b2b; }
+.tv .pyl-scores .score-meta { font-size: min(1.5vw, 2.8vh); }
+.tv .pyl-scores .score-value { font-size: min(3.4vw, 6.2vh); }
+.tv .pyl-scores .score.control { box-shadow: 0 0 1.4vw .4vw var(--gold) inset; }
+
+/* Phones */
+.pick-choices { display: flex; flex-direction: column; gap: .75rem; }
+.pick-choice { display: flex; align-items: center; gap: .8rem; text-align: left; font-size: 1.3rem; padding: 1.2rem 1rem; }
+.pick-choice .letter { display: inline-flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: #1a1a1a; color: var(--gold); flex: none; }
+.buzzer.spin { background: #1fa65a; box-shadow: 0 .5rem 0 #0f6a37; }
+.buzzer.press { background: #ff2b6e; box-shadow: 0 .5rem 0 #9c1040; font-size: 4rem; animation: pyl-pulse .5s ease-in-out infinite alternate; }
+@keyframes pyl-pulse { from { transform: scale(1); } to { transform: scale(1.03); } }
+.corner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.corner-btn { padding: 1.6rem .5rem; font-size: 1.2rem; }
+.pyl-emcee-options { margin: 0; padding-left: 1.4rem; }
+.pyl-emcee-options li { padding: .2rem 0; }
+.pyl-emcee-options li.right { color: #7dffb0; font-weight: 700; }

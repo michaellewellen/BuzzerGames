@@ -589,6 +589,8 @@ Run("shuffle: real data plays through the engine (500 games started, 1 clue pick
     }
 });
 
+PylChecks.Run(Run);
+
 Console.WriteLine();
 Console.WriteLine($"{passed} passed, {failed} failed");
 return failed == 0 ? 0 : 1;

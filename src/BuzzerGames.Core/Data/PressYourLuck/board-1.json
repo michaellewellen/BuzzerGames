@@ -1,0 +1,21 @@
+// Round 1 Big Board. Edit freely: every game deals its board from these lists.
+// "counts" must add up to 45, because the 9 Whammies fill the other 9 of the 54 outcomes (18 squares x 3 faces).
+{
+  "whammiesPerFace": [1, 3, 5],
+  "counts": { "cash": 22, "cashSpin": 10, "big": 4, "prizes": 5, "corner": 4 },
+  "cash":     [500, 600, 700, 750, 800, 900, 1000, 1100, 1250, 1400],
+  "cashSpin": [1000, 1250, 1500, 1750, 2000, 2500],
+  "big":      [4000, 5000],
+  "prizes": [
+    { "name": "A Hawaiian vacation", "value": 3800 },
+    { "name": "A new bicycle", "value": 700 },
+    { "name": "A big-screen TV", "value": 1400 },
+    { "name": "A hot tub", "value": 2900 },
+    { "name": "A fishing boat", "value": 4200 },
+    { "name": "A leather sofa", "value": 1800 },
+    { "name": "A dream kitchen", "value": 3200 },
+    { "name": "A grand piano", "value": 4500 },
+    { "name": "A ski trip", "value": 2200 },
+    { "name": "A riding mower", "value": 1600 }
+  ]
+}

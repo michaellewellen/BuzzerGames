@@ -1,0 +1,20 @@
+// Round 2 Big Board: same shape as round 1, with bigger numbers.
+{
+  "whammiesPerFace": [1, 3, 5],
+  "counts": { "cash": 22, "cashSpin": 10, "big": 4, "prizes": 5, "corner": 4 },
+  "cash":     [750, 900, 1000, 1250, 1400, 1500, 1750, 2000, 2250],
+  "cashSpin": [1500, 2000, 2500, 3000, 3500],
+  "big":      [5000, 6000, 7500],
+  "prizes": [
+    { "name": "A trip to Paris", "value": 5600 },
+    { "name": "A sports car", "value": 7000 },
+    { "name": "A home theater", "value": 4800 },
+    { "name": "A cruise for two", "value": 5200 },
+    { "name": "A backyard pool", "value": 6500 },
+    { "name": "A speedboat", "value": 6800 },
+    { "name": "A safari adventure", "value": 5900 },
+    { "name": "A designer wardrobe", "value": 4400 },
+    { "name": "A diamond ring", "value": 4000 },
+    { "name": "A baby grand piano", "value": 6200 }
+  ]
+}

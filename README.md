@@ -22,6 +22,22 @@ Classic Concentration, Super Password, and The Price Is Right waiting in the win
 - Whoever answered last correctly picks the next clue.
 - Two rounds, Daily Doubles (1 in round one, 2 in round two), and Final Jeopardy with wagers and typed answers.
 
+## How a Press Your Luck game works
+
+Same setup as Jeopardy: create it on the TV at `/press-your-luck`, one emcee and three players join by QR code.
+
+- **Question round.** The TV asks an open question and the first player to buzz gives a guess out loud. The emcee taps right or wrong (and can type what they said).
+  - Right: two bogus answers join it and the guesser earns **3 spins**.
+  - Wrong: the real answer plus one bogus answer are shown.
+  - The other two players pick one of the three choices on their phones. A correct pick earns **1 spin**. Wrong picks cost nothing.
+- **Big Board.** 18 squares, three faces each, so the light really lands on one of 54 outcomes. Fewest spins goes first. A player taps **SPIN**, then **PRESS!** to stop the light. Cash, cash plus a spin, prizes, Pick a Corner, or a **Whammy** that wipes out their score. Four Whammies and they are out. Spins can be passed to the highest-scoring opponent after at least one spin.
+- Two rounds; the second round pays more.
+- The light is decided by the server, so a laggy phone can't cheat. `PressLagMs` and `TickMs` in `PressYourLuckGame.cs` control the lag allowance and speed.
+
+**Sound.** The TV has a "Click to turn on sound" button (browsers require a click). It plays built-in beeps. To use your own, drop files in `src/BuzzerGames.Web/wwwroot/sounds/` named `tick`, `start`, `stop`, `cash`, `big`, `whammy`, `corner` (`.mp3`, `.wav` or `.ogg`); anything missing falls back to the built-in beep.
+
+**Editing the board.** `src/BuzzerGames.Core/Data/PressYourLuck/board-1.json` and `board-2.json` hold the square counts, the cash values and the prize list for each round. Whammies per face (1, 3 and 5) are set there too. The values are my guesses, not the real 80s table.
+
 ## Run it on your computer
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).
@@ -70,13 +86,17 @@ src/BuzzerGames.Core/          The game itself: plain C#, no web code
   Jeopardy/DummyGameDataSource.cs  placeholder questions for testing
   Jeopardy/Snapshots.cs          frozen pictures of the game that pages draw from
   Jeopardy/GameRoomManager.cs    all running games, found by room code
+  PressYourLuck/                 the Press Your Luck engine, board dealing, questions, room manager
+  Data/PressYourLuck/            board recipes (counts, values, prizes)
 
 src/BuzzerGames.Web/           The website
   Program.cs                     startup and wiring
   Games/GameCatalog.cs           the "pick a game" list
   Components/Pages/              Home, JeopardyHome, JeopardyRoom (the one page every screen goes through)
   Components/Jeopardy/           LobbyView, BoardView (TV), EmceeView, PlayerView, ScoreStrip
+  Components/PressYourLuck/      the Press Your Luck screens (TV, emcee, player, lobby)
   wwwroot/app.css, js/bg.js      styling, and the small JavaScript bits (saved seat, QR code)
+  wwwroot/js/pyl.js              the flashing Big Board and its sounds
 
 tests/                         Checks that play real games and verify the rules and the screens
 Dockerfile                     How Railway builds and runs it

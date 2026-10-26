@@ -1,0 +1,37 @@
+@* The three contestants: score, saved-up spins, and Whammies. Shared by the big screen and every phone. *@
+
+<div class="scores pyl-scores">
+    @foreach (var player in Players)
+    {
+        <div class="score @(player.IsActing ? "control" : "") @(player.IsGuesser ? "answering" : "") @(player.IsOut ? "locked" : "")">
+            <span class="score-name">@player.Name</span>
+            <span class="score-value">@Money.Format(player.Score)</span>
+            <span class="score-meta">
+                @if (player.IsOut)
+                {
+                    <span class="out-tag">OUT</span>
+                }
+                else
+                {
+                    <span class="spins-tag">@SpinsText(player)</span>
+                }
+                <span class="whams" title="Whammies">
+                    @for (var i = 0; i < PressYourLuckGame.WhammiesToBeOut; i++)
+                    {
+                        <span class="wham @(i < player.Whammies ? "hit" : "")"></span>
+                    }
+                </span>
+            </span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<PylPlayerInfo> Players { get; set; } = default!;
+
+    private static string SpinsText(PylPlayerInfo p)
+    {
+        var text = p.Spins == 1 ? "1 spin" : $"{p.Spins} spins";
+        return p.PassedSpins > 0 ? $"{p.PassedSpins} passed + {text}" : text;
+    }
+}

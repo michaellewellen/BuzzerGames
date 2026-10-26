@@ -1,4 +1,5 @@
 using BuzzerGames.Core.Jeopardy;
+using BuzzerGames.Core.PressYourLuck;
 using BuzzerGames.Web;
 
 // Run with:  dotnet run --project tests/BuzzerGames.Web.Checks
@@ -369,6 +370,58 @@ Run("a whole game, drawing the TV, the emcee, and all three players after every 
 
     Check.Equal(GamePhase.GameOver, table.S.Phase, "the game finished");
     Check.True(draws > 200, $"expected hundreds of redraws, got {draws}");
+});
+
+Console.WriteLine("Press Your Luck screens");
+
+Run("pyl: only the emcee's phone sees the answer before the reveal", () =>
+{
+    var t = new PylTable();
+    Check.True(Render.Has(Render.PylEmcee(t), "Answer1"), "emcee sees the answer");
+    Check.True(!Render.Has(Render.PylTv(t), "Answer1"), "TV hides the answer");
+    for (var i = 0; i < 3; i++)
+        Check.True(!Render.Has(Render.PylPlayer(t, i), "Answer1"), $"player {i} hides the answer");
+});
+
+Run("pyl: phones never show the question text, the TV does", () =>
+{
+    var t = new PylTable();
+    Check.True(Render.Has(Render.PylTv(t), "Clue number 1"), "TV shows the question");
+    for (var i = 0; i < 3; i++)
+        Check.True(!Render.Has(Render.PylPlayer(t, i), "Clue number 1"), $"player {i} phone hides the question");
+});
+
+Run("pyl: TV shows the answer once the reveal arrives", () =>
+{
+    var t = new PylTable();
+    Check.Ok(t.Game.Buzz(t.Tokens[0]));
+    Check.Ok(t.Game.JudgeGuess(t.Emcee, true));
+    Check.Ok(t.Game.Pick(t.Tokens[1], t.S.CorrectIndex));
+    Check.Ok(t.Game.Pick(t.Tokens[2], (t.S.CorrectIndex + 1) % 3));
+    Check.Equal(PylPhase.Reveal, t.S.Phase, "reveal phase");
+    Check.True(Render.Has(Render.PylTv(t), "Answer1"), "TV shows the answer at the reveal");
+});
+
+Run("pyl: a whole game, drawing every screen after every action", () =>
+{
+    var t = new PylTable(seed: 5);
+    var draws = 0;
+    t.Game.Changed += () =>
+    {
+        Render.PylTv(t);
+        Render.PylEmcee(t);
+        for (var i = 0; i < 3; i++) Render.PylPlayer(t, i);
+        draws++;
+    };
+    t.PlayQuestionRound();
+    // Spin and press on a cash square a few times so the TV, emcee and phones are drawn mid-spin and after.
+    for (var n = 0; n < 4; n++)
+    {
+        if (t.S.Phase != PylPhase.SpinReady || t.S.ActingId is null) break;
+        t.SpinFor(o => PylTable.IsPlainCash(o));
+        if (t.S.Phase == PylPhase.SpinReady && t.S.ActingId is not null) t.Game.Pass(t.Tokens[t.IndexOf(t.S.ActingId.Value)], null);
+    }
+    Check.True(draws > 20, $"expected plenty of redraws, got {draws}");
 });
 
 Console.WriteLine();
