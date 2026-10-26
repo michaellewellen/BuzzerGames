@@ -1,15 +1,21 @@
 @page "/jeopardy/{Code}"
+@page "/jeopardy/{Code}/board"
 @implements IDisposable
 @inject GameRoomManager Rooms
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <PageTitle>Jeopardy · @Code.ToUpperInvariant()</PageTitle>
 
 @*
-    This one page is every screen in the game. It looks at two things:
-      1. What phase is the game in? (lobby, playing, final...)
-      2. Who is this device? (emcee, a player, or just a spectator like the big screen)
-    ...and shows the matching view.
+    This one page is every screen in the game, and it answers two web addresses:
+
+      /jeopardy/ABCD         for people. Phones scan the QR code and land here. It offers the join buttons
+                             and remembers which seat this phone took.
+      /jeopardy/ABCD/board   for the big screen. It never joins; it only watches. It shows the QR code
+                             while people join, then turns into the game board.
+
+    Then it asks two questions: what phase is the game in, and who is this device? The answers pick the view.
 *@
 
 @if (_game is null)
@@ -26,7 +32,12 @@ else if (!_ready)
 }
 else if (_snapshot.Phase == GamePhase.Lobby)
 {
-    <LobbyView Snapshot="_snapshot" Seat="_seat" Error="_error" OnJoin="JoinAsync" OnStart="Start" />
+    @* Note the @ in Error="@_error". Without it Razor passes the literal text "_error" instead of the variable's value. *@
+    <LobbyView Snapshot="_snapshot" Seat="_seat" BoardMode="_boardMode" Error="@_error" OnJoin="JoinAsync" OnStart="Start" />
+}
+else if (_boardMode)
+{
+    <BoardView Snapshot="_snapshot" />
 }
 else if (_seat.Role == Role.Emcee)
 {
@@ -49,6 +60,7 @@ else
     private Seat _seat = new(Role.Spectator);
     private Guid _token;
     private bool _ready;
+    private bool _boardMode;
     private string? _error;
 
     // Each phone remembers its seat in this browser's storage under a key like "bg.jeopardy.BCDF".
@@ -56,16 +68,23 @@ else
 
     protected override void OnInitialized()
     {
+        // Which of the two addresses are we on?
+        _boardMode = new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/')
+            .EndsWith("/board", StringComparison.OrdinalIgnoreCase);
+
         _game = Rooms.Find(Code);
         if (_game is null) return;
 
         _snapshot = _game.Snapshot();
         _game.Changed += OnGameChanged;
+
+        // The big screen never takes a seat, so there is nothing to load from the browser.
+        if (_boardMode) _ready = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || _game is null) return;
+        if (!firstRender || _game is null || _boardMode) return;
 
         // Did this phone already take a seat in this game (before a refresh, or a locked screen)?
         var saved = await JS.InvokeAsync<string?>("bg.getItem", StorageKey);

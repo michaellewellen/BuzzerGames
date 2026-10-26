@@ -1,12 +1,17 @@
 @inject IJSRuntime JS
 
 @*
-    The landing page. Everyone sees the same three choices: join as emcee, join as player, or
-    (once the table is full) start the game. A device that never joins, like the big screen,
-    stays a spectator, and when the game starts it turns into the board.
+    The lobby, in two flavors:
+
+      Phone flavor (BoardMode = false): the three choices. Join as Emcee, join as Player, and, once the
+      table is full, Start Game.
+
+      Big-screen flavor (BoardMode = true): no join buttons, because the big screen never takes a seat.
+      It just shows a large QR code and the roster, plus Start Game. When the game starts, it turns
+      into the board.
 *@
 
-<main class="lobby">
+<main class="lobby @(BoardMode ? "board-mode" : "")">
     <header class="lobby-header">
         <h1 class="logo">JEOPARDY</h1>
         <p class="room-line">Room <span class="room-code">@Snapshot.Code</span></p>
@@ -15,7 +20,12 @@
     <div class="lobby-grid">
 
         <section class="card">
-            @if (Seat.Role != Role.Spectator)
+            @if (BoardMode)
+            {
+                <h2>Take a seat</h2>
+                <p>Scan the QR code with your phone, then choose <strong>Emcee</strong> or <strong>Player</strong>.</p>
+            }
+            else if (Seat.Role != Role.Spectator)
             {
                 <h2>You're in!</h2>
                 <p>
@@ -75,7 +85,7 @@
             </ul>
         </section>
 
-        <section class="card">
+        <section class="card qr-card">
             <h2>Scan to join</h2>
             <div id="qr-@Snapshot.Code" class="qr"></div>
             <p class="join-url">@_joinUrl</p>
@@ -87,6 +97,7 @@
 @code {
     [Parameter, EditorRequired] public GameSnapshot Snapshot { get; set; } = default!;
     [Parameter, EditorRequired] public Seat Seat { get; set; }
+    [Parameter] public bool BoardMode { get; set; }
     [Parameter] public string? Error { get; set; }
     [Parameter] public EventCallback<(Role Role, string Name)> OnJoin { get; set; }
     [Parameter] public EventCallback OnStart { get; set; }
@@ -104,6 +115,7 @@
         if (!firstRender) return;
 
         // Draw the QR code. The browser works out the page's real public address and hands it back.
+        // The QR code always points at the phone address (/jeopardy/ABCD), never at the /board address.
         _joinUrl = await JS.InvokeAsync<string>("bg.renderQr", $"qr-{Snapshot.Code}", $"/jeopardy/{Snapshot.Code}");
         StateHasChanged();
     }

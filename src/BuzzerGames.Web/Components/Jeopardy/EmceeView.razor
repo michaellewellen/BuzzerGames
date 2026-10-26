@@ -21,6 +21,7 @@
     {
         case GamePhase.Board:
             <p class="hint"><strong>@Snapshot.ControlPlayer?.Name</strong> is in control. Tap the clue they call out.</p>
+            <div class="pick-board">
             @for (var c = 0; c < Snapshot.Categories.Count; c++)
             {
                 var categoryIndex = c;
@@ -39,6 +40,7 @@
                     </div>
                 </div>
             }
+            </div>
             break;
 
         case GamePhase.DailyDoubleWager:

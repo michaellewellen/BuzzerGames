@@ -1,17 +1,19 @@
 /* BuzzerGames: one stylesheet for the whole site.
-   TV sizes use vw units so the board scales to any screen; phone views use rem and big tap targets. */
+   The big-screen board sizes itself from the screen (vw/vh units), so it fills any TV or monitor.
+   Phone views use rem and big tap targets. */
 
 :root {
     --bg: #05082e;
     --panel: #101a6b;
-    --blue: #0a1fc4;
+    --blue: #0a14c8;          /* the board's cell blue */
     --blue-dark: #0a1260;
     --edge: #5f6bd1;
-    --gold: #ffd35a;
+    --gold: #ffd35a;          /* buttons and accents */
+    --value-gold: #e3a93f;    /* the dollar amounts on the board */
     --text: #ffffff;
     --good: #2ecc71;
     --bad: #e74c3c;
-    --scores-h: 7rem;
+    --scores-h: 15vh;         /* height of the score bar on the big screen */
 }
 
 * { box-sizing: border-box; }
@@ -122,45 +124,127 @@ a.game-tile:hover { border-color: var(--gold); }
 .qr svg { display: block; width: 100%; height: auto; }
 .join-url { text-align: center; font-size: .85rem; opacity: .75; word-break: break-all; }
 
-/* ---------- big screen ---------- */
+/* On the big screen the lobby is mostly a giant QR code. */
+.lobby.board-mode { max-width: 90rem; }
+.lobby.board-mode .qr-card { order: -1; }
+.lobby.board-mode .qr { max-width: min(26rem, 45vh); }
+.lobby.board-mode .join-url { font-size: 1rem; }
+.lobby.board-mode .btn-start { width: 100%; margin-top: 1rem; font-size: 1.6rem; padding: 1.2rem; }
 
-.tv { position: relative; min-height: 100vh; padding: 1.2vw; display: flex; flex-direction: column; gap: 1vw; }
-.tv-top { display: flex; justify-content: space-between; font-size: 1.4vw; opacity: .8; }
-.board { display: grid; grid-template-columns: repeat(var(--cols), 1fr); gap: .5vw; }
-.board-cell { display: flex; align-items: center; justify-content: center; text-align: center; background: var(--blue); border-radius: .4vw; }
-.board-category { min-height: 7vw; padding: .5vw; font-size: 1.6vw; font-weight: 800; text-transform: uppercase; line-height: 1.15; }
-.board-value { min-height: 7.5vw; font-size: 3.4vw; font-weight: 900; color: var(--gold); font-family: Impact, "Arial Narrow Bold", sans-serif; }
-.board-value.used { background: #0a1470; }
+/* ---------- big screen (the Jeopardy board) ---------- */
 
-.tv .scores { margin-top: auto; }
+.tv {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+    overflow: hidden;
+}
+.tv-top { display: flex; justify-content: space-between; padding: .4vh 1vw; font-size: min(1.2vw, 2vh); opacity: .6; }
+
+/* Six columns across the top, one category per column, then five rows that stretch to fill the screen. */
+.board {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    grid-template-rows: auto repeat(5, 1fr);
+    gap: .5vw;
+    padding: .5vw;
+    background: #000;
+}
+.board-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: var(--blue);
+    min-width: 0;
+    min-height: 0;
+}
+.board-category {
+    min-height: 14vh;
+    padding: 1.5vh .8vw;
+    font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+    font-size: min(2.1vw, 3.8vh);
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1.1;
+    color: #fff;
+    text-shadow: .12vw .12vw 0 #000;
+}
+.board-value {
+    font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+    font-size: min(6vw, 11vh);
+    font-weight: 400;
+    color: var(--value-gold);
+    text-shadow: .2vw .2vw 0 #000;
+}
+.board-value.used { background: #07097a; color: transparent; text-shadow: none; }
+
+.tv .scores { flex: 0 0 var(--scores-h); gap: .5vw; padding: .5vw; background: #000; }
+.tv .score {
+    background: var(--blue);
+    border-radius: 0;
+    border-width: .35vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 .5vw;
+}
+.tv .score-name { font-size: min(1.9vw, 3.4vh); }
+.tv .score-value { font-size: min(4vw, 7.5vh); color: #fff; text-shadow: .12vw .12vw 0 #000; }
+.tv .score-value.negative { color: #ff8a8a; }
+.tv .score.answering { background: #1f9d5c; }
 
 .clue-overlay {
     position: absolute;
     inset: 0 0 var(--scores-h) 0;
-    margin: 1.2vw 1.2vw 0;
     background: var(--blue);
-    border-radius: 1vw;
+    margin: .5vw .5vw 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 3vw;
+    padding: 3vw 6vw;
     z-index: 5;
+    text-shadow: .15vw .15vw 0 #000;
 }
-.clue-meta { font-size: 1.8vw; color: var(--gold); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-.clue-text { font-size: 3.6vw; font-weight: 700; text-transform: uppercase; line-height: 1.25; max-width: 80vw; }
-.clue-answer { font-size: 3vw; color: var(--gold); font-weight: 800; text-transform: uppercase; margin-top: 2vw; }
-.clue-status { font-size: 2.2vw; margin-top: 1.5vw; }
+.clue-meta { font-size: min(2vw, 3.6vh); color: var(--value-gold); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.clue-text {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: min(4.6vw, 8.5vh);
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.25;
+    max-width: 88vw;
+}
+.clue-answer { font-size: min(3.4vw, 6vh); color: var(--value-gold); font-weight: 800; text-transform: uppercase; margin-top: 3vh; }
+.clue-status { font-size: min(2.4vw, 4.2vh); margin-top: 2vh; }
+.daily-double { font-size: min(7vw, 13vh); font-weight: 900; color: var(--value-gold); text-align: center; letter-spacing: .05em; font-family: Impact, sans-serif; }
 
-.final { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2vw; background: var(--blue); border-radius: 1vw; }
-.final-title { font-size: 4vw; color: var(--gold); letter-spacing: .1em; }
-.final-category { font-size: 3vw; font-weight: 800; text-transform: uppercase; }
-.final-status { font-size: 2.2vw; opacity: .85; }
-.final-players { display: grid; gap: .8vw; margin-top: 2vw; width: 70vw; }
-.final-player { display: flex; justify-content: space-between; gap: 2vw; padding: 1vw 1.5vw; background: var(--panel); border-radius: .6vw; font-size: 1.8vw; }
+.final {
+    flex: 1;
+    min-height: 0;
+    margin: .5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2vw;
+    background: var(--blue);
+    text-shadow: .12vw .12vw 0 #000;
+}
+.final-title { font-size: min(4.5vw, 8vh); color: var(--value-gold); letter-spacing: .1em; font-family: Impact, sans-serif; font-weight: 400; }
+.final-category { font-size: min(3.2vw, 6vh); font-weight: 800; text-transform: uppercase; }
+.final-status { font-size: min(2.4vw, 4.2vh); opacity: .9; }
+.final-players { display: grid; gap: 1vh; margin-top: 2vh; width: min(70vw, 100%); }
+.final-player { display: flex; justify-content: space-between; gap: 2vw; padding: 1.2vh 1.5vw; background: rgba(0, 0, 0, .35); font-size: min(2vw, 3.6vh); }
 
-/* ---------- scores (TV and phones) ---------- */
+/* ---------- scores (big screen and phones) ---------- */
 
 .scores { display: flex; gap: .8rem; }
 .score { flex: 1; background: var(--panel); border: 3px solid transparent; border-radius: .6rem; padding: .5rem; text-align: center; min-width: 0; }
@@ -170,11 +254,9 @@ a.game-tile:hover { border-color: var(--gold); }
 .score.answering { background: #1f7a4d; }
 .score.locked { opacity: .5; }
 .negative { color: #ff8a8a; }
-.tv .score { padding: .8vw; }
-.tv .score-name { font-size: 1.8vw; }
-.tv .score-value { font-size: 3vw; }
 
 .winner { font-size: clamp(2rem, 5vw, 4rem); color: var(--gold); font-weight: 900; text-align: center; margin-top: 1.5rem; }
+.tv .winner { color: var(--value-gold); }
 
 /* ---------- phones ---------- */
 
@@ -184,7 +266,7 @@ a.game-tile:hover { border-color: var(--gold); }
 .pill { background: var(--gold); color: #1a1a1a; font-weight: 800; padding: .3rem .9rem; border-radius: 2rem; }
 .my-score { font-size: 1.6rem; font-weight: 800; color: var(--gold); }
 .big-message { font-size: 1.8rem; font-weight: 700; text-align: center; margin: 1rem 0 .3rem; }
-.daily-double { font-size: 2rem; font-weight: 900; color: var(--gold); text-align: center; letter-spacing: .05em; }
+.phone .daily-double { font-size: 2rem; color: var(--gold); font-family: inherit; }
 
 .buzzer {
     width: 100%;
@@ -203,12 +285,48 @@ a.game-tile:hover { border-color: var(--gold); }
 .buzzer:active:not(:disabled) { transform: translateY(.35rem); box-shadow: 0 .15rem 0 #8e2a20; }
 .buzzer:disabled { background: #4a4f78; box-shadow: none; cursor: not-allowed; }
 
-/* emcee */
-.pick-category { background: var(--panel); border-radius: .8rem; padding: .6rem .7rem .7rem; }
-.pick-category h3 { font-size: .85rem; color: var(--gold); letter-spacing: .06em; }
-.pick-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: .4rem; }
-.pick-cell { padding: .85rem 0; border: 0; border-radius: .4rem; background: var(--blue); color: var(--gold); font-weight: 800; font-size: 1rem; cursor: pointer; }
-.pick-cell:disabled { background: #151a4a; color: #4a4f78; cursor: not-allowed; }
+/* ---------- emcee ---------- */
+
+/* On a wide screen the emcee's picker is laid out like the real board: one column per category.
+   (Phones in portrait get the stacked version further down.) */
+.phone.emcee { max-width: 64rem; }
+.pick-board { display: grid; grid-template-columns: repeat(6, 1fr); gap: .4rem; }
+.pick-category { display: flex; flex-direction: column; gap: .4rem; background: #000; padding: .3rem; }
+.pick-category h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.4rem;
+    margin: 0;
+    padding: .3rem;
+    background: var(--blue);
+    font-size: .72rem;
+    line-height: 1.15;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+.pick-row { display: flex; flex-direction: column; gap: .4rem; }
+.pick-cell {
+    padding: 1.1rem 0;
+    border: 0;
+    background: var(--blue);
+    color: var(--value-gold);
+    font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+    font-size: 1.4rem;
+    text-shadow: .08rem .08rem 0 #000;
+    cursor: pointer;
+}
+.pick-cell:disabled { background: #07097a; color: transparent; text-shadow: none; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+    .pick-board { display: flex; flex-direction: column; gap: .6rem; }
+    .pick-category { padding: .5rem; background: var(--panel); border-radius: .8rem; }
+    .pick-category h3 { justify-content: flex-start; min-height: 0; background: transparent; text-align: left; font-size: .85rem; color: var(--gold); }
+    .pick-row { display: grid; grid-template-columns: repeat(5, 1fr); }
+    .pick-cell { padding: .85rem 0; font-size: 1.1rem; border-radius: .4rem; }
+}
+
 .emcee-clue { background: var(--panel); border-radius: .8rem; padding: 1rem; }
 .emcee-clue-meta { font-size: .8rem; color: var(--gold); text-transform: uppercase; letter-spacing: .06em; }
 .emcee-clue-text { font-size: 1.25rem; font-weight: 600; }

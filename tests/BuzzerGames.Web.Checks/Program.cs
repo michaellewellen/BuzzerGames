@@ -282,6 +282,71 @@ Run("player: Final Jeopardy forms for finalists, and a polite note for everyone 
     Check.True(!Render.Has(Render.Player(table, 1), "You won!"), "the others aren't");
 });
 
+Console.WriteLine("The big-screen address and the _error bug");
+
+Run("room page: no literal '_error' text on any lobby screen", () =>
+{
+    // The bug: Error="_error" (no @) passed the *text* "_error" to the lobby, which showed it as an error message.
+    var rooms = new GameRoomManager(new DummyGameDataSource());
+    var game = rooms.Create();
+    foreach (var board in new[] { false, true })
+    {
+        var html = Render.Room(rooms, game.Code, board);
+        Check.True(!Render.Has(html, "_error"), $"no stray _error text (board={board})");
+        Check.True(!Render.Has(html, "class=\"error\""), $"no error paragraph at all when nothing went wrong (board={board})");
+    }
+});
+
+Run("room page: /board shows the QR code and no join buttons; phone address shows the join buttons", () =>
+{
+    var rooms = new GameRoomManager(new DummyGameDataSource());
+    var game = rooms.Create();
+
+    var tv = Render.Room(rooms, game.Code, board: true);
+    Check.True(Render.Has(tv, "Scan the QR code"), "the TV tells people to scan");
+    Check.True(Render.Has(tv, "board-mode"), "the TV lobby uses the big-screen layout");
+    Check.True(!Render.Has(tv, "Join as Emcee") && !Render.Has(tv, "Join as Player"), "the TV never offers to take a seat");
+    Check.True(!Render.Has(tv, "Start Game"), "no Start button until the table is full");
+
+    // A phone first shows "Connecting…" while it asks the browser for its saved seat (a JS call this
+    // test harness doesn't have), so all we can verify here is that it did NOT get the TV treatment.
+    var phone = Render.Room(rooms, game.Code, board: false);
+    Check.True(!Render.Has(phone, "board-mode") && !Render.Has(phone, "Scan the QR code"), "phones don't get the big-screen lobby");
+
+    game.JoinEmcee("Host");
+    game.JoinPlayer("Ann");
+    game.JoinPlayer("Bob");
+    game.JoinPlayer("Cy");
+    Check.True(Render.Has(Render.Room(rooms, game.Code, board: true), "Start Game"), "the TV shows Start once the table is full");
+});
+
+Run("room page: after Start, /board becomes the board and an un-joined phone sees it too", () =>
+{
+    var rooms = new GameRoomManager(new DummyGameDataSource());
+    var game = rooms.Create();
+    game.JoinEmcee("Host");
+    foreach (var n in new[] { "Ann", "Bob", "Cy" }) game.JoinPlayer(n);
+    game.Start();
+
+    var tv = Render.Room(rooms, game.Code, board: true);
+    Check.Equal(6, Render.Count(tv, "board-category"), "six category headers on the TV");
+    Check.True(!Render.Has(tv, "Join as Emcee"), "no join buttons on a running game");
+});
+
+Run("room page: unknown code says game not found", () =>
+{
+    var rooms = new GameRoomManager(new DummyGameDataSource());
+    Check.True(Render.Has(Render.Room(rooms, "ZZZZ", board: true), "Game not found"), "friendly message");
+});
+
+Run("emcee picker: 30 cells inside the pick-board wrapper", () =>
+{
+    var html = Render.Emcee(Table.Started());
+    Check.True(Render.Has(html, "class=\"pick-board\""), "wrapper present");
+    Check.Equal(30, Render.Count(html, "class=\"pick-cell\""), "30 pick buttons");
+    Check.Equal(6, Render.Count(html, "class=\"pick-category\""), "6 category columns");
+});
+
 Console.WriteLine("Every screen, every phase");
 
 Run("a whole game, drawing the TV, the emcee, and all three players after every single action", () =>

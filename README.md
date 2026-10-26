@@ -8,10 +8,12 @@ Classic Concentration, Super Password, and The Price Is Right waiting in the win
 ## How a Jeopardy game works
 
 - One **emcee** and three **players**. Everyone joins from the same web address.
-- The **big screen** (a TV or projector) opens the site, creates a game, and shows the QR code.
-  Phones scan the QR code or type the four-letter room code.
-- The landing page has three choices: **Join as Emcee**, **Join as Player**, and (once the table is full) **Start Game**.
-  A device that never joins, like the TV, turns into the game board when the game starts.
+- The **big screen** (a TV or projector) opens the site and taps **Create a new game**. That lands on
+  `/jeopardy/ABCD/board`, which shows a big QR code while people join and becomes the game board when the game starts.
+  The big screen never takes a seat, and it never shows an answer, so it is safe to put on a TV.
+- Phones scan the QR code (or type the four-letter room code). That opens `/jeopardy/ABCD`, which offers
+  **Join as Emcee** and **Join as Player**. Once the table is full, **Start Game** appears.
+- Phones deliberately do **not** show the clue text. Everyone reads the clue off the big screen.
 - Contestants call out a category and amount. The **emcee taps that clue** on their phone, and the clue appears on the big screen.
 - Buzzers are open the whole time the clue is showing. **First buzz wins.**
 - The emcee sees the correct answer and taps **Correct** or **Wrong**.
@@ -28,8 +30,12 @@ You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).
 dotnet run --project src/BuzzerGames.Web
 ```
 
-Then open <http://localhost:5080>. To try all four roles by yourself, open the site in one normal window and
-a few private/incognito windows (each one remembers its own seat).
+Then open <http://localhost:5080>. To try the whole thing by yourself you need **five windows**:
+
+1. Window 1 is the TV: click Create a new game on `/jeopardy`. Leave it on its `/board` address.
+2. Windows 2 to 5 are the phones: open `/jeopardy/ABCD` (use the room code from the TV) and join as the emcee and
+   as three players. Each browser remembers its own seat, so use one normal window plus private/incognito windows
+   (or different browsers). Resize them small to see what a phone gets.
 
 ## Run the checks
 

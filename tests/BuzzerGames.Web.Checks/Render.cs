@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using BuzzerGames.Core.Jeopardy;
 using BuzzerGames.Web.Components.Jeopardy;
+using BuzzerGames.Web.Components.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,8 +48,35 @@ static class Render
         });
 
     /// <summary>The lobby, as seen by a device with the given seat.</summary>
-    public static string Lobby(JeopardyGame game, Seat seat) =>
-        Html<LobbyView>(new() { ["Snapshot"] = game.Snapshot(), ["Seat"] = seat });
+    public static string Lobby(JeopardyGame game, Seat seat, bool boardMode = false) =>
+        Html<LobbyView>(new() { ["Snapshot"] = game.Snapshot(), ["Seat"] = seat, ["BoardMode"] = boardMode });
+
+    /// <summary>
+    /// The whole room page, at the phone address (/jeopardy/CODE) or the big-screen address (/jeopardy/CODE/board).
+    /// Unlike the other helpers this goes through routing-level code: which view gets picked, and what
+    /// parameters the page passes down. That is where the "_error" bug lived.
+    /// </summary>
+    public static string Room(GameRoomManager rooms, string code, bool board)
+    {
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<IJSRuntime, NoJs>()
+            .AddSingleton(rooms)
+            .AddSingleton<NavigationManager>(new FakeNav($"http://localhost/jeopardy/{code}" + (board ? "/board" : "")))
+            .BuildServiceProvider();
+        using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
+        return renderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await renderer.RenderComponentAsync<JeopardyRoom>(
+                ParameterView.FromDictionary(new Dictionary<string, object?> { ["Code"] = code }));
+            return output.ToHtmlString();
+        }).GetAwaiter().GetResult();
+    }
+
+    private sealed class FakeNav : NavigationManager
+    {
+        public FakeNav(string uri) => Initialize("http://localhost/", uri);
+    }
 
     // ---- little helpers for asserting on HTML ----
 
