@@ -1,0 +1,15 @@
+@* The row of three scores, shared by the big screen, the emcee's phone, and the players' phones. *@
+
+<div class="scores">
+    @foreach (var player in Players)
+    {
+        <div class="score @(player.HasControl ? "control" : "") @(player.IsAnswering ? "answering" : "") @(player.IsLockedOut ? "locked" : "")">
+            <span class="score-name">@player.Name</span>
+            <span class="score-value @(player.Score < 0 ? "negative" : "")">@Money.Format(player.Score)</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<PlayerInfo> Players { get; set; } = default!;
+}

@@ -1,0 +1,118 @@
+@page "/jeopardy/{Code}"
+@implements IDisposable
+@inject GameRoomManager Rooms
+@inject IJSRuntime JS
+
+<PageTitle>Jeopardy · @Code.ToUpperInvariant()</PageTitle>
+
+@*
+    This one page is every screen in the game. It looks at two things:
+      1. What phase is the game in? (lobby, playing, final...)
+      2. Who is this device? (emcee, a player, or just a spectator like the big screen)
+    ...and shows the matching view.
+*@
+
+@if (_game is null)
+{
+    <main class="card center">
+        <h1>Game not found</h1>
+        <p>There's no game with the code <strong>@Code.ToUpperInvariant()</strong>. It may have ended, or the server may have restarted.</p>
+        <a class="btn" href="/jeopardy">Start or join a game</a>
+    </main>
+}
+else if (!_ready)
+{
+    <main class="card center"><p class="muted">Connecting…</p></main>
+}
+else if (_snapshot.Phase == GamePhase.Lobby)
+{
+    <LobbyView Snapshot="_snapshot" Seat="_seat" Error="_error" OnJoin="JoinAsync" OnStart="Start" />
+}
+else if (_seat.Role == Role.Emcee)
+{
+    <EmceeView Game="_game" Snapshot="_snapshot" Token="_token" />
+}
+else if (_seat.Role == Role.Player)
+{
+    <PlayerView Game="_game" Snapshot="_snapshot" Token="_token" PlayerId="_seat.PlayerId!.Value" />
+}
+else
+{
+    <BoardView Snapshot="_snapshot" />
+}
+
+@code {
+    [Parameter] public string Code { get; set; } = "";
+
+    private JeopardyGame? _game;
+    private GameSnapshot _snapshot = default!;
+    private Seat _seat = new(Role.Spectator);
+    private Guid _token;
+    private bool _ready;
+    private string? _error;
+
+    // Each phone remembers its seat in this browser's storage under a key like "bg.jeopardy.BCDF".
+    private string StorageKey => $"bg.jeopardy.{Code.ToUpperInvariant()}";
+
+    protected override void OnInitialized()
+    {
+        _game = Rooms.Find(Code);
+        if (_game is null) return;
+
+        _snapshot = _game.Snapshot();
+        _game.Changed += OnGameChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _game is null) return;
+
+        // Did this phone already take a seat in this game (before a refresh, or a locked screen)?
+        var saved = await JS.InvokeAsync<string?>("bg.getItem", StorageKey);
+        if (Guid.TryParse(saved, out var token))
+        {
+            _token = token;
+            _seat = _game.GetSeat(token);
+        }
+
+        _ready = true;
+        StateHasChanged();
+    }
+
+    // The game just changed (someone buzzed, the emcee judged...). Grab a fresh snapshot and redraw.
+    // InvokeAsync hops onto this page's own thread, because the change came from another phone's call.
+    private void OnGameChanged() => _ = InvokeAsync(() =>
+    {
+        _snapshot = _game!.Snapshot();
+        StateHasChanged();
+    });
+
+    private async Task JoinAsync((Role Role, string Name) request)
+    {
+        _error = null;
+        var result = request.Role == Role.Emcee
+            ? _game!.JoinEmcee(request.Name)
+            : _game!.JoinPlayer(request.Name);
+
+        if (!result.Ok)
+        {
+            _error = result.Error;
+            return;
+        }
+
+        _token = result.Token;
+        _seat = _game.GetSeat(_token);
+        await JS.InvokeVoidAsync("bg.setItem", StorageKey, _token.ToString());
+    }
+
+    private void Start()
+    {
+        var result = _game!.Start();
+        _error = result.Ok ? null : result.Error;
+    }
+
+    public void Dispose()
+    {
+        if (_game is not null) _game.Changed -= OnGameChanged;
+    }
+}

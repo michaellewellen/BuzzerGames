@@ -1,0 +1,9 @@
+# Keep the Docker build small and make sure it never copies in stale build output from this computer.
+**/bin/
+**/obj/
+.git/
+.vs/
+.vscode/
+tests/
+docs/
+*.md

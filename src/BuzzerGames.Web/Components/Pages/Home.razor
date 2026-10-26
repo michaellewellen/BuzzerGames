@@ -1,0 +1,29 @@
+@page "/"
+
+<PageTitle>BuzzerGames</PageTitle>
+
+<main class="picker">
+    <h1 class="site-title">BuzzerGames</h1>
+    <p class="tagline">Pick a game</p>
+
+    <div class="game-grid">
+        @foreach (var game in GameCatalog.All)
+        {
+            @if (game.IsPlayable)
+            {
+                <a class="game-tile" href="@game.Url">
+                    <h2>@game.Name</h2>
+                    <p>@game.Blurb</p>
+                </a>
+            }
+            else
+            {
+                <div class="game-tile soon">
+                    <h2>@game.Name</h2>
+                    <p>@game.Blurb</p>
+                    <span class="soon-badge">Coming soon</span>
+                </div>
+            }
+        }
+    </div>
+</main>

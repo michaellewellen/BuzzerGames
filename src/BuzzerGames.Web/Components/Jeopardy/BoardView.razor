@@ -1,0 +1,143 @@
+@*
+    The big-screen view: the board, the clue, the scores. Nothing here is clickable, because the
+    emcee runs the game from their phone. This view only ever shows what the room is meant to see.
+    It never shows the correct answer until the Reveal.
+*@
+
+<main class="tv">
+
+    @if (IsFinalPhase)
+    {
+        <section class="final">
+            <h1 class="final-title">FINAL JEOPARDY</h1>
+            <p class="final-category">@Snapshot.FinalCategory</p>
+
+            @if (Snapshot.Phase == GamePhase.FinalWager)
+            {
+                <p class="final-status">Place your wagers…</p>
+            }
+            else
+            {
+                <p class="clue-text">@Snapshot.FinalText</p>
+            }
+
+            @if (Snapshot.Phase == GamePhase.FinalAnswer)
+            {
+                <p class="final-status">Write your answers…</p>
+            }
+
+            @if (Snapshot.FinalAnswer is not null)
+            {
+                <p class="clue-answer">@Snapshot.FinalAnswer</p>
+            }
+
+            <div class="final-players">
+                @foreach (var player in Snapshot.Players.Where(p => p.InFinal))
+                {
+                    <div class="final-player">
+                        <span class="score-name">@player.Name</span>
+                        @if (player.FinalCorrect is { } correct)
+                        {
+                            <span class="@(correct ? "right" : "wrong")">
+                                @(correct ? "✓" : "✗") @player.FinalAnswer · wagered @Money.Format(player.FinalWager ?? 0)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="muted">@WaitingText(player)</span>
+                        }
+                    </div>
+                }
+            </div>
+
+            @if (Snapshot.Phase == GamePhase.GameOver)
+            {
+                <p class="winner">@WinnerText</p>
+            }
+        </section>
+    }
+    else
+    {
+        <header class="tv-top">
+            <span>Round @Snapshot.Round</span>
+            <span>Room @Snapshot.Code</span>
+        </header>
+
+        <section class="board" style="--cols:@Snapshot.Categories.Count">
+            @foreach (var category in Snapshot.Categories)
+            {
+                <div class="board-cell board-category">@category.Name</div>
+            }
+            @for (var row = 0; row < JeopardyGame.CluesPerCategory; row++)
+            {
+                @foreach (var category in Snapshot.Categories)
+                {
+                    var cell = category.Cells[row];
+                    <div class="board-cell board-value @(cell.IsUsed ? "used" : "")">@(cell.IsUsed ? "" : Money.Format(cell.Value))</div>
+                }
+            }
+        </section>
+
+        @if (Snapshot.Clue is { } clue)
+        {
+            <section class="clue-overlay">
+                @if (Snapshot.Phase == GamePhase.DailyDoubleWager)
+                {
+                    <p class="daily-double">DAILY DOUBLE!</p>
+                    <p class="clue-meta">@clue.Category</p>
+                    <p class="clue-status">@Snapshot.AnsweringPlayer?.Name is making a wager…</p>
+                }
+                else
+                {
+                    <p class="clue-meta">
+                        @clue.Category ·
+                        @(clue.IsDailyDouble ? $"Daily Double, {Money.Format(clue.Wager ?? 0)}" : Money.Format(clue.Value))
+                    </p>
+                    <p class="clue-text">@clue.Text</p>
+
+                    @switch (Snapshot.Phase)
+                    {
+                        case GamePhase.ClueOpen:
+                            <p class="clue-status muted">Buzzers are open…</p>
+                            break;
+                        case GamePhase.Answering:
+                        case GamePhase.DailyDoubleAnswering:
+                            <p class="clue-status">@Snapshot.AnsweringPlayer?.Name is answering…</p>
+                            break;
+                        case GamePhase.Reveal:
+                            <p class="clue-answer">@clue.Answer</p>
+                            <p class="clue-status">@Snapshot.RevealMessage</p>
+                            break;
+                    }
+                }
+            </section>
+        }
+    }
+
+    <ScoreStrip Players="Snapshot.Players" />
+
+</main>
+
+@code {
+    [Parameter, EditorRequired] public GameSnapshot Snapshot { get; set; } = default!;
+
+    private bool IsFinalPhase => Snapshot.Phase is GamePhase.FinalWager or GamePhase.FinalAnswer
+        or GamePhase.FinalJudging or GamePhase.GameOver;
+
+    private string WinnerText
+    {
+        get
+        {
+            var names = Snapshot.Winners.Select(id => Snapshot.FindPlayer(id)?.Name).Where(n => n is not null);
+            return Snapshot.Winners.Count == 0 ? "Game over!" : $"{string.Join(" & ", names)} wins!";
+        }
+    }
+
+    // What to show next to a finalist who hasn't been judged yet. Wagers and answers stay secret until then.
+    private string WaitingText(PlayerInfo player) => Snapshot.Phase switch
+    {
+        GamePhase.FinalWager => player.FinalWager is null ? "Thinking…" : "Wager locked in ✓",
+        GamePhase.FinalAnswer => player.FinalAnswer is null ? "Writing…" : "Answer locked in ✓",
+        _ => "Waiting for the emcee…"
+    };
+}

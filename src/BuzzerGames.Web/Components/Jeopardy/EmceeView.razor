@@ -1,0 +1,191 @@
+@*
+    The emcee's phone. Unlike the big screen, this view shows the correct answer, because the emcee
+    needs it to judge. The emcee runs the whole game from here: picks the clue a contestant called
+    out, says yes or no to answers, gives up on clues nobody knows, and moves on.
+*@
+
+<main class="phone emcee">
+    <header class="phone-header">
+        <span class="pill">EMCEE</span>
+        <span class="phone-sub">Room @Snapshot.Code · Round @Snapshot.Round</span>
+    </header>
+
+    <ScoreStrip Players="Snapshot.Players" />
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case GamePhase.Board:
+            <p class="hint"><strong>@Snapshot.ControlPlayer?.Name</strong> is in control. Tap the clue they call out.</p>
+            @for (var c = 0; c < Snapshot.Categories.Count; c++)
+            {
+                var categoryIndex = c;
+                var category = Snapshot.Categories[c];
+                <div class="pick-category">
+                    <h3>@category.Name</h3>
+                    <div class="pick-row">
+                        @for (var r = 0; r < category.Cells.Count; r++)
+                        {
+                            var rowIndex = r;
+                            var cell = category.Cells[r];
+                            <button class="pick-cell" disabled="@cell.IsUsed" @onclick="() => Pick(categoryIndex, rowIndex)">
+                                @(cell.IsUsed ? "–" : cell.Value.ToString())
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+            break;
+
+        case GamePhase.DailyDoubleWager:
+            <p class="daily-double">DAILY DOUBLE!</p>
+            <p class="hint">Waiting for <strong>@Snapshot.AnsweringPlayer?.Name</strong> to make a wager…</p>
+            break;
+
+        case GamePhase.ClueOpen:
+            @CluePanel(Snapshot.Clue!)
+            <p class="hint">Buzzers are open.@LockedOutText</p>
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.GiveUp(Token))">
+                Nobody knows it · reveal the answer
+            </button>
+            break;
+
+        case GamePhase.Answering:
+        case GamePhase.DailyDoubleAnswering:
+            @CluePanel(Snapshot.Clue!)
+            <p class="hint"><strong>@Snapshot.AnsweringPlayer?.Name</strong> is answering. Were they right?</p>
+            <div class="judge-buttons">
+                <button class="btn btn-yes" @onclick="() => Act(Game.Judge(Token, true))">✓ Correct<small>+@Money.Format(Stake)</small></button>
+                <button class="btn btn-no" @onclick="() => Act(Game.Judge(Token, false))">✗ Wrong<small>−@Money.Format(Stake)</small></button>
+            </div>
+            break;
+
+        case GamePhase.Reveal:
+            @CluePanel(Snapshot.Clue!)
+            <p class="hint">@Snapshot.RevealMessage</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">Continue</button>
+            break;
+
+        case GamePhase.FinalWager:
+            <p class="daily-double">FINAL JEOPARDY</p>
+            <p class="hint">Category: <strong>@Snapshot.FinalCategory</strong>. Waiting for wagers…</p>
+            @FinalStatus(p => p.FinalWager is null ? "thinking…" : "wager locked in ✓")
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.ForceFinalAdvance(Token))">
+                Lock in now (missing wagers count as $0)
+            </button>
+            break;
+
+        case GamePhase.FinalAnswer:
+            <p class="daily-double">FINAL JEOPARDY</p>
+            <div class="emcee-clue">
+                <p class="emcee-clue-text">@Snapshot.FinalText</p>
+                <p class="emcee-clue-answer">Answer: @Snapshot.FinalAnswer</p>
+            </div>
+            <p class="hint">Waiting for answers…</p>
+            @FinalStatus(p => p.FinalAnswer is null ? "writing…" : "answer locked in ✓")
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.ForceFinalAdvance(Token))">
+                Lock in now (missing answers count as blank)
+            </button>
+            break;
+
+        case GamePhase.FinalJudging:
+            <p class="daily-double">FINAL JEOPARDY</p>
+            <div class="emcee-clue">
+                <p class="emcee-clue-text">@Snapshot.FinalText</p>
+                <p class="emcee-clue-answer">Answer: @Snapshot.FinalAnswer</p>
+            </div>
+            @foreach (var player in Snapshot.Players.Where(p => p.InFinal))
+            {
+                var playerId = player.Id;
+                <div class="final-judge">
+                    <p><strong>@player.Name</strong> wagered @Money.Format(player.FinalWager ?? 0)</p>
+                    <p class="typed-answer">@(string.IsNullOrWhiteSpace(player.FinalAnswer) ? "(no answer)" : player.FinalAnswer)</p>
+                    @if (player.FinalCorrect is { } correct)
+                    {
+                        <p class="@(correct ? "right" : "wrong")">@(correct ? "✓ Correct" : "✗ Wrong")</p>
+                    }
+                    else
+                    {
+                        <div class="judge-buttons">
+                            <button class="btn btn-yes" @onclick="() => Act(Game.JudgeFinal(Token, playerId, true))">✓ Correct</button>
+                            <button class="btn btn-no" @onclick="() => Act(Game.JudgeFinal(Token, playerId, false))">✗ Wrong</button>
+                        </div>
+                    }
+                </div>
+            }
+            break;
+
+        case GamePhase.GameOver:
+            <p class="winner">@WinnerText</p>
+            <a class="btn btn-wide" href="/jeopardy">Start a new game</a>
+            break;
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public JeopardyGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public GameSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+
+    private string? _error;
+    private GamePhase _lastPhase;
+
+    // An error like "That clue was already played" only makes sense for the screen it appeared on.
+    protected override void OnParametersSet()
+    {
+        if (Snapshot.Phase == _lastPhase) return;
+        _lastPhase = Snapshot.Phase;
+        _error = null;
+    }
+
+    // Every button goes through here: if the game said no, show why.
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private void Pick(int categoryIndex, int rowIndex) => Act(Game.SelectClue(Token, categoryIndex, rowIndex));
+
+    // What a right or wrong answer is worth right now: the wager on a Daily Double, otherwise the clue value.
+    private int Stake => Snapshot.Clue?.Wager ?? Snapshot.Clue?.Value ?? 0;
+
+    private string LockedOutText
+    {
+        get
+        {
+            var names = Snapshot.Players.Where(p => p.IsLockedOut).Select(p => p.Name).ToList();
+            return names.Count == 0 ? "" : $" Already missed: {string.Join(", ", names)}.";
+        }
+    }
+
+    private string WinnerText
+    {
+        get
+        {
+            var names = Snapshot.Winners.Select(id => Snapshot.FindPlayer(id)?.Name).Where(n => n is not null);
+            return Snapshot.Winners.Count == 0 ? "Game over!" : $"{string.Join(" & ", names)} wins!";
+        }
+    }
+
+    // The clue, plus the correct answer. Only the emcee's phone ever draws this.
+    private RenderFragment CluePanel(ClueInfo clue) => @<div class="emcee-clue">
+        <p class="emcee-clue-meta">
+            @clue.Category ·
+            @(clue.IsDailyDouble ? $"Daily Double, {Money.Format(clue.Wager ?? 0)}" : Money.Format(clue.Value))
+        </p>
+        <p class="emcee-clue-text">@clue.Text</p>
+        <p class="emcee-clue-answer">Answer: @clue.Answer</p>
+    </div>;
+
+    // A little list of who has done what, for the Final Jeopardy waiting screens.
+    private RenderFragment FinalStatus(Func<PlayerInfo, string> describe) => @<ul class="roster">
+        @foreach (var player in Snapshot.Players.Where(p => p.InFinal))
+        {
+            <li class="filled">
+                <span class="seat-label">@player.Name</span>
+                <span class="seat-name">@describe(player)</span>
+            </li>
+        }
+    </ul>;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="icon" href="data:," />
+    <ImportMap />
+    <HeadOutlet @rendermode="NoPrerender" />
+</head>
+
+<body>
+    <Routes @rendermode="NoPrerender" />
+    <script src="@Assets["js/qrcode.js"]"></script>
+    <script src="@Assets["js/bg.js"]"></script>
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>
+
+@code {
+    // Every page runs interactively over a live connection (SignalR under the hood), and we skip
+    // "prerendering". Prerendering would build each page twice, once on the server and once when
+    // the live connection starts, and our pages read the phone's saved seat from the browser,
+    // which only exists once the live connection is up.
+    private static readonly IComponentRenderMode NoPrerender = new InteractiveServerRenderMode(prerender: false);
+}

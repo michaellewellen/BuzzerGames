@@ -1,0 +1,18 @@
+# Build output
+bin/
+obj/
+publish/
+
+# Editors and IDEs
+.vs/
+.idea/
+*.user
+*.suo
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Local secrets (we have none yet, but this keeps them out if we add some)
+appsettings.Local.json
+.env

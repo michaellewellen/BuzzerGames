@@ -1,0 +1,186 @@
+@*
+    A contestant's phone: a big buzzer, plus the wager and answer boxes when the game asks for them.
+    The clue itself is deliberately NOT shown here. Everyone looks at the big screen, like the real show.
+*@
+
+<main class="phone player">
+    <header class="phone-header">
+        <span class="pill">@Me.Name</span>
+        <span class="my-score @(Me.Score < 0 ? "negative" : "")">@Money.Format(Me.Score)</span>
+    </header>
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case GamePhase.Board:
+            @if (Me.HasControl)
+            {
+                <p class="big-message">You're in control!</p>
+                <p class="hint">Call out a category and dollar amount.</p>
+            }
+            else
+            {
+                <p class="big-message">Watch the screen</p>
+                <p class="hint"><strong>@Snapshot.ControlPlayer?.Name</strong> is picking the next clue.</p>
+            }
+            break;
+
+        case GamePhase.ClueOpen:
+            @if (Me.IsLockedOut)
+            {
+                <button class="buzzer" disabled>MISSED</button>
+                <p class="hint">You already missed this one. Hang tight.</p>
+            }
+            else
+            {
+                <button class="buzzer" @onclick="Buzz">BUZZ</button>
+                <p class="hint">Buzz in any time. First one wins.</p>
+            }
+            break;
+
+        case GamePhase.Answering:
+            @if (Me.IsAnswering)
+            {
+                <p class="big-message">You buzzed in!</p>
+                <p class="hint">Say your answer out loud.</p>
+            }
+            else
+            {
+                <p class="big-message">@Snapshot.AnsweringPlayer?.Name buzzed in</p>
+                <p class="hint">Waiting on the emcee's ruling…</p>
+            }
+            break;
+
+        case GamePhase.DailyDoubleWager:
+            @if (Me.IsAnswering)
+            {
+                <p class="daily-double">DAILY DOUBLE!</p>
+                <p class="hint">Wager between @Money.Format(Snapshot.MinWager) and @Money.Format(Snapshot.MaxWager).</p>
+                <input class="text-input" type="number" inputmode="numeric" placeholder="Your wager"
+                       @bind="_wagerText" @bind:event="oninput" />
+                <button class="btn btn-start btn-wide" @onclick="SubmitDailyDoubleWager">Lock in wager</button>
+            }
+            else
+            {
+                <p class="big-message">Daily Double!</p>
+                <p class="hint"><strong>@Snapshot.AnsweringPlayer?.Name</strong> is making a wager.</p>
+            }
+            break;
+
+        case GamePhase.DailyDoubleAnswering:
+            @if (Me.IsAnswering)
+            {
+                <p class="big-message">Your wager is in</p>
+                <p class="hint">Say your answer out loud.</p>
+            }
+            else
+            {
+                <p class="big-message">Watch the screen</p>
+                <p class="hint"><strong>@Snapshot.AnsweringPlayer?.Name</strong> is answering the Daily Double.</p>
+            }
+            break;
+
+        case GamePhase.Reveal:
+            <p class="big-message">@Snapshot.RevealMessage</p>
+            break;
+
+        case GamePhase.FinalWager:
+            <p class="daily-double">FINAL JEOPARDY</p>
+            @if (!Me.InFinal)
+            {
+                <p class="hint">You didn't qualify this time. Watch the big screen.</p>
+            }
+            else if (Me.FinalWager is not null)
+            {
+                <p class="big-message">Wager locked in</p>
+                <p class="hint">Waiting on the others…</p>
+            }
+            else
+            {
+                <p class="hint">Category: <strong>@Snapshot.FinalCategory</strong></p>
+                <p class="hint">Wager between $0 and @Money.Format(Me.Score).</p>
+                <input class="text-input" type="number" inputmode="numeric" placeholder="Your wager"
+                       @bind="_wagerText" @bind:event="oninput" />
+                <button class="btn btn-start btn-wide" @onclick="SubmitFinalWager">Lock in wager</button>
+            }
+            break;
+
+        case GamePhase.FinalAnswer:
+            <p class="daily-double">FINAL JEOPARDY</p>
+            @if (!Me.InFinal)
+            {
+                <p class="hint">Watch the big screen.</p>
+            }
+            else if (Me.FinalAnswer is not null)
+            {
+                <p class="big-message">Answer locked in</p>
+                <p class="hint">Waiting on the others…</p>
+            }
+            else
+            {
+                <p class="hint">The clue is on the big screen. Type your answer.</p>
+                <input class="text-input" placeholder="Your answer" maxlength="100"
+                       @bind="_answerText" @bind:event="oninput" />
+                <button class="btn btn-start btn-wide" @onclick="SubmitFinalAnswer">Lock in answer</button>
+            }
+            break;
+
+        case GamePhase.FinalJudging:
+            <p class="big-message">The emcee is judging…</p>
+            @if (Me.InFinal && Me.FinalCorrect is { } judged)
+            {
+                <p class="@(judged ? "right" : "wrong")">@(judged ? "✓ You got it!" : "✗ Not quite")</p>
+            }
+            break;
+
+        case GamePhase.GameOver:
+            <p class="big-message">@(Snapshot.Winners.Contains(Me.Id) ? "You won! 🎉" : "Game over")</p>
+            <p class="hint">Final score: @Money.Format(Me.Score)</p>
+            break;
+    }
+
+    <ScoreStrip Players="Snapshot.Players" />
+</main>
+
+@code {
+    [Parameter, EditorRequired] public JeopardyGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public GameSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+    [Parameter, EditorRequired] public Guid PlayerId { get; set; }
+
+    private string? _error;
+    private string _wagerText = "";
+    private string _answerText = "";
+    private GamePhase _lastPhase;
+
+    private PlayerInfo Me => Snapshot.FindPlayer(PlayerId)!;
+
+    protected override void OnParametersSet()
+    {
+        if (Snapshot.Phase == _lastPhase) return;
+        _lastPhase = Snapshot.Phase;
+        _error = null;
+    }
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private void Buzz() => Act(Game.Buzz(Token));
+
+    private void SubmitDailyDoubleWager()
+    {
+        if (!int.TryParse(_wagerText, out var amount)) { _error = "Please enter a whole number."; return; }
+        Act(Game.SubmitDailyDoubleWager(Token, amount));
+    }
+
+    private void SubmitFinalWager()
+    {
+        if (!int.TryParse(_wagerText, out var amount)) { _error = "Please enter a whole number."; return; }
+        Act(Game.SubmitFinalWager(Token, amount));
+    }
+
+    private void SubmitFinalAnswer() => Act(Game.SubmitFinalAnswer(Token, _answerText));
+}

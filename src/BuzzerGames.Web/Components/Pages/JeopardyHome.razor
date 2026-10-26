@@ -1,0 +1,54 @@
+@page "/jeopardy"
+@inject GameRoomManager Rooms
+@inject NavigationManager Navigation
+
+<PageTitle>Jeopardy</PageTitle>
+
+<main class="card center jeopardy-home">
+    <h1>Jeopardy</h1>
+    <p class="muted">Start a game on the big screen, then everyone else scans the QR code or types the room code.</p>
+
+    <button class="btn btn-start" @onclick="CreateGame">Create a new game</button>
+
+    <hr />
+
+    <h2>Have a room code?</h2>
+    <div class="button-row">
+        <input class="text-input code-input" placeholder="ABCD" maxlength="4"
+               @bind="_code" @bind:event="oninput" @onkeydown="OnKeyDown" />
+        <button class="btn" @onclick="JoinGame">Go</button>
+    </div>
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    <a class="back-link" href="/">All games</a>
+</main>
+
+@code {
+    private string _code = "";
+    private string? _error;
+
+    private void CreateGame()
+    {
+        var game = Rooms.Create();
+        Navigation.NavigateTo($"/jeopardy/{game.Code}");
+    }
+
+    private void JoinGame()
+    {
+        var game = Rooms.Find(_code);
+        if (game is null)
+        {
+            _error = "We couldn't find a game with that code.";
+            return;
+        }
+        Navigation.NavigateTo($"/jeopardy/{game.Code}");
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") JoinGame();
+    }
+}

@@ -1,0 +1,129 @@
+@inject IJSRuntime JS
+
+@*
+    The landing page. Everyone sees the same three choices: join as emcee, join as player, or
+    (once the table is full) start the game. A device that never joins, like the big screen,
+    stays a spectator, and when the game starts it turns into the board.
+*@
+
+<main class="lobby">
+    <header class="lobby-header">
+        <h1 class="logo">JEOPARDY</h1>
+        <p class="room-line">Room <span class="room-code">@Snapshot.Code</span></p>
+    </header>
+
+    <div class="lobby-grid">
+
+        <section class="card">
+            @if (Seat.Role != Role.Spectator)
+            {
+                <h2>You're in!</h2>
+                <p>
+                    You joined as <strong>@MyName</strong>
+                    (@(Seat.Role == Role.Emcee ? "emcee" : "player")). Waiting for the rest of the table…
+                </p>
+            }
+            else if (_pendingRole is not null)
+            {
+                <h2>Join as @(_pendingRole == Role.Emcee ? "emcee" : "player")</h2>
+                <input class="text-input" placeholder="Your name" maxlength="@JeopardyGame.NameMaxLength"
+                       @bind="_name" @bind:event="oninput" @onkeydown="OnKeyDown" />
+                <div class="button-row">
+                    <button class="btn" @onclick="ConfirmJoin">Join</button>
+                    <button class="btn btn-quiet" @onclick="CancelJoin">Back</button>
+                </div>
+            }
+            else
+            {
+                <h2>Join the game</h2>
+                <div class="button-column">
+                    <button class="btn" disabled="@(Snapshot.EmceeName is not null)" @onclick="() => BeginJoin(Role.Emcee)">
+                        Join as Emcee
+                    </button>
+                    <button class="btn" disabled="@(Snapshot.Players.Count >= JeopardyGame.PlayerSeats)" @onclick="() => BeginJoin(Role.Player)">
+                        Join as Player
+                    </button>
+                </div>
+            }
+
+            @if (Snapshot.CanStart)
+            {
+                <button class="btn btn-start" @onclick="OnStart">Start Game</button>
+            }
+
+            @if (Error is not null)
+            {
+                <p class="error">@Error</p>
+            }
+        </section>
+
+        <section class="card">
+            <h2>At the table</h2>
+            <ul class="roster">
+                <li class="@(Snapshot.EmceeName is null ? "open" : "filled")">
+                    <span class="seat-label">Emcee</span>
+                    <span class="seat-name">@(Snapshot.EmceeName ?? "waiting…")</span>
+                </li>
+                @for (var i = 0; i < JeopardyGame.PlayerSeats; i++)
+                {
+                    var player = i < Snapshot.Players.Count ? Snapshot.Players[i] : null;
+                    <li class="@(player is null ? "open" : "filled")">
+                        <span class="seat-label">Player @(i + 1)</span>
+                        <span class="seat-name">@(player?.Name ?? "waiting…")</span>
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <section class="card">
+            <h2>Scan to join</h2>
+            <div id="qr-@Snapshot.Code" class="qr"></div>
+            <p class="join-url">@_joinUrl</p>
+        </section>
+
+    </div>
+</main>
+
+@code {
+    [Parameter, EditorRequired] public GameSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Seat Seat { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback<(Role Role, string Name)> OnJoin { get; set; }
+    [Parameter] public EventCallback OnStart { get; set; }
+
+    private Role? _pendingRole;
+    private string _name = "";
+    private string _joinUrl = "";
+
+    private string MyName => Seat.Role == Role.Emcee
+        ? Snapshot.EmceeName ?? ""
+        : Snapshot.FindPlayer(Seat.PlayerId)?.Name ?? "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // Draw the QR code. The browser works out the page's real public address and hands it back.
+        _joinUrl = await JS.InvokeAsync<string>("bg.renderQr", $"qr-{Snapshot.Code}", $"/jeopardy/{Snapshot.Code}");
+        StateHasChanged();
+    }
+
+    private void BeginJoin(Role role)
+    {
+        _pendingRole = role;
+        _name = "";
+    }
+
+    private void CancelJoin() => _pendingRole = null;
+
+    private async Task ConfirmJoin()
+    {
+        if (_pendingRole is null) return;
+        await OnJoin.InvokeAsync((_pendingRole.Value, _name));
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await ConfirmJoin();
+    }
+}
