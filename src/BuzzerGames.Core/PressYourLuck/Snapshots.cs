@@ -44,6 +44,7 @@ public sealed record OutcomeInfo(string Kind, string Text, string? Sub);
 public sealed record SpinInfo(
     int Id,
     IReadOnlyList<int> Sequence,   // which square is lit at tick 0, 1, 2...
+    IReadOnlyList<int> Pages,      // which face the whole board shows at tick 0, 1, 2...
     long StartUnixMs,              // when tick 0 happens (server clock)
     long ServerNowUnixMs,          // the server clock right now, so a screen can correct for its own clock
     int TickMs);
@@ -52,7 +53,8 @@ public sealed record SpinResultInfo(
     int Id,
     Guid PlayerId,
     string PlayerName,
-    int Tick,          // the tick the light stopped on; faces are frozen at this tick
+    int Tick,          // the tick the light stopped on
+    int Face,          // the face the whole board was showing when it stopped
     int Square,        // the lit square
     string Kind,       // cash, prize, corner, whammy
     string Text,

@@ -38,7 +38,6 @@ window.pyl = (() => {
     let audio = null, soundOn = false;
     const files = {};
 
-    const faceAt = (square, tick) => (Math.floor(tick / 2) + square) % 3;
 
     // ---------- drawing ----------
 
@@ -68,11 +67,11 @@ window.pyl = (() => {
         draw(0, -1);
     }
 
-    // Shows every square's face at the given tick, with one square lit (or none, when lit is -1).
-    function draw(tick, lit) {
+    // Shows every square at the given face (page), with one square lit (or none, when lit is -1).
+    function draw(face, lit) {
         litSquare = lit;
         squares.forEach((el, i) => {
-            const o = (board[i] || [])[faceAt(i, tick)];
+            const o = (board[i] || [])[face];
             if (!o) { el.textContent = ""; return; }
             el.className = "pyl-sq k-" + o.kind + (i === lit ? " lit" : "");
             el.innerHTML = "";
@@ -111,7 +110,7 @@ window.pyl = (() => {
             const tick = Math.floor(elapsed / spin.tickMs);
             if (tick !== lastTick) {
                 lastTick = tick;
-                draw(tick, spin.sequence[tick % spin.sequence.length]);
+                draw(spin.pages[tick % spin.pages.length], spin.sequence[tick % spin.sequence.length]);
                 if (!files.spin) play("tick");   // no spin file: beep on every light change instead
             }
         }
@@ -124,7 +123,7 @@ window.pyl = (() => {
         spin = null;
         stopSpinSound();
         boardEl.classList.remove("boom");
-        draw(r.tick, r.square);
+        draw(r.face, r.square);
 
         if (r.pending) {
             centerEl.innerHTML = `<div class="result"><span class="rt">PICK A CORNER!</span></div>`;
@@ -146,7 +145,7 @@ window.pyl = (() => {
     // Used when a screen opens mid-game: show the last result without any fanfare.
     function showResult(r) {
         if (!boardEl) return;
-        draw(r.tick, r.square);
+        draw(r.face, r.square);
         if (r.kind === "whammy") centerEl.innerHTML = `<div class="result whammy">${WHAMMY_FACE}<span class="rt">WHAMMY!</span></div>`;
         else centerEl.innerHTML = `<div class="result"><span class="rt">${esc(r.text)}</span>${r.sub ? `<small>${esc(r.sub)}</small>` : ""}</div>`;
     }
@@ -236,5 +235,5 @@ window.pyl = (() => {
         }
     }
 
-    return { mount, start, stop, showResult, enableSound, _faceAt: faceAt };
+    return { mount, start, stop, showResult, enableSound };
 })();

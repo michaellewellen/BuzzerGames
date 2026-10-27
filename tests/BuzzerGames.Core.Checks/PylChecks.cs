@@ -63,7 +63,7 @@ sealed class PylTable
         for (var tick = 0; tick < s.Spin!.Sequence.Count; tick++)
         {
             var square = s.Spin.Sequence[tick];
-            if (wanted(s.Board[square][PressYourLuckGame.FaceAt(square, tick)])) return tick;
+            if (wanted(s.Board[square][s.Spin.Pages[tick]])) return tick;
         }
         throw new Exception("No such outcome appears on this spin.");
     }
@@ -263,6 +263,25 @@ static class PylChecks
             Check.Equal(PylPhase.Spinning, s.Phase, "phase");
             Check.Equal(PressYourLuckGame.SequenceLength, s.Spin!.Sequence.Count, "the light has a long script");
             Check.True(Enumerable.Range(1, 1999).All(i => s.Spin.Sequence[i] != s.Spin.Sequence[i - 1]), "the light always moves");
+            // The whole board changes face together: it holds a face for 2 or 3 flashes, then jumps to a different one.
+            var pages = s.Spin.Pages;
+            Check.Equal(PressYourLuckGame.SequenceLength, pages.Count, "one face per flash");
+            var runs = new List<int>();
+            for (var i = 0; i < pages.Count; )
+            {
+                var j = i;
+                while (j < pages.Count && pages[j] == pages[i]) j++;
+                if (j < pages.Count) runs.Add(j - i);   // the last run is cut off by the end of the script
+                i = j;
+            }
+            Check.True(runs.All(r => r is 2 or 3), "every face is held for 2 or 3 flashes");
+            Check.True(pages.Distinct().Count() == 3, "all three faces show up");
+            // So the Whammies on screen always match one face's count (2, 3 or 4), never a mixture.
+            for (var i = 0; i < 60; i++)
+            {
+                var whammiesShown = Enumerable.Range(0, BoardFactory.Squares).Count(q => s.Board[q][pages[i]].Kind == "whammy");
+                Check.True(whammiesShown is 2 or 3 or 4, $"{whammiesShown} Whammies on screen at flash {i}");
+            }
 
             foreach (var tick in new[] { 0, 1, 7, 33, 150 })
             {
@@ -349,7 +368,7 @@ static class PylChecks
             Check.Fails(t.Game.PickCorner(t.Tokens[t.IndexOf(actor)], 3), "square 3 isn't a corner");
             Check.Fails(t.Game.PickCorner(t.Tokens[(t.IndexOf(actor) + 1) % 3], 5), "somebody else choosing");
 
-            var shown = spinning.Board[5][PressYourLuckGame.FaceAt(5, tick)];
+            var shown = spinning.Board[5][spinning.Spin!.Pages[tick]];
             Check.Ok(t.Game.PickCorner(t.Tokens[t.IndexOf(actor)], 5));
             var done = t.S.LastSpin!;
             Check.True(!done.Pending && done.Square == 5, "resolved on the chosen corner");

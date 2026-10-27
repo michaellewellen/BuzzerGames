@@ -45,7 +45,6 @@ public sealed class PressYourLuckGame
     public const int PressLagMs = 80;
 
     /// <summary>Which of the three faces a square is showing at a given tick. The big screen uses the same formula.</summary>
-    public static int FaceAt(int square, int tick) => (tick / 2 + square) % BoardFactory.Faces;
 
     // ---- Private state -------------------------------------------------------------------
 
@@ -95,8 +94,10 @@ public sealed class PressYourLuckGame
     private bool _spunThisTurn;
     private int _spinId;
     private int[] _sequence = [];
+    private int[] _pages = [];    // which face (page) the whole board shows at each tick
     private DateTimeOffset _spinStart;
     private int _cornerTick;
+    private int _cornerFace;
     private SpinResultInfo? _lastSpin;
     private int _resultId;
 
@@ -267,6 +268,7 @@ public sealed class PressYourLuckGame
 
         _spinId++;
         _sequence = NewSequence();
+        _pages = NewPages();
         _spinStart = _time.GetUtcNow().AddMilliseconds(LeadInMs);
         _message = null;
         _phase = PylPhase.Spinning;
@@ -282,17 +284,19 @@ public sealed class PressYourLuckGame
         var elapsed = (_time.GetUtcNow() - _spinStart).TotalMilliseconds - PressLagMs;
         var tick = elapsed < 0 ? 0 : (int)(elapsed / TickMs);
         var square = _sequence[tick % _sequence.Length];
-        var outcome = _board[square][FaceAt(square, tick)];
+        var face = _pages[tick % _pages.Length];
+        var outcome = _board[square][face];
 
         if (outcome.Kind == OutcomeKind.Corner)
         {
             _cornerTick = tick;
-            _lastSpin = Announce(Acting!, tick, square, outcome, $"{Acting!.Name} landed on Pick a Corner!", pending: true);
+            _cornerFace = face;
+            _lastSpin = Announce(Acting!, tick, face, square, outcome, $"{Acting!.Name} landed on Pick a Corner!", pending: true);
             _phase = PylPhase.PickCorner;
             return Result.Success;
         }
 
-        Resolve(Acting!, tick, square, outcome, null);
+        Resolve(Acting!, tick, face, square, outcome, null);
         return Result.Success;
     });
 
@@ -303,8 +307,8 @@ public sealed class PressYourLuckGame
         if (_phase != PylPhase.PickCorner) return Result.Fail("There's no corner to pick right now.");
         if (!BoardFactory.Corners.Contains(corner)) return Result.Fail("That isn't a corner.");
 
-        var outcome = _board[corner][FaceAt(corner, _cornerTick)];
-        Resolve(Acting!, _cornerTick, corner, outcome, "picked a corner:");
+        var outcome = _board[corner][_cornerFace];
+        Resolve(Acting!, _cornerTick, _cornerFace, corner, outcome, "picked a corner:");
         return Result.Success;
     });
 
@@ -404,7 +408,7 @@ public sealed class PressYourLuckGame
 
             SpinInfo? spin = null;
             if (_phase == PylPhase.Spinning)
-                spin = new SpinInfo(_spinId, _sequence, _spinStart.ToUnixTimeMilliseconds(), _time.GetUtcNow().ToUnixTimeMilliseconds(), TickMs);
+                spin = new SpinInfo(_spinId, _sequence, _pages, _spinStart.ToUnixTimeMilliseconds(), _time.GetUtcNow().ToUnixTimeMilliseconds(), TickMs);
 
             var winners = new List<Guid>();
             if (_phase == PylPhase.GameOver)
@@ -591,11 +595,29 @@ public sealed class PressYourLuckGame
         return sequence;
     }
 
-    private SpinResultInfo Announce(PlayerState player, int tick, int square, Outcome outcome, string message, bool pending = false) =>
-        new(++_resultId, player.Id, player.Name, tick, square, outcome.Kind.ToString().ToLowerInvariant(), outcome.Text, outcome.Sub, message, pending);
+    // The whole board changes face together, like the real one: it holds a face for 2 or 3 flashes, then jumps
+    // to one of the other two. That is why the number of Whammies on screen is always one of the face counts.
+    private int[] NewPages()
+    {
+        var pages = new int[SequenceLength];
+        var previous = _rng.Next(BoardFactory.Faces);
+        var i = 0;
+        while (i < pages.Length)
+        {
+            int next;
+            do { next = _rng.Next(BoardFactory.Faces); } while (next == previous);
+            previous = next;
+            var run = _rng.Next(2, 4);   // 2 or 3 flashes
+            for (var k = 0; k < run && i < pages.Length; k++) pages[i++] = next;
+        }
+        return pages;
+    }
+
+    private SpinResultInfo Announce(PlayerState player, int tick, int face, int square, Outcome outcome, string message, bool pending = false) =>
+        new(++_resultId, player.Id, player.Name, tick, face, square, outcome.Kind.ToString().ToLowerInvariant(), outcome.Text, outcome.Sub, message, pending);
 
     // Applies what the light landed on, then works out whose move is next.
-    private void Resolve(PlayerState player, int tick, int square, Outcome outcome, string? cornerPhrase)
+    private void Resolve(PlayerState player, int tick, int face, int square, Outcome outcome, string? cornerPhrase)
     {
         string message;
         switch (outcome.Kind)
@@ -632,7 +654,7 @@ public sealed class PressYourLuckGame
         }
 
         if (cornerPhrase is not null) message = $"{player.Name} {cornerPhrase} {message}";
-        _lastSpin = Announce(player, tick, square, outcome, message);
+        _lastSpin = Announce(player, tick, face, square, outcome, message);
 
         var remaining = player.IsOut ? 0 : _actingPassed ? _passedLeft : player.Spins;
         if (remaining > 0) _phase = PylPhase.SpinReady;
