@@ -13,6 +13,7 @@ public enum PylPhase
     SpinReady,    // the contestant whose turn it is chooses: spin, or pass their spins
     Spinning,     // the light is running; the contestant presses to stop it
     PickCorner,   // they landed on Pick a Corner and choose one
+    PickMove,     // they landed on Move One Space and choose the square on one side or the other
     RoundOver,    // the Big Board round is finished; the emcee taps Continue
     GameOver
 }
@@ -37,6 +38,9 @@ public sealed record QuestionInfo(
     string Text,
     string Answer,
     string? AlsoAccept);
+
+/// <summary>One of the two squares you can move to from Move One Space.</summary>
+public sealed record MoveChoice(int Direction, int Square, OutcomeInfo Shows);
 
 public sealed record OutcomeInfo(string Kind, string Text, string? Sub, int Value = 0);
 
@@ -85,6 +89,7 @@ public sealed record PylSnapshot(
     bool CanPass,
     IReadOnlyList<Guid> PassTargets,
     IReadOnlyList<int> Corners,
+    IReadOnlyList<MoveChoice> MoveChoices,
     IReadOnlyList<Guid> Winners,
     bool CanStart)
 {

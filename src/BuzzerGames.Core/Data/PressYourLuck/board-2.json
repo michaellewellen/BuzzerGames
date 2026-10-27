@@ -1,7 +1,7 @@
 // Round 2 Big Board: bigger numbers, and it leans on the older show: more prizes, fewer "+ SPIN" squares.
 {
   "whammiesPerFace": [2, 3, 4],
-  "counts": { "cash": 22, "cashSpin": 6, "big": 2, "prizes": 10, "corner": 4, "bigBucks": 1 },
+  "counts": { "cash": 20, "cashSpin": 6, "big": 2, "prizes": 10, "corner": 4, "bigBucks": 1, "move": 2 },
   "cash":     [750, 900, 1000, 1250, 1400, 1500, 1750, 2000, 2250],
   "cashSpin": [1500, 2000, 2500, 3000, 3500],
   "big":      [5000, 6000, 7500],

@@ -102,6 +102,24 @@
             }
             break;
 
+        case PylPhase.PickMove:
+            @if (Me.IsActing)
+            {
+                <p class="big-message">Move one space: take one of these!</p>
+                <div class="corner-grid">
+                    @foreach (var m in Snapshot.MoveChoices)
+                    {
+                        var direction = m.Direction;
+                        <button class="btn corner-btn" @onclick="() => Act(Game.PickMove(Token, direction))">@MoveLabel(m)</button>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="big-message">@Snapshot.Acting?.Name is choosing a side</p>
+            }
+            break;
+
         case PylPhase.PickCorner:
             @if (Me.IsActing)
             {
@@ -153,6 +171,9 @@
     }
 
     private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private static string MoveLabel(MoveChoice m) =>
+        (m.Direction < 0 ? "↶ " : "↷ ") + m.Shows.Text + (m.Shows.Sub is { } sub ? " " + sub : "");
 
     private static string CornerName(int corner) => corner switch
     {

@@ -36,6 +36,7 @@ window.pyl = (() => {
     // Pictures: /images/whammy1.png .. whammy6.png (one is picked at random for each Whammy square), and
     // /images/press_your_luck.png for the logo in the middle. If a picture is missing, a drawing stands in for it.
     const WHAMMY_PICTURES = 6;
+    const PALETTE = 8;        // how many colors the cash squares are dealt from (see .c0 to .c7 in app.css)
 
     function whammyPicture(n, className) {
         const img = document.createElement("img");
@@ -119,6 +120,21 @@ window.pyl = (() => {
         return at;
     }
 
+    // The ring of marquee bulbs around the square the light is on: 5 along each side, blinking in turns.
+    const BULBS_PER_SIDE = 5;
+    function addBulbs(el) {
+        const n = BULBS_PER_SIDE;
+        for (let t = 0; t < 4 * n; t++) {
+            const side = Math.floor(t / n), k = (t % n) / n;
+            const [x, y] = [[k, 0], [1, k], [1 - k, 1], [0, 1 - k]][side];
+            const bulb = document.createElement("i");
+            bulb.className = "bulb" + (t % 2 ? " odd" : "");
+            bulb.style.left = (x * 100) + "%";
+            bulb.style.top = (y * 100) + "%";
+            el.appendChild(bulb);
+        }
+    }
+
     // Shows every square at the given face (page), with one square lit (or none, when lit is -1).
     // A second square can light with it: Big Bucks lights the square it is paying.
     function draw(face, lit, linked) {
@@ -127,11 +143,19 @@ window.pyl = (() => {
         squares.forEach((el, i) => {
             const o = (board[i] || [])[face];
             if (!o) { el.textContent = ""; return; }
-            el.className = "pyl-sq k-" + o.kind + (i === lit ? " lit" : "") + (i === linked ? " lit linked" : "");
+            const isLit = i === lit || i === linked;
+            el.className = "pyl-sq k-" + o.kind + " c" + ((i * 5 + face * 3 + (i >> 1)) % PALETTE) + (i === lit ? " lit" : "") + (i === linked ? " lit linked" : "");
             el.innerHTML = "";
+            if (isLit) addBulbs(el);
             if (o.kind === "whammy") {
                 el.appendChild(whammyPicture(whammyArt[i][face], "whammy-pic"));
                 return;
+            }
+            if (o.kind === "move") {
+                const a = document.createElement("span");
+                a.className = "arrows";
+                a.textContent = "⇅";
+                el.appendChild(a);
             }
             const t = document.createElement("span");
             t.className = "t";
@@ -185,7 +209,13 @@ window.pyl = (() => {
 
         if (r.pending) {
             centerEl.className = "pyl-center";
-            centerEl.innerHTML = `<div class="result"><span class="rt">PICK A CORNER!</span></div>`;
+            if (r.kind === "move") {
+                // Light up the two squares the player can choose between.
+                [(r.square + 17) % 18, (r.square + 1) % 18].forEach(q => squares[q] && squares[q].classList.add("choice"));
+                centerEl.innerHTML = `<div class="result"><span class="rt long">MOVE ONE SPACE!</span><small class="sm">Up or down? Choose a side.</small></div>`;
+            } else {
+                centerEl.innerHTML = `<div class="result"><span class="rt long">PICK A CORNER!</span></div>`;
+            }
             return;
         }
 

@@ -90,6 +90,18 @@
             <button class="btn btn-wide" @onclick="() => Act(Game.Press(Token))">Stop the light for @Snapshot.Acting?.Name</button>
             break;
 
+        case PylPhase.PickMove:
+            <p class="big-message">Move One Space!</p>
+            <p class="hint">@Snapshot.Acting?.Name chooses a side. You can choose for them:</p>
+            <div class="corner-grid">
+                @foreach (var m in Snapshot.MoveChoices)
+                {
+                    var direction = m.Direction;
+                    <button class="btn" @onclick="() => Act(Game.PickMove(Token, direction))">@MoveLabel(m)</button>
+                }
+            </div>
+            break;
+
         case PylPhase.PickCorner:
             <p class="big-message">Pick a Corner!</p>
             <p class="hint">@Snapshot.Acting?.Name chooses. You can choose for them:</p>
@@ -143,6 +155,9 @@
     private void Act(Result result) => _error = result.Ok ? null : result.Error;
 
     private void Judge(bool correct) => Act(Game.JudgeGuess(Token, correct, correct ? null : _said));
+
+    private static string MoveLabel(MoveChoice m) =>
+        (m.Direction < 0 ? "↶ " : "↷ ") + m.Shows.Text + (m.Shows.Sub is { } sub ? " " + sub : "");
 
     private static string CornerName(int corner) => corner switch
     {

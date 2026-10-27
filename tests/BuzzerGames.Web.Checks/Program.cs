@@ -424,6 +424,21 @@ Run("pyl: a whole game, drawing every screen after every action", () =>
     Check.True(draws > 20, $"expected plenty of redraws, got {draws}");
 });
 
+Run("pyl: Move One Space shows the two choices to the player and the emcee", () =>
+{
+    var t = new PylTable();
+    t.PlayQuestionRound();
+    var acting = t.IndexOf(t.S.ActingId!.Value);
+    var spinning = t.StartSpin();
+    Check.Ok(t.PressAtTick(spinning, PylTable.FindTick(spinning, o => o.Kind == "move")));
+    Check.Equal(PylPhase.PickMove, t.S.Phase, "waiting for a choice");
+    var player = Render.PylPlayer(t, acting);
+    Check.Equal(2, Render.Count(player, "corner-btn"), "two choice buttons on the acting player's phone");
+    Check.True(Render.Has(Render.PylEmcee(t), "Move One Space!"), "the emcee can choose too");
+    Check.True(!Render.Has(Render.PylPlayer(t, (acting + 1) % 3), "corner-btn"), "other players only watch");
+    Render.PylTv(t);
+});
+
 Run("pyl: when the game is over only the emcee gets the play-again buttons", () =>
 {
     var t = new PylTable(seed: 3);

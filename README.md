@@ -40,6 +40,10 @@ Same setup as Jeopardy: create it on the TV at `/press-your-luck`, one emcee and
 
 **Big Bucks.** One square per board. When the light lands on it, it pays the best cash amount showing on the board at that moment, and that square lights up too.
 
+**Move One Space.** Two squares per board. Landing on one lets the player choose the square on either side of it, seeing what each shows, and take that. It never sits on a corner or next to Pick a Corner or another Move One Space.
+
+**Colors and lights.** Cash squares are dealt one of eight colors (`.c0` to `.c7` in `app.css`), Big Bucks is green, and the square the light is on gets a ring of blinking bulbs.
+
 **Editing the board.** `src/BuzzerGames.Core/Data/PressYourLuck/board-1.json` and `board-2.json` hold the square counts, the cash values and the prize list for each round. Round 1 leans on the newer show (lots of `+ SPIN`), round 2 on the older one (more prizes). Whammies per face (2, 3 and 4) are set there too. The values are my guesses, not the real 80s table.
 
 ## Run it on your computer

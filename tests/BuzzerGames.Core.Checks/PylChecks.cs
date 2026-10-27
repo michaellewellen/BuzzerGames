@@ -233,6 +233,9 @@ static class PylChecks
                     Check.Equal(expectedSpins, all.Count(o => o.Kind == OutcomeKind.Cash && o.ExtraSpin), "cash + spin squares");
                     Check.Equal(expectedPrizes, all.Count(o => o.Kind == OutcomeKind.Prize), "prizes");
                     Check.Equal(1, all.Count(o => o.Kind == OutcomeKind.BigBucks), "one Big Bucks square");
+                    Check.Equal(2, all.Count(o => o.Kind == OutcomeKind.Move), "Move One Space squares");
+                    Check.True(BoardFactory.MovesAreSafe(board), "no Move One Space beside a corner or another Move");
+                    Check.True(BoardFactory.Corners.All(c => board[c].All(o => o.Kind != OutcomeKind.Move)), "no Move One Space on a corner");
                 }
             }
         });
@@ -256,6 +259,36 @@ static class PylChecks
             Check.Equal(expectedSquare, r.LinkedSquare, "the best cash square lights too");
             Check.Equal(before + expected, t.P(player).Score, "it pays the best cash showing");
             Check.Equal(face, r.Face, "on that face");
+        });
+
+        run("pyl: Move One Space lets you take the square on either side, with a real choice", () =>
+        {
+            var t = new PylTable();
+            t.PlayQuestionRound();
+            var player = t.IndexOf(t.S.ActingId!.Value);
+            var s = t.StartSpin();
+            var tick = PylTable.FindTick(s, o => o.Kind == "move");
+            var face = s.Spin!.Pages[tick];
+            var square = s.Spin.Sequence[tick];
+            Check.Ok(t.PressAtTick(s, tick));
+            var after = t.S;
+            Check.Equal(PylPhase.PickMove, after.Phase, "waiting for the choice");
+            Check.True(after.LastSpin!.Pending && after.LastSpin.Kind == "move", "the result is pending a choice");
+            Check.Equal(2, after.MoveChoices.Count, "two squares to choose between");
+            var down = (square + 1) % 18;
+            var up = (square + 17) % 18;
+            Check.True(after.MoveChoices.Select(m => m.Square).OrderBy(x => x).SequenceEqual(new[] { up, down }.OrderBy(x => x)), "the neighbors");
+            Check.True(after.MoveChoices.All(m => m.Shows.Kind != "move" && m.Shows.Kind != "corner"), "neither is another special square");
+            Check.Fails(t.Game.Spin(t.Tokens[player]), "spinning mid-choice");
+            Check.Fails(t.Game.PickMove(t.Tokens[player], 0), "not a side");
+            Check.Fails(t.Game.PickMove(t.Tokens[(player + 1) % 3], 1), "somebody else choosing");
+            var chosen = after.MoveChoices.First(m => m.Direction == 1);
+            var before = t.P(player).Score;
+            Check.Ok(t.Game.PickMove(t.Tokens[player], 1));
+            var done = t.S.LastSpin!;
+            Check.True(!done.Pending && done.Square == down, "resolved on the chosen square");
+            Check.Equal(chosen.Shows.Text, done.Text, "you get what that square was showing");
+            if (chosen.Shows.Kind == "cash") Check.Equal(before + chosen.Shows.Value, t.P(player).Score, "and its money");
         });
 
         run("pyl: round 2's board pays more than round 1's", () =>
@@ -588,6 +621,9 @@ static class PylChecks
                             break;
                         case PylPhase.Spinning:
                             Check.Ok(t.PressAtTick(s, rng.Next(0, 400)));
+                            break;
+                        case PylPhase.PickMove:
+                            Check.Ok(t.Game.PickMove(t.Tokens[t.IndexOf(s.ActingId!.Value)], rng.Next(2) == 0 ? -1 : 1));
                             break;
                         case PylPhase.PickCorner:
                             Check.Ok(t.Game.PickCorner(t.Tokens[t.IndexOf(s.ActingId!.Value)], BoardFactory.Corners[rng.Next(4)]));

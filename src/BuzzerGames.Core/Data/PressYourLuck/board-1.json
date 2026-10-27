@@ -4,7 +4,7 @@
 // pays the best cash showing on the board at that moment.
 {
   "whammiesPerFace": [2, 3, 4],
-  "counts": { "cash": 19, "cashSpin": 12, "big": 4, "prizes": 5, "corner": 4, "bigBucks": 1 },
+  "counts": { "cash": 17, "cashSpin": 12, "big": 4, "prizes": 5, "corner": 4, "bigBucks": 1, "move": 2 },
   "cash":     [500, 600, 700, 750, 800, 900, 1000, 1100, 1250, 1400],
   "cashSpin": [1000, 1250, 1500, 1750, 2000, 2500],
   "big":      [4000, 5000],

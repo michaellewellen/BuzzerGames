@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace BuzzerGames.Core.PressYourLuck;
 
-public enum OutcomeKind { Cash, Prize, Corner, Whammy, BigBucks }
+public enum OutcomeKind { Cash, Prize, Corner, Whammy, BigBucks, Move }
 
 /// <summary>
 /// What one face of one square shows. Sub is the small second line ("+ SPIN", or a prize's dollar value).
@@ -21,6 +21,9 @@ public sealed record Outcome(OutcomeKind Kind, string Text, string? Sub = null, 
         new(OutcomeKind.Prize, name.ToUpperInvariant(), "$" + value.ToString("N0", CultureInfo.InvariantCulture), value);
 
     public static Outcome Corner { get; } = new(OutcomeKind.Corner, "PICK A CORNER");
+
+    /// <summary>Move One Space: the player chooses the square on either side of this one and takes what it shows.</summary>
+    public static Outcome Move { get; } = new(OutcomeKind.Move, "MOVE ONE SPACE");
 
     /// <summary>The Big Bucks square as it sits on the board. It has no amount yet: it pays the best cash on the page.</summary>
     public static Outcome BigBucks { get; } = new(OutcomeKind.BigBucks, "BIG BUCKS");
@@ -40,7 +43,8 @@ public sealed record BoardCounts(
     [property: JsonPropertyName("big")] int Big,
     [property: JsonPropertyName("prizes")] int Prizes,
     [property: JsonPropertyName("corner")] int Corner,
-    [property: JsonPropertyName("bigBucks")] int BigBucks = 0);
+    [property: JsonPropertyName("bigBucks")] int BigBucks = 0,
+    [property: JsonPropertyName("move")] int Move = 0);
 
 /// <summary>A Big Board recipe as written in Data/PressYourLuck/board-N.json.</summary>
 public sealed record BoardConfig(
@@ -87,7 +91,7 @@ public static class BoardFactory
     {
         var whammies = config.WhammiesPerFace.OrderBy(_ => rng.Next()).ToArray();
         var whammyTotal = whammies.Sum();
-        var others = config.Counts.Cash + config.Counts.CashSpin + config.Counts.Big + config.Counts.Prizes + config.Counts.Corner + config.Counts.BigBucks;
+        var others = config.Counts.Cash + config.Counts.CashSpin + config.Counts.Big + config.Counts.Prizes + config.Counts.Corner + config.Counts.BigBucks + config.Counts.Move;
         if (whammies.Length != Faces || whammyTotal > Squares || whammyTotal + others != Squares * Faces)
             throw new InvalidOperationException($"A board needs exactly {Squares * Faces} outcomes (it has {whammyTotal + others}).");
 
@@ -95,8 +99,24 @@ public static class BoardFactory
         {
             var board = Build(config, whammies, rng);
             // Avoid one square showing the same text on two faces; give up on that nicety after a while.
+            // Move One Space must never sit next to Pick a Corner or another Move One Space (you would have to
+            // resolve one special square from inside another). That is a hard rule; the duplicate-text one is a nicety.
+            if (!MovesAreSafe(board) && attempt < 2000) continue;
             if (attempt >= 60 || board.All(faces => faces.Select(o => o.Text).Distinct().Count() == Faces)) return board;
         }
+    }
+
+    /// <summary>True when, on every face, no Move One Space square has a Pick a Corner or Move One Space square beside it.</summary>
+    public static bool MovesAreSafe(Outcome[][] board)
+    {
+        for (var q = 0; q < Squares; q++)
+            for (var f = 0; f < Faces; f++)
+            {
+                if (board[q][f].Kind != OutcomeKind.Move) continue;
+                foreach (var n in new[] { (q + 1) % Squares, (q + Squares - 1) % Squares })
+                    if (board[n][f].Kind is OutcomeKind.Corner or OutcomeKind.Move) return false;
+            }
+        return true;
     }
 
     private static Outcome[][] Build(BoardConfig config, int[] whammies, Random rng)
@@ -119,6 +139,14 @@ public static class BoardFactory
             var spot = open.First(c => !Corners.Contains(c.s));
             open.Remove(spot);
             board[spot.s][spot.f] = Outcome.Corner;
+        }
+
+        // Move One Space also stays off the four corners, so picking a corner can never land you on one.
+        for (var i = 0; i < config.Counts.Move; i++)
+        {
+            var spot = open.First(c => !Corners.Contains(c.s));
+            open.Remove(spot);
+            board[spot.s][spot.f] = Outcome.Move;
         }
 
         var pool = new List<Outcome>();

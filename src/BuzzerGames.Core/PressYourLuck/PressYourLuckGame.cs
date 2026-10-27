@@ -98,6 +98,7 @@ public sealed class PressYourLuckGame
     private DateTimeOffset _spinStart;
     private int _cornerTick;
     private int _cornerFace;
+    private int _moveSquare;
     private SpinResultInfo? _lastSpin;
     private int _resultId;
 
@@ -348,6 +349,16 @@ public sealed class PressYourLuckGame
         var face = _pages[tick % _pages.Length];
         var outcome = Settle(square, face, out var linked);
 
+        if (outcome.Kind == OutcomeKind.Move)
+        {
+            _cornerTick = tick;
+            _cornerFace = face;
+            _moveSquare = square;
+            _lastSpin = Announce(Acting!, tick, face, square, -1, outcome, $"{Acting!.Name} landed on Move One Space!", pending: true);
+            _phase = PylPhase.PickMove;
+            return Result.Success;
+        }
+
         if (outcome.Kind == OutcomeKind.Corner)
         {
             _cornerTick = tick;
@@ -370,6 +381,21 @@ public sealed class PressYourLuckGame
 
         var outcome = Settle(corner, _cornerFace, out var linked);
         Resolve(Acting!, _cornerTick, _cornerFace, corner, linked, outcome, "picked a corner:");
+        return Result.Success;
+    });
+
+    /// <summary>After Move One Space: take what the square on one side (-1) or the other (+1) is showing.</summary>
+    public Result PickMove(Guid token, int direction) => Run(() =>
+    {
+        if (!CanActFor(token)) return Result.Fail("It isn't your turn.");
+        if (_phase != PylPhase.PickMove) return Result.Fail("There's no move to make right now.");
+        if (direction is not (-1 or 1)) return Result.Fail("Choose one side or the other.");
+
+        var target = (_moveSquare + direction + BoardFactory.Squares) % BoardFactory.Squares;
+        var outcome = Settle(target, _cornerFace, out var linked);
+        // The board is dealt so this can't happen, but if it ever did, the move simply pays nothing.
+        if (outcome.Kind is OutcomeKind.Corner or OutcomeKind.Move) outcome = Outcome.Cash(0);
+        Resolve(Acting!, _cornerTick, _cornerFace, target, linked, outcome, "moved one space:");
         return Result.Success;
     });
 
@@ -445,7 +471,7 @@ public sealed class PressYourLuckGame
         lock (_gate)
         {
             var inQuestions = _phase is PylPhase.Question or PylPhase.Answering or PylPhase.Picking or PylPhase.Reveal;
-            var inBoard = _phase is PylPhase.SpinReady or PylPhase.Spinning or PylPhase.PickCorner;
+            var inBoard = _phase is PylPhase.SpinReady or PylPhase.Spinning or PylPhase.PickCorner or PylPhase.PickMove;
 
             var players = _players.Select(p => new PylPlayerInfo(
                 Id: p.Id,
@@ -503,6 +529,13 @@ public sealed class PressYourLuckGame
                 CanPass: canPass,
                 PassTargets: canPass ? PassTargets().Select(t => t.Id).ToList() : [],
                 Corners: BoardFactory.Corners,
+                MoveChoices: _phase != PylPhase.PickMove ? [] :
+                    new[] { -1, 1 }.Select(d =>
+                    {
+                        var sq = (_moveSquare + d + BoardFactory.Squares) % BoardFactory.Squares;
+                        var o = _board[sq][_cornerFace];
+                        return new MoveChoice(d, sq, new OutcomeInfo(o.Kind.ToString().ToLowerInvariant(), o.Text, o.Sub, o.Value));
+                    }).ToList(),
                 Winners: winners,
                 CanStart: _phase == PylPhase.Lobby && IsFull());
         }
