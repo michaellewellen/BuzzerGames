@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using BuzzerGames.Core.Jeopardy;
 
 namespace BuzzerGames.Core.PressYourLuck;
@@ -20,67 +22,87 @@ public interface IPylQuestionSource
     IReadOnlyList<PylQuestion> CreateQuestions(Random rng, int rounds, int perRound, GameOptions? options = null);
 }
 
+/// <summary>One question as written in Data/PressYourLuck/questions.json.</summary>
+public sealed record PylQuestionRecord(
+    [property: JsonPropertyName("category")] string Category,
+    [property: JsonPropertyName("question")] string Question,
+    [property: JsonPropertyName("answer")] string Answer,
+    [property: JsonPropertyName("wrong")] string[] Wrong,
+    [property: JsonPropertyName("level")] int Level = 1,
+    [property: JsonPropertyName("holiday")] bool Holiday = false);
+
 /// <summary>
-/// Builds questions out of the same category bank Jeopardy uses. A Jeopardy clue is already an open-ended
-/// question with a one-word or one-name answer, and the OTHER answers in its category make natural decoys
-/// ("Also a Game": Risk, Go, Othello...). Round 1 uses the easier rows of a category, round 2 the harder ones.
+/// Deals Press Your Luck questions from its own bank, written for this game: general-knowledge questions with
+/// one short spoken answer, and two wrong answers chosen by hand because people really might say them.
+/// A game gets six questions, each from a different category. Round 1 uses the easier ones (level 1); round 2
+/// leans toward the harder ones (level 2). Holiday questions only appear when the holiday option is on, and then
+/// exactly one does.
 /// </summary>
 public sealed class JsonPylQuestionSource : IPylQuestionSource
 {
-    private readonly IReadOnlyList<CategoryRecord> _categories;
+    private static readonly JsonSerializerOptions Json = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true
+    };
 
-    public JsonPylQuestionSource() : this(QuestionBank.LoadCategories()) { }
+    private readonly IReadOnlyList<PylQuestionRecord> _bank;
 
-    public JsonPylQuestionSource(IReadOnlyList<CategoryRecord> categories) => _categories = categories;
+    public JsonPylQuestionSource() : this(LoadBank()) { }
+
+    public JsonPylQuestionSource(IReadOnlyList<PylQuestionRecord> bank) => _bank = bank;
+
+    /// <summary>Reads Data/PressYourLuck/questions.json from inside the assembly.</summary>
+    public static IReadOnlyList<PylQuestionRecord> LoadBank()
+    {
+        var assembly = typeof(JsonPylQuestionSource).Assembly;
+        var name = assembly.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith(".PressYourLuck.questions.json", StringComparison.OrdinalIgnoreCase))
+            ?? throw new InvalidOperationException("The Press Your Luck question bank (questions.json) is missing.");
+        using var reader = new StreamReader(assembly.GetManifestResourceStream(name)!);
+        return JsonSerializer.Deserialize<PylQuestionRecord[]>(reader.ReadToEnd(), Json) ?? [];
+    }
 
     public IReadOnlyList<PylQuestion> CreateQuestions(Random rng, int rounds, int perRound, GameOptions? options = null)
     {
         options ??= GameOptions.Default;
         var total = rounds * perRound;
-        var used = new HashSet<CategoryRecord>();
         var holidayIndex = options.Holiday ? rng.Next(total) : -1;
+        var usedCategories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var usedQuestions = new HashSet<PylQuestionRecord>();
         var result = new List<PylQuestion>();
 
         for (var round = 0; round < rounds; round++)
         {
-            var tagsThisRound = new HashSet<string>();
             for (var i = 0; i < perRound; i++)
             {
-                var index = round * perRound + i;
-                var wantHoliday = index == holidayIndex;
+                var wantHoliday = round * perRound + i == holidayIndex;
+                var pool = _bank.Where(q => q.Holiday == wantHoliday && !usedQuestions.Contains(q)
+                    && (wantHoliday || !usedCategories.Contains(q.Category))).ToList();
+                if (!wantHoliday && round == 0 && pool.Any(q => q.Level <= 1)) pool = pool.Where(q => q.Level <= 1).ToList();
+                if (pool.Count == 0) throw new InvalidOperationException("The question bank has too few questions to deal a game.");
 
-                var candidates = _categories.Where(c => !used.Contains(c) && c.Clues.Length >= 3
-                    && (wantHoliday ? c.Tag == JsonGameDataSource.Holiday : c.Tag != JsonGameDataSource.Holiday)
-                    && (wantHoliday || !tagsThisRound.Contains(c.Tag))).ToList();
-                if (candidates.Count == 0)   // a tiny bank: relax the "different subject" rule
-                    candidates = _categories.Where(c => !used.Contains(c) && c.Tag != JsonGameDataSource.Holiday).ToList();
-                if (candidates.Count == 0) throw new InvalidOperationException("The question bank has too few categories.");
-
-                var category = candidates[rng.Next(candidates.Count)];
-                used.Add(category);
-                tagsThisRound.Add(category.Tag);
-
-                // Rows run easiest to hardest: round 1 draws from the first three, round 2 from the last three.
-                var rowStart = rounds <= 1 ? 0 : (int)Math.Round((double)round / (rounds - 1) * Math.Max(0, category.Clues.Length - 3));
-                var row = Math.Min(category.Clues.Length - 1, rowStart + rng.Next(3));
-                result.Add(Build(category, row, rng));
+                // Round 2 favors the harder questions: they count triple.
+                var pick = round == 0 ? pool[rng.Next(pool.Count)] : WeightedPick(pool, rng);
+                usedQuestions.Add(pick);
+                usedCategories.Add(pick.Category);
+                result.Add(new PylQuestion(pick.Category, pick.Question, pick.Answer, pick.Wrong));
             }
         }
         return result;
     }
 
-    private static PylQuestion Build(CategoryRecord category, int row, Random rng)
+    private static PylQuestionRecord WeightedPick(List<PylQuestionRecord> pool, Random rng)
     {
-        var clue = category.Clues[row];
-        var taken = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { clue.Answer };
-        foreach (var a in clue.Alt ?? []) taken.Add(a);
-
-        var decoys = category.Clues.Where(c => !taken.Contains(c.Answer)).Select(c => c.Answer)
-            .Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(_ => rng.Next()).Take(2).ToList();
-
-        return new PylQuestion(
-            category.Title.ToUpperInvariant(), clue.Clue, clue.Answer, decoys,
-            clue.Alt is { Length: > 0 } ? string.Join(", ", clue.Alt) : null);
+        var weights = pool.Select(q => q.Level >= 2 ? 3 : 1).ToArray();
+        var roll = rng.Next(weights.Sum());
+        for (var i = 0; i < pool.Count; i++)
+        {
+            roll -= weights[i];
+            if (roll < 0) return pool[i];
+        }
+        return pool[^1];
     }
 }
 

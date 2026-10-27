@@ -1,0 +1,2840 @@
+[
+ {
+  "category": "SCIENCE",
+  "question": "What is the chemical symbol for gold?",
+  "answer": "Au",
+  "wrong": [
+   "Ag",
+   "Gd"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What gas do plants take in from the air to make food?",
+  "answer": "Carbon dioxide",
+  "wrong": [
+   "Oxygen",
+   "Nitrogen"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What is the hardest natural substance on Earth?",
+  "answer": "Diamond",
+  "wrong": [
+   "Quartz",
+   "Granite"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What is the center of an atom called?",
+  "answer": "The nucleus",
+  "wrong": [
+   "The electron",
+   "The proton"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "At sea level, at what temperature in Fahrenheit does water boil?",
+  "answer": "212",
+  "wrong": [
+   "200",
+   "180"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What invisible force keeps our feet on the ground?",
+  "answer": "Gravity",
+  "wrong": [
+   "Magnetism",
+   "Friction"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What is the most abundant gas in Earth's atmosphere?",
+  "answer": "Nitrogen",
+  "wrong": [
+   "Oxygen",
+   "Carbon dioxide"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What metal is liquid at room temperature?",
+  "answer": "Mercury",
+  "wrong": [
+   "Lead",
+   "Aluminum"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What is the process by which a caterpillar becomes a butterfly?",
+  "answer": "Metamorphosis",
+  "wrong": [
+   "Migration",
+   "Hibernation"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What do you call a scientist who studies the weather?",
+  "answer": "A meteorologist",
+  "wrong": [
+   "A geologist",
+   "An astronomer"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What type of blood is called the universal donor?",
+  "answer": "O negative",
+  "wrong": [
+   "AB positive",
+   "A negative"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What is the name of the galaxy we live in?",
+  "answer": "The Milky Way",
+  "wrong": [
+   "Andromeda",
+   "The Pinwheel"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What instrument measures air pressure?",
+  "answer": "A barometer",
+  "wrong": [
+   "A thermometer",
+   "A hydrometer"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What kind of rock forms when lava cools and hardens?",
+  "answer": "Igneous",
+  "wrong": [
+   "Sedimentary",
+   "Metamorphic"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What natural event causes the ocean's tides?",
+  "answer": "The Moon's gravity",
+  "wrong": [
+   "The wind",
+   "The Sun's heat"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What do you call the huge single landmass that all the continents were once joined in?",
+  "answer": "Pangaea",
+  "wrong": [
+   "Atlantis",
+   "Laurasia"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What is the name of the layer of gases that surrounds the Earth?",
+  "answer": "The atmosphere",
+  "wrong": [
+   "The stratosphere",
+   "The ozone"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What scale is used to measure the strength of earthquakes?",
+  "answer": "The Richter scale",
+  "wrong": [
+   "The Beaufort scale",
+   "The Fujita scale"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "Which metal is strongly attracted to magnets?",
+  "answer": "Iron",
+  "wrong": [
+   "Aluminum",
+   "Copper"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What do you call a person who studies fossils?",
+  "answer": "A paleontologist",
+  "wrong": [
+   "An archaeologist",
+   "A geologist"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What material are most computer chips made from?",
+  "answer": "Silicon",
+  "wrong": [
+   "Copper",
+   "Carbon"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "How many planets are in our solar system?",
+  "answer": "Eight",
+  "wrong": [
+   "Nine",
+   "Seven"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "What do bees collect from flowers to make honey?",
+  "answer": "Nectar",
+  "wrong": [
+   "Sap",
+   "Pollen"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SCIENCE",
+  "question": "Which scientist discovered penicillin?",
+  "answer": "Alexander Fleming",
+  "wrong": [
+   "Louis Pasteur",
+   "Marie Curie"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "What is the largest planet in our solar system?",
+  "answer": "Jupiter",
+  "wrong": [
+   "Saturn",
+   "Neptune"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "Which planet is known as the Red Planet?",
+  "answer": "Mars",
+  "wrong": [
+   "Venus",
+   "Jupiter"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "Which planet is best known for its rings?",
+  "answer": "Saturn",
+  "wrong": [
+   "Jupiter",
+   "Uranus"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "What is the closest star to Earth?",
+  "answer": "The Sun",
+  "wrong": [
+   "Proxima Centauri",
+   "Polaris"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "What is the hottest planet in our solar system?",
+  "answer": "Venus",
+  "wrong": [
+   "Mercury",
+   "Mars"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "Which planet is closest to the Sun?",
+  "answer": "Mercury",
+  "wrong": [
+   "Venus",
+   "Mars"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "Which planet is farthest from the Sun?",
+  "answer": "Neptune",
+  "wrong": [
+   "Uranus",
+   "Pluto"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "Who was the first person to walk on the moon?",
+  "answer": "Neil Armstrong",
+  "wrong": [
+   "Buzz Aldrin",
+   "John Glenn"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "In what year did people first walk on the moon?",
+  "answer": "1969",
+  "wrong": [
+   "1967",
+   "1971"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "Who was the first American in space?",
+  "answer": "Alan Shepard",
+  "wrong": [
+   "John Glenn",
+   "Neil Armstrong"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "What kind of animal was Laika, the first animal to orbit the Earth?",
+  "answer": "A dog",
+  "wrong": [
+   "A monkey",
+   "A chimpanzee"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "What is the name of the giant storm that has raged on Jupiter for centuries?",
+  "answer": "The Great Red Spot",
+  "wrong": [
+   "The Red Eye",
+   "The Crimson Vortex"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "Which famous space telescope, launched in 1990, was named after an astronomer?",
+  "answer": "The Hubble",
+  "wrong": [
+   "The Kepler",
+   "The James Webb"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "What do we call a small rock from space that burns up in our atmosphere as a 'shooting star'?",
+  "answer": "A meteor",
+  "wrong": [
+   "A comet",
+   "An asteroid"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPACE",
+  "question": "What was NASA's reusable spacecraft program that flew from 1981 to 2011?",
+  "answer": "The Space Shuttle",
+  "wrong": [
+   "The Apollo program",
+   "The Gemini program"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is the fastest land animal?",
+  "answer": "The cheetah",
+  "wrong": [
+   "The lion",
+   "The gazelle"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is the largest animal on Earth?",
+  "answer": "The blue whale",
+  "wrong": [
+   "The elephant",
+   "The great white shark"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is a group of lions called?",
+  "answer": "A pride",
+  "wrong": [
+   "A pack",
+   "A herd"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What do giant pandas mostly eat?",
+  "answer": "Bamboo",
+  "wrong": [
+   "Eucalyptus",
+   "Grass"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is the only mammal that can truly fly?",
+  "answer": "The bat",
+  "wrong": [
+   "The flying squirrel",
+   "The sugar glider"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "How many hearts does an octopus have?",
+  "answer": "Three",
+  "wrong": [
+   "Two",
+   "Eight"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is the tallest animal in the world?",
+  "answer": "The giraffe",
+  "wrong": [
+   "The elephant",
+   "The ostrich"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is a baby kangaroo called?",
+  "answer": "A joey",
+  "wrong": [
+   "A cub",
+   "A calf"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is a baby cow called?",
+  "answer": "A calf",
+  "wrong": [
+   "A foal",
+   "A lamb"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "Which flightless bird lives in Antarctica?",
+  "answer": "The penguin",
+  "wrong": [
+   "The ostrich",
+   "The albatross"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is the largest bird in the world?",
+  "answer": "The ostrich",
+  "wrong": [
+   "The emu",
+   "The condor"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is a male chicken called?",
+  "answer": "A rooster",
+  "wrong": [
+   "A drake",
+   "A gander"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What do you call animals that eat only plants?",
+  "answer": "Herbivores",
+  "wrong": [
+   "Carnivores",
+   "Omnivores"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "How many legs does an insect have?",
+  "answer": "Six",
+  "wrong": [
+   "Four",
+   "Eight"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "How many legs does a spider have?",
+  "answer": "Eight",
+  "wrong": [
+   "Six",
+   "Ten"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What sea creature has eight arms and squirts ink?",
+  "answer": "An octopus",
+  "wrong": [
+   "A squid",
+   "A jellyfish"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is the largest species of big cat?",
+  "answer": "The tiger",
+  "wrong": [
+   "The lion",
+   "The jaguar"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is a baby sheep called?",
+  "answer": "A lamb",
+  "wrong": [
+   "A kid",
+   "A foal"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What kind of animal is a Komodo dragon?",
+  "answer": "A lizard",
+  "wrong": [
+   "A snake",
+   "A crocodile"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What is the national bird of the United States?",
+  "answer": "The bald eagle",
+  "wrong": [
+   "The wild turkey",
+   "The golden eagle"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What kind of fish is Nemo in the movie 'Finding Nemo'?",
+  "answer": "A clownfish",
+  "wrong": [
+   "A goldfish",
+   "A blue tang"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "ANIMALS",
+  "question": "What do you call a baby frog?",
+  "answer": "A tadpole",
+  "wrong": [
+   "A froglet",
+   "A pollywog"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "How many teeth does a typical adult have?",
+  "answer": "32",
+  "wrong": [
+   "28",
+   "36"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "How many bones are in the adult human body?",
+  "answer": "206",
+  "wrong": [
+   "306",
+   "186"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "What is the largest organ of the human body?",
+  "answer": "The skin",
+  "wrong": [
+   "The liver",
+   "The brain"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "What is the longest bone in the human body?",
+  "answer": "The femur",
+  "wrong": [
+   "The tibia",
+   "The humerus"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "What organs filter your blood and make urine?",
+  "answer": "The kidneys",
+  "wrong": [
+   "The liver",
+   "The bladder"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "How many chambers does the human heart have?",
+  "answer": "Four",
+  "wrong": [
+   "Two",
+   "Three"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "What vitamin does your body make from sunlight?",
+  "answer": "Vitamin D",
+  "wrong": [
+   "Vitamin C",
+   "Vitamin A"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "What colored part of the eye controls how much light gets in?",
+  "answer": "The iris",
+  "wrong": [
+   "The pupil",
+   "The retina"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "What do red blood cells carry around the body?",
+  "answer": "Oxygen",
+  "wrong": [
+   "Nutrients",
+   "Antibodies"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "How many senses do we traditionally say people have?",
+  "answer": "Five",
+  "wrong": [
+   "Four",
+   "Six"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "What is the hardest substance in the human body?",
+  "answer": "Tooth enamel",
+  "wrong": [
+   "Bone",
+   "The skull"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "What tube carries food from your mouth to your stomach?",
+  "answer": "The esophagus",
+  "wrong": [
+   "The trachea",
+   "The intestine"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "What kind of blood vessels carry blood away from the heart?",
+  "answer": "Arteries",
+  "wrong": [
+   "Veins",
+   "Capillaries"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "THE HUMAN BODY",
+  "question": "Which bone protects your brain?",
+  "answer": "The skull",
+  "wrong": [
+   "The pelvis",
+   "The spine"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the largest country in the world by area?",
+  "answer": "Russia",
+  "wrong": [
+   "Canada",
+   "China"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of Australia?",
+  "answer": "Canberra",
+  "wrong": [
+   "Sydney",
+   "Melbourne"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of Canada?",
+  "answer": "Ottawa",
+  "wrong": [
+   "Toronto",
+   "Montreal"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of Brazil?",
+  "answer": "Brasília",
+  "wrong": [
+   "Rio de Janeiro",
+   "São Paulo"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the smallest state in the U.S.?",
+  "answer": "Rhode Island",
+  "wrong": [
+   "Delaware",
+   "Connecticut"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the largest state in the U.S.?",
+  "answer": "Alaska",
+  "wrong": [
+   "Texas",
+   "California"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "On which continent is Egypt?",
+  "answer": "Africa",
+  "wrong": [
+   "Asia",
+   "Europe"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the tallest mountain in the world above sea level?",
+  "answer": "Mount Everest",
+  "wrong": [
+   "K2",
+   "Mount Kilimanjaro"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the largest hot desert in the world?",
+  "answer": "The Sahara",
+  "wrong": [
+   "The Gobi",
+   "The Mojave"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of Japan?",
+  "answer": "Tokyo",
+  "wrong": [
+   "Kyoto",
+   "Osaka"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of Spain?",
+  "answer": "Madrid",
+  "wrong": [
+   "Barcelona",
+   "Lisbon"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of Texas?",
+  "answer": "Austin",
+  "wrong": [
+   "Dallas",
+   "Houston"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of California?",
+  "answer": "Sacramento",
+  "wrong": [
+   "Los Angeles",
+   "San Francisco"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of New York State?",
+  "answer": "Albany",
+  "wrong": [
+   "New York City",
+   "Buffalo"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of Florida?",
+  "answer": "Tallahassee",
+  "wrong": [
+   "Miami",
+   "Orlando"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of Washington State?",
+  "answer": "Olympia",
+  "wrong": [
+   "Seattle",
+   "Tacoma"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the capital of Nevada?",
+  "answer": "Carson City",
+  "wrong": [
+   "Las Vegas",
+   "Reno"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which of the Great Lakes lies entirely within the United States?",
+  "answer": "Lake Michigan",
+  "wrong": [
+   "Lake Superior",
+   "Lake Erie"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What ocean lies between the United States and Europe?",
+  "answer": "The Atlantic",
+  "wrong": [
+   "The Pacific",
+   "The Arctic"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which European country is shaped like a boot?",
+  "answer": "Italy",
+  "wrong": [
+   "Greece",
+   "Spain"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the largest island in the world?",
+  "answer": "Greenland",
+  "wrong": [
+   "Madagascar",
+   "Borneo"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "On which continent is the Amazon rainforest?",
+  "answer": "South America",
+  "wrong": [
+   "Africa",
+   "Asia"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which continent has no permanent residents?",
+  "answer": "Antarctica",
+  "wrong": [
+   "Australia",
+   "Greenland"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which U.S. state is nicknamed the Sunshine State?",
+  "answer": "Florida",
+  "wrong": [
+   "California",
+   "Arizona"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "The Statue of Liberty was a gift from which country?",
+  "answer": "France",
+  "wrong": [
+   "England",
+   "Italy"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "In which country would you find the Great Pyramids of Giza?",
+  "answer": "Egypt",
+  "wrong": [
+   "Mexico",
+   "Peru"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which country has the largest population today?",
+  "answer": "India",
+  "wrong": [
+   "China",
+   "The United States"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which U.S. state is nicknamed the Last Frontier?",
+  "answer": "Alaska",
+  "wrong": [
+   "Montana",
+   "Wyoming"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Off the coast of which country is the Great Barrier Reef?",
+  "answer": "Australia",
+  "wrong": [
+   "Mexico",
+   "Indonesia"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which sea is so salty that people float easily in it?",
+  "answer": "The Dead Sea",
+  "wrong": [
+   "The Red Sea",
+   "The Black Sea"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the most populous city in the United States?",
+  "answer": "New York City",
+  "wrong": [
+   "Los Angeles",
+   "Chicago"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which U.S. city is nicknamed the Windy City?",
+  "answer": "Chicago",
+  "wrong": [
+   "Boston",
+   "San Francisco"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "In which state is Mount Rushmore?",
+  "answer": "South Dakota",
+  "wrong": [
+   "North Dakota",
+   "Wyoming"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which state has the most national parks?",
+  "answer": "California",
+  "wrong": [
+   "Alaska",
+   "Utah"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What river carved out the Grand Canyon?",
+  "answer": "The Colorado River",
+  "wrong": [
+   "The Rio Grande",
+   "The Snake River"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "How many time zones are there in the contiguous United States?",
+  "answer": "Four",
+  "wrong": [
+   "Three",
+   "Five"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "Which bridge links San Francisco to Marin County?",
+  "answer": "The Golden Gate Bridge",
+  "wrong": [
+   "The Bay Bridge",
+   "The Brooklyn Bridge"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "GEOGRAPHY",
+  "question": "What is the tallest building in the world?",
+  "answer": "The Burj Khalifa",
+  "wrong": [
+   "Taipei 101",
+   "The Empire State Building"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "What is the capital of Utah?",
+  "answer": "Salt Lake City",
+  "wrong": [
+   "Provo",
+   "Ogden"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "How many national parks are in Utah?",
+  "answer": "Five",
+  "wrong": [
+   "Three",
+   "Seven"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "What is Utah's state nickname?",
+  "answer": "The Beehive State",
+  "wrong": [
+   "The Pioneer State",
+   "The Desert State"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "Which Utah national park is home to Delicate Arch?",
+  "answer": "Arches",
+  "wrong": [
+   "Zion",
+   "Bryce Canyon"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "What is the name of the big salty lake in northern Utah?",
+  "answer": "The Great Salt Lake",
+  "wrong": [
+   "Utah Lake",
+   "Bear Lake"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "In what year did Utah become a state?",
+  "answer": "1896",
+  "wrong": [
+   "1847",
+   "1912"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "What are the tall, thin rock spires at Bryce Canyon called?",
+  "answer": "Hoodoos",
+  "wrong": [
+   "Buttes",
+   "Mesas"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "Which Utah city hosted the 2002 Winter Olympics?",
+  "answer": "Salt Lake City",
+  "wrong": [
+   "Park City",
+   "Provo"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "What is the highest point in Utah?",
+  "answer": "Kings Peak",
+  "wrong": [
+   "Mount Timpanogos",
+   "Mount Nebo"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "What is Utah's state bird?",
+  "answer": "The California gull",
+  "wrong": [
+   "The bald eagle",
+   "The western meadowlark"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "The golden spike was driven at Promontory Summit in 1869 to complete what?",
+  "answer": "The transcontinental railroad",
+  "wrong": [
+   "The Pony Express",
+   "The Oregon Trail"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "UTAH",
+  "question": "Which Utah national park is famous for a hike called The Narrows?",
+  "answer": "Zion",
+  "wrong": [
+   "Arches",
+   "Capitol Reef"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Who was the first President of the United States?",
+  "answer": "George Washington",
+  "wrong": [
+   "Thomas Jefferson",
+   "John Adams"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Who wrote the Declaration of Independence?",
+  "answer": "Thomas Jefferson",
+  "wrong": [
+   "Benjamin Franklin",
+   "George Washington"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "In what year was the Declaration of Independence signed?",
+  "answer": "1776",
+  "wrong": [
+   "1789",
+   "1781"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "What ship carried the Pilgrims to America in 1620?",
+  "answer": "The Mayflower",
+  "wrong": [
+   "The Santa Maria",
+   "The Half Moon"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Who was President of the United States during the Civil War?",
+  "answer": "Abraham Lincoln",
+  "wrong": [
+   "Ulysses S. Grant",
+   "Andrew Jackson"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Who was the first woman to fly solo across the Atlantic Ocean?",
+  "answer": "Amelia Earhart",
+  "wrong": [
+   "Sally Ride",
+   "Harriet Quimby"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "In what year did Columbus first sail to the Americas?",
+  "answer": "1492",
+  "wrong": [
+   "1520",
+   "1620"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Who gave the famous 'I Have a Dream' speech?",
+  "answer": "Martin Luther King Jr.",
+  "wrong": [
+   "Malcolm X",
+   "Frederick Douglass"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Which president's face is on the $1 bill?",
+  "answer": "George Washington",
+  "wrong": [
+   "Abraham Lincoln",
+   "Thomas Jefferson"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Which president's face is on the $5 bill?",
+  "answer": "Abraham Lincoln",
+  "wrong": [
+   "Thomas Jefferson",
+   "Ulysses S. Grant"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Whose face is on the U.S. penny?",
+  "answer": "Abraham Lincoln",
+  "wrong": [
+   "George Washington",
+   "Thomas Jefferson"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "What was the first permanent English settlement in America?",
+  "answer": "Jamestown",
+  "wrong": [
+   "Plymouth",
+   "Roanoke"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "How many original colonies were there?",
+  "answer": "Thirteen",
+  "wrong": [
+   "Twelve",
+   "Fifteen"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Who was the first president to live in the White House?",
+  "answer": "John Adams",
+  "wrong": [
+   "George Washington",
+   "Thomas Jefferson"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Which famous document begins with the words 'We the People'?",
+  "answer": "The Constitution",
+  "wrong": [
+   "The Declaration of Independence",
+   "The Bill of Rights"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "How many amendments make up the Bill of Rights?",
+  "answer": "Ten",
+  "wrong": [
+   "Twelve",
+   "Five"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Who was president for most of World War II?",
+  "answer": "Franklin D. Roosevelt",
+  "wrong": [
+   "Harry Truman",
+   "Dwight Eisenhower"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "What happened at Pearl Harbor on December 7, 1941?",
+  "answer": "A surprise attack on the U.S. fleet",
+  "wrong": [
+   "The D-Day landings",
+   "The Battle of Midway"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Where did the Wright brothers make their first airplane flight?",
+  "answer": "Kitty Hawk, North Carolina",
+  "wrong": [
+   "Dayton, Ohio",
+   "Cape Canaveral, Florida"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "In what year did the Titanic sink?",
+  "answer": "1912",
+  "wrong": [
+   "1905",
+   "1923"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Who is credited with inventing the practical light bulb?",
+  "answer": "Thomas Edison",
+  "wrong": [
+   "Alexander Graham Bell",
+   "Nikola Tesla"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "Who invented the telephone?",
+  "answer": "Alexander Graham Bell",
+  "wrong": [
+   "Thomas Edison",
+   "Samuel Morse"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "What did Samuel Morse invent?",
+  "answer": "The telegraph",
+  "wrong": [
+   "The telephone",
+   "The radio"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "U.S. HISTORY",
+  "question": "What war ended in 1865?",
+  "answer": "The Civil War",
+  "wrong": [
+   "The Revolutionary War",
+   "The War of 1812"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Who was the first emperor of Rome?",
+  "answer": "Augustus",
+  "wrong": [
+   "Julius Caesar",
+   "Nero"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "In what year did World War II end?",
+  "answer": "1945",
+  "wrong": [
+   "1943",
+   "1947"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Who painted the Mona Lisa?",
+  "answer": "Leonardo da Vinci",
+  "wrong": [
+   "Michelangelo",
+   "Raphael"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Who painted the ceiling of the Sistine Chapel?",
+  "answer": "Michelangelo",
+  "wrong": [
+   "Leonardo da Vinci",
+   "Raphael"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Which British monarch reigned from 1837 to 1901?",
+  "answer": "Queen Victoria",
+  "wrong": [
+   "Queen Elizabeth I",
+   "Queen Anne"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Which ancient empire built the Colosseum?",
+  "answer": "The Roman Empire",
+  "wrong": [
+   "The Greek Empire",
+   "The Ottoman Empire"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "In which country did the ancient Olympic Games begin?",
+  "answer": "Greece",
+  "wrong": [
+   "Italy",
+   "Egypt"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Who is credited with discovering gravity after watching an apple fall?",
+  "answer": "Isaac Newton",
+  "wrong": [
+   "Albert Einstein",
+   "Galileo"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Who developed the theory of relativity?",
+  "answer": "Albert Einstein",
+  "wrong": [
+   "Isaac Newton",
+   "Stephen Hawking"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Who led the first expedition to reach the South Pole, in 1911?",
+  "answer": "Roald Amundsen",
+  "wrong": [
+   "Robert Falcon Scott",
+   "Ernest Shackleton"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "The ancient Egyptians wrote on a paper-like material made from what plant?",
+  "answer": "Papyrus",
+  "wrong": [
+   "Bamboo",
+   "Flax"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Who invented the printing press in Europe in the 1400s?",
+  "answer": "Johannes Gutenberg",
+  "wrong": [
+   "Leonardo da Vinci",
+   "Benjamin Franklin"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Which French emperor was defeated at Waterloo?",
+  "answer": "Napoleon Bonaparte",
+  "wrong": [
+   "Louis XIV",
+   "Charlemagne"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORLD HISTORY",
+  "question": "Which ancient civilization built Machu Picchu in the mountains of Peru?",
+  "answer": "The Incas",
+  "wrong": [
+   "The Aztecs",
+   "The Mayans"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What fruit is the main ingredient in guacamole?",
+  "answer": "Avocado",
+  "wrong": [
+   "Cucumber",
+   "Tomato"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What is the main ingredient in hummus?",
+  "answer": "Chickpeas",
+  "wrong": [
+   "Lentils",
+   "Black beans"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What country is sushi from?",
+  "answer": "Japan",
+  "wrong": [
+   "China",
+   "Korea"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What vegetable is famous for making you cry when you cut it?",
+  "answer": "An onion",
+  "wrong": [
+   "A pepper",
+   "Garlic"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What kind of nut is used to make marzipan?",
+  "answer": "Almonds",
+  "wrong": [
+   "Walnuts",
+   "Pecans"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "Which fruit has its seeds on the outside?",
+  "answer": "A strawberry",
+  "wrong": [
+   "A raspberry",
+   "A blueberry"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What spice comes from the crocus flower and is among the most expensive in the world?",
+  "answer": "Saffron",
+  "wrong": [
+   "Vanilla",
+   "Cinnamon"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What is tofu made from?",
+  "answer": "Soybeans",
+  "wrong": [
+   "Rice",
+   "Wheat"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "Oranges are famous for being a good source of which vitamin?",
+  "answer": "Vitamin C",
+  "wrong": [
+   "Vitamin A",
+   "Vitamin D"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What do you call a dried plum?",
+  "answer": "A prune",
+  "wrong": [
+   "A raisin",
+   "A date"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What kind of nut is traditionally used to make pesto?",
+  "answer": "Pine nuts",
+  "wrong": [
+   "Walnuts",
+   "Almonds"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What vegetable is sauerkraut made from?",
+  "answer": "Cabbage",
+  "wrong": [
+   "Cucumbers",
+   "Beets"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What vegetable is a pickle made from?",
+  "answer": "A cucumber",
+  "wrong": [
+   "A zucchini",
+   "A green bean"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What shape of pasta is farfalle?",
+  "answer": "Bow ties",
+  "wrong": [
+   "Tubes",
+   "Spirals"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "FOOD",
+  "question": "What is the main ingredient in a classic tortilla chip?",
+  "answer": "Corn",
+  "wrong": [
+   "Wheat",
+   "Potato"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What do you call a word that means the opposite of another word?",
+  "answer": "An antonym",
+  "wrong": [
+   "A synonym",
+   "A homonym"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What do you call words that sound alike but are spelled differently, like 'to' and 'two'?",
+  "answer": "Homophones",
+  "wrong": [
+   "Synonyms",
+   "Acronyms"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What do you call a word that is spelled the same forwards and backwards, like 'kayak'?",
+  "answer": "A palindrome",
+  "wrong": [
+   "An acronym",
+   "An anagram"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What do you call a word formed from the first letters of a phrase, like NASA?",
+  "answer": "An acronym",
+  "wrong": [
+   "A synonym",
+   "A palindrome"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What is the most widely spoken native language in the world?",
+  "answer": "Mandarin Chinese",
+  "wrong": [
+   "English",
+   "Spanish"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What language is spoken in Brazil?",
+  "answer": "Portuguese",
+  "wrong": [
+   "Spanish",
+   "French"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What do you call a word that imitates a sound, like 'buzz' or 'sizzle'?",
+  "answer": "Onomatopoeia",
+  "wrong": [
+   "Alliteration",
+   "A metaphor"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What does the Spanish word 'gracias' mean?",
+  "answer": "Thank you",
+  "wrong": [
+   "Please",
+   "Goodbye"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What does the French word 'bonjour' mean?",
+  "answer": "Hello",
+  "wrong": [
+   "Goodbye",
+   "Thank you"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What is the writing system that lets blind people read with their fingers?",
+  "answer": "Braille",
+  "wrong": [
+   "Morse code",
+   "Cursive"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What does the Spanish word 'amigo' mean?",
+  "answer": "Friend",
+  "wrong": [
+   "Love",
+   "Brother"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "Which language is the word 'sayonara' from?",
+  "answer": "Japanese",
+  "wrong": [
+   "Chinese",
+   "Korean"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "WORDS & LANGUAGE",
+  "question": "What does the Italian word 'ciao' mean?",
+  "answer": "Hello and goodbye",
+  "wrong": [
+   "Thank you",
+   "Excuse me"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Who wrote the play 'Romeo and Juliet'?",
+  "answer": "William Shakespeare",
+  "wrong": [
+   "Charles Dickens",
+   "Mark Twain"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Who wrote 'The Adventures of Tom Sawyer'?",
+  "answer": "Mark Twain",
+  "wrong": [
+   "Charles Dickens",
+   "Ernest Hemingway"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "What does Cinderella lose at the ball?",
+  "answer": "A glass slipper",
+  "wrong": [
+   "A tiara",
+   "A necklace"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "In 'The Wizard of Oz', what does the Scarecrow want from the Wizard?",
+  "answer": "A brain",
+  "wrong": [
+   "A heart",
+   "Courage"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Who painted 'The Starry Night'?",
+  "answer": "Vincent van Gogh",
+  "wrong": [
+   "Claude Monet",
+   "Pablo Picasso"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Which musical instrument has 88 keys?",
+  "answer": "The piano",
+  "wrong": [
+   "The organ",
+   "The accordion"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "How many strings does a standard guitar have?",
+  "answer": "Six",
+  "wrong": [
+   "Four",
+   "Eight"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "How many strings does a violin have?",
+  "answer": "Four",
+  "wrong": [
+   "Five",
+   "Six"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Who wrote 'The Cat in the Hat'?",
+  "answer": "Dr. Seuss",
+  "wrong": [
+   "Shel Silverstein",
+   "Roald Dahl"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "In the fairy tale, what did Jack trade for the magic beans?",
+  "answer": "A cow",
+  "wrong": [
+   "A horse",
+   "A goat"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Who composed the piano piece 'Für Elise'?",
+  "answer": "Ludwig van Beethoven",
+  "wrong": [
+   "Wolfgang Mozart",
+   "Johann Sebastian Bach"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Which composer wrote 'The Four Seasons'?",
+  "answer": "Antonio Vivaldi",
+  "wrong": [
+   "Johann Sebastian Bach",
+   "Wolfgang Mozart"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Who wrote 'The Lion, the Witch and the Wardrobe'?",
+  "answer": "C.S. Lewis",
+  "wrong": [
+   "J.R.R. Tolkien",
+   "Roald Dahl"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Which brass instrument has a slide?",
+  "answer": "The trombone",
+  "wrong": [
+   "The trumpet",
+   "The tuba"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "What is the name of the school Harry Potter attends?",
+  "answer": "Hogwarts",
+  "wrong": [
+   "Beauxbatons",
+   "Durmstrang"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "What two colors do you mix to make green?",
+  "answer": "Blue and yellow",
+  "wrong": [
+   "Red and blue",
+   "Red and yellow"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Who is known as the 'King of Rock and Roll'?",
+  "answer": "Elvis Presley",
+  "wrong": [
+   "Chuck Berry",
+   "Little Richard"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "Who is known as the 'King of Pop'?",
+  "answer": "Michael Jackson",
+  "wrong": [
+   "Elvis Presley",
+   "Prince"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "What color are Mickey Mouse's shorts?",
+  "answer": "Red",
+  "wrong": [
+   "Blue",
+   "Yellow"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "What is the snowman's name in the movie 'Frozen'?",
+  "answer": "Olaf",
+  "wrong": [
+   "Sven",
+   "Kristoff"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "BOOKS & ARTS",
+  "question": "What kind of animal is Eeyore, Winnie the Pooh's friend?",
+  "answer": "A donkey",
+  "wrong": [
+   "A horse",
+   "A mule"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "How many players from one team are on a basketball court at a time?",
+  "answer": "Five",
+  "wrong": [
+   "Six",
+   "Seven"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "How many innings are in a regulation baseball game?",
+  "answer": "Nine",
+  "wrong": [
+   "Seven",
+   "Ten"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "How many points is a touchdown worth in football, before the extra point?",
+  "answer": "Six",
+  "wrong": [
+   "Seven",
+   "Three"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "What sport uses a shuttlecock?",
+  "answer": "Badminton",
+  "wrong": [
+   "Tennis",
+   "Squash"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "How many rings are on the Olympic flag?",
+  "answer": "Five",
+  "wrong": [
+   "Four",
+   "Six"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "In golf, what do you call one stroke under par on a hole?",
+  "answer": "A birdie",
+  "wrong": [
+   "An eagle",
+   "A bogey"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "How often are the Summer Olympics held?",
+  "answer": "Every four years",
+  "wrong": [
+   "Every two years",
+   "Every five years"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "What is the highest possible score in a single game of bowling?",
+  "answer": "300",
+  "wrong": [
+   "200",
+   "250"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "How many holes are played in a full round of golf?",
+  "answer": "Eighteen",
+  "wrong": [
+   "Twelve",
+   "Twenty-four"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "How many players from one team are on the field in soccer?",
+  "answer": "Eleven",
+  "wrong": [
+   "Ten",
+   "Twelve"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "SPORTS",
+  "question": "What do you call it when a pitcher gets through a whole game without giving up a hit?",
+  "answer": "A no-hitter",
+  "wrong": [
+   "A shutout",
+   "A grand slam"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many days are there in a leap year?",
+  "answer": "366",
+  "wrong": [
+   "365",
+   "367"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many sides does a stop sign have?",
+  "answer": "Eight",
+  "wrong": [
+   "Six",
+   "Ten"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many colors are in a rainbow?",
+  "answer": "Seven",
+  "wrong": [
+   "Six",
+   "Eight"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many degrees are in a circle?",
+  "answer": "360",
+  "wrong": [
+   "180",
+   "270"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many sides does a hexagon have?",
+  "answer": "Six",
+  "wrong": [
+   "Five",
+   "Eight"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many feet are in a mile?",
+  "answer": "5,280",
+  "wrong": [
+   "5,000",
+   "5,820"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many ounces are in a pound?",
+  "answer": "Sixteen",
+  "wrong": [
+   "Twelve",
+   "Twenty"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many cups are in a quart?",
+  "answer": "Four",
+  "wrong": [
+   "Two",
+   "Eight"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "At what temperature in Fahrenheit does water freeze?",
+  "answer": "32",
+  "wrong": [
+   "0",
+   "30"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "What number does the Roman numeral X stand for?",
+  "answer": "Ten",
+  "wrong": [
+   "Five",
+   "Fifty"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "What number does the Roman numeral L stand for?",
+  "answer": "Fifty",
+  "wrong": [
+   "One hundred",
+   "Five hundred"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many zeros are in one million?",
+  "answer": "Six",
+  "wrong": [
+   "Five",
+   "Seven"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "How many items are in a baker's dozen?",
+  "answer": "Thirteen",
+  "wrong": [
+   "Twelve",
+   "Fourteen"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "What do you call a shape with five equal sides?",
+  "answer": "A pentagon",
+  "wrong": [
+   "A hexagon",
+   "An octagon"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "What is the currency of Japan?",
+  "answer": "The yen",
+  "wrong": [
+   "The yuan",
+   "The won"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "What is the currency of the United Kingdom?",
+  "answer": "The pound",
+  "wrong": [
+   "The euro",
+   "The franc"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "What is the currency of Mexico?",
+  "answer": "The peso",
+  "wrong": [
+   "The real",
+   "The dollar"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "Which company co-founded by Bill Gates and Paul Allen makes Windows?",
+  "answer": "Microsoft",
+  "wrong": [
+   "Apple",
+   "IBM"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "Who made the first successful airplane flight in 1903?",
+  "answer": "The Wright brothers",
+  "wrong": [
+   "Charles Lindbergh",
+   "The Montgolfier brothers"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "EVERYDAY KNOWLEDGE",
+  "question": "In what year was the first iPhone released?",
+  "answer": "2007",
+  "wrong": [
+   "2004",
+   "2010"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "NATURE",
+  "question": "What kind of tree produces acorns?",
+  "answer": "The oak",
+  "wrong": [
+   "The maple",
+   "The pine"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "NATURE",
+  "question": "What is the tallest type of tree in the world?",
+  "answer": "The coast redwood",
+  "wrong": [
+   "The giant sequoia",
+   "The Douglas fir"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "NATURE",
+  "question": "What scale is used to rate the strength of tornadoes?",
+  "answer": "The Fujita scale",
+  "wrong": [
+   "The Richter scale",
+   "The Beaufort scale"
+  ],
+  "level": 2,
+  "holiday": false
+ },
+ {
+  "category": "NATURE",
+  "question": "What do you call a hurricane's calm center?",
+  "answer": "The eye",
+  "wrong": [
+   "The core",
+   "The heart"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "NATURE",
+  "question": "What is the name for the line that divides the Earth into northern and southern halves?",
+  "answer": "The equator",
+  "wrong": [
+   "The prime meridian",
+   "The tropic of Cancer"
+  ],
+  "level": 1,
+  "holiday": false
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "Which of Santa's reindeer has a red nose?",
+  "answer": "Rudolph",
+  "wrong": [
+   "Dasher",
+   "Blitzen"
+  ],
+  "level": 1,
+  "holiday": true
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "What is the name of the Grinch's dog?",
+  "answer": "Max",
+  "wrong": [
+   "Buddy",
+   "Rex"
+  ],
+  "level": 1,
+  "holiday": true
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "What do people traditionally kiss under at Christmas?",
+  "answer": "Mistletoe",
+  "wrong": [
+   "Holly",
+   "Ivy"
+  ],
+  "level": 1,
+  "holiday": true
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "Which country is credited with starting the tradition of the Christmas tree?",
+  "answer": "Germany",
+  "wrong": [
+   "England",
+   "Norway"
+  ],
+  "level": 2,
+  "holiday": true
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "What is the candle holder used at Hanukkah called?",
+  "answer": "A menorah",
+  "wrong": [
+   "A kinara",
+   "A dreidel"
+  ],
+  "level": 1,
+  "holiday": true
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "What Christmas song begins 'Dashing through the snow'?",
+  "answer": "Jingle Bells",
+  "wrong": [
+   "Deck the Halls",
+   "Silent Night"
+  ],
+  "level": 1,
+  "holiday": true
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "What is the red-leafed plant that is a traditional Christmas decoration?",
+  "answer": "The poinsettia",
+  "wrong": [
+   "The amaryllis",
+   "Holly"
+  ],
+  "level": 1,
+  "holiday": true
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "What are the names of the three gifts the Wise Men brought to the baby Jesus?",
+  "answer": "Gold, frankincense and myrrh",
+  "wrong": [
+   "Gold, silver and spices",
+   "Silk, incense and gold"
+  ],
+  "level": 1,
+  "holiday": true
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "Who is the miserly main character in Dickens' 'A Christmas Carol'?",
+  "answer": "Ebenezer Scrooge",
+  "wrong": [
+   "Jacob Marley",
+   "Bob Cratchit"
+  ],
+  "level": 1,
+  "holiday": true
+ },
+ {
+  "category": "HOLIDAYS",
+  "question": "Who wrote 'A Christmas Carol'?",
+  "answer": "Charles Dickens",
+  "wrong": [
+   "Mark Twain",
+   "Louisa May Alcott"
+  ],
+  "level": 1,
+  "holiday": true
+ }
+]

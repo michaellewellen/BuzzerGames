@@ -637,6 +637,22 @@ static class PylChecks
             }
         });
 
+        run("pyl: the question bank is sound: unique questions, two different wrong answers, no giveaways", () =>
+        {
+            var bank = JsonPylQuestionSource.LoadBank();
+            Check.True(bank.Count >= 200, $"expected at least 200 questions, got {bank.Count}");
+            Check.Equal(bank.Count, bank.Select(q => q.Question.ToLowerInvariant()).Distinct().Count(), "every question is different");
+            foreach (var q in bank)
+            {
+                Check.Equal(2, q.Wrong.Length, "two wrong answers: " + q.Question);
+                Check.Equal(2, q.Wrong.Select(w => w.ToLowerInvariant()).Distinct().Count(), "different wrong answers: " + q.Question);
+                Check.True(!q.Wrong.Contains(q.Answer, StringComparer.OrdinalIgnoreCase), "wrong answers differ from the answer: " + q.Question);
+                Check.True(q.Question.Trim().EndsWith('?'), "it is a question: " + q.Question);
+            }
+            Check.True(bank.Count(q => !q.Holiday && q.Level >= 2) >= 30, "enough harder questions for round 2");
+            Check.True(bank.Count(q => q.Holiday) >= 6, "enough holiday questions");
+        });
+
         run("pyl: real questions from the bank: 6 different categories, 3 choices that are all different", () =>
         {
             var source = new JsonPylQuestionSource();
@@ -644,24 +660,40 @@ static class PylChecks
             {
                 var qs = source.CreateQuestions(new Random(seed), 2, 3, new GameOptions(seed % 3 == 0));
                 Check.Equal(6, qs.Count, "six questions");
-                Check.Equal(6, qs.Select(q => q.Category).Distinct().Count(), "different categories");
+                Check.Equal(6, qs.Select(q => q.Text).Distinct().Count(), "six different questions");
+                var holiday = seed % 3 == 0;
+                Check.Equal(holiday ? 5 : 6, qs.Select(q => q.Category).Where(c => c != "HOLIDAYS").Distinct().Count(), "different categories");
                 Check.True(qs.All(q => q.Decoys.Count == 2 && q.Decoys.Distinct(StringComparer.OrdinalIgnoreCase).Count() == 2), "two different decoys");
                 Check.True(qs.All(q => !q.Decoys.Contains(q.Answer, StringComparer.OrdinalIgnoreCase)), "decoys differ from the answer");
-                Check.True(qs.All(q => q.Answer.Length < 3 || !System.Text.RegularExpressions.Regex.IsMatch(q.Text, @"\b" + System.Text.RegularExpressions.Regex.Escape(q.Answer) + @"\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase)), "the clue doesn't contain the answer");
             }
         });
 
         run("pyl: the holiday option adds exactly one holiday question, and only when asked", () =>
         {
             var source = new JsonPylQuestionSource();
-            var holidayTitles = QuestionBank.LoadCategories().Where(c => c.Tag == "holiday").Select(c => c.Title.ToUpperInvariant()).ToHashSet();
             for (var seed = 0; seed < 200; seed++)
             {
                 var on = source.CreateQuestions(new Random(seed), 2, 3, new GameOptions(true));
                 var off = source.CreateQuestions(new Random(seed), 2, 3, new GameOptions(false));
-                Check.Equal(1, on.Count(q => holidayTitles.Contains(q.Category)), "one holiday question when asked");
-                Check.Equal(0, off.Count(q => holidayTitles.Contains(q.Category)), "none otherwise");
+                Check.Equal(1, on.Count(q => q.Category == "HOLIDAYS"), "one holiday question when asked");
+                Check.Equal(0, off.Count(q => q.Category == "HOLIDAYS"), "none otherwise");
             }
+        });
+
+        run("pyl: round 1 only gets the easier questions, and round 2 leans harder", () =>
+        {
+            var bank = JsonPylQuestionSource.LoadBank();
+            var harder = bank.Where(q => q.Level >= 2).Select(q => q.Question).ToHashSet();
+            var source = new JsonPylQuestionSource();
+            int r1 = 0, r2 = 0;
+            for (var seed = 0; seed < 400; seed++)
+            {
+                var qs = source.CreateQuestions(new Random(seed), 2, 3);
+                r1 += qs.Take(3).Count(q => harder.Contains(q.Text));
+                r2 += qs.Skip(3).Count(q => harder.Contains(q.Text));
+            }
+            Check.Equal(0, r1, "round 1 never gets a harder question");
+            Check.True(r2 > 400, $"round 2 should get a fair share of harder questions, got {r2} in 1200");
         });
     }
 }

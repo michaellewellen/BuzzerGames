@@ -44,6 +44,8 @@ Same setup as Jeopardy: create it on the TV at `/press-your-luck`, one emcee and
 
 **Colors and lights.** Cash squares are dealt one of eight colors (`.c0` to `.c7` in `app.css`), Big Bucks is green, and the square the light is on gets a ring of blinking bulbs.
 
+**Questions.** Press Your Luck has its own bank, `src/BuzzerGames.Core/Data/PressYourLuck/questions.json`: general-knowledge questions with one short spoken answer and two hand-picked wrong answers. Each game deals six, all from different categories. `level: 2` marks a harder one (round 2 favors those), and `holiday: true` marks the ones only used when the holiday box is ticked. It does not use the Jeopardy bank.
+
 **Editing the board.** `src/BuzzerGames.Core/Data/PressYourLuck/board-1.json` and `board-2.json` hold the square counts, the cash values and the prize list for each round. Round 1 leans on the newer show (lots of `+ SPIN`), round 2 on the older one (more prizes). Whammies per face (2, 3 and 4) are set there too. The values are my guesses, not the real 80s table.
 
 ## Run it on your computer
