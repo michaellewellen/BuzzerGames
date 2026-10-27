@@ -623,7 +623,9 @@ public sealed class PressYourLuckGame
                 message = $"{player.Name} takes ${outcome.Value:N0}!";
                 if (outcome.ExtraSpin)
                 {
-                    if (_actingPassed) _passedLeft++; else player.Spins++;
+                    // A spin earned while playing passed spins is the player's own: it joins their own spins,
+                    // and the passed spins keep counting down.
+                    player.Spins++;
                     message = $"{player.Name} takes ${outcome.Value:N0} and an extra spin!";
                 }
                 break;

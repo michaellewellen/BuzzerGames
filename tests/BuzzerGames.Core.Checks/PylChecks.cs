@@ -379,6 +379,21 @@ static class PylChecks
             Check.Fails(t.Game.Pass(t.Tokens[2], t.Ids[0]), "re-passing");
         });
 
+        run("pyl: a spin earned while playing passed spins is the player's own, and the passed spins still count down", () =>
+        {
+            var t = new PylTable();
+            t.PlayQuestionRound();
+            t.SpinFor(PylTable.IsPlainCash);
+            Check.Ok(t.Game.Pass(t.Tokens[1], t.Ids[2]));       // Cy gets Bob's 2 spins and has none of his own
+            Check.Equal(0, t.P(2).Spins, "Cy starts with no spins of his own");
+            t.SpinFor(PylTable.IsCashSpin);
+            Check.Equal(1, t.P(2).Spins, "the earned spin is Cy's own");
+            Check.True(t.S.ActingIsPassed && t.S.ActingSpinsLeft == 1, "one passed spin is left, not two");
+            t.SpinFor(PylTable.IsPlainCash);
+            Check.True(t.S.ActingId != t.Ids[2] || !t.S.ActingIsPassed, "the passed spins are used up");
+            Check.Equal(1, t.P(2).Spins, "Cy still has his earned spin for his own turn");
+        });
+
         run("pyl: passing goes to the single highest scorer without choosing", () =>
         {
             var t = new PylTable();
