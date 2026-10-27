@@ -33,7 +33,44 @@ window.pyl = (() => {
         <path d="M70 140 l8 14 l8 -14 M92 142 l8 16 l8 -16 M114 140 l8 14 l8 -14" fill="#fff"/>
       </svg>`;
 
-    let boardEl = null, centerEl = null, squares = [], board = [];
+    // Pictures: /images/whammy1.png .. whammy6.png (one is picked at random for each Whammy square), and
+    // /images/press_your_luck.png for the logo in the middle. If a picture is missing, a drawing stands in for it.
+    const WHAMMY_PICTURES = 6;
+
+    function whammyPicture(n, className) {
+        const img = document.createElement("img");
+        img.className = className;
+        img.alt = "Whammy";
+        img.src = `/images/whammy${n}.png`;
+        img.onerror = () => {
+            const stand = document.createElement("span");
+            stand.className = className + " stand-in";
+            stand.innerHTML = className.includes("big") ? WHAMMY_FACE : "WHAMMY";
+            img.replaceWith(stand);
+        };
+        return img;
+    }
+
+    function logoPicture() {
+        const img = document.createElement("img");
+        img.className = "pyl-logo";
+        img.alt = "Press Your Luck";
+        img.src = "/images/press_your_luck.png";
+        img.onerror = () => {
+            const stand = document.createElement("div");
+            stand.className = "pyl-logo stand-in";
+            stand.textContent = "PRESS YOUR LUCK";
+            img.replaceWith(stand);
+        };
+        return img;
+    }
+
+    function showLogo() {
+        centerEl.className = "pyl-center";
+        centerEl.replaceChildren(logoPicture());
+    }
+
+    let boardEl = null, centerEl = null, squares = [], board = [], whammyArt = [];
     let spin = null, offsetMs = 0, frame = 0, lastTick = -1, litSquare = -1;
     let audio = null, soundOn = false;
     const files = {};
@@ -47,6 +84,8 @@ window.pyl = (() => {
         cancelAnimationFrame(frame);
         spin = null;
         board = boardData || [];
+        // Each Whammy square on the board gets its own random picture, for as long as this board lasts.
+        whammyArt = board.map(faces => faces.map(() => 1 + Math.floor(Math.random() * WHAMMY_PICTURES)));
         stopSpinSound();
         boardEl.classList.remove("boom");
         boardEl.innerHTML = "";
@@ -63,18 +102,37 @@ window.pyl = (() => {
         centerEl = document.createElement("div");
         centerEl.className = "pyl-center";
         boardEl.appendChild(centerEl);
+        showLogo();
 
         draw(0, -1);
     }
 
+    // Big Bucks is worth the best cash showing on the page. This must pick the same square as the server does:
+    // the highest amount, and the first one (counting round from the top-left) if two are equal.
+    function bigBucksSquare(face, lit) {
+        if (lit < 0 || !board[lit] || !board[lit][face] || board[lit][face].kind !== "bigbucks") return -1;
+        let best = 0, at = -1;
+        board.forEach((faces, q) => {
+            const o = faces[face];
+            if (q !== lit && o.kind === "cash" && o.value > best) { best = o.value; at = q; }
+        });
+        return at;
+    }
+
     // Shows every square at the given face (page), with one square lit (or none, when lit is -1).
-    function draw(face, lit) {
+    // A second square can light with it: Big Bucks lights the square it is paying.
+    function draw(face, lit, linked) {
         litSquare = lit;
+        if (linked === undefined || linked === null) linked = bigBucksSquare(face, lit);
         squares.forEach((el, i) => {
             const o = (board[i] || [])[face];
             if (!o) { el.textContent = ""; return; }
-            el.className = "pyl-sq k-" + o.kind + (i === lit ? " lit" : "");
+            el.className = "pyl-sq k-" + o.kind + (i === lit ? " lit" : "") + (i === linked ? " lit linked" : "");
             el.innerHTML = "";
+            if (o.kind === "whammy") {
+                el.appendChild(whammyPicture(whammyArt[i][face], "whammy-pic"));
+                return;
+            }
             const t = document.createElement("span");
             t.className = "t";
             t.textContent = o.text;
@@ -97,7 +155,7 @@ window.pyl = (() => {
         offsetMs = s.serverNowUnixMs - Date.now();
         lastTick = -1;
         boardEl.classList.remove("boom");
-        centerEl.innerHTML = "";
+        showLogo();
         startSpinSound();
         cancelAnimationFrame(frame);
         frame = requestAnimationFrame(run);
@@ -123,30 +181,45 @@ window.pyl = (() => {
         spin = null;
         stopSpinSound();
         boardEl.classList.remove("boom");
-        draw(r.face, r.square);
+        draw(r.face, r.square, r.linkedSquare);
 
         if (r.pending) {
+            centerEl.className = "pyl-center";
             centerEl.innerHTML = `<div class="result"><span class="rt">PICK A CORNER!</span></div>`;
             return;
         }
 
         const sub = r.sub ? `<small>${esc(r.sub)}</small>` : "";
         if (r.kind === "whammy") {
-            centerEl.innerHTML = `<div class="result whammy">${WHAMMY_FACE}<span class="rt">WHAMMY!</span></div>`;
+            showWhammy(r);
             boardEl.classList.remove("boom");
             void boardEl.offsetWidth;            // restart the flash animation
             boardEl.classList.add("boom");
             play("whammy");
         } else {
+            centerEl.className = "pyl-center";
             centerEl.innerHTML = `<div class="result"><span class="rt">${esc(r.text)}</span>${sub}</div>`;
         }
+    }
+
+    // The Whammy that was hit, blown up in the middle of the board.
+    function showWhammy(r) {
+        centerEl.className = "pyl-center";
+        const wrap = document.createElement("div");
+        wrap.className = "result whammy";
+        wrap.appendChild(whammyPicture(((whammyArt[r.square] || [])[r.face]) || 1, "whammy-big"));
+        const word = document.createElement("span");
+        word.className = "rt";
+        word.textContent = "WHAMMY!";
+        wrap.appendChild(word);
+        centerEl.replaceChildren(wrap);
     }
 
     // Used when a screen opens mid-game: show the last result without any fanfare.
     function showResult(r) {
         if (!boardEl) return;
-        draw(r.face, r.square);
-        if (r.kind === "whammy") centerEl.innerHTML = `<div class="result whammy">${WHAMMY_FACE}<span class="rt">WHAMMY!</span></div>`;
+        draw(r.face, r.square, r.linkedSquare);
+        if (r.kind === "whammy") showWhammy(r);
         else centerEl.innerHTML = `<div class="result"><span class="rt">${esc(r.text)}</span>${r.sub ? `<small>${esc(r.sub)}</small>` : ""}</div>`;
     }
 

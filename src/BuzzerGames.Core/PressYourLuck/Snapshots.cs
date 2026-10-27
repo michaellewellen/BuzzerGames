@@ -38,7 +38,7 @@ public sealed record QuestionInfo(
     string Answer,
     string? AlsoAccept);
 
-public sealed record OutcomeInfo(string Kind, string Text, string? Sub);
+public sealed record OutcomeInfo(string Kind, string Text, string? Sub, int Value = 0);
 
 /// <summary>Everything a screen needs to run the light: it is sent once per spin.</summary>
 public sealed record SpinInfo(
@@ -56,6 +56,7 @@ public sealed record SpinResultInfo(
     int Tick,          // the tick the light stopped on
     int Face,          // the face the whole board was showing when it stopped
     int Square,        // the lit square
+    int LinkedSquare,  // a second square to light with it (Big Bucks lights the square it is paying), or -1
     string Kind,       // cash, prize, corner, whammy
     string Text,
     string? Sub,

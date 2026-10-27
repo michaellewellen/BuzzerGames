@@ -36,7 +36,11 @@ Same setup as Jeopardy: create it on the TV at `/press-your-luck`, one emcee and
 
 **Sound.** The TV has a "Click to turn on sound" button (browsers require a click). It plays built-in beeps. To use your own, drop files in `src/BuzzerGames.Web/wwwroot/sounds/` named `spin` (loops while the light runs and cuts off the moment someone presses) and `whammy` (plays on a Whammy), as `.mp3`, `.wav` or `.ogg`. Anything missing falls back to a built-in beep, and cash and prize results are silent because the host reads the amount.
 
-**Editing the board.** `src/BuzzerGames.Core/Data/PressYourLuck/board-1.json` and `board-2.json` hold the square counts, the cash values and the prize list for each round. Whammies per face (2, 3 and 4) are set there too. The values are my guesses, not the real 80s table.
+**Pictures.** Put these in `src/BuzzerGames.Web/wwwroot/images/`: `whammy1.png` to `whammy6.png` (square; every Whammy square on a board gets one picked at random, and the one you hit is blown up in the middle) and `press_your_luck.png` (the logo in the middle, 4 squares wide by 3 tall, shown whenever there is no result). If a picture is missing the game draws a stand-in, so nothing breaks.
+
+**Big Bucks.** One square per board. When the light lands on it, it pays the best cash amount showing on the board at that moment, and that square lights up too.
+
+**Editing the board.** `src/BuzzerGames.Core/Data/PressYourLuck/board-1.json` and `board-2.json` hold the square counts, the cash values and the prize list for each round. Round 1 leans on the newer show (lots of `+ SPIN`), round 2 on the older one (more prizes). Whammies per face (2, 3 and 4) are set there too. The values are my guesses, not the real 80s table.
 
 ## Run it on your computer
 

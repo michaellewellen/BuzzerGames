@@ -1,8 +1,10 @@
 // Round 1 Big Board. Edit freely: every game deals its board from these lists.
 // "counts" must add up to 45, because the 9 Whammies fill the other 9 of the 54 outcomes (18 squares x 3 faces).
+// Round 1 leans on the newer show: lots of "+ SPIN" squares and only a few prizes. "bigBucks" is the square that
+// pays the best cash showing on the board at that moment.
 {
   "whammiesPerFace": [2, 3, 4],
-  "counts": { "cash": 22, "cashSpin": 10, "big": 4, "prizes": 5, "corner": 4 },
+  "counts": { "cash": 19, "cashSpin": 12, "big": 4, "prizes": 5, "corner": 4, "bigBucks": 1 },
   "cash":     [500, 600, 700, 750, 800, 900, 1000, 1100, 1250, 1400],
   "cashSpin": [1000, 1250, 1500, 1750, 2000, 2500],
   "big":      [4000, 5000],
@@ -16,6 +18,10 @@
     { "name": "A dream kitchen", "value": 3200 },
     { "name": "A grand piano", "value": 4500 },
     { "name": "A ski trip", "value": 2200 },
-    { "name": "A riding mower", "value": 1600 }
+    { "name": "A riding mower", "value": 1600 },
+    { "name": "Exercise equipment", "value": 1500 },
+    { "name": "A gallery of art", "value": 2600 },
+    { "name": "A motorcycle", "value": 3400 },
+    { "name": "A jet ski", "value": 2400 }
   ]
 }

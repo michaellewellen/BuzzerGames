@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace BuzzerGames.Core.PressYourLuck;
 
-public enum OutcomeKind { Cash, Prize, Corner, Whammy }
+public enum OutcomeKind { Cash, Prize, Corner, Whammy, BigBucks }
 
 /// <summary>
 /// What one face of one square shows. Sub is the small second line ("+ SPIN", or a prize's dollar value).
@@ -21,6 +21,13 @@ public sealed record Outcome(OutcomeKind Kind, string Text, string? Sub = null, 
         new(OutcomeKind.Prize, name.ToUpperInvariant(), "$" + value.ToString("N0", CultureInfo.InvariantCulture), value);
 
     public static Outcome Corner { get; } = new(OutcomeKind.Corner, "PICK A CORNER");
+
+    /// <summary>The Big Bucks square as it sits on the board. It has no amount yet: it pays the best cash on the page.</summary>
+    public static Outcome BigBucks { get; } = new(OutcomeKind.BigBucks, "BIG BUCKS");
+
+    /// <summary>What Big Bucks turned into when the light stopped on it.</summary>
+    public static Outcome BigBucksWon(int amount) =>
+        new(OutcomeKind.BigBucks, "$" + amount.ToString("N0", CultureInfo.InvariantCulture), "BIG BUCKS", amount);
 }
 
 public sealed record PrizeRecord(
@@ -32,7 +39,8 @@ public sealed record BoardCounts(
     [property: JsonPropertyName("cashSpin")] int CashSpin,
     [property: JsonPropertyName("big")] int Big,
     [property: JsonPropertyName("prizes")] int Prizes,
-    [property: JsonPropertyName("corner")] int Corner);
+    [property: JsonPropertyName("corner")] int Corner,
+    [property: JsonPropertyName("bigBucks")] int BigBucks = 0);
 
 /// <summary>A Big Board recipe as written in Data/PressYourLuck/board-N.json.</summary>
 public sealed record BoardConfig(
@@ -79,7 +87,7 @@ public static class BoardFactory
     {
         var whammies = config.WhammiesPerFace.OrderBy(_ => rng.Next()).ToArray();
         var whammyTotal = whammies.Sum();
-        var others = config.Counts.Cash + config.Counts.CashSpin + config.Counts.Big + config.Counts.Prizes + config.Counts.Corner;
+        var others = config.Counts.Cash + config.Counts.CashSpin + config.Counts.Big + config.Counts.Prizes + config.Counts.Corner + config.Counts.BigBucks;
         if (whammies.Length != Faces || whammyTotal > Squares || whammyTotal + others != Squares * Faces)
             throw new InvalidOperationException($"A board needs exactly {Squares * Faces} outcomes (it has {whammyTotal + others}).");
 
@@ -114,6 +122,7 @@ public static class BoardFactory
         }
 
         var pool = new List<Outcome>();
+        for (var i = 0; i < config.Counts.BigBucks; i++) pool.Add(Outcome.BigBucks);
         for (var i = 0; i < config.Counts.Cash; i++) pool.Add(Outcome.Cash(Pick(config.Cash, rng)));
         for (var i = 0; i < config.Counts.CashSpin; i++) pool.Add(Outcome.Cash(Pick(config.CashSpin, rng), extraSpin: true));
         for (var i = 0; i < config.Counts.Big; i++) pool.Add(Outcome.Cash(Pick(config.Big, rng), extraSpin: true));

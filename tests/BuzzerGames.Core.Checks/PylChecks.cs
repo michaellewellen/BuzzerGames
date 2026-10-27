@@ -228,10 +228,34 @@ static class PylChecks
                     Check.True(perFace.SequenceEqual([2, 3, 4]), $"Whammies split 2/3/4 across faces, got {string.Join("/", perFace)}");
                     Check.Equal(4, all.Count(o => o.Kind == OutcomeKind.Corner), "Pick a Corner squares");
                     Check.True(BoardFactory.Corners.All(c => board[c].All(o => o.Kind != OutcomeKind.Corner)), "no Pick a Corner on a corner");
-                    Check.Equal(14, all.Count(o => o.Kind == OutcomeKind.Cash && o.ExtraSpin), "cash + spin squares (10 + 4 big)");
-                    Check.Equal(5, all.Count(o => o.Kind == OutcomeKind.Prize), "prizes");
+                    var expectedSpins = round == 1 ? 16 : 8;      // cash + spin, plus the big cash + spin squares
+                    var expectedPrizes = round == 1 ? 5 : 10;
+                    Check.Equal(expectedSpins, all.Count(o => o.Kind == OutcomeKind.Cash && o.ExtraSpin), "cash + spin squares");
+                    Check.Equal(expectedPrizes, all.Count(o => o.Kind == OutcomeKind.Prize), "prizes");
+                    Check.Equal(1, all.Count(o => o.Kind == OutcomeKind.BigBucks), "one Big Bucks square");
                 }
             }
+        });
+
+        run("pyl: Big Bucks pays the best cash on that page and lights that square too", () =>
+        {
+            var t = new PylTable();
+            t.PlayQuestionRound();
+            var player = t.IndexOf(t.S.ActingId!.Value);
+            var s = t.StartSpin();
+            var tick = PylTable.FindTick(s, o => o.Kind == "bigbucks");
+            var face = s.Spin!.Pages[tick];
+            var square = s.Spin.Sequence[tick];
+            var expected = Enumerable.Range(0, 18).Where(q => q != square && s.Board[q][face].Kind == "cash").Max(q => s.Board[q][face].Value);
+            var expectedSquare = Enumerable.Range(0, 18).First(q => q != square && s.Board[q][face].Kind == "cash" && s.Board[q][face].Value == expected);
+            var before = t.P(player).Score;
+            Check.Ok(t.PressAtTick(s, tick));
+            var r = t.S.LastSpin!;
+            Check.Equal("bigbucks", r.Kind, "the result is Big Bucks");
+            Check.Equal(square, r.Square, "the light's square");
+            Check.Equal(expectedSquare, r.LinkedSquare, "the best cash square lights too");
+            Check.Equal(before + expected, t.P(player).Score, "it pays the best cash showing");
+            Check.Equal(face, r.Face, "on that face");
         });
 
         run("pyl: round 2's board pays more than round 1's", () =>

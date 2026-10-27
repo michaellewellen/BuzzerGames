@@ -346,18 +346,18 @@ public sealed class PressYourLuckGame
         var tick = elapsed < 0 ? 0 : (int)(elapsed / TickMs);
         var square = _sequence[tick % _sequence.Length];
         var face = _pages[tick % _pages.Length];
-        var outcome = _board[square][face];
+        var outcome = Settle(square, face, out var linked);
 
         if (outcome.Kind == OutcomeKind.Corner)
         {
             _cornerTick = tick;
             _cornerFace = face;
-            _lastSpin = Announce(Acting!, tick, face, square, outcome, $"{Acting!.Name} landed on Pick a Corner!", pending: true);
+            _lastSpin = Announce(Acting!, tick, face, square, -1, outcome, $"{Acting!.Name} landed on Pick a Corner!", pending: true);
             _phase = PylPhase.PickCorner;
             return Result.Success;
         }
 
-        Resolve(Acting!, tick, face, square, outcome, null);
+        Resolve(Acting!, tick, face, square, linked, outcome, null);
         return Result.Success;
     });
 
@@ -368,8 +368,8 @@ public sealed class PressYourLuckGame
         if (_phase != PylPhase.PickCorner) return Result.Fail("There's no corner to pick right now.");
         if (!BoardFactory.Corners.Contains(corner)) return Result.Fail("That isn't a corner.");
 
-        var outcome = _board[corner][_cornerFace];
-        Resolve(Acting!, _cornerTick, _cornerFace, corner, outcome, "picked a corner:");
+        var outcome = Settle(corner, _cornerFace, out var linked);
+        Resolve(Acting!, _cornerTick, _cornerFace, corner, linked, outcome, "picked a corner:");
         return Result.Success;
     });
 
@@ -494,7 +494,7 @@ public sealed class PressYourLuckGame
                 GuessText: inQuestions ? _guessText : null,
                 Message: _message,
                 BoardId: _boardId,
-                Board: _board.Select(faces => (IReadOnlyList<OutcomeInfo>)faces.Select(o => new OutcomeInfo(o.Kind.ToString().ToLowerInvariant(), o.Text, o.Sub)).ToList()).ToList(),
+                Board: _board.Select(faces => (IReadOnlyList<OutcomeInfo>)faces.Select(o => new OutcomeInfo(o.Kind.ToString().ToLowerInvariant(), o.Text, o.Sub, o.Value)).ToList()).ToList(),
                 Spin: spin,
                 LastSpin: _lastSpin,
                 ActingId: inBoard || _phase == PylPhase.RoundOver ? _actingId : null,
@@ -674,11 +674,30 @@ public sealed class PressYourLuckGame
         return pages;
     }
 
-    private SpinResultInfo Announce(PlayerState player, int tick, int face, int square, Outcome outcome, string message, bool pending = false) =>
-        new(++_resultId, player.Id, player.Name, tick, face, square, outcome.Kind.ToString().ToLowerInvariant(), outcome.Text, outcome.Sub, message, pending);
+    /// <summary>
+    /// What the light really landed on. Big Bucks is worth the best cash amount showing on the board's current
+    /// face (the first such square wins a tie, from the top-left clockwise), and that square lights up with it.
+    /// </summary>
+    private Outcome Settle(int square, int face, out int linked)
+    {
+        linked = -1;
+        var outcome = _board[square][face];
+        if (outcome.Kind != OutcomeKind.BigBucks) return outcome;
+
+        var best = 0;
+        for (var q = 0; q < _board.Length; q++)
+        {
+            var o = _board[q][face];
+            if (q != square && o.Kind == OutcomeKind.Cash && o.Value > best) { best = o.Value; linked = q; }
+        }
+        return Outcome.BigBucksWon(best);
+    }
+
+    private SpinResultInfo Announce(PlayerState player, int tick, int face, int square, int linked, Outcome outcome, string message, bool pending = false) =>
+        new(++_resultId, player.Id, player.Name, tick, face, square, linked, outcome.Kind.ToString().ToLowerInvariant(), outcome.Text, outcome.Sub, message, pending);
 
     // Applies what the light landed on, then works out whose move is next.
-    private void Resolve(PlayerState player, int tick, int face, int square, Outcome outcome, string? cornerPhrase)
+    private void Resolve(PlayerState player, int tick, int face, int square, int linked, Outcome outcome, string? cornerPhrase)
     {
         string message;
         switch (outcome.Kind)
@@ -694,6 +713,11 @@ public sealed class PressYourLuckGame
                     _passedLeft = 0;
                     message += $" That's {WhammiesToBeOut} Whammies. {player.Name} is out!";
                 }
+                break;
+
+            case OutcomeKind.BigBucks:
+                player.Score += outcome.Value;
+                message = $"BIG BUCKS! {player.Name} takes ${outcome.Value:N0}!";
                 break;
 
             case OutcomeKind.Prize:
@@ -715,7 +739,7 @@ public sealed class PressYourLuckGame
         }
 
         if (cornerPhrase is not null) message = $"{player.Name} {cornerPhrase} {message}";
-        _lastSpin = Announce(player, tick, face, square, outcome, message);
+        _lastSpin = Announce(player, tick, face, square, linked, outcome, message);
 
         var remaining = player.IsOut ? 0 : _actingPassed ? _passedLeft : player.Spins;
         if (remaining > 0) _phase = PylPhase.SpinReady;
