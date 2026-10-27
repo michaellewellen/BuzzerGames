@@ -204,6 +204,28 @@ public sealed class PasswordGame
         return Result.Success;
     });
 
+    /// <summary>
+    /// The emcee throws out the puzzle being played (it turned out to be a dud for this crowd) and the next one in the line-up takes
+    /// its place, starting again at word 1. Scores and control stay as they are, nothing is held against either team, and the dud
+    /// is not dealt again this game. Not available once the puzzle is over.
+    /// </summary>
+    public Result SwapPuzzle(Guid emceeToken) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can swap the puzzle.");
+        if (_phase is not (PasswordPhase.Control or PasswordPhase.Clue or PasswordPhase.Guess or PasswordPhase.PuzzleGuess or PasswordPhase.WordResult))
+            return Result.Fail("There's no puzzle in play to swap.");
+
+        var list = _puzzles.ToList();
+        list.RemoveAt(_puzzleIndex);
+        if (_puzzleIndex >= list.Count) list.AddRange(_source.CreatePuzzles(_rng, PuzzlesPerGame));
+        _puzzles = list;
+
+        _wordIndex = 0;
+        _lastSolverTeam = -1;
+        StartWord($"New puzzle! {TeamNames[_controlTeam]} still has control.");
+        return Result.Success;
+    });
+
     private void BeginGame()
     {
         _puzzles = _source.CreatePuzzles(_rng, PuzzlesPerGame);

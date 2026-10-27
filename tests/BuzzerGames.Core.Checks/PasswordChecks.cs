@@ -690,6 +690,42 @@ static class PasswordChecks
             }
         });
 
+        run("password: the emcee can swap a dud puzzle for the next one, mid-word, without costing anyone anything", () =>
+        {
+            var t = new PasswordTable();
+            t.SolveWord(1, bigWordRight: false);                // Team B gets word 1 and misses the big word
+            Check.Ok(t.Game.Continue(t.Emcee));
+            t.Open(1);
+            t.Clue();                                           // a clue is up on word 2
+            var before = t.S;
+            Check.Equal("Mystery1", before.BigWord, "the first puzzle");
+            Check.Equal(1, before.ControlTeam, "Team B has control");
+
+            Check.Fails(t.Game.SwapPuzzle(t.Tokens[0]), "a player swapping");
+            Check.Ok(t.Game.SwapPuzzle(t.Emcee));
+            var s = t.S;
+            Check.Equal("Mystery2", s.BigWord, "the next puzzle takes its place");
+            Check.Equal(1, s.PuzzleNumber, "still the first puzzle of the game");
+            Check.Equal(1, s.WordNumber, "back at word 1");
+            Check.Equal(PasswordPhase.Control, s.Phase, "the control choice again");
+            Check.Equal(1, s.ControlTeam, "control is unchanged");
+            Check.Equal(0, s.Clues.Count, "no clues carried over");
+            Check.True(s.Words.Count(w => w.State == WordState.Waiting) == 4 && s.Words[0].State == WordState.Current, "a fresh set of words");
+            Check.Equal(0, s.Teams[0].Score + s.Teams[1].Score, "scores untouched");
+            Check.True(!s.BigWordRevealed, "the new big word is secret");
+            Check.True(s.Message is not null && s.Message.Contains("New puzzle"), "says what happened");
+
+            // It plays on from there, and the worth of the puzzle is unchanged.
+            t.Open(1);
+            t.ClueAndJudge(true);
+            Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, true));
+            Check.Equal(PasswordGame.PuzzleValue(0), t.S.Teams[1].Score, "Team B scores puzzle 1's value for the swapped-in puzzle");
+
+            // Once a puzzle is over there is nothing to swap, and neither in the lobby or after the game.
+            Check.Fails(t.Game.SwapPuzzle(t.Emcee), "swapping a finished puzzle");
+            Check.Fails(new PasswordTable(start: false).Game.SwapPuzzle(Guid.NewGuid()), "swapping in the lobby");
+        });
+
         run("password: switching partners keeps every phone signed in, with the second players trading teams", () =>
         {
             var t = new PasswordTable();

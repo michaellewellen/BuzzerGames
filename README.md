@@ -71,7 +71,9 @@ is the `/board` address.
 
 **Playing again.** After the bonus round the emcee chooses: *same players* (everyone stays signed in), *switch partners* (same phones, no QR code; the two second players trade teams, so A1 + B2 play B1 + A2), or *new players* (back to the lobby, everyone scans again).
 
-**Emcee tools.** The emcee's phone shows the password, the big word and the other answers to accept, and has Correct / Wrong buttons, "Throw out that clue", and can type a clue for a player whose phone died.
+**Emcee tools.** The emcee's phone shows the password, the big word and the other answers to accept, and has Correct / Wrong buttons, "Throw out that clue", and can type a clue for a player whose phone died. "Swap this puzzle" (two taps, to be safe) throws out a dud puzzle and starts the next one at word 1, with scores and control untouched.
+
+**What makes a good password.** The clue-giver only ever sees the password in play, never the big word, so a clue that leaks the big word is legal (that's part of the fun). The one thing that matters is that a password is easy to *clue*: concrete and vivid with an obvious association. Abstract words (think, open, blow) have no single hook and make a miserable password. (The bonus round is different: the guesser knows the letter, so abstract words work there.)
 
 **Puzzles.** `src/BuzzerGames.Core/Data/Password/puzzles.json`: each entry has a `kind` (Person, Place or Thing), the `answer`, five `words` ordered from vague to obvious, and optional `alsoAccept`. Each game deals 12, avoiding the same kind twice in a row.
 

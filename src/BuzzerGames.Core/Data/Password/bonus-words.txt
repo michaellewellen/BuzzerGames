@@ -5,6 +5,7 @@
 #   * ONE word, letters only. A proper noun is fine if it is a city, place, or a first or last name that
 #     belongs to someone famous ("Clinton" is great, "Anderson" is too vague).
 #   * Something a friend can clue in a few seconds without saying the word. Avoid obscure words.
+#   * Abstract words are fine here (think, consume): the guesser knows the letter, so "ponder" + T gets "think".
 #   * Keep a healthy number for every letter (X, Q and Z are the thin ones).
 
 # A

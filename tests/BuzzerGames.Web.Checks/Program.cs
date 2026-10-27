@@ -718,6 +718,10 @@ Run("pw emcee: sees the password, the big word and the other answers, with the r
     Check.True(Render.ShowsAnyCase(html, "Anchor") && Render.ShowsAnyCase(html, "Engine"), "and all five words");
     Check.True(Render.Has(html, "Play") && Render.Has(html, "Pass"), "the emcee can choose play or pass for a team");
 
+    Check.True(Render.Has(Render.PwEmcee(t), "Swap this puzzle") && !Render.Has(Render.PwEmcee(t), "Yes, swap it"), "a swap button, not yet armed");
+    for (var i = 0; i < 4; i++) Check.True(!Render.Has(Render.PwPlayer(t, i), "Swap this puzzle"), $"player {i} has no swap button");
+    Check.True(!Render.Has(Render.PwTv(t), "Swap this puzzle"), "the TV has no swap button");
+
     t.Open(0);
     html = Render.PwEmcee(t);
     Check.True(Render.Has(html, "Send clue for them"), "the emcee can type a clue for a dead phone");
