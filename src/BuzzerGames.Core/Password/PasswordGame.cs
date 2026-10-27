@@ -4,26 +4,27 @@ namespace BuzzerGames.Core.Password;
 
 /// <summary>
 /// One Password Plus game: two teams of two, one emcee, and puzzles worth more and more points until a team
-/// reaches 500.
+/// reaches 500, then a bonus round for the winners.
 ///
-///   A puzzle is a mystery "big word" and five password words that each hint at it. Each password is a "word"
-///   (the unit that is played): one partner gives one-word clues, the other guesses.
+///   A puzzle (a round) is a mystery "big word" and five password words that each hint at it, getting easier. A word
+///   is played by clue-giving: one partner gives one-word clues, the other guesses. The emcee judges every clue and guess.
 ///
-///   The team that most recently got a right ruling has control (a coin flip decides the first word) and chooses
-///   to play (their clue-giver gives the first clue) or pass. Clues then alternate between the teams, each clue
-///   followed by one guess from that team's guesser. Each side gets at most 4 clues. If all 8 clues miss, the word
-///   is posted on the board and nobody may guess the big word.
+///   The team that most recently got a word right has control (a coin flip decides the first word) and chooses to
+///   play (their clue-giver gives the first clue) or pass. Clues then alternate between the teams, each clue followed by
+///   one guess from that team's guesser. Each side gets at most 4 clues. A clue the emcee throws out is just spent.
+///   If all 8 clues miss, the word is posted on the board and the puzzle carries on with the next word.
 ///
-///   When a guesser gets the word, that guesser (and only that guesser) gets one shot at the big word. The
-///   exception is the fifth word: the guesser tries first, then their clue-giver, then the other team's guesser,
-///   then the other team's clue-giver. A right guess scores the puzzle's value for that player's team. Whenever a
-///   puzzle ends, any words not yet played are shown.
+///   When a guesser gets the word, that guesser (and only that guesser) gets one shot at the big word. The exception is the
+///   fifth word: the guesser tries first, then their clue-giver, then the other team's guesser, then the other team's
+///   clue-giver. If nobody gets the fifth word, the last team to guess a word in the puzzle starts that same chain.
+///   A right guess scores the puzzle's value (100, 100, 200, 200, 300, 300, then 400) and reveals the whole puzzle.
 ///
-///   The roles swap after every word: on the first word player 1 gives and player 2 guesses, on the second word
-///   player 2 gives and player 1 guesses, and so on, carrying on across puzzles.
+///   Roles swap only when a new puzzle begins: player 1 gives and player 2 guesses in the first puzzle, then they swap.
 ///
-///   Puzzles are worth 100, 100, 200, 200, 300, 300, then 400 each. The first team to reach 500 wins (and would go
-///   on to the bonus round).
+///   The team that reaches 500 (or leads after the last puzzle) plays the bonus round: ten words in alphabetical order from a
+///   random letter, 60 seconds, $100 per word and $10,000 for all ten. One partner faces the TV and gives clues, the other
+///   guesses with their back to it, and the emcee rules: got it, pass (the word comes back later if there is time), or a
+///   broken clue rule, which zaps the word.
 ///
 /// Like Jeopardy and Press Your Luck, this class knows nothing about web pages, and every public method takes one lock.
 /// </summary>
@@ -37,6 +38,11 @@ public sealed class PasswordGame
     public const int WordsPerPuzzle = 5;
     public const int CluesPerSide = 4;
     public const int WinScore = 500;
+
+    // The bonus round: ten words, one per letter in alphabetical order, in 60 seconds.
+    public const int BonusSeconds = 60;
+    public const int BonusLetterValue = 100;
+    public const int BonusJackpot = 10_000;
 
     /// <summary>The most puzzles one game can use. A game can end sooner; it never needs more than this.</summary>
     public const int PuzzlesPerGame = 12;
@@ -91,10 +97,23 @@ public sealed class PasswordGame
 
     private List<int> _winners = [];
 
+    private readonly IBonusWordSource _bonusWords;
+    private readonly Func<DateTime> _now;
+    private int _bonusTeam = -1;
+    private BonusRound? _bonusRound;
+    private readonly BonusSlotState[] _bonusStates = new BonusSlotState[TextBonusWordSource.WordsPerRound];
+    private readonly List<int> _bonusQueue = [];   // slots still to play, current first; passed words go to the back
+    private int _bonusGiverSlot;
+    private DateTime? _bonusEnds;
+    private int _bonusEarned;
+    private Timer? _bonusTimer;
+
     // ---- Public surface ------------------------------------------------------------------
 
-    public PasswordGame(string code, IPasswordPuzzleSource source, Random? rng = null)
+    public PasswordGame(string code, IPasswordPuzzleSource source, Random? rng = null, IBonusWordSource? bonusWords = null, Func<DateTime>? clock = null)
     {
+        _bonusWords = bonusWords ?? new TextBonusWordSource();
+        _now = clock ?? (() => DateTime.UtcNow);
         Code = code;
         _source = source;
         _rng = rng ?? new Random();
@@ -198,6 +217,20 @@ public sealed class PasswordGame
         _attempts.Clear();
         _attemptPos = 0;
         _winners = [];
+        ResetBonus();
+    }
+
+    private void ResetBonus()
+    {
+        _bonusTimer?.Dispose();
+        _bonusTimer = null;
+        _bonusTeam = -1;
+        _bonusRound = null;
+        Array.Clear(_bonusStates);
+        _bonusQueue.Clear();
+        _bonusGiverSlot = 0;
+        _bonusEnds = null;
+        _bonusEarned = 0;
     }
 
     // ---- One word ------------------------------------------------------------------------
@@ -388,6 +421,12 @@ public sealed class PasswordGame
 
         switch (_phase)
         {
+            case PasswordPhase.BonusResult:
+                FinishGame([_bonusTeam], _bonusEarned > 0
+                    ? $"wins the game and ${_bonusEarned:N0} in the bonus round!"
+                    : "wins the game, but not a penny in the bonus round.");
+                return Result.Success;
+
             case PasswordPhase.WordResult:
                 _wordIndex++;
                 StartWord(null);
@@ -395,17 +434,13 @@ public sealed class PasswordGame
 
             case PasswordPhase.PuzzleResult:
                 var best = _scores.Max();
-                if (best >= WinScore)
+                var leaders = _scores.Select((sc, i) => (sc, i)).Where(x => x.sc == best).Select(x => x.i).ToList();
+                var outOfPuzzles = _puzzleIndex + 1 >= _puzzles.Count;
+                if (best >= WinScore || outOfPuzzles)
                 {
-                    FinishGame(_scores.Select((s, i) => (s, i)).Where(x => x.s == best).Select(x => x.i).ToList(),
-                        "goes to the bonus round!");
-                    return Result.Success;
-                }
-                if (_puzzleIndex + 1 >= _puzzles.Count)
-                {
-                    // Out of puzzles: the higher score wins.
-                    FinishGame(_scores.Select((s, i) => (s, i)).Where(x => x.s == best).Select(x => x.i).ToList(),
-                        "wins on points!");
+                    // One clear winner plays the bonus round. A tie has no winner, so the game just ends.
+                    if (leaders.Count == 1) BeginBonusReady(leaders[0], best >= WinScore);
+                    else FinishGame(leaders, "");
                     return Result.Success;
                 }
                 _puzzleIndex++;
@@ -445,6 +480,106 @@ public sealed class PasswordGame
         _phase = PasswordPhase.Control;
     }
 
+    // ---- The bonus round -----------------------------------------------------------------
+
+    private void BeginBonusReady(int team, bool reachedScore)
+    {
+        _winners = [team];
+        _bonusTeam = team;
+        _bonusGiverSlot = 0;
+        _bonusRound = _bonusWords.CreateRound(_rng);
+        Array.Clear(_bonusStates);
+        _bonusQueue.Clear();
+        _bonusQueue.AddRange(Enumerable.Range(0, TextBonusWordSource.WordsPerRound));
+        _bonusEnds = null;
+        _bonusEarned = 0;
+        _turnTeam = -1;
+        _message = reachedScore
+            ? $"{TeamNames[team]} reached {WinScore} and goes to the bonus round!"
+            : $"{TeamNames[team]} wins on points and goes to the bonus round!";
+        _phase = PasswordPhase.BonusReady;
+    }
+
+    /// <summary>Before the clock starts, the emcee can swap who gives the clues (and faces the TV) and who guesses.</summary>
+    public Result BonusSwapRoles(Guid emceeToken) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
+        if (_phase != PasswordPhase.BonusReady) return Result.Fail("The roles can only be swapped before the clock starts.");
+        _bonusGiverSlot = 1 - _bonusGiverSlot;
+        return Result.Success;
+    });
+
+    /// <summary>The emcee starts the 60-second clock and the first word appears on the TV.</summary>
+    public Result StartBonus(Guid emceeToken) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can start the clock.");
+        if (_phase != PasswordPhase.BonusReady) return Result.Fail("The bonus round isn't ready to start.");
+
+        _bonusEnds = _now().AddSeconds(BonusSeconds);
+        _bonusStates[_bonusQueue[0]] = BonusSlotState.Current;
+        _message = null;
+        _phase = PasswordPhase.BonusPlay;
+        _bonusTimer?.Dispose();
+        _bonusTimer = new Timer(_ => Tick(), null, TimeSpan.FromSeconds(BonusSeconds) + TimeSpan.FromMilliseconds(100), Timeout.InfiniteTimeSpan);
+        return Result.Success;
+    });
+
+    /// <summary>The guesser said the word: add $100 and show the next one.</summary>
+    public Result BonusCorrect(Guid emceeToken) => Run(() => BonusRule(emceeToken, BonusSlotState.Correct));
+
+    /// <summary>Somebody said "pass": move on, and the word comes back at the end of the line if there is time.</summary>
+    public Result BonusPass(Guid emceeToken) => Run(() => BonusRule(emceeToken, BonusSlotState.Passed));
+
+    /// <summary>A clue rule was broken: the word is zapped (lost) and the next one comes up.</summary>
+    public Result BonusZap(Guid emceeToken) => Run(() => BonusRule(emceeToken, BonusSlotState.Zapped));
+
+    private Result BonusRule(Guid emceeToken, BonusSlotState outcome)
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can rule on the bonus words.");
+        if (_phase != PasswordPhase.BonusPlay) return Result.Fail("The bonus round isn't being played.");
+
+        // A tap that lands just after the buzzer is too late: the round ends and the tap is ignored.
+        if (_now() >= _bonusEnds) { FinishBonus(); return Result.Success; }
+
+        var current = _bonusQueue[0];
+        _bonusQueue.RemoveAt(0);
+        _bonusStates[current] = outcome;
+        if (outcome == BonusSlotState.Passed) _bonusQueue.Add(current);
+
+        if (_bonusQueue.Count == 0) FinishBonus();
+        else _bonusStates[_bonusQueue[0]] = BonusSlotState.Current;
+        return Result.Success;
+    }
+
+    /// <summary>Ends the round if the clock has run out. A timer calls this when the time is up; it is safe to call any time.</summary>
+    public Result Tick() => Run(() =>
+    {
+        if (_phase != PasswordPhase.BonusPlay || _bonusEnds is null) return Result.Fail("The clock isn't running.");
+        var left = _bonusEnds.Value - _now();
+        if (left > TimeSpan.Zero)
+        {
+            _bonusTimer?.Change(left + TimeSpan.FromMilliseconds(50), Timeout.InfiniteTimeSpan);
+            return Result.Fail("There's still time.");
+        }
+        FinishBonus();
+        return Result.Success;
+    });
+
+    private void FinishBonus()
+    {
+        _bonusTimer?.Dispose();
+        _bonusTimer = null;
+        _bonusQueue.Clear();
+        for (var i = 0; i < _bonusStates.Length; i++)
+            if (_bonusStates[i] is BonusSlotState.Current or BonusSlotState.Waiting) _bonusStates[i] = BonusSlotState.Waiting;
+        var correct = _bonusStates.Count(x => x == BonusSlotState.Correct);
+        _bonusEarned = correct == TextBonusWordSource.WordsPerRound ? BonusJackpot : correct * BonusLetterValue;
+        _message = correct == TextBonusWordSource.WordsPerRound
+            ? $"ALL TEN! {TeamNames[_bonusTeam]} wins ${_bonusEarned:N0}!"
+            : $"{TeamNames[_bonusTeam]} got {correct} of {TextBonusWordSource.WordsPerRound}: ${_bonusEarned:N0}.";
+        _phase = PasswordPhase.BonusResult;
+    }
+
     // ---- Seats and snapshots -------------------------------------------------------------
 
     public Seat GetSeat(Guid token)
@@ -462,7 +597,8 @@ public sealed class PasswordGame
         lock (_gate)
         {
             var inGame = _phase != PasswordPhase.Lobby && _puzzles.Count > 0;
-            var playing = inGame && _phase != PasswordPhase.GameOver;
+            var inBonus = _phase is PasswordPhase.BonusReady or PasswordPhase.BonusPlay or PasswordPhase.BonusResult;
+            var playing = inGame && _phase != PasswordPhase.GameOver && !inBonus;
             var puzzle = inGame ? _puzzles[_puzzleIndex] : null;
             var onClock = _phase is PasswordPhase.Clue or PasswordPhase.Guess or PasswordPhase.PuzzleGuess;
             var attempting = _phase == PasswordPhase.PuzzleGuess ? _attempts[_attemptPos] : (Guid?)null;
@@ -515,7 +651,19 @@ public sealed class PasswordGame
                 AttemptsLeft: _phase == PasswordPhase.PuzzleGuess ? _attempts.Count - _attemptPos : 0,
                 Message: _message,
                 Winners: _winners.ToList(),
-                CanStart: _phase == PasswordPhase.Lobby && IsFull());
+                CanStart: _phase == PasswordPhase.Lobby && IsFull(),
+                BonusTeam: inBonus ? _bonusTeam : -1,
+                BonusGiverId: inBonus ? PlayerAt(_bonusTeam, _bonusGiverSlot).Id : null,
+                BonusGuesserId: inBonus ? PlayerAt(_bonusTeam, 1 - _bonusGiverSlot).Id : null,
+                BonusSlots: inBonus && _bonusRound is not null
+                    ? _bonusRound.Words.Select((w, i) => new BonusSlotInfo(_bonusRound.LetterAt(i), w, _bonusStates[i])).ToList()
+                    : [],
+                BonusCurrent: _phase == PasswordPhase.BonusPlay && _bonusQueue.Count > 0 ? _bonusQueue[0] : -1,
+                BonusEndsAtUtc: inBonus ? _bonusEnds : null,
+                BonusMillisLeft: _phase == PasswordPhase.BonusPlay && _bonusEnds is { } ends ? (int)Math.Max(0, (ends - _now()).TotalMilliseconds) : 0,
+                BonusSeconds: BonusSeconds,
+                BonusCorrect: inBonus ? _bonusStates.Count(x => x == BonusSlotState.Correct) : 0,
+                BonusEarned: _phase == PasswordPhase.BonusResult ? _bonusEarned : 0);
         }
     }
 

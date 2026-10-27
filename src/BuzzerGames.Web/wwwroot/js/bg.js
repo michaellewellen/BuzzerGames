@@ -25,3 +25,21 @@ window.bg = {
     return url;
   }
 };
+
+// The Password Plus bonus-round countdown. The server owns the real clock and ends the round itself; this only makes the
+// numbers on screen tick down smoothly. An element with data-clock-end / data-clock-ms is counted down from the moment
+// it first appears (or when data-clock-end changes, which means a new clock), so a device's own clock doesn't matter.
+// It changes the text node's value in place, which Blazor's own updates to the page are fine with.
+setInterval(function () {
+  var now = Date.now();
+  document.querySelectorAll('[data-clock-end]').forEach(function (el) {
+    var key = el.getAttribute('data-clock-end');
+    if (el._clockKey !== key) {
+      el._clockKey = key;
+      el._clockDeadline = now + Number(el.getAttribute('data-clock-ms'));
+    }
+    var seconds = Math.max(0, Math.ceil((el._clockDeadline - now) / 1000));
+    if (el.firstChild && el.firstChild.nodeValue !== String(seconds)) el.firstChild.nodeValue = String(seconds);
+    el.classList.toggle('low', seconds <= 10);
+  });
+}, 200);

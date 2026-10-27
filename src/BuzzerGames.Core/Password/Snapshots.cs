@@ -13,6 +13,9 @@ public enum PasswordPhase
     PuzzleGuess,  // the word was guessed; someone gets a shot at the big word
     WordResult,   // the word is done and the puzzle is still open; the emcee taps Continue
     PuzzleResult, // the puzzle is done (solved or thrown out); the emcee taps Continue
+    BonusReady,   // the winning team is set up for the bonus round; the emcee taps Start
+    BonusPlay,    // 60 seconds, ten words, one clue-giver facing the TV and one guesser with their back to it
+    BonusResult,  // the clock ran out (or all ten were done); the emcee taps Continue
     GameOver
 }
 
@@ -22,6 +25,15 @@ public enum WordState
     Current,  // being played now
     Solved,   // guessed, so it is up on the board
     Posted    // nobody got it (or the puzzle ended), so it was put up on the board anyway
+}
+
+public enum BonusSlotState
+{
+    Waiting,  // not seen yet
+    Current,  // on the screen now
+    Passed,   // passed, and in line to come back
+    Correct,
+    Zapped    // a clue rule was broken, so the word is lost
 }
 
 public enum ClueOutcome { Pending, Miss, Hit, Rejected }
@@ -49,6 +61,8 @@ public sealed record PasswordWordInfo(int Number, string Text, WordState State);
 
 public sealed record PasswordClueInfo(int Team, string Text, ClueOutcome Outcome);
 
+public sealed record BonusSlotInfo(char Letter, string Word, BonusSlotState State);
+
 public sealed record PasswordSnapshot(
     string Code,
     PasswordPhase Phase,
@@ -73,7 +87,17 @@ public sealed record PasswordSnapshot(
     int AttemptsLeft,           // including the current one
     string? Message,
     IReadOnlyList<int> Winners,
-    bool CanStart)
+    bool CanStart,
+    int BonusTeam,                          // the team playing the bonus round, or -1
+    Guid? BonusGiverId,                     // faces the TV and gives the clues
+    Guid? BonusGuesserId,                   // back to the TV
+    IReadOnlyList<BonusSlotInfo> BonusSlots, // SECRET: the TV only shows the current word until the round is over
+    int BonusCurrent,                       // index into BonusSlots of the word on the screen, or -1
+    DateTime? BonusEndsAtUtc,
+    int BonusMillisLeft,                    // by the game's own clock, when this picture was taken
+    int BonusSeconds,
+    int BonusCorrect,
+    int BonusEarned)
 {
     public PasswordPlayerInfo? FindPlayer(Guid? id) => id is null ? null : Players.FirstOrDefault(p => p.Id == id);
     public PasswordPlayerInfo? Attempting => FindPlayer(AttemptingId);

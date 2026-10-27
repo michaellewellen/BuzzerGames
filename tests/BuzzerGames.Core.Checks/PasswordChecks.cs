@@ -17,9 +17,15 @@ sealed class PasswordTable
     public Guid[] Tokens { get; }
     public Guid[] Ids { get; }
 
-    public PasswordTable(int seed = 1, bool start = true, IPasswordPuzzleSource? source = null)
+    /// <summary>The game's clock. It only moves when a check calls <see cref="Advance"/>.</summary>
+    public DateTime Now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+
+    public void Advance(double seconds) => Now = Now.AddSeconds(seconds);
+
+    public PasswordTable(int seed = 1, bool start = true, IPasswordPuzzleSource? source = null, IBonusWordSource? bonus = null)
     {
-        Game = new PasswordGame("TEST", source ?? new FixedPasswordPuzzleSource(), new Random(seed));
+        Game = new PasswordGame("TEST", source ?? new FixedPasswordPuzzleSource(), new Random(seed),
+            bonus ?? new FixedBonusWordSource('A'), () => Now);
         Emcee = Game.JoinEmcee("Host").Token;
         Tokens =
         [
@@ -71,6 +77,43 @@ sealed class PasswordTable
         ClueAndJudge(true);
         Check.Equal(PasswordPhase.PuzzleGuess, S.Phase, "phase after a right word");
         Check.Ok(Game.JudgePuzzleGuess(Emcee, bigWordRight));
+    }
+
+    /// <summary>Starts the clock, lets all 60 seconds run out, and moves on to the end of the game.</summary>
+    public void PlayBonusOut()
+    {
+        Check.Equal(PasswordPhase.BonusReady, S.Phase, "ready for the bonus round");
+        Check.Ok(Game.StartBonus(Emcee));
+        Advance(PasswordGame.BonusSeconds + 1);
+        Check.Ok(Game.Tick());
+        Check.Equal(PasswordPhase.BonusResult, S.Phase, "the clock ran out");
+        Check.Ok(Game.Continue(Emcee));
+        Check.Equal(PasswordPhase.GameOver, S.Phase, "game over");
+    }
+
+    /// <summary>Solves puzzle after puzzle for <paramref name="team"/> until the game reaches the bonus round.</summary>
+    public void PlayToBonus(int team)
+    {
+        var guard = 0;
+        while (S.Phase != PasswordPhase.BonusReady && guard++ < 20)
+        {
+            SolveWord(team, bigWordRight: true);
+            Check.Ok(Game.Continue(Emcee));
+        }
+        Check.Equal(PasswordPhase.BonusReady, S.Phase, "reached the bonus round");
+    }
+
+    /// <summary>Plays on, solving everything for <paramref name="team"/> and playing the bonus out, until the game is over.</summary>
+    public void PlayToGameOver(int team)
+    {
+        var guard = 0;
+        while (S.Phase != PasswordPhase.GameOver && guard++ < 40)
+        {
+            if (S.Phase == PasswordPhase.BonusReady) { PlayBonusOut(); break; }
+            SolveWord(team, bigWordRight: true);
+            Check.Ok(Game.Continue(Emcee));
+        }
+        Check.Equal(PasswordPhase.GameOver, S.Phase, "the game ended");
     }
 
     /// <summary>From the Control phase: <paramref name="team"/> solves the whole puzzle on its first word, then the emcee continues.</summary>
@@ -566,9 +609,15 @@ static class PasswordChecks
             Check.Equal(600, t.S.Teams[0].Score, "Team A");
             Check.Ok(t.Game.Continue(t.Emcee));
             var s = t.S;
-            Check.Equal(PasswordPhase.GameOver, s.Phase, "game over");
+            Check.Equal(PasswordPhase.BonusReady, s.Phase, "Team A goes on to the bonus round");
             Check.True(s.Winners.SequenceEqual([0]), "Team A won");
             Check.True(s.Message is not null && s.Message.Contains("bonus round") && s.Message.Contains("Team A"), "the bonus round is announced");
+            Check.Fails(t.Game.ChooseControl(t.Emcee, true), "playing the puzzle during the bonus round");
+            Check.Equal("", s.CurrentWord, "no puzzle word is left lying around");
+            t.PlayBonusOut();
+            s = t.S;
+            Check.True(s.Winners.SequenceEqual([0]), "Team A still won");
+            Check.True(s.Message is not null && s.Message.Contains("Team A"), "and the ending names them");
             Check.Fails(t.Game.Continue(t.Emcee), "continuing a finished game");
             Check.Fails(t.Game.ChooseControl(t.Emcee, true), "playing on after the game");
             Check.Equal("", s.CurrentWord, "no secret word is left lying around");
@@ -578,11 +627,7 @@ static class PasswordChecks
         {
             var t = new PasswordTable();
             Check.Fails(t.Game.Restart(t.Emcee, true), "restarting mid-game");
-            while (t.S.Phase != PasswordPhase.GameOver)
-            {
-                t.SolveWord(0, bigWordRight: true);
-                Check.Ok(t.Game.Continue(t.Emcee));
-            }
+            t.PlayToGameOver(0);
             Check.Fails(t.Game.Restart(t.Tokens[0], true), "a player restarting");
             Check.Fails(t.Game.Restart(Guid.NewGuid(), false), "a stranger restarting");
 
@@ -595,11 +640,7 @@ static class PasswordChecks
             Check.Equal(Role.Player, t.Game.GetSeat(t.Tokens[3]).Role, "and their phone is still signed in");
             Check.True(s.Winners.Count == 0, "no winner yet");
 
-            while (t.S.Phase != PasswordPhase.GameOver)
-            {
-                t.SolveWord(1, bigWordRight: true);
-                Check.Ok(t.Game.Continue(t.Emcee));
-            }
+            t.PlayToGameOver(1);
             Check.Ok(t.Game.Restart(t.Emcee, samePlayers: false));
             s = t.S;
             Check.Equal(PasswordPhase.Lobby, s.Phase, "back to the lobby");
@@ -615,7 +656,7 @@ static class PasswordChecks
             t.SolveWord(1, bigWordRight: true);
             Check.Ok(t.Game.Continue(t.Emcee));
             var s = t.S;
-            Check.Equal(PasswordPhase.GameOver, s.Phase, "no puzzles left");
+            Check.Equal(PasswordPhase.BonusReady, s.Phase, "no puzzles left, so the leader plays the bonus round");
             Check.True(s.Winners.SequenceEqual([1]), "Team B has the most points");
             Check.True(s.Message is not null && s.Message.Contains("points"), "wins on points");
 
@@ -650,6 +691,225 @@ static class PasswordChecks
             Check.Equal("Thing", s.PuzzleKind, "what kind of answer it is");
             Check.Equal(WordsPerPuzzle, s.Words.Count, "five words");
             Check.True(s.Words.Select(w => w.Text).SequenceEqual(FixedPasswordPuzzleSource.Words), "in the order they are played");
+        });
+
+        Console.WriteLine();
+        Console.WriteLine("Password Plus: the bonus round");
+
+        run("bonus: the winners get ten words, A to J here, with Ann facing the TV and Bob guessing, until the emcee swaps them", () =>
+        {
+            var t = new PasswordTable();
+            t.PlayToBonus(0);
+            var s = t.S;
+            Check.Equal(0, s.BonusTeam, "Team A plays");
+            Check.Equal(10, s.BonusSlots.Count, "ten words");
+            Check.True(s.BonusSlots.Select(x => x.Letter).SequenceEqual("ABCDEFGHIJ"), "A to J in order");
+            Check.True(s.BonusSlots.All(x => x.Word[0] == x.Letter), "each word starts with its letter");
+            Check.True(s.BonusSlots.All(x => x.State == BonusSlotState.Waiting), "nothing played yet");
+            Check.Equal(-1, s.BonusCurrent, "no word is showing before the clock starts");
+            Check.Equal(null, s.BonusEndsAtUtc, "and no clock yet");
+            Check.Equal(t.Ids[0], s.BonusGiverId, "Ann gives the clues");
+            Check.Equal(t.Ids[1], s.BonusGuesserId, "Bob guesses");
+
+            Check.Fails(t.Game.BonusSwapRoles(t.Tokens[0]), "a player swapping");
+            Check.Fails(t.Game.StartBonus(t.Tokens[0]), "a player starting the clock");
+            Check.Fails(t.Game.BonusCorrect(t.Emcee), "ruling before the clock starts");
+            Check.Ok(t.Game.BonusSwapRoles(t.Emcee));
+            Check.Equal(t.Ids[1], t.S.BonusGiverId, "Bob gives the clues after the swap");
+            Check.Equal(t.Ids[0], t.S.BonusGuesserId, "Ann guesses");
+            Check.Ok(t.Game.BonusSwapRoles(t.Emcee));
+            Check.Equal(t.Ids[0], t.S.BonusGiverId, "and swaps back");
+
+            Check.Ok(t.Game.StartBonus(t.Emcee));
+            s = t.S;
+            Check.Equal(PasswordPhase.BonusPlay, s.Phase, "playing");
+            Check.Equal(0, s.BonusCurrent, "the A word is up");
+            Check.Equal(t.Now.AddSeconds(60), s.BonusEndsAtUtc, "sixty seconds on the clock");
+            Check.Fails(t.Game.BonusSwapRoles(t.Emcee), "swapping with the clock running");
+            Check.Fails(t.Game.StartBonus(t.Emcee), "starting twice");
+        });
+
+        run("bonus: only the emcee rules; correct moves on; pass sends the word to the back of the line and brings it back", () =>
+        {
+            var t = new PasswordTable();
+            t.PlayToBonus(0);
+            Check.Ok(t.Game.StartBonus(t.Emcee));
+            Check.Fails(t.Game.BonusCorrect(t.Tokens[0]), "the clue-giver ruling");
+            Check.Fails(t.Game.BonusPass(t.Tokens[1]), "the guesser passing");
+            Check.Fails(t.Game.BonusZap(Guid.NewGuid()), "a stranger zapping");
+
+            Check.Ok(t.Game.BonusPass(t.Emcee));               // pass on A
+            var s = t.S;
+            Check.Equal(BonusSlotState.Passed, s.BonusSlots[0].State, "A is passed");
+            Check.Equal(1, s.BonusCurrent, "B is next");
+            Check.Equal(BonusSlotState.Current, s.BonusSlots[1].State, "B is showing");
+
+            for (var i = 1; i < 10; i++)
+            {
+                Check.Equal(i, t.S.BonusCurrent, $"the {"ABCDEFGHIJ"[i]} word is up");
+                Check.Ok(t.Game.BonusCorrect(t.Emcee));
+            }
+            s = t.S;
+            Check.Equal(PasswordPhase.BonusPlay, s.Phase, "still going: A is waiting");
+            Check.Equal(0, s.BonusCurrent, "the passed A word comes back after J");
+            Check.Equal(BonusSlotState.Current, s.BonusSlots[0].State, "and is showing");
+            Check.Equal(9, s.BonusCorrect, "nine right so far");
+
+            Check.Ok(t.Game.BonusCorrect(t.Emcee));
+            s = t.S;
+            Check.Equal(PasswordPhase.BonusResult, s.Phase, "all ten done, so the round ends before the clock does");
+            Check.Equal(10, s.BonusCorrect, "all ten");
+            Check.Equal(10_000, s.BonusEarned, "$10,000 for all ten");
+            Check.True(s.Message!.Contains("ALL TEN") && s.Message.Contains("10,000"), "announced");
+            Check.Fails(t.Game.BonusCorrect(t.Emcee), "ruling after the round");
+
+            Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Equal(PasswordPhase.GameOver, t.S.Phase, "game over");
+            Check.True(t.S.Message!.Contains("Team A") && t.S.Message.Contains("10,000"), "the winnings are in the ending");
+        });
+
+        run("bonus: passed words come back in the order they were passed, and a word can be passed again", () =>
+        {
+            var t = new PasswordTable();
+            t.PlayToBonus(0);
+            Check.Ok(t.Game.StartBonus(t.Emcee));
+            Check.Ok(t.Game.BonusPass(t.Emcee));               // A passed
+            Check.Ok(t.Game.BonusPass(t.Emcee));               // B passed
+            for (var i = 2; i < 10; i++) Check.Ok(t.Game.BonusCorrect(t.Emcee));   // C to J
+            Check.Equal(0, t.S.BonusCurrent, "A comes back first");
+            Check.Ok(t.Game.BonusPass(t.Emcee));               // A again
+            Check.Equal(1, t.S.BonusCurrent, "then B");
+            Check.Ok(t.Game.BonusCorrect(t.Emcee));
+            Check.Equal(0, t.S.BonusCurrent, "and A one more time");
+            Check.Ok(t.Game.BonusCorrect(t.Emcee));
+            Check.Equal(10_000, t.S.BonusEarned, "and it still adds up");
+        });
+
+        run("bonus: a zapped word is lost, $100 a word, and no jackpot without all ten", () =>
+        {
+            var t = new PasswordTable();
+            t.PlayToBonus(1);
+            Check.Ok(t.Game.StartBonus(t.Emcee));
+            Check.Ok(t.Game.BonusZap(t.Emcee));
+            Check.Equal(BonusSlotState.Zapped, t.S.BonusSlots[0].State, "the A word is zapped");
+            for (var i = 1; i < 10; i++) Check.Ok(t.Game.BonusCorrect(t.Emcee));
+            var s = t.S;
+            Check.Equal(PasswordPhase.BonusResult, s.Phase, "nothing is left to play: a zapped word does not come back");
+            Check.Equal(9, s.BonusCorrect, "nine right");
+            Check.Equal(900, s.BonusEarned, "nine hundred dollars");
+            Check.Equal(1, s.BonusTeam, "Team B played");
+            Check.Ok(t.Game.Continue(t.Emcee));
+            Check.True(t.S.Winners.SequenceEqual([1]) && t.S.Message!.Contains("Team B") && t.S.Message.Contains("900"), "Team B and $900 in the ending");
+        });
+
+        run("bonus: the clock is the server's; time up ends the round, and a late tap does not count", () =>
+        {
+            var t = new PasswordTable();
+            t.PlayToBonus(0);
+            Check.Fails(t.Game.Tick(), "ticking before the clock starts");
+            Check.Ok(t.Game.StartBonus(t.Emcee));
+            Check.Ok(t.Game.BonusCorrect(t.Emcee));
+            Check.Ok(t.Game.BonusCorrect(t.Emcee));
+            t.Advance(59.5);
+            Check.Fails(t.Game.Tick(), "half a second left");
+            Check.Equal(PasswordPhase.BonusPlay, t.S.Phase, "still playing");
+            Check.Ok(t.Game.BonusPass(t.Emcee));                // within the time, still allowed
+            t.Advance(1);
+            Check.Ok(t.Game.BonusCorrect(t.Emcee));             // too late: the round ends and this is ignored
+            var s = t.S;
+            Check.Equal(PasswordPhase.BonusResult, s.Phase, "time is up");
+            Check.Equal(2, s.BonusCorrect, "only the two before the buzzer count");
+            Check.Equal(200, s.BonusEarned, "two hundred dollars");
+            Check.True(s.BonusSlots.Count(x => x.State == BonusSlotState.Waiting) + s.BonusSlots.Count(x => x.State == BonusSlotState.Passed) == 8, "the rest were not won");
+            Check.Equal(-1, s.BonusCurrent, "no word is showing any more");
+        });
+
+        run("bonus: it can start anywhere and wraps from Z back to A", () =>
+        {
+            var t = new PasswordTable(bonus: new FixedBonusWordSource('X'));
+            t.PlayToBonus(0);
+            Check.True(t.S.BonusSlots.Select(x => x.Letter).SequenceEqual("XYZABCDEFG"), "X to G");
+            Check.True(t.S.BonusSlots.Select(x => x.Word).SequenceEqual(["Xest", "Yest", "Zest", "Aest", "Best", "Cest", "Dest", "Eest", "Fest", "Gest"]), "the words follow");
+        });
+
+        run("bonus: nobody is left in the bonus round after a restart, and a tie has no bonus round", () =>
+        {
+            var t = new PasswordTable();
+            t.PlayToGameOver(0);
+            Check.Ok(t.Game.Restart(t.Emcee, samePlayers: true));
+            var s = t.S;
+            Check.Equal(-1, s.BonusTeam, "no bonus team");
+            Check.Equal(0, s.BonusSlots.Count, "no bonus words");
+            Check.Equal(null, s.BonusEndsAtUtc, "no clock");
+            Check.Equal(0, s.BonusEarned, "no winnings");
+
+            // The restart while a clock is running isn't possible (the game isn't over), but a timer from an old round must be harmless.
+            Check.Fails(t.Game.Tick(), "a stray tick");
+        });
+
+        run("bonus: before the bonus round the snapshot holds no bonus words", () =>
+        {
+            var t = new PasswordTable();
+            var s = t.S;
+            Check.Equal(0, s.BonusSlots.Count, "no words dealt yet");
+            Check.Equal(-1, s.BonusTeam, "no team yet");
+            t.SolveWord(0, bigWordRight: true);
+            Check.Equal(0, t.S.BonusSlots.Count, "still none after a puzzle");
+        });
+
+        Console.WriteLine();
+        Console.WriteLine("Password Plus: the bonus word bank");
+
+        run("bonus bank: every letter has plenty of clean, clue-able single words", () =>
+        {
+            var words = TextBonusWordSource.LoadBank();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var w in words)
+            {
+                Check.True(w.Length is >= 2 and <= 15 && w.All(char.IsLetter), $"\"{w}\" must be one plain word of letters");
+                Check.True(char.IsUpper(w[0]), $"\"{w}\" starts with a capital");
+                Check.True(seen.Add(w), $"\"{w}\" appears twice");
+            }
+            var bank = TextBonusWordSource.Group(words);
+            for (var c = 'A'; c <= 'Z'; c++)
+            {
+                var need = c is 'X' ? 8 : c is 'Q' ? 12 : 14;
+                Check.True(bank.TryGetValue(c, out var list) && list.Count >= need, $"{c}: needs at least {need} words, has {(bank.TryGetValue(c, out var l2) ? l2.Count : 0)}");
+            }
+        });
+
+        run("bonus bank: every deal is ten words, one per letter in order, and a night of games doesn't repeat itself", () =>
+        {
+            var source = new TextBonusWordSource();
+            var rng = new Random(5);
+            var starts = new HashSet<char>();
+            var wrapped = false;
+            var perLetter = new Dictionary<char, List<string>>();
+            for (var round = 0; round < 60; round++)
+            {
+                var r = source.CreateRound(rng);
+                starts.Add(r.StartLetter);
+                if (r.StartLetter > 'Q') wrapped = true;
+                Check.Equal(10, r.Words.Count, "ten words");
+                for (var i = 0; i < 10; i++)
+                {
+                    var letter = r.LetterAt(i);
+                    Check.Equal(letter, char.ToUpperInvariant(r.Words[i][0]), $"word {i + 1} starts with {letter}");
+                    if (!perLetter.TryGetValue(letter, out var list)) perLetter[letter] = list = [];
+                    list.Add(r.Words[i]);
+                }
+                Check.Equal(10, r.Words.Distinct().Count(), "the ten words are different");
+            }
+            Check.True(starts.Count >= 12, $"the starting letter varies (saw {starts.Count})");
+            Check.True(wrapped, "some rounds wrapped around from Z to A");
+            // No word shows up twice for a letter until that letter's whole list has been used.
+            var bank = source.Bank;
+            foreach (var (letter, dealt) in perLetter)
+            {
+                var size = bank[letter].Count;
+                foreach (var chunk in dealt.Chunk(size))
+                    Check.Equal(chunk.Length, chunk.Distinct().Count(), $"{letter}: no repeats within a pass through {size} words");
+            }
         });
 
         Console.WriteLine();

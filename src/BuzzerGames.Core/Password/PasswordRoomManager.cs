@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 namespace BuzzerGames.Core.Password;
 
 /// <summary>Keeps every running Password Plus game in memory, findable by its short room code.</summary>
-public sealed class PasswordRoomManager(IPasswordPuzzleSource source)
+public sealed class PasswordRoomManager(IPasswordPuzzleSource source, IBonusWordSource? bonusWords = null)
 {
     // No vowels, so a room code can never spell a word you'd rather not show on the big screen.
     private const string CodeAlphabet = "BCDFGHJKLMNPQRSTVWXZ";
@@ -20,7 +20,7 @@ public sealed class PasswordRoomManager(IPasswordPuzzleSource source)
             {
                 for (var i = 0; i < span.Length; i++) span[i] = CodeAlphabet[Random.Shared.Next(CodeAlphabet.Length)];
             });
-            var game = new PasswordGame(code, source);
+            var game = new PasswordGame(code, source, bonusWords: bonusWords);
             if (_games.TryAdd(code, game)) return game;
         }
     }

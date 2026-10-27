@@ -34,4 +34,23 @@ public static class PasswordText
         ClueOutcome.Rejected => "rejected",
         _ => "pending"
     };
+
+    public static string BonusClass(BonusSlotState state) => state switch
+    {
+        BonusSlotState.Current => "current",
+        BonusSlotState.Passed => "passed",
+        BonusSlotState.Correct => "correct",
+        BonusSlotState.Zapped => "zapped",
+        _ => "waiting"
+    };
+
+    public static string BonusMark(BonusSlotState state) => state switch
+    {
+        BonusSlotState.Correct => "✓",
+        BonusSlotState.Zapped => "✗",
+        BonusSlotState.Passed => "pass",
+        _ => "–"
+    };
+
+    public static string Money(int amount) => "$" + amount.ToString("N0");
 }

@@ -641,3 +641,34 @@ a.game-tile:hover { border-color: var(--gold); }
 .pw-lobby .roster li.team-b .seat-label { color: var(--team-b); }
 .btn.pw-join-a { background: var(--team-a); }
 .btn.pw-join-b { background: var(--team-b); }
+
+
+/* ---- Password Plus: the bonus round ---- */
+.pw-bonus { text-align: center; }
+.bonus-clock { font-size: clamp(5rem, 16vw, 12rem); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; margin: .1em 0 .15em; }
+.bonus-clock.low { color: #ff5a4f; }
+.bonus-clock.done { font-size: clamp(3rem, 9vw, 7rem); }
+.bonus-clock.small { font-size: 3.4rem; margin: 0; text-align: center; }
+.bonus-letters { display: flex; flex-wrap: wrap; gap: .35em; justify-content: center; margin: .2em 0 .6em; }
+.bonus-letter { min-width: 1.6em; padding: .15em .25em; border-radius: .35em; font-weight: 800; font-size: clamp(1.4rem, 3.6vw, 2.6rem); border: .12em solid currentColor; opacity: .55; }
+.bonus-letter.current { opacity: 1; background: #fff; color: #111; }
+.bonus-letter.correct { opacity: 1; background: #1faa59; border-color: #1faa59; color: #fff; }
+.bonus-letter.zapped { opacity: 1; background: #d63a2f; border-color: #d63a2f; color: #fff; text-decoration: line-through; }
+.bonus-letter.passed { opacity: 1; border-color: #f2c230; color: #f2c230; }
+.bonus-word { font-size: clamp(3rem, 11vw, 9rem); font-weight: 800; letter-spacing: .03em; margin: .1em 0 .2em; }
+.bonus-instruction { font-size: clamp(1.1rem, 2.2vw, 1.8rem); margin: .3em 0; }
+.bonus-review { list-style: none; padding: 0; margin: .4em auto; max-width: 36rem; text-align: left; font-size: clamp(1.1rem, 2.4vw, 1.9rem); }
+.bonus-review li { display: flex; gap: .8em; padding: .12em .4em; border-radius: .3em; }
+.bonus-review li.correct { background: rgba(31,170,89,.35); }
+.bonus-review li.zapped { background: rgba(214,58,47,.35); text-decoration: line-through; }
+.bonus-review li.passed, .bonus-review li.waiting, .bonus-review li.current { opacity: .6; }
+.bonus-review-letter { font-weight: 800; width: 1.2em; }
+.bonus-review-word { flex: 1; }
+.bonus-emcee-word { text-align: center; }
+.bonus-emcee-text { font-size: 2.6rem; font-weight: 800; margin: .1em 0; }
+.bonus-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .6rem; margin: .8rem 0; }
+.bonus-btn { font-size: 2rem; font-weight: 800; padding: 1.1rem .2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; border: 0; border-radius: .7rem; }
+.bonus-btn small { font-size: .75rem; font-weight: 600; }
+.bonus-right { background: #1faa59; }
+.bonus-wrong { background: #d63a2f; }
+.bonus-pass { background: #f2c230; color: #222; font-size: 1.5rem; }

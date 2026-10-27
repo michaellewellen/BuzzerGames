@@ -461,9 +461,31 @@ Console.WriteLine("Password Plus screens");
 
 // Whatever the screens show, the secrets must stay secret: the TV never shows an unrevealed word or the big word, a guesser's phone
 // never shows the word being played, and no player's phone ever shows the big word. Drawn after every action of a whole game below.
+bool ShowsWord(string html, string word) =>
+    System.Text.RegularExpressions.Regex.IsMatch(html, $"(?<![A-Za-z]){System.Text.RegularExpressions.Regex.Escape(word)}(?![A-Za-z])", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+// The bonus round has its own secrets: the TV shows only the word being played (nothing before or after the clock),
+// the guesser has their back turned so no phone may show a bonus word, and only the emcee's phone shows the current one.
+void AssertBonusSecrets(PasswordTable t)
+{
+    var s = t.S;
+    var tv = Render.PwTv(t);
+    for (var i = 0; i < s.BonusSlots.Count; i++)
+    {
+        var word = s.BonusSlots[i].Word;
+        var allowedOnTv = s.Phase == PasswordPhase.BonusResult || (s.Phase == PasswordPhase.BonusPlay && i == s.BonusCurrent);
+        Check.True(ShowsWord(tv, word) == allowedOnTv, $"the TV {(allowedOnTv ? "should" : "must not")} show \"{word}\" in {s.Phase}");
+        for (var p = 0; p < 4; p++)
+            Check.True(!ShowsWord(Render.PwPlayer(t, p), word), $"player {p}'s phone shows the bonus word \"{word}\"");
+        var emcee = Render.PwEmcee(t);
+        Check.True(ShowsWord(emcee, word) == (s.Phase == PasswordPhase.BonusPlay && i == s.BonusCurrent), $"the emcee should see only the current word (\"{word}\" in {s.Phase})");
+    }
+}
+
 void AssertPasswordSecrets(PasswordTable t)
 {
     var s = t.S;
+    if (s.Phase is PasswordPhase.BonusReady or PasswordPhase.BonusPlay or PasswordPhase.BonusResult) { AssertBonusSecrets(t); return; }
     if (s.Phase is PasswordPhase.Lobby or PasswordPhase.GameOver) return;
 
     var tv = Render.PwTv(t);
@@ -719,18 +741,22 @@ Run("pw emcee: sees the password, the big word and the other answers, with the r
     Check.True(Render.Has(Render.PwEmcee(t), "Next puzzle"), "a Next puzzle button after a solved puzzle");
 });
 
-Run("pw emcee: the end of the game offers the play-again buttons, and only the emcee gets them", () =>
+Run("pw emcee: a win leads to the bonus round, and the end of the game offers the play-again buttons, only to the emcee", () =>
 {
     var t = new PasswordTable();
-    while (t.S.Phase != PasswordPhase.GameOver)
+    var guard = 0;
+    while (t.S.Phase != PasswordPhase.BonusReady && guard++ < 20)
     {
         t.SolveWord(0, bigWordRight: true);
-        if (t.S.Teams[0].Score >= PasswordGame.WinScore) Check.True(Render.Has(Render.PwEmcee(t), "Finish the game"), "the last result says Finish the game");
+        if (t.S.Teams[0].Score >= PasswordGame.WinScore) Check.True(Render.Has(Render.PwEmcee(t), "On to the bonus round"), "the last result says on to the bonus round");
         Check.Ok(t.Game.Continue(t.Emcee));
     }
+    Check.True(Render.Has(Render.PwEmcee(t), "bonus round") && Render.Has(Render.PwEmcee(t), "Start the 60-second clock"), "the bonus round is announced");
+    t.PlayBonusOut();
+
     var emcee = Render.PwEmcee(t);
     Check.True(Render.Has(emcee, "Play again, same players") && Render.Has(emcee, "Play again, new players"), "both play-again buttons");
-    Check.True(Render.Has(emcee, "bonus round"), "the bonus round is announced");
+    Check.True(Render.Has(emcee, "bonus round"), "the bonus round is in the ending");
     for (var i = 0; i < 4; i++) Check.True(!Render.Has(Render.PwPlayer(t, i), "Play again"), $"player {i} doesn't get them");
     Check.True(!Render.Has(Render.PwTv(t), "Play again,"), "the TV doesn't get them");
 
@@ -738,6 +764,7 @@ Run("pw emcee: the end of the game offers the play-again buttons, and only the e
     Check.True(Render.Has(Render.PwPlayer(t, 2), "Game over") && !Render.Has(Render.PwPlayer(t, 3), "Your team won"), "the other team is not");
     Check.True(Render.Has(Render.PwTv(t), "GAME OVER") && Render.Has(Render.PwTv(t), "bonus round"), "the TV shows the winner");
 });
+
 
 Console.WriteLine("Every Password Plus screen, every phase");
 
@@ -753,6 +780,7 @@ Run("pw: a whole game, drawing the TV, the emcee and all four phones after every
     };
 
     var n = 0;
+    var bonusMoves = 0;
     var guard = 0;
     var phases = new HashSet<PasswordPhase>();
     while (t.S.Phase != PasswordPhase.GameOver && guard++ < 3000)
@@ -775,6 +803,18 @@ Run("pw: a whole game, drawing the TV, the emcee and all four phones after every
             case PasswordPhase.PuzzleGuess:
                 Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, n % 4 == 0));
                 break;
+            case PasswordPhase.BonusReady:
+                if (n % 2 == 0) Check.Ok(t.Game.BonusSwapRoles(t.Emcee));
+                Check.Ok(t.Game.StartBonus(t.Emcee));
+                bonusMoves = 0;
+                break;
+            case PasswordPhase.BonusPlay:
+                bonusMoves++;
+                if (bonusMoves > 14) { t.Advance(61); Check.Ok(t.Game.Tick()); }
+                else if (bonusMoves % 5 == 0) Check.Ok(t.Game.BonusPass(t.Emcee));
+                else if (bonusMoves % 7 == 0) Check.Ok(t.Game.BonusZap(t.Emcee));
+                else Check.Ok(t.Game.BonusCorrect(t.Emcee));
+                break;
             default:
                 Check.Ok(t.Game.Continue(t.Emcee));
                 break;
@@ -783,12 +823,13 @@ Run("pw: a whole game, drawing the TV, the emcee and all four phones after every
 
     Check.Equal(PasswordPhase.GameOver, t.S.Phase, "the game finished");
     Check.True(draws > 60, $"expected dozens of redraws, got {draws}");
-    foreach (var phase in new[] { PasswordPhase.Control, PasswordPhase.Clue, PasswordPhase.Guess, PasswordPhase.PuzzleGuess, PasswordPhase.WordResult, PasswordPhase.PuzzleResult })
+    foreach (var phase in new[] { PasswordPhase.Control, PasswordPhase.Clue, PasswordPhase.Guess, PasswordPhase.PuzzleGuess, PasswordPhase.WordResult, PasswordPhase.PuzzleResult, PasswordPhase.BonusReady, PasswordPhase.BonusPlay, PasswordPhase.BonusResult })
         Check.True(phases.Contains(phase), $"the game should have passed through {phase}");
 
     // And once more with the real puzzle bank, so every real word draws without trouble.
-    var real = new PasswordTable(seed: 9, source: new JsonPasswordPuzzleSource());
-    real.Game.Changed += () => { Render.PwTv(real); Render.PwEmcee(real); for (var i = 0; i < 4; i++) Render.PwPlayer(real, i); };
+    bonusMoves = 0;
+    var real = new PasswordTable(seed: 9, source: new JsonPasswordPuzzleSource(), bonus: new TextBonusWordSource());
+    real.Game.Changed += () => { AssertPasswordSecrets(real); Render.PwEmcee(real); for (var i = 0; i < 4; i++) Render.PwPlayer(real, i); };
     guard = 0;
     while (real.S.Phase != PasswordPhase.GameOver && guard++ < 3000)
     {
@@ -800,10 +841,101 @@ Run("pw: a whole game, drawing the TV, the emcee and all four phones after every
             case PasswordPhase.Clue: real.Clue(); break;
             case PasswordPhase.Guess: Check.Ok(real.Game.JudgeGuess(real.Emcee, n % 3 == 0)); break;
             case PasswordPhase.PuzzleGuess: Check.Ok(real.Game.JudgePuzzleGuess(real.Emcee, n % 4 == 0)); break;
+            case PasswordPhase.BonusReady:
+                if (n % 2 == 0) Check.Ok(real.Game.BonusSwapRoles(real.Emcee));
+                Check.Ok(real.Game.StartBonus(real.Emcee));
+                bonusMoves = 0;
+                break;
+            case PasswordPhase.BonusPlay:
+                bonusMoves++;
+                if (bonusMoves > 14) { real.Advance(61); Check.Ok(real.Game.Tick()); }
+                else if (bonusMoves % 5 == 0) Check.Ok(real.Game.BonusPass(real.Emcee));
+                else if (bonusMoves % 7 == 0) Check.Ok(real.Game.BonusZap(real.Emcee));
+                else Check.Ok(real.Game.BonusCorrect(real.Emcee));
+                break;
             default: Check.Ok(real.Game.Continue(real.Emcee)); break;
         }
     }
     Check.Equal(PasswordPhase.GameOver, real.S.Phase, "the real-bank game finished");
+});
+
+Console.WriteLine("The Password Plus bonus round");
+
+Run("pw bonus: ready screens, the TV shows the letters and who does what but no words, phones have no words", () =>
+{
+    var t = new PasswordTable();
+    t.PlayToBonus(0);
+    var tv = Render.PwTv(t);
+    Check.True(Render.Has(tv, "BONUS ROUND") && Render.Has(tv, "$10,000 FOR ALL TEN"), "the TV announces it");
+    Check.Equal(10, Render.Count(tv, "class=\"bonus-letter "), "ten letters");
+    foreach (var letter in "ABCDEFGHIJ") Check.True(Render.Has(tv, $">{letter}</span>"), $"the letter {letter} is on the TV");
+    Check.True(Render.Has(tv, "class=\"bonus-clock ") && Render.Has(tv, ">60<"), "a clock at 60");
+    Check.True(!Render.Has(tv, "data-clock-end"), "the clock isn't counting yet");
+    Check.True(Render.Has(tv, "Ann") && Render.Has(tv, "face the screen") && Render.Has(tv, "Bob") && Render.Has(tv, "turn your back"), "says who faces the TV and who turns around");
+    Check.True(!Render.Has(tv, "class=\"bonus-word\""), "no word yet");
+
+    var emcee = Render.PwEmcee(t);
+    Check.True(Render.Has(emcee, "Start the 60-second clock") && Render.Has(emcee, "Swap who gives the clues"), "the emcee can swap and start");
+    Check.True(!Render.Has(emcee, "bonus-btn"), "no ruling buttons before the clock starts");
+
+    Check.True(Render.Has(Render.PwPlayer(t, 0), "Face the big screen!") && Render.Has(Render.PwPlayer(t, 1), "Back to the screen!"), "Ann faces, Bob turns around");
+    Check.True(Render.Has(Render.PwPlayer(t, 2), "Team A is playing the bonus round") && Render.Has(Render.PwPlayer(t, 3), "Team A is playing the bonus round"), "Team B watches");
+
+    Check.Ok(t.Game.BonusSwapRoles(t.Emcee));
+    Check.True(Render.Has(Render.PwPlayer(t, 1), "Face the big screen!") && Render.Has(Render.PwPlayer(t, 0), "Back to the screen!"), "after the swap Bob faces and Ann turns around");
+});
+
+Run("pw bonus: while playing, the TV shows the one current word and the clock; the emcee has the three buttons", () =>
+{
+    var t = new PasswordTable();
+    t.PlayToBonus(0);
+    Check.Ok(t.Game.StartBonus(t.Emcee));
+
+    var tv = Render.PwTv(t);
+    Check.True(Render.Has(tv, "class=\"bonus-word\">Aest<"), "the A word is on the TV");
+    Check.True(!Render.Has(tv, "Best"), "and no other word");
+    Check.True(Render.Has(tv, "data-clock-end=") && Render.Has(tv, "data-clock-ms=\"60000\""), "the clock carries its end time and the time left");
+    Check.True(Render.Has(tv, "bonus-letter current"), "the current letter is lit");
+
+    var emcee = Render.PwEmcee(t);
+    Check.True(Render.Has(emcee, "Aest"), "the emcee sees the word");
+    Check.True(Render.Has(emcee, "bonus-right") && Render.Has(emcee, "bonus-pass") && Render.Has(emcee, "bonus-wrong"), "the check, the yellow PASS and the red X");
+    Check.True(Render.Has(emcee, "✓") && Render.Has(emcee, "✗") && Render.Has(emcee, "PASS"), "marked as a check, an X and PASS");
+    for (var i = 0; i < 4; i++) Check.True(!Render.Has(Render.PwPlayer(t, i), "Aest"), $"player {i} doesn't see the word");
+
+    Check.Ok(t.Game.BonusCorrect(t.Emcee));
+    Check.Ok(t.Game.BonusPass(t.Emcee));
+    Check.Ok(t.Game.BonusZap(t.Emcee));
+    tv = Render.PwTv(t);
+    Check.True(Render.Has(tv, "class=\"bonus-word\">Dest<") && !Render.Has(tv, "Aest") && !Render.Has(tv, "Best"), "now the D word");
+    Check.True(Render.Has(tv, "bonus-letter correct") && Render.Has(tv, "bonus-letter passed") && Render.Has(tv, "bonus-letter zapped"), "A won, B passed, C zapped");
+});
+
+Run("pw bonus: the results show every word, and the ending shows the winnings", () =>
+{
+    var t = new PasswordTable();
+    t.PlayToBonus(0);
+    Check.Ok(t.Game.StartBonus(t.Emcee));
+    for (var i = 0; i < 3; i++) Check.Ok(t.Game.BonusCorrect(t.Emcee));
+    Check.Ok(t.Game.BonusZap(t.Emcee));
+    t.Advance(61);
+    Check.Ok(t.Game.Tick());
+
+    var tv = Render.PwTv(t);
+    Check.Equal(10, Render.Count(tv, "bonus-review-word"), "every word is listed");
+    Check.True(Render.Has(tv, "Aest") && Render.Has(tv, "Jest"), "the words are revealed now");
+    Check.True(Render.Has(tv, "TIME!") && Render.Has(tv, "$300"), "time is up and they won $300");
+    Check.True(Render.Has(Render.PwEmcee(t), "Finish the game"), "the emcee can finish");
+    Check.True(Render.Has(Render.PwPlayer(t, 0), "$300"), "the players see the result");
+
+    Check.Ok(t.Game.Continue(t.Emcee));
+    Check.True(Render.Has(Render.PwTv(t), "GAME OVER") && Render.Has(Render.PwTv(t), "$300 in the bonus round"), "the game over screen has the winnings");
+
+    var perfect = new PasswordTable();
+    perfect.PlayToBonus(1);
+    Check.Ok(perfect.Game.StartBonus(perfect.Emcee));
+    for (var i = 0; i < 10; i++) Check.Ok(perfect.Game.BonusCorrect(perfect.Emcee));
+    Check.True(Render.Has(Render.PwTv(perfect), "ALL TEN!") && Render.Has(Render.PwTv(perfect), "$10,000"), "the jackpot");
 });
 
 Run("pw home page: Password Plus is listed as playable, and Super Password is gone from the picker", () =>
