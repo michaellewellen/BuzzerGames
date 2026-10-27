@@ -433,7 +433,7 @@ a.game-tile:hover { border-color: var(--gold); }
 .pyl-sq.k-bigbucks { background: linear-gradient(#ffe36e, #d49a00); color: #3a2400; text-shadow: none; }
 .pyl-sq.k-bigbucks .t { font-size: calc(var(--cell) * .2); }
 .pyl-sq.k-whammy { background: linear-gradient(#ff3b3b, #a40e17); color: #fff; padding: 0; }
-.pyl-sq .whammy-pic { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pyl-sq .whammy-pic { width: 100%; height: 100%; object-fit: contain; display: block; }
 .pyl-sq .whammy-pic.stand-in { display: flex; align-items: center; justify-content: center; font-size: calc(var(--cell) * .17); font-weight: 900; }
 .pyl-sq.lit { background: #fff; color: #101010; text-shadow: none; box-shadow: 0 0 2.2vw 1vw #ffe36e; transform: scale(1.07); position: relative; z-index: 2; }
 .pyl-sq.lit small { color: #333; }
