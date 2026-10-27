@@ -464,9 +464,9 @@ static class PasswordChecks
             Check.Equal(1, s.ControlTeam, "control carries over");
         });
 
-        run("password: puzzles are worth 100, 100, 200, 200, 300, 300, then 400", () =>
+        run("password: puzzles are worth 100, 100, then 200 each", () =>
         {
-            var expected = new[] { 100, 100, 200, 200, 300, 300, 400, 400, 400 };
+            var expected = new[] { 100, 100, 200, 200, 200, 200, 200 };
             for (var i = 0; i < expected.Length; i++)
                 Check.Equal(expected[i], PasswordGame.PuzzleValue(i), $"value of puzzle {i + 1}");
 
@@ -604,9 +604,9 @@ static class PasswordChecks
             Check.Equal(PasswordPhase.Control, t.S.Phase, "nobody has 500 yet, so the game goes on");
             Check.Equal(300, t.S.Teams[0].Score, "Team A");
             Check.Equal(300, t.S.Teams[1].Score, "Team B");
-            t.SolveWord(0, bigWordRight: true);   // puzzle 5 is worth 300: A reaches 600
+            t.SolveWord(0, bigWordRight: true);   // puzzle 5 is worth 200: A reaches exactly 500
             Check.Equal(PasswordPhase.PuzzleResult, t.S.Phase, "the result screen comes first");
-            Check.Equal(600, t.S.Teams[0].Score, "Team A");
+            Check.Equal(500, t.S.Teams[0].Score, "Team A");
             Check.Ok(t.Game.Continue(t.Emcee));
             var s = t.S;
             Check.Equal(PasswordPhase.BonusReady, s.Phase, "Team A goes on to the bonus round");
@@ -650,32 +650,68 @@ static class PasswordChecks
             Check.Ok(t.Game.JoinPlayer("New", 0));
         });
 
-        run("password: if the puzzles run out, the higher score wins, and a level score is a tie", () =>
+        run("password: the game never ends by running out of puzzles, and there are never ties", () =>
         {
+            // A source with a single puzzle runs dry after every puzzle; the game just deals more and plays on.
             var t = new PasswordTable(source: new OnePuzzleSource());
-            t.SolveWord(1, bigWordRight: true);
+            t.SolveWord(1, bigWordRight: true);                 // B: 100
             Check.Ok(t.Game.Continue(t.Emcee));
-            var s = t.S;
-            Check.Equal(PasswordPhase.BonusReady, s.Phase, "no puzzles left, so the leader plays the bonus round");
-            Check.True(s.Winners.SequenceEqual([1]), "Team B has the most points");
-            Check.True(s.Message is not null && s.Message.Contains("points"), "wins on points");
+            Check.Equal(PasswordPhase.Control, t.S.Phase, "more puzzles were dealt");
+            Check.Equal(2, t.S.PuzzleNumber, "puzzle 2");
 
-            var tie = new PasswordTable(source: new OnePuzzleSource());
-            tie.Open(0);
-            tie.MissAllClues();
-            Check.Ok(tie.Game.Continue(tie.Emcee));
-            for (var i = 1; i < PasswordGame.WordsPerPuzzle - 1; i++)
+            // Nobody ever scores, puzzle after puzzle: still no ending and no tie.
+            var dry = new PasswordTable(source: new OnePuzzleSource());
+            for (var puzzle = 1; puzzle <= 15; puzzle++)
             {
-                tie.Open(tie.S.ControlTeam);
-                tie.MissAllClues();
-                Check.Ok(tie.Game.Continue(tie.Emcee));
+                for (var word = 0; word < PasswordGame.WordsPerPuzzle; word++)
+                {
+                    dry.Open(dry.S.ControlTeam);
+                    dry.MissAllClues();
+                    Check.Ok(dry.Game.Continue(dry.Emcee));
+                }
+                Check.Equal(PasswordPhase.Control, dry.S.Phase, $"puzzle {puzzle} is over and the game goes on");
             }
-            tie.Open(tie.S.ControlTeam);
-            tie.MissAllClues();
-            Check.Ok(tie.Game.Continue(tie.Emcee));
-            Check.Equal(PasswordPhase.GameOver, tie.S.Phase, "game over");
-            Check.Equal(2, tie.S.Winners.Count, "both teams share a 0 to 0 finish");
-            Check.True(tie.S.Message is not null && tie.S.Message.Contains("tie"), "it's called a tie");
+
+            // Whoever first reaches 500 is alone in front, on any path to it.
+            for (var seed = 1; seed <= 40; seed++)
+            {
+                var rng = new Random(seed);
+                var g = new PasswordTable(seed: seed);
+                var guard = 0;
+                while (g.S.Phase != PasswordPhase.BonusReady && guard++ < 60)
+                {
+                    g.SolveWord(rng.Next(2), bigWordRight: true);
+                    Check.Ok(g.Game.Continue(g.Emcee));
+                }
+                Check.Equal(1, g.S.Winners.Count, $"seed {seed}: exactly one winner");
+                var score = g.S.Teams[g.S.Winners[0]].Score;
+                var other = g.S.Teams[1 - g.S.Winners[0]].Score;
+                Check.True(score >= PasswordGame.WinScore && other < PasswordGame.WinScore && score > other, $"seed {seed}: {score} to {other}");
+            }
+        });
+
+        run("password: switching partners keeps every phone signed in, with the second players trading teams", () =>
+        {
+            var t = new PasswordTable();
+            t.PlayToGameOver(0);
+            Check.Fails(t.Game.RestartSwitched(t.Tokens[0]), "a player switching partners");
+            Check.Ok(t.Game.RestartSwitched(t.Emcee));
+            var s = t.S;
+            Check.Equal(PasswordPhase.Control, s.Phase, "a fresh game starts at once");
+            Check.Equal(0, s.Teams[0].Score + s.Teams[1].Score, "scores are reset");
+            Check.Equal(0, s.FindPlayer(t.Ids[0])!.Team, "Ann stays on Team A");
+            Check.Equal(0, s.FindPlayer(t.Ids[3])!.Team, "Dee moves to Team A");
+            Check.Equal(1, s.FindPlayer(t.Ids[2])!.Team, "Cy stays on Team B");
+            Check.Equal(1, s.FindPlayer(t.Ids[1])!.Team, "Bob moves to Team B");
+            Check.True(s.Players.Count(p => p.Team == 0) == 2 && s.Players.Count(p => p.Team == 1) == 2, "two on each team");
+            Check.True(s.Players.Where(p => p.Slot == 0).All(p => p.IsGiver) && s.Players.Where(p => p.Slot == 1).All(p => p.IsGuesser), "player 1 gives in puzzle 1 again");
+            for (var i = 0; i < 4; i++) Check.Equal(Role.Player, t.Game.GetSeat(t.Tokens[i]).Role, $"phone {i} is still a player");
+            Check.Fails(t.Game.RestartSwitched(t.Emcee), "switching mid-game");
+
+            // And it plays: the new Team A (Ann + Dee) clues, Ann gives and Dee guesses.
+            t.Open(0);
+            Check.Ok(t.Game.SubmitClue(t.Tokens[0], "red"));
+            Check.True(t.S.Guesser(0)!.Id == t.Ids[3], "Dee is Team A's guesser now");
         });
 
         run("password: the snapshot carries the secrets, so every view must decide what to hide", () =>

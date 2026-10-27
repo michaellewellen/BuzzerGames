@@ -63,11 +63,13 @@ is the `/board` address.
 
 **The big word.** When a word is guessed, only that guesser may try the big word. If they miss, the puzzle carries on to the next word. The exception is word 5: the guesser, then their clue-giver, then the other team's guesser, then their clue-giver. If nobody gets word 5, the last team to guess a word in this puzzle starts that same chain. If nobody guessed a single word, the puzzle is thrown out. A right big word scores the puzzle's value and reveals everything (all five words and the big word).
 
-**Scoring.** Puzzles are worth 100, 100, 200, 200, 300, 300, then 400 each. The first team to **500** goes to the bonus round. If the puzzles run out first, the team ahead plays it; a tie just ends the game.
+**Scoring.** Puzzles are worth 100, 100, then 200 each. The first team to **500** goes to the bonus round. Only one team scores per puzzle, so there are never ties, and the game just deals more puzzles if it needs them.
 
 **The bonus round.** The winning team gets ten single words in alphabetical order, one per letter, starting at a random letter and wrapping from Z back to A (so Q to Z, or X to G). It runs on the TV with a 60-second clock, the ten letters typed out (A B C D…), and the current word in giant type. One partner faces the TV and gives clues out loud; the other sits with their back to it and guesses. Nobody uses their phone: **only the emcee rules**, with three buttons: a green ✓ (got it), a yellow PASS, and a red ✗ (a clue rule was broken, so the word is zapped). A passed word goes to the back of the line and comes up again after the J word if there is still time; a zapped word is lost for good. $100 per word, **$10,000 for all ten**. The clock is the server's, so the round ends by itself when time is up. Before starting, the emcee can swap who gives the clues (player 1 does by default).
 
 **Bonus words.** `src/BuzzerGames.Core/Data/Password/bonus-words.txt`: one word per line, in any order (the letter is just the first letter), `#` for comments. Single words only: common things, places, or a first or last name of someone famous ("Clinton" yes, "Anderson" too vague). Just paste more words in and rebuild; the checks make sure every letter has enough. Words that were dealt recently are skipped, so games on the same night don't repeat until a letter runs out of fresh ones.
+
+**Playing again.** After the bonus round the emcee chooses: *same players* (everyone stays signed in), *switch partners* (same phones, no QR code; the two second players trade teams, so A1 + B2 play B1 + A2), or *new players* (back to the lobby, everyone scans again).
 
 **Emcee tools.** The emcee's phone shows the password, the big word and the other answers to accept, and has Correct / Wrong buttons, "Throw out that clue", and can type a clue for a player whose phone died.
 

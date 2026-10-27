@@ -755,7 +755,7 @@ Run("pw emcee: a win leads to the bonus round, and the end of the game offers th
     t.PlayBonusOut();
 
     var emcee = Render.PwEmcee(t);
-    Check.True(Render.Has(emcee, "Play again, same players") && Render.Has(emcee, "Play again, new players"), "both play-again buttons");
+    Check.True(Render.Has(emcee, "Play again, same players") && Render.Has(emcee, "Play again, switch partners") && Render.Has(emcee, "Play again, new players"), "all three play-again buttons");
     Check.True(Render.Has(emcee, "bonus round"), "the bonus round is in the ending");
     for (var i = 0; i < 4; i++) Check.True(!Render.Has(Render.PwPlayer(t, i), "Play again"), $"player {i} doesn't get them");
     Check.True(!Render.Has(Render.PwTv(t), "Play again,"), "the TV doesn't get them");

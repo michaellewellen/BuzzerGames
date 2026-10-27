@@ -17,11 +17,11 @@ namespace BuzzerGames.Core.Password;
 ///   When a guesser gets the word, that guesser (and only that guesser) gets one shot at the big word. The exception is the
 ///   fifth word: the guesser tries first, then their clue-giver, then the other team's guesser, then the other team's
 ///   clue-giver. If nobody gets the fifth word, the last team to guess a word in the puzzle starts that same chain.
-///   A right guess scores the puzzle's value (100, 100, 200, 200, 300, 300, then 400) and reveals the whole puzzle.
+///   A right guess scores the puzzle's value (100, 100, then 200 each) and reveals the whole puzzle.
 ///
 ///   Roles swap only when a new puzzle begins: player 1 gives and player 2 guesses in the first puzzle, then they swap.
 ///
-///   The team that reaches 500 (or leads after the last puzzle) plays the bonus round: ten words in alphabetical order from a
+///   The first team to reach 500 plays the bonus round (only one team scores per puzzle, so there are never ties): ten words in alphabetical order from a
 ///   random letter, 60 seconds, $100 per word and $10,000 for all ten. One partner faces the TV and gives clues, the other
 ///   guesses with their back to it, and the emcee rules: got it, pass (the word comes back later if there is time), or a
 ///   broken clue rule, which zaps the word.
@@ -49,8 +49,8 @@ public sealed class PasswordGame
 
     public static readonly IReadOnlyList<string> TeamNames = ["Team A", "Team B"];
 
-    /// <summary>What a puzzle is worth: 100, 100, 200, 200, 300, 300, then 400 from then on. Index 0 is the first puzzle.</summary>
-    public static int PuzzleValue(int puzzleIndex) => Math.Min(100 * (puzzleIndex / 2 + 1), 400);
+    /// <summary>What a puzzle is worth: 100, 100, then 200 from then on. Index 0 is the first puzzle.</summary>
+    public static int PuzzleValue(int puzzleIndex) => Math.Min(100 * (puzzleIndex / 2 + 1), 200);
 
     // ---- Private state -------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ public sealed class PasswordGame
         public Guid Id { get; } = Guid.NewGuid();
         public Guid Token { get; } = Guid.NewGuid();
         public required string Name { get; init; }
-        public required int Team { get; init; }
+        public required int Team { get; set; }
         public required int Slot { get; init; }
     }
 
@@ -184,6 +184,23 @@ public sealed class PasswordGame
             _players.Clear();
             _phase = PasswordPhase.Lobby;
         }
+        return Result.Success;
+    });
+
+    /// <summary>
+    /// Another game with the same four phones, but the partners switch: the two second players trade teams (so the new teams are A1+B2 against B1+A2). Nobody has to scan the QR code again.
+    /// </summary>
+    public Result RestartSwitched(Guid emceeToken) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
+        if (_phase != PasswordPhase.GameOver) return Result.Fail("The game isn't over yet.");
+
+        ClearGameState();
+        var a = PlayerAt(0, 1);
+        var b = PlayerAt(1, 1);
+        a.Team = 1;
+        b.Team = 0;
+        BeginGame();
         return Result.Success;
     });
 
@@ -434,14 +451,17 @@ public sealed class PasswordGame
 
             case PasswordPhase.PuzzleResult:
                 var best = _scores.Max();
-                var leaders = _scores.Select((sc, i) => (sc, i)).Where(x => x.sc == best).Select(x => x.i).ToList();
-                var outOfPuzzles = _puzzleIndex + 1 >= _puzzles.Count;
-                if (best >= WinScore || outOfPuzzles)
+                if (best >= WinScore)
                 {
-                    // One clear winner plays the bonus round. A tie has no winner, so the game just ends.
-                    if (leaders.Count == 1) BeginBonusReady(leaders[0], best >= WinScore);
-                    else FinishGame(leaders, "");
+                    // Only one team scores per puzzle, so whoever first reaches 500 is alone in front. No ties.
+                    var leaders = _scores.Select((sc, i) => (sc, i)).Where(x => x.sc == best).Select(x => x.i).ToList();
+                    BeginBonusReady(leaders[0]);
                     return Result.Success;
+                }
+                if (_puzzleIndex + 1 >= _puzzles.Count)
+                {
+                    // The game never ends by running out: nobody has 500 yet, so deal some more.
+                    _puzzles = _puzzles.Concat(_source.CreatePuzzles(_rng, PuzzlesPerGame)).ToList();
                 }
                 _puzzleIndex++;
                 _wordIndex = 0;
@@ -482,7 +502,7 @@ public sealed class PasswordGame
 
     // ---- The bonus round -----------------------------------------------------------------
 
-    private void BeginBonusReady(int team, bool reachedScore)
+    private void BeginBonusReady(int team)
     {
         _winners = [team];
         _bonusTeam = team;
@@ -494,9 +514,7 @@ public sealed class PasswordGame
         _bonusEnds = null;
         _bonusEarned = 0;
         _turnTeam = -1;
-        _message = reachedScore
-            ? $"{TeamNames[team]} reached {WinScore} and goes to the bonus round!"
-            : $"{TeamNames[team]} wins on points and goes to the bonus round!";
+        _message = $"{TeamNames[team]} reached {WinScore} and goes to the bonus round!";
         _phase = PasswordPhase.BonusReady;
     }
 
