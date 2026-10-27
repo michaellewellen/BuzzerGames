@@ -59,7 +59,17 @@ else
     private bool _boardMode;
     private string? _error;
 
-    private string StorageKey => $"bg.pyl.{Code.ToUpperInvariant()}";
+    // Testing aid: opening the page as .../ABCD?seat=2 gives that tab its own saved seat, so one browser can play
+    // several people. Real phones don't use it, so for them it is just the room code as before.
+    private string StorageKey
+    {
+        get
+        {
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+            var slot = query.TryGetValue("seat", out var v) ? v.ToString() : "";
+            return $"bg.pyl.{Code.ToUpperInvariant()}" + (slot.Length > 0 ? $".{slot}" : "");
+        }
+    }
 
     protected override void OnInitialized()
     {

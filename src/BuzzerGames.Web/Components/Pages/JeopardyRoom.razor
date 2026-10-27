@@ -64,7 +64,17 @@ else
     private string? _error;
 
     // Each phone remembers its seat in this browser's storage under a key like "bg.jeopardy.BCDF".
-    private string StorageKey => $"bg.jeopardy.{Code.ToUpperInvariant()}";
+    // Testing aid: opening the page as .../ABCD?seat=2 gives that tab its own saved seat, so one browser can play
+    // several people. Real phones don't use it, so for them it is just the room code as before.
+    private string StorageKey
+    {
+        get
+        {
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+            var slot = query.TryGetValue("seat", out var v) ? v.ToString() : "";
+            return $"bg.jeopardy.{Code.ToUpperInvariant()}" + (slot.Length > 0 ? $".{slot}" : "");
+        }
+    }
 
     protected override void OnInitialized()
     {
