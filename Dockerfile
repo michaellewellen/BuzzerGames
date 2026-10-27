@@ -6,15 +6,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy only the project files first and restore packages. Docker remembers this step,
-# so later builds skip it unless a .csproj file changes. That makes deploys much faster.
-COPY src/BuzzerGames.Core/BuzzerGames.Core.csproj src/BuzzerGames.Core/
-COPY src/BuzzerGames.Web/BuzzerGames.Web.csproj src/BuzzerGames.Web/
-RUN dotnet restore src/BuzzerGames.Web/BuzzerGames.Web.csproj
-
-# Now copy the real source code and publish a release build.
+# Now copy the real source code and publish a release build (this restores packages too,
+# so the framework's own files, like blazor.web.js, are definitely part of the build).
 COPY src/ src/
-RUN dotnet publish src/BuzzerGames.Web/BuzzerGames.Web.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish src/BuzzerGames.Web/BuzzerGames.Web.csproj -c Release -o /app/publish
+
+# Diagnostic: shows up in the Railway build log, so we can see the Blazor script made it in.
+RUN echo "--- blazor.web in publish output ---" && grep -o '"Route": *"[^"]*blazor.web[^"]*"' /app/publish/*.endpoints.json | head -5 || true
 
 # ---------- Stage 2: run ----------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
