@@ -424,6 +424,23 @@ Run("pyl: a whole game, drawing every screen after every action", () =>
     Check.True(draws > 20, $"expected plenty of redraws, got {draws}");
 });
 
+Run("pyl: when the game is over only the emcee gets the play-again buttons", () =>
+{
+    var t = new PylTable(seed: 3);
+    for (var round = 0; round < PressYourLuckGame.Rounds; round++)
+    {
+        t.PlayQuestionRound();
+        var guard = 0;
+        while (t.S.Phase == PylPhase.SpinReady && guard++ < 500) t.SpinFor(o => o.Kind == "cash" && o.Sub is null);
+        Check.Ok(t.Game.ContinueFromRound(t.Emcee));
+    }
+    var emcee = Render.PylEmcee(t);
+    Check.True(Render.Has(emcee, "Play again, same players"), "same players button");
+    Check.True(Render.Has(emcee, "Play again, new players"), "new players button");
+    Check.True(!Render.Has(Render.PylPlayer(t, 0), "Play again"), "players don't get them");
+    Check.True(!Render.Has(Render.PylTv(t), "Play again,"), "the TV doesn't get them");
+});
+
 Console.WriteLine();
 Console.WriteLine($"{passed} passed, {failed} failed");
 return failed == 0 ? 0 : 1;

@@ -115,7 +115,9 @@
 
         case PylPhase.GameOver:
             <p class="winner">@WinnerText</p>
-            <a class="btn btn-wide" href="/press-your-luck">Start a new game</a>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Restart(Token, samePlayers: true))">Play again, same players</button>
+            <button class="btn btn-wide" @onclick="() => Act(Game.Restart(Token, samePlayers: false))">Play again, new players</button>
+            <a class="back-link" href="/">All games</a>
             break;
     }
 </main>

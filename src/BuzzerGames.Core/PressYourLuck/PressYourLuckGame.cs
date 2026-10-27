@@ -150,6 +150,43 @@ public sealed class PressYourLuckGame
         if (_phase != PylPhase.Lobby) return Result.Fail("The game has already started.");
         if (!IsFull()) return Result.Fail("We need 1 emcee and 3 players first.");
 
+        BeginGame();
+        return Result.Success;
+    });
+
+    /// <summary>
+    /// After the game is over the emcee can play again. With samePlayers, everyone keeps their seat (and their
+    /// phone stays signed in) and a fresh game starts at once. Without it, the players are cleared and the room goes
+    /// back to the lobby with the same room code and the same emcee, so three new people can take the seats.
+    /// </summary>
+    public Result Restart(Guid emceeToken, bool samePlayers) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
+        if (_phase != PylPhase.GameOver) return Result.Fail("The game isn't over yet.");
+
+        ClearGameState();
+        if (samePlayers)
+        {
+            foreach (var p in _players)
+            {
+                p.Score = 0;
+                p.Spins = 0;
+                p.Whammies = 0;
+                p.IsOut = false;
+                p.Pick = null;
+            }
+            BeginGame();
+        }
+        else
+        {
+            _players.Clear();
+            _phase = PylPhase.Lobby;
+        }
+        return Result.Success;
+    });
+
+    private void BeginGame()
+    {
         _questions = _questionSource.CreateQuestions(_rng, Rounds, QuestionsPerRound, _options);
         if (_questions.Count != Rounds * QuestionsPerRound)
             throw new InvalidOperationException($"The question source must supply {Rounds * QuestionsPerRound} questions.");
@@ -157,8 +194,32 @@ public sealed class PressYourLuckGame
         _round = 1;
         _questionIndex = 0;
         BeginQuestion();
-        return Result.Success;
-    });
+    }
+
+    // Forgets everything about the game that just finished (but not who is in the room, nor the running counters).
+    private void ClearGameState()
+    {
+        _message = null;
+        _round = 0;
+        _questions = [];
+        _questionIndex = 0;
+        _guesserId = null;
+        _guessText = null;
+        _choices = [];
+        _correctIndex = -1;
+        _pickers.Clear();
+        _guesserRight = false;
+        _board = [];
+        _order = [];
+        _orderPos = 0;
+        _actingId = null;
+        _actingPassed = false;
+        _passedLeft = 0;
+        _spunThisTurn = false;
+        _sequence = [];
+        _pages = [];
+        _lastSpin = null;
+    }
 
     // ---- Question round ------------------------------------------------------------------
 

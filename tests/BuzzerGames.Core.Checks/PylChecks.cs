@@ -434,6 +434,51 @@ static class PylChecks
             Check.Equal(t.Ids[1], t.S.ActingId!.Value, "Bob plays Ann's spins");
         });
 
+        run("pyl: play again keeps the players, or empties the seats, and only the emcee can ask", () =>
+        {
+            // Play a whole game quickly, then restart it both ways.
+            PylTable Finished()
+            {
+                var t = new PylTable(seed: 3);
+                for (var round = 0; round < PressYourLuckGame.Rounds; round++)
+                {
+                    t.PlayQuestionRound();
+                    var guard = 0;
+                    while (t.S.Phase is PylPhase.SpinReady && guard++ < 500) t.SpinFor(o => o.Kind == "cash" && o.Sub is null);
+                    Check.Ok(t.Game.ContinueFromRound(t.Emcee));
+                }
+                Check.Equal(PylPhase.GameOver, t.S.Phase, "the game ended");
+                return t;
+            }
+
+            var a = Finished();
+            Check.True(a.S.Players.Any(p => p.Score > 0), "someone scored");
+            Check.Fails(a.Game.Restart(a.Tokens[0], true), "a player restarting");
+            var oldIds = a.Ids.ToArray();
+            Check.Ok(a.Game.Restart(a.Emcee, samePlayers: true));
+            Check.Equal(PylPhase.Question, a.S.Phase, "straight into question 1");
+            Check.Equal(1, a.S.Round, "round 1");
+            Check.Equal(1, a.S.Question!.Number, "first question");
+            Check.True(a.S.Players.All(p => p.Score == 0 && p.Spins == 0 && p.Whammies == 0 && !p.IsOut), "everyone starts fresh");
+            Check.True(a.S.Players.Select(p => p.Id).SequenceEqual(oldIds), "same seats");
+            Check.Equal(Role.Player, a.Game.GetSeat(a.Tokens[0]).Role, "phones are still signed in");
+            Check.Fails(a.Game.Restart(a.Emcee, true), "restarting a game in progress");
+            a.PlayQuestion();                                  // and it plays normally
+            Check.True(a.S.Players.Any(p => p.Spins > 0), "spins were earned in the new game");
+
+            var b = Finished();
+            Check.Ok(b.Game.Restart(b.Emcee, samePlayers: false));
+            Check.Equal(PylPhase.Lobby, b.S.Phase, "back in the lobby");
+            Check.Equal(0, b.S.Players.Count, "the seats are empty");
+            Check.Equal(Role.Emcee, b.Game.GetSeat(b.Emcee).Role, "the emcee keeps their seat");
+            Check.Equal(Role.Spectator, b.Game.GetSeat(b.Tokens[0]).Role, "old players are spectators now");
+            Check.Fails(b.Game.Start(), "starting without a full table");
+            foreach (var n in new[] { "Dee", "Eli", "Flo" }) Check.Ok(b.Game.JoinPlayer(n));
+            Check.True(b.S.CanStart, "a new table can start");
+            Check.Ok(b.Game.Start());
+            Check.Equal(PylPhase.Question, b.S.Phase, "and play");
+        });
+
         run("pyl: when the last spin is played the round ends; the emcee continues to round 2", () =>
         {
             var t = new PylTable();

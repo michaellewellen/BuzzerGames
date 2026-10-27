@@ -103,6 +103,8 @@ else
     private void OnGameChanged() => _ = InvokeAsync(() =>
     {
         _snapshot = _game!.Snapshot();
+        // A restart with new players empties the seats, so a phone that was a player becomes a spectator again.
+        if (_token != Guid.Empty) _seat = _game.GetSeat(_token);
         StateHasChanged();
     });
 
