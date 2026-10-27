@@ -225,7 +225,7 @@ static class PylChecks
                     Check.Equal(9, all.Count(o => o.Kind == OutcomeKind.Whammy), "Whammies");
                     Check.True(board.All(f => f.Count(o => o.Kind == OutcomeKind.Whammy) <= 1), "no square is a Whammy twice");
                     var perFace = Enumerable.Range(0, 3).Select(f => board.Count(sq => sq[f].Kind == OutcomeKind.Whammy)).Order().ToArray();
-                    Check.True(perFace.SequenceEqual([1, 3, 5]), $"Whammies split 1/3/5 across faces, got {string.Join("/", perFace)}");
+                    Check.True(perFace.SequenceEqual([2, 3, 4]), $"Whammies split 2/3/4 across faces, got {string.Join("/", perFace)}");
                     Check.Equal(4, all.Count(o => o.Kind == OutcomeKind.Corner), "Pick a Corner squares");
                     Check.True(BoardFactory.Corners.All(c => board[c].All(o => o.Kind != OutcomeKind.Corner)), "no Pick a Corner on a corner");
                     Check.Equal(14, all.Count(o => o.Kind == OutcomeKind.Cash && o.ExtraSpin), "cash + spin squares (10 + 4 big)");

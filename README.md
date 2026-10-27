@@ -34,9 +34,9 @@ Same setup as Jeopardy: create it on the TV at `/press-your-luck`, one emcee and
 - Two rounds; the second round pays more.
 - The light is decided by the server, so a laggy phone can't cheat. `PressLagMs` and `TickMs` in `PressYourLuckGame.cs` control the lag allowance and speed.
 
-**Sound.** The TV has a "Click to turn on sound" button (browsers require a click). It plays built-in beeps. To use your own, drop files in `src/BuzzerGames.Web/wwwroot/sounds/` named `tick`, `start`, `stop`, `cash`, `big`, `whammy`, `corner` (`.mp3`, `.wav` or `.ogg`); anything missing falls back to the built-in beep.
+**Sound.** The TV has a "Click to turn on sound" button (browsers require a click). It plays built-in beeps. To use your own, drop files in `src/BuzzerGames.Web/wwwroot/sounds/` named `spin` (loops while the light runs and cuts off the moment someone presses) and `whammy` (plays on a Whammy), as `.mp3`, `.wav` or `.ogg`. Anything missing falls back to a built-in beep, and cash and prize results are silent because the host reads the amount.
 
-**Editing the board.** `src/BuzzerGames.Core/Data/PressYourLuck/board-1.json` and `board-2.json` hold the square counts, the cash values and the prize list for each round. Whammies per face (1, 3 and 5) are set there too. The values are my guesses, not the real 80s table.
+**Editing the board.** `src/BuzzerGames.Core/Data/PressYourLuck/board-1.json` and `board-2.json` hold the square counts, the cash values and the prize list for each round. Whammies per face (2, 3 and 4) are set there too. The values are my guesses, not the real 80s table.
 
 ## Run it on your computer
 

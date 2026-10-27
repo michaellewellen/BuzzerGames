@@ -7,8 +7,10 @@
 //   stop(result)      freezes the board on the square the server says the light stopped on
 //   enableSound()     browsers only allow sound after a click, so the big screen has a button for it
 //
-// SOUNDS: drop files into src/BuzzerGames.Web/wwwroot/sounds/ named tick, start, stop, cash, big, whammy or
-// corner (.mp3, .wav or .ogg) and they are used automatically. Anything missing falls back to a synthesized beep.
+// SOUNDS: drop two files into src/BuzzerGames.Web/wwwroot/sounds/ (.mp3, .wav or .ogg):
+//   spin    plays (and loops) while the light runs, and is cut off the moment someone presses
+//   whammy  plays when the light lands on a Whammy
+// Anything missing falls back to a synthesized beep. Cash and prize results are silent: the host reads the amount.
 window.pyl = (() => {
     // Where each of the 18 squares sits on a 6-wide, 5-high grid as [row, column], clockwise from top-left.
     // This order matches BoardFactory on the server.
@@ -46,6 +48,7 @@ window.pyl = (() => {
         cancelAnimationFrame(frame);
         spin = null;
         board = boardData || [];
+        stopSpinSound();
         boardEl.classList.remove("boom");
         boardEl.innerHTML = "";
 
@@ -96,7 +99,7 @@ window.pyl = (() => {
         lastTick = -1;
         boardEl.classList.remove("boom");
         centerEl.innerHTML = "";
-        play("start");
+        startSpinSound();
         cancelAnimationFrame(frame);
         frame = requestAnimationFrame(run);
     }
@@ -109,7 +112,7 @@ window.pyl = (() => {
             if (tick !== lastTick) {
                 lastTick = tick;
                 draw(tick, spin.sequence[tick % spin.sequence.length]);
-                play("tick");
+                if (!files.spin) play("tick");   // no spin file: beep on every light change instead
             }
         }
         frame = requestAnimationFrame(run);
@@ -119,12 +122,12 @@ window.pyl = (() => {
         if (!boardEl) return;
         cancelAnimationFrame(frame);
         spin = null;
+        stopSpinSound();
         boardEl.classList.remove("boom");
         draw(r.tick, r.square);
 
         if (r.pending) {
             centerEl.innerHTML = `<div class="result"><span class="rt">PICK A CORNER!</span></div>`;
-            play("corner");
             return;
         }
 
@@ -137,7 +140,6 @@ window.pyl = (() => {
             play("whammy");
         } else {
             centerEl.innerHTML = `<div class="result"><span class="rt">${esc(r.text)}</span>${sub}</div>`;
-            play(r.sub === "+ SPIN" ? "big" : "cash");
         }
     }
 
@@ -158,13 +160,13 @@ window.pyl = (() => {
         await audio.resume();
         soundOn = true;
         loadFiles();
-        play("start");
+        synth.start();   // a little blip so you know sound is on
         return true;
     }
 
     // Looks for optional sound files; each one found replaces the synthesized sound of the same name.
     async function loadFiles() {
-        for (const name of ["tick", "start", "stop", "cash", "big", "whammy", "corner"]) {
+        for (const name of ["spin", "whammy"]) {
             for (const ext of ["mp3", "wav", "ogg"]) {
                 try {
                     const r = await fetch(`/sounds/${name}.${ext}`);
@@ -203,6 +205,24 @@ window.pyl = (() => {
         corner: () => [440, 554, 660].forEach((f, i) => tone(f, 0.15, "square", 0.07, i * 0.1)),
         whammy: () => { swoop(700, 220, 0, 0.45); swoop(450, 60, 0.5, 0.9); },
     };
+
+    let spinSrc = null;
+
+    function startSpinSound() {
+        stopSpinSound();
+        if (!soundOn || !audio || !files.spin) return;
+        spinSrc = audio.createBufferSource();
+        spinSrc.buffer = files.spin;
+        spinSrc.loop = true;
+        spinSrc.connect(audio.destination);
+        spinSrc.start();
+    }
+
+    function stopSpinSound() {
+        if (!spinSrc) return;
+        try { spinSrc.stop(); } catch (e) { /* already stopped */ }
+        spinSrc = null;
+    }
 
     function play(name) {
         if (!soundOn || !audio) return;
