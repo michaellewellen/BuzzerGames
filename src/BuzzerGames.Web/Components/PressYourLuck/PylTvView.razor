@@ -130,7 +130,7 @@
                     $"{actor.Name} · {Snapshot.ActingSpinsLeft} spin{(Snapshot.ActingSpinsLeft == 1 ? "" : "s")} {(Snapshot.ActingIsPassed ? "passed to them" : "to play")}",
                 PylPhase.Spinning when actor is not null => $"{actor.Name}: press your luck!",
                 PylPhase.PickCorner when actor is not null => $"{actor.Name}: pick a corner!",
-                PylPhase.PickMove when actor is not null => $"{actor.Name}: move up or down one space!",
+                PylPhase.PickMove when actor is not null => $"{actor.Name}: move one space!",
                 PylPhase.RoundOver => "That's the end of the Big Board round.",
                 _ => ""
             };

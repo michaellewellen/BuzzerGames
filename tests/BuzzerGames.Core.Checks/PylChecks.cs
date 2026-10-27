@@ -278,7 +278,12 @@ static class PylChecks
             var down = (square + 1) % 18;
             var up = (square + 17) % 18;
             Check.True(after.MoveChoices.Select(m => m.Square).OrderBy(x => x).SequenceEqual(new[] { up, down }.OrderBy(x => x)), "the neighbors");
-            Check.True(after.MoveChoices.All(m => m.Shows.Kind != "move" && m.Shows.Kind != "corner"), "neither is another special square");
+            Check.True(after.MoveChoices.All(m => m.Shows.Kind != "move" && m.Shows.Kind != "corner" && m.Shows.Kind != "whammy"), "neither is another special square or a Whammy");
+            Check.Equal("→", BoardFactory.MoveArrow(3, 1), "top row clockwise points right");
+            Check.Equal("←", BoardFactory.MoveArrow(1, -1), "top row backwards points left");
+            Check.Equal("↓", BoardFactory.MoveArrow(7, 1), "right side clockwise points down");
+            Check.Equal("↑", BoardFactory.MoveArrow(6, -1), "right side backwards points up");
+            Check.Equal("↑", BoardFactory.MoveArrow(16, 1), "left side clockwise points up");
             Check.Fails(t.Game.Spin(t.Tokens[player]), "spinning mid-choice");
             Check.Fails(t.Game.PickMove(t.Tokens[player], 0), "not a side");
             Check.Fails(t.Game.PickMove(t.Tokens[(player + 1) % 3], 1), "somebody else choosing");

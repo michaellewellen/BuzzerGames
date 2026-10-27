@@ -106,7 +106,19 @@ public static class BoardFactory
         }
     }
 
-    /// <summary>True when, on every face, no Move One Space square has a Pick a Corner or Move One Space square beside it.</summary>
+    /// <summary>The arrow for stepping onto <paramref name="neighbor"/> by moving <paramref name="direction"/> (+1 is clockwise) around the ring.</summary>
+    public static string MoveArrow(int neighbor, int direction)
+    {
+        var from = ((neighbor - direction) % Squares + Squares) % Squares;
+        // The square numbers run clockwise: 0-4 go right along the top, 5-8 down the right side,
+        // 9-13 left along the bottom, 14-17 up the left side.
+        var segment = direction > 0 ? from : (from + Squares - 1) % Squares;
+        var clockwise = segment <= 4 ? "→" : segment <= 8 ? "↓" : segment <= 13 ? "←" : "↑";
+        if (direction > 0) return clockwise;
+        return clockwise switch { "→" => "←", "←" => "→", "↓" => "↑", _ => "↓" };
+    }
+
+    /// <summary>True when, on every face, no Move One Space square has a Pick a Corner, Move One Space or Whammy square beside it.</summary>
     public static bool MovesAreSafe(Outcome[][] board)
     {
         for (var q = 0; q < Squares; q++)
@@ -114,7 +126,7 @@ public static class BoardFactory
             {
                 if (board[q][f].Kind != OutcomeKind.Move) continue;
                 foreach (var n in new[] { (q + 1) % Squares, (q + Squares - 1) % Squares })
-                    if (board[n][f].Kind is OutcomeKind.Corner or OutcomeKind.Move) return false;
+                    if (board[n][f].Kind is OutcomeKind.Corner or OutcomeKind.Move or OutcomeKind.Whammy) return false;
             }
         return true;
     }

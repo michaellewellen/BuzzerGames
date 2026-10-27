@@ -173,7 +173,7 @@
     private void Act(Result result) => _error = result.Ok ? null : result.Error;
 
     private static string MoveLabel(MoveChoice m) =>
-        (m.Direction < 0 ? "↶ " : "↷ ") + m.Shows.Text + (m.Shows.Sub is { } sub ? " " + sub : "");
+        BoardFactory.MoveArrow(m.Square, m.Direction) + " " + m.Shows.Text + (m.Shows.Sub is { } sub ? " " + sub : "");
 
     private static string CornerName(int corner) => corner switch
     {
