@@ -1,7 +1,9 @@
 using System.Text.RegularExpressions;
 using BuzzerGames.Core.Jeopardy;
+using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
 using BuzzerGames.Web.Components.Jeopardy;
+using BuzzerGames.Web.Components.Password;
 using BuzzerGames.Web.Components.PressYourLuck;
 using BuzzerGames.Web.Components.Pages;
 using Microsoft.AspNetCore.Components;
@@ -56,6 +58,44 @@ static class Render
 
     public static string PylPlayer(PylTable t, int i) =>
         Html<PylPlayerView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[i], ["PlayerId"] = t.Ids[i] });
+
+    // ---- Password Plus ----
+
+    public static string PwTv(PasswordTable t) => Html<PasswordTvView>(new() { ["Snapshot"] = t.S });
+
+    public static string PwEmcee(PasswordTable t) =>
+        Html<PasswordEmceeView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee });
+
+    /// <summary>One player's phone (0 = Ann, 1 = Bob on Team A; 2 = Cy, 3 = Dee on Team B).</summary>
+    public static string PwPlayer(PasswordTable t, int i) =>
+        Html<PasswordPlayerView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[i], ["PlayerId"] = t.Ids[i] });
+
+    public static string PwLobby(PasswordGame game, Seat seat, bool boardMode = false) =>
+        Html<PasswordLobbyView>(new() { ["Snapshot"] = game.Snapshot(), ["Seat"] = seat, ["BoardMode"] = boardMode });
+
+    /// <summary>The whole Password Plus room page, at the phone address or the big-screen /board address.</summary>
+    public static string PwRoom(PasswordRoomManager rooms, string code, bool board)
+    {
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<IJSRuntime, NoJs>()
+            .AddSingleton(rooms)
+            .AddSingleton<NavigationManager>(new FakeNav($"http://localhost/password-plus/{code}" + (board ? "/board" : "")))
+            .BuildServiceProvider();
+        using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
+        return renderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await renderer.RenderComponentAsync<PasswordRoom>(
+                ParameterView.FromDictionary(new Dictionary<string, object?> { ["Code"] = code }));
+            return output.ToHtmlString();
+        }).GetAwaiter().GetResult();
+    }
+
+    /// <summary>True if the text appears anywhere on the page, in any capitalization (raw or HTML-encoded).</summary>
+    public static bool ShowsAnyCase(string html, string text) =>
+        html.Contains(text, StringComparison.OrdinalIgnoreCase)
+        || html.Contains(System.Net.WebUtility.HtmlEncode(text), StringComparison.OrdinalIgnoreCase)
+        || html.Contains(System.Text.Encodings.Web.HtmlEncoder.Default.Encode(text), StringComparison.OrdinalIgnoreCase);
 
     /// <summary>The lobby, as seen by a device with the given seat.</summary>
     public static string Lobby(JeopardyGame game, Seat seat, bool boardMode = false) =>

@@ -1,0 +1,102 @@
+[
+  // Password Plus puzzles. "answer" is the big word; "alsoAccept" are other answers the emcee should take.
+  // "words" are the five passwords, in the order they are played. Each is ONE plain word that hints at the answer,
+  // roughly from the vaguest to the most telling. "kind" is what the TV announces: Person, Place, Thing, Title, Idea.
+  // A password should never be (or contain) part of the answer.
+
+  { "kind": "Thing",  "answer": "Christmas Tree", "alsoAccept": ["Xmas Tree", "Tree"],
+    "words": ["Ornament", "Pine", "Lights", "Star", "Presents"] },
+
+  { "kind": "Place",  "answer": "Disneyland", "alsoAccept": ["Disney", "Disney Land", "Magic Kingdom"],
+    "words": ["Mouse", "Castle", "Rides", "Anaheim", "Fireworks"] },
+
+  { "kind": "Person", "answer": "Santa Claus", "alsoAccept": ["Santa", "Saint Nick", "Saint Nicholas", "Kris Kringle"],
+    "words": ["Sleigh", "Reindeer", "Chimney", "Elves", "Beard"] },
+
+  { "kind": "Person", "answer": "Michael Jackson", "alsoAccept": ["MJ", "Jackson", "King of Pop"],
+    "words": ["Glove", "Sequins", "Neverland", "Moonwalk", "Thriller"] },
+
+  { "kind": "Person", "answer": "Elvis Presley", "alsoAccept": ["Elvis", "Presley", "The King"],
+    "words": ["Rock", "Memphis", "Vegas", "Sideburns", "Graceland"] },
+
+  { "kind": "Place",  "answer": "Hollywood", "alsoAccept": [],
+    "words": ["Sign", "Stars", "Studio", "Oscar", "Boulevard"] },
+
+  { "kind": "Thing",  "answer": "Birthday Cake", "alsoAccept": ["Cake", "Birthday"],
+    "words": ["Wish", "Candles", "Frosting", "Slice", "Party"] },
+
+  { "kind": "Place",  "answer": "Hawaii", "alsoAccept": [],
+    "words": ["Lei", "Luau", "Volcano", "Honolulu", "Aloha"] },
+
+  { "kind": "Title",  "answer": "Star Wars", "alsoAccept": ["Starwars", "Star Wars Episode IV", "A New Hope"],
+    "words": ["Galaxy", "Jedi", "Force", "Lightsaber", "Wookiee"] },
+
+  { "kind": "Title",  "answer": "Titanic", "alsoAccept": ["The Titanic"],
+    "words": ["Ship", "Atlantic", "Rose", "Iceberg", "Sank"] },
+
+  { "kind": "Title",  "answer": "Ghostbusters", "alsoAccept": ["Ghost Busters"],
+    "words": ["Haunted", "Slimer", "Proton", "Firehouse", "Marshmallow"] },
+
+  { "kind": "Title",  "answer": "Back to the Future", "alsoAccept": ["Back to the Future Part II"],
+    "words": ["Hoverboard", "Plutonium", "Marty", "Doc", "DeLorean"] },
+
+  { "kind": "Thing",  "answer": "Pizza", "alsoAccept": [],
+    "words": ["Slice", "Crust", "Cheese", "Pepperoni", "Delivery"] },
+
+  { "kind": "Thing",  "answer": "Snowman", "alsoAccept": ["Frosty", "Frosty the Snowman"],
+    "words": ["Winter", "Carrot", "Scarf", "Coal", "Melt"] },
+
+  { "kind": "Person", "answer": "Superman", "alsoAccept": ["Clark Kent", "Man of Steel", "Kal-El"],
+    "words": ["Flying", "Cape", "Krypton", "Metropolis", "Lois"] },
+
+  { "kind": "Person", "answer": "Batman", "alsoAccept": ["Bruce Wayne", "The Dark Knight", "Dark Knight"],
+    "words": ["Cowl", "Gotham", "Robin", "Joker", "Alfred"] },
+
+  { "kind": "Place",  "answer": "Egypt", "alsoAccept": [],
+    "words": ["Mummy", "Nile", "Pharaoh", "Sphinx", "Pyramid"] },
+
+  { "kind": "Place",  "answer": "Paris", "alsoAccept": ["Paris France"],
+    "words": ["Beret", "Seine", "Croissant", "Louvre", "Eiffel"] },
+
+  { "kind": "Place",  "answer": "Las Vegas", "alsoAccept": ["Vegas"],
+    "words": ["Neon", "Slots", "Strip", "Casino", "Jackpot"] },
+
+  { "kind": "Idea",   "answer": "Vacation", "alsoAccept": ["A Vacation", "Holiday", "Trip"],
+    "words": ["Hotel", "Suitcase", "Passport", "Beach", "Sunburn"] },
+
+  { "kind": "Thing",  "answer": "Roller Coaster", "alsoAccept": ["Rollercoaster", "Coaster"],
+    "words": ["Track", "Screams", "Loop", "Drop", "Amusement"] },
+
+  { "kind": "Thing",  "answer": "Telephone", "alsoAccept": ["Phone", "Rotary Phone"],
+    "words": ["Ring", "Cord", "Dial", "Receiver", "Operator"] },
+
+  { "kind": "Thing",  "answer": "Television", "alsoAccept": ["TV", "Telly"],
+    "words": ["Screen", "Channel", "Remote", "Antenna", "Sitcom"] },
+
+  { "kind": "Thing",  "answer": "Walkman", "alsoAccept": ["Sony Walkman"],
+    "words": ["Portable", "Tape", "Stereo", "Cassette", "Headphones"] },
+
+  { "kind": "Thing",  "answer": "Rubik's Cube", "alsoAccept": ["Rubiks Cube", "Rubik Cube", "Rubik's", "Rubiks"],
+    "words": ["Colors", "Squares", "Twist", "Scramble", "Puzzle"] },
+
+  { "kind": "Place",  "answer": "Mall", "alsoAccept": ["Shopping Mall", "The Mall"],
+    "words": ["Stores", "Parking", "Escalator", "Kiosk", "Arcade"] },
+
+  { "kind": "Title",  "answer": "Pac-Man", "alsoAccept": ["Pacman", "Pac Man"],
+    "words": ["Maze", "Cherry", "Pellets", "Ghosts", "Arcade"] },
+
+  { "kind": "Title",  "answer": "Jaws", "alsoAccept": [],
+    "words": ["Beach", "Boat", "Fin", "Shark", "Spielberg"] },
+
+  { "kind": "Title",  "answer": "E.T.", "alsoAccept": ["ET", "E.T. the Extra-Terrestrial", "ET the Extra-Terrestrial", "Extra-Terrestrial"],
+    "words": ["Bicycle", "Candy", "Phone", "Finger", "Alien"] },
+
+  { "kind": "Idea",   "answer": "Wedding", "alsoAccept": ["A Wedding", "Marriage"],
+    "words": ["Bouquet", "Cake", "Vows", "Ring", "Bride"] },
+
+  { "kind": "Idea",   "answer": "Halloween", "alsoAccept": [],
+    "words": ["Spooky", "Pumpkin", "Costume", "Candy", "Trick"] },
+
+  { "kind": "Thing",  "answer": "Turkey", "alsoAccept": ["A Turkey", "Thanksgiving Turkey"],
+    "words": ["Feathers", "Gobble", "Drumstick", "Stuffing", "Cranberry"] }
+]

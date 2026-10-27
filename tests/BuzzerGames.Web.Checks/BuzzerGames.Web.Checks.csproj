@@ -21,6 +21,7 @@
     <Compile Include="..\BuzzerGames.Core.Checks\Table.cs" Link="Table.cs" />
     <Compile Include="..\BuzzerGames.Core.Checks\Check.cs" Link="Check.cs" />
     <Compile Include="..\BuzzerGames.Core.Checks\PylChecks.cs" Link="PylChecks.cs" />
+    <Compile Include="..\BuzzerGames.Core.Checks\PasswordChecks.cs" Link="PasswordChecks.cs" />
   </ItemGroup>
 
 </Project>

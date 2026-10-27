@@ -524,3 +524,120 @@ a.game-tile:hover { border-color: var(--gold); }
 .pyl-emcee-options { margin: 0; padding-left: 1.4rem; }
 .pyl-emcee-options li { padding: .2rem 0; }
 .pyl-emcee-options li.right { color: #7dffb0; font-weight: 700; }
+
+/* ---------- Password Plus ---------- */
+
+:root {
+    --team-a: #ff9a3c;
+    --team-b: #34d1e0;
+}
+
+/* The TV: the big word, five word slots, the clues on the current word, and the two teams underneath. */
+.pw-tv { background: radial-gradient(ellipse at center, #123a6b 0%, #050d24 80%); }
+.pw-panel {
+    flex: 1;
+    min-height: 0;
+    margin: .5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    text-align: center;
+    padding: 1vh 3vw;
+    overflow: hidden;
+    background: linear-gradient(#1c3fd8, #0a1a90);
+    border: .4vw solid var(--gold);
+    text-shadow: .15vw .15vw 0 #000;
+}
+.pw-kind { margin: 0; font-size: min(2.2vw, 4vh); letter-spacing: .1em; }
+.pw-kind strong { color: var(--value-gold); }
+.pw-bigword {
+    margin: 0;
+    font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+    font-size: min(7vw, 12vh);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #fff;
+}
+.pw-bigword.revealed { color: #7dffb0; }
+.pw-words { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1vw; width: 100%; }
+.pw-word {
+    min-height: 11vh;
+    padding: 1vh .5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0a1260;
+    border: .3vw solid var(--edge);
+}
+.pw-word.current { border-color: var(--gold); box-shadow: 0 0 1.2vw var(--gold); }
+.pw-word.solved { background: #1f9d5c; border-color: #fff; }
+.pw-word.posted { background: #7a1f2e; border-color: #ff8a8a; }
+.pw-word-num { font-size: min(1.4vw, 2.4vh); opacity: .7; }
+.pw-word-text { font-size: min(2.6vw, 5vh); font-weight: 800; text-transform: uppercase; overflow-wrap: anywhere; }
+
+.pw-clues { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .8vw; }
+.pw-clue {
+    display: flex;
+    align-items: center;
+    gap: .7vw;
+    padding: .6vh 1vw;
+    background: rgba(0, 0, 0, .35);
+    border-left: .6vw solid var(--edge);
+}
+.pw-clue.team-a { border-left-color: var(--team-a); }
+.pw-clue.team-b { border-left-color: var(--team-b); }
+.pw-clue-team { font-size: min(1.2vw, 2.2vh); opacity: .8; }
+.pw-clue-text { font-size: min(2.6vw, 4.8vh); font-weight: 800; text-transform: uppercase; }
+.pw-clue-mark { font-size: min(2.2vw, 4vh); }
+.pw-clue.hit .pw-clue-text, .pw-clue.hit .pw-clue-mark { color: #7dffb0; }
+.pw-clue.miss .pw-clue-text { text-decoration: line-through; opacity: .6; }
+.pw-clue.miss .pw-clue-mark { color: #ff8a8a; }
+.pw-clue.rejected { opacity: .5; }
+.pw-clue.rejected .pw-clue-text { text-decoration: line-through; }
+
+.pw-status { margin: 0; min-height: 1.3em; font-size: min(2.4vw, 4.4vh); font-weight: 700; }
+.pw-status.team-a { color: var(--team-a); }
+.pw-status.team-b { color: var(--team-b); }
+
+/* The two teams (TV and phones). */
+.pw-team.team-a .score-name { color: var(--team-a); }
+.pw-team.team-b .score-name { color: var(--team-b); }
+.pw-team.clock { box-shadow: 0 0 1rem .15rem rgba(255, 255, 255, .55); }
+.control-tag { display: inline-block; margin-left: .4em; padding: .05em .5em; border-radius: 1em; background: var(--gold); color: #1a1a1a; font-size: .6em; font-weight: 900; vertical-align: middle; }
+.pw-members { display: flex; flex-wrap: wrap; justify-content: center; gap: .1em .9em; font-size: .8rem; opacity: .95; }
+.pw-member small { opacity: .8; }
+.pw-member.attempting { color: var(--gold); font-weight: 800; }
+.tv .pw-members { font-size: min(1.4vw, 2.6vh); }
+.tv .pw-scores .score-value { font-size: min(3.6vw, 6.4vh); }
+.tv .pw-scores .score.control { box-shadow: 0 0 1.4vw .4vw var(--gold) inset; }
+
+/* Phones. */
+.pw-player.team-a .pill { background: var(--team-a); }
+.pw-player.team-b .pill { background: var(--team-b); }
+.pw-secret {
+    background: var(--panel);
+    border: 3px dashed var(--gold);
+    border-radius: .8rem;
+    padding: .8rem;
+    text-align: center;
+}
+.pw-secret-label { display: block; font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; opacity: .8; }
+.pw-secret-word { display: block; font-size: 2.4rem; text-transform: uppercase; letter-spacing: .08em; color: var(--gold); overflow-wrap: anywhere; }
+.pw-clues-phone { flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: .4rem; }
+.pw-clues-phone .pw-clue { padding: .5rem .8rem; gap: .8rem; }
+.pw-clues-phone .pw-clue-team { font-size: .75rem; }
+.pw-clues-phone .pw-clue-text { flex: 1; font-size: 1.3rem; }
+.pw-clues-phone .pw-clue-mark { font-size: 1.2rem; }
+.pw-emcee-words { margin: .4rem 0 0; padding-left: 1.4rem; }
+.pw-emcee-words li { padding: .1rem 0; }
+.pw-emcee-words li.current { color: var(--gold); font-weight: 700; }
+.pw-emcee-words li.solved { color: #7dffb0; }
+.pw-emcee-words li.posted { color: #ff8a8a; }
+.pw-emcee-words small { opacity: .7; }
+
+.pw-lobby .roster li.team-a .seat-label { color: var(--team-a); }
+.pw-lobby .roster li.team-b .seat-label { color: var(--team-b); }
+.btn.pw-join-a { background: var(--team-a); }
+.btn.pw-join-b { background: var(--team-b); }

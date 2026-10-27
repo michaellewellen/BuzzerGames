@@ -2,8 +2,8 @@
 
 Making our favorite game shows playable, on phones, with a big screen in the middle of the room.
 
-Right now there is one game, **Jeopardy**. The site opens on a "pick a game" page, with Wheel of Fortune,
-Classic Concentration, Super Password, and The Price Is Right waiting in the wings.
+Right now there are three games: **Jeopardy**, **Press Your Luck** and **Password Plus**. The site opens on a
+"pick a game" page, with Wheel of Fortune, Classic Concentration and The Price Is Right waiting in the wings.
 
 ## How a Jeopardy game works
 
@@ -47,6 +47,30 @@ Same setup as Jeopardy: create it on the TV at `/press-your-luck`, one emcee and
 **Questions.** Press Your Luck has its own bank, `src/BuzzerGames.Core/Data/PressYourLuck/questions.json`: general-knowledge questions with one short spoken answer and two hand-picked wrong answers. Each game deals six, all from different categories. `level: 2` marks a harder one (round 2 favors those), and `holiday: true` marks the ones only used when the holiday box is ticked. It does not use the Jeopardy bank.
 
 **Editing the board.** `src/BuzzerGames.Core/Data/PressYourLuck/board-1.json` and `board-2.json` hold the square counts, the cash values and the prize list for each round. Round 1 leans on the newer show (lots of `+ SPIN`), round 2 on the older one (more prizes). Whammies per face (2, 3 and 4) are set there too. The values are my guesses, not the real 80s table.
+
+## How a Password Plus game works
+
+Five people: **Emcee**, **Team A** (player 1, player 2) and **Team B** (player 1, player 2). Everyone joins from a phone; the TV
+is the `/board` address.
+
+**A puzzle** has a secret "big word" (a person, place, thing, title or idea) and five password words that hint at it.
+The five words are played one after another. The TV shows five slots; a word only appears there once it is guessed or posted.
+
+**A word.** Both clue-givers see the password on their phones; guessers never do. The team on the clock gives a one-word clue
+(typed on the phone and shown on the TV), the emcee rules on the guess out loud, and the turn passes to the other team. Each side gets
+4 clues, 8 in all. If nobody gets the word it goes up on the board and nobody gets a shot at the big word.
+
+**Roles swap every word.** On word 1, player 1 gives and player 2 guesses; on word 2 they swap, and so on.
+
+**Control.** A coin flip decides the first word. After that, the team that last got a word right chooses **Play** (they give the first clue) or **Pass** (the other team does).
+
+**The big word.** When a word is guessed, only the guesser may try the big word. The exception is word 5, where the order is: that team's guesser, that team's clue-giver, then the other team's guesser, then their clue-giver. A right answer scores the puzzle's value and ends the puzzle, revealing everything.
+
+**Scoring.** Puzzles are worth 100, 100, 200, 200, 300, 300, then 400 each. The first team to **500** wins and goes on to the bonus round (not built yet), or the team ahead after 12 puzzles.
+
+**Emcee tools.** The emcee's phone shows the password, the big word and the other answers to accept, and has Correct / Wrong buttons, "Throw out that clue" (made-up word, part of the word, and so on), and can type a clue for a player whose phone died.
+
+**Puzzles.** `src/BuzzerGames.Core/Data/Password/puzzles.json`: each entry has a `kind`, the `answer`, five `words` and optional `alsoAccept`. Each game deals 12, avoiding the same kind twice in a row.
 
 ## Run it on your computer
 
@@ -98,6 +122,8 @@ src/BuzzerGames.Core/          The game itself: plain C#, no web code
   Jeopardy/GameRoomManager.cs    all running games, found by room code
   PressYourLuck/                 the Press Your Luck engine, board dealing, questions, room manager
   Data/PressYourLuck/            board recipes (counts, values, prizes)
+  Password/                      the Password Plus engine, puzzle dealing, room manager
+  Data/Password/                 the puzzle bank (puzzles.json)
 
 src/BuzzerGames.Web/           The website
   Program.cs                     startup and wiring
@@ -105,6 +131,7 @@ src/BuzzerGames.Web/           The website
   Components/Pages/              Home, JeopardyHome, JeopardyRoom (the one page every screen goes through)
   Components/Jeopardy/           LobbyView, BoardView (TV), EmceeView, PlayerView, ScoreStrip
   Components/PressYourLuck/      the Press Your Luck screens (TV, emcee, player, lobby)
+  Components/Password/           the Password Plus screens (TV, emcee, player, lobby)
   wwwroot/app.css, js/bg.js      styling, and the small JavaScript bits (saved seat, QR code)
   wwwroot/js/pyl.js              the flashing Big Board and its sounds
 

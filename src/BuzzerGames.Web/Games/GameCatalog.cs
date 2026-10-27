@@ -13,9 +13,9 @@ public static class GameCatalog
     [
         new("Jeopardy", "/jeopardy", "Three players, one emcee, and a board full of clues.", IsPlayable: true),
         new("Press Your Luck", "/press-your-luck", "Earn spins, then press your luck on the Big Board. No Whammies!", IsPlayable: true),
+        new("Password Plus", "/password-plus", "One-word clues, two teams, five secret words, one big word.", IsPlayable: true),
         new("Wheel of Fortune", "/wheel-of-fortune", "Spin, solve, and buy a vowel.", IsPlayable: false),
         new("Classic Concentration", "/classic-concentration", "Match the prizes to reveal the rebus.", IsPlayable: false),
-        new("Super Password", "/super-password", "One-word clues, two teams, one secret word.", IsPlayable: false),
         new("The Price Is Right", "/price-is-right", "Come on down!", IsPlayable: false),
     ];
 }
