@@ -214,35 +214,39 @@ static class PasswordChecks
             Check.Equal(PasswordPhase.Clue, t.S.Phase, "phase");
         });
 
-        run("password: on word 1 player 1 gives and player 2 guesses; on word 2 they swap; it carries across puzzles", () =>
+        run("password: roles hold for the whole puzzle and only swap when the next big word begins", () =>
         {
             var t = new PasswordTable();
-            var s = t.S;
-            foreach (var team in new[] { 0, 1 })
+            void ExpectGiver(int slot, string when)
             {
-                Check.True(s.Players.Single(p => p.Team == team && p.Slot == 0).IsGiver, $"team {team} player 1 gives on word 1");
-                Check.True(s.Players.Single(p => p.Team == team && p.Slot == 1).IsGuesser, $"team {team} player 2 guesses on word 1");
+                foreach (var team in new[] { 0, 1 })
+                {
+                    Check.True(t.S.Players.Single(p => p.Team == team && p.Slot == slot).IsGiver, $"team {team} player {slot + 1} gives {when}");
+                    Check.True(t.S.Players.Single(p => p.Team == team && p.Slot == 1 - slot).IsGuesser, $"team {team} player {2 - slot} guesses {when}");
+                }
             }
+
+            ExpectGiver(0, "on word 1 of puzzle 1");
             t.Open(0);
             t.MissAllClues();
             Check.Ok(t.Game.Continue(t.Emcee));
-            s = t.S;
-            Check.Equal(2, s.WordNumber, "word 2");
-            foreach (var team in new[] { 0, 1 })
-            {
-                Check.True(s.Players.Single(p => p.Team == team && p.Slot == 1).IsGiver, $"team {team} player 2 gives on word 2");
-                Check.True(s.Players.Single(p => p.Team == team && p.Slot == 0).IsGuesser, $"team {team} player 1 guesses on word 2");
-            }
+            Check.Equal(2, t.S.WordNumber, "word 2");
+            ExpectGiver(0, "on word 2 of puzzle 1 (nobody swaps mid-puzzle)");
 
-            // Solve the puzzle on word 2 (the game's second word). The next puzzle's first word is the game's third, so player 1 gives again.
-            t.SolveWord(0, bigWordRight: true);
+            t.SolveWord(0, bigWordRight: true);                 // the big word is found on word 2
             Check.Ok(t.Game.Continue(t.Emcee));
             Check.Equal(2, t.S.PuzzleNumber, "puzzle 2");
             Check.Equal(1, t.S.WordNumber, "its first word");
-            Check.True(t.S.Players.Single(p => p.Team == 0 && p.Slot == 0).IsGiver, "the third word of the game: player 1 gives");
+            ExpectGiver(1, "in puzzle 2");
+
+            t.Open(0);
+            t.MissAllClues();
+            Check.Ok(t.Game.Continue(t.Emcee));
+            ExpectGiver(1, "on word 2 of puzzle 2");
+
             t.SolveWord(0, bigWordRight: true);
             Check.Ok(t.Game.Continue(t.Emcee));
-            Check.True(t.S.Players.Single(p => p.Team == 0 && p.Slot == 1).IsGiver, "the fourth word of the game: player 2 gives");
+            ExpectGiver(0, "in puzzle 3");
         });
 
         run("password: only the clue-giver on the clock can send a clue", () =>
@@ -260,21 +264,30 @@ static class PasswordChecks
             Check.Ok(u.Game.SubmitClue(u.Emcee, "red"));        // the emcee can send it for a dead phone
         });
 
-        run("password: a clue must be one plain word that isn't part of the password, and a bad try costs nothing", () =>
+        run("password: the emcee judges clues; throwing one out costs only that clue and passes the turn", () =>
         {
             var t = new PasswordTable();
             t.Open(0);                                          // the password is "Anchor"
-            foreach (var bad in new[] { "", "   ", "two words", "hot-dog", "r3d", "red!", "anchor", "ANCHOR", "anchors", "danchor", "anch", new string('a', 40) })
-                Check.Fails(t.Game.SubmitClue(t.Tokens[0], bad), $"the clue \"{bad}\"");
-            Check.Equal(PasswordPhase.Clue, t.S.Phase, "still waiting for a real clue");
-            Check.Equal(PasswordGame.CluesPerSide, t.S.Teams[0].CluesLeft, "no clue used up by bad tries");
-            Check.Equal(0, t.S.Clues.Count, "nothing was posted");
+            foreach (var bad in new[] { "", "   ", new string('a', 40) })
+                Check.Fails(t.Game.SubmitClue(t.Tokens[0], bad), $"the clue \"{bad.Trim()}\"");
+            Check.Equal(PasswordGame.CluesPerSide, t.S.Teams[0].CluesLeft, "no clue used up by an empty try");
 
-            Check.Ok(t.Game.SubmitClue(t.Tokens[0], "an"));     // a tiny word that merely sits inside is fine
-            Check.Fails(t.Game.SubmitClue(t.Tokens[0], "navy"), "a second clue while a guess is pending");
+            // Ann breaks the rules (two words). The emcee throws it out: that clue is spent, Bob never guesses, and Team B is up.
+            Check.Ok(t.Game.SubmitClue(t.Tokens[0], "two words"));
+            Check.Equal(PasswordPhase.Guess, t.S.Phase, "the emcee gets to rule on it");
+            Check.Fails(t.Game.RejectClue(t.Tokens[1]), "a player throwing out a clue");
+            Check.Ok(t.Game.RejectClue(t.Emcee));
+            Check.Equal(ClueOutcome.Rejected, t.S.Clues[^1].Outcome, "the clue is marked thrown out");
+            Check.Equal(PasswordPhase.Clue, t.S.Phase, "back to a clue");
+            Check.Equal(1, t.S.TurnTeam, "Team B is next");
+            Check.Equal(3, t.S.Teams[0].CluesLeft, "Team A used one of its four");
+            Check.Equal(WordState.Current, t.S.Words[0].State, "the word is still in play");
+
+            t.Clue();                                           // Cy gives, Dee guesses, wrong
             Check.Ok(t.Game.JudgeGuess(t.Emcee, false));
-            Check.Fails(t.Game.SubmitClue(t.Tokens[2], "AN"), "repeating a clue that was already used on this word");
-            Check.Ok(t.Game.SubmitClue(t.Tokens[2], "navy"));
+            Check.Equal(0, t.S.TurnTeam, "and then Team A's clue-giver goes again");
+            Check.Ok(t.Game.SubmitClue(t.Tokens[0], "ship"));
+            Check.True(t.S.Guesser(0)!.IsGuesser && t.S.Guesser(0)!.OnClock, "Bob can guess this time");
         });
 
         run("password: after a miss the other team clues, and each side gets four clues", () =>
@@ -471,17 +484,67 @@ static class PasswordChecks
             Check.Equal(2, t.S.PuzzleNumber, "on to the next puzzle");
         });
 
-        run("password: if the fifth word itself goes unguessed, nobody may guess the big word and the puzzle is thrown out", () =>
+        run("password: if the fifth word goes unguessed, the last team to guess a word gets the first shot at the big word", () =>
+        {
+            // Team A won words 1-3, Team B won word 4, and nobody gets word 5: Team B was the last to guess, so Dee (their guesser) starts.
+            var t = new PasswordTable();
+            for (var i = 0; i < 3; i++) { t.SolveWord(0, bigWordRight: false); Check.Ok(t.Game.Continue(t.Emcee)); }
+            t.SolveWord(1, bigWordRight: false);
+            Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Equal(PasswordGame.WordsPerPuzzle, t.S.WordNumber, "word 5");
+            t.Open(0);
+            t.MissAllClues();
+            var s = t.S;
+            Check.Equal(PasswordPhase.PuzzleGuess, s.Phase, "a shot at the big word");
+            Check.Equal(WordState.Posted, s.Words[4].State, "the fifth word is posted");
+            Check.True(!s.BigWordRevealed, "the big word is still secret");
+            Check.Equal(t.Ids[3], s.AttemptingId, "Dee, Team B's guesser, goes first");
+            Check.Equal(4, s.AttemptsLeft, "four tries");
+            var order = new List<int>();
+            for (var i = 0; i < 4; i++)
+            {
+                order.Add(t.IndexOf(t.S.AttemptingId!.Value));
+                Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, false));
+            }
+            Check.True(order.SequenceEqual([3, 2, 1, 0]), $"Dee, Cy, then Team A's guesser Bob and giver Ann (got {string.Join(",", order)})");
+            Check.Equal(PasswordPhase.PuzzleResult, t.S.Phase, "everybody missed");
+            Check.True(t.S.BigWordRevealed, "so the big word is shown");
+            Check.Equal(0, t.S.Teams[0].Score + t.S.Teams[1].Score, "no points");
+        });
+
+        run("password: a right big word after an unsolved fifth word scores for whoever got it", () =>
         {
             var t = new PasswordTable();
             t.PlayToWordFive(0);
             t.Open(0);
             t.MissAllClues();
-            var s = t.S;
-            Check.Equal(PasswordPhase.PuzzleResult, s.Phase, "phase");
-            Check.Equal(WordState.Posted, s.Words[4].State, "the fifth word is posted");
-            Check.True(s.BigWordRevealed, "the big word is shown");
-            Check.Equal(0, s.Teams[0].Score + s.Teams[1].Score, "no points");
+            Check.Equal(t.Ids[1], t.S.AttemptingId, "Bob, Team A's guesser, goes first");
+            Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, false));
+            Check.Equal(t.Ids[0], t.S.AttemptingId, "then Ann, Team A's clue-giver");
+            Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, false));
+            Check.Equal(t.Ids[3], t.S.AttemptingId, "then Team B's guesser, Dee");
+            Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, true));
+            Check.Equal(100, t.S.Teams[1].Score, "Team B scores the puzzle");
+            Check.Equal(PasswordPhase.PuzzleResult, t.S.Phase, "puzzle over");
+        });
+
+        run("password: a puzzle where nobody guesses a single word is thrown out", () =>
+        {
+            var t = new PasswordTable();
+            for (var i = 0; i < PasswordGame.WordsPerPuzzle; i++)
+            {
+                t.Open(0);
+                t.MissAllClues();
+                if (i < PasswordGame.WordsPerPuzzle - 1)
+                {
+                    Check.Equal(PasswordPhase.WordResult, t.S.Phase, $"word {i + 1} goes up on the board, and the puzzle carries on");
+                    Check.Equal(WordState.Posted, t.S.Words[i].State, $"word {i + 1} is posted");
+                    Check.Ok(t.Game.Continue(t.Emcee));
+                }
+            }
+            Check.Equal(PasswordPhase.PuzzleResult, t.S.Phase, "puzzle over");
+            Check.True(t.S.BigWordRevealed, "the big word is shown");
+            Check.Equal(0, t.S.Teams[0].Score + t.S.Teams[1].Score, "no points");
             Check.Fails(t.Game.JudgePuzzleGuess(t.Emcee, true), "a big-word guess");
         });
 
@@ -596,11 +659,11 @@ static class PasswordChecks
         {
             var bank = JsonPasswordPuzzleSource.LoadBank();
             Check.True(bank.Count >= PasswordGame.PuzzlesPerGame, $"need at least {PasswordGame.PuzzlesPerGame} puzzles, have {bank.Count}");
-            var kinds = new HashSet<string> { "Person", "Place", "Thing", "Title", "Idea" };
+            var kinds = new HashSet<string> { "Person", "Place", "Thing" };
             var answers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var p in bank)
             {
-                Check.True(kinds.Contains(p.Kind), $"{p.Answer}: kind \"{p.Kind}\" must be one of Person, Place, Thing, Title, Idea");
+                Check.True(kinds.Contains(p.Kind), $"{p.Answer}: kind \"{p.Kind}\" must be one of Person, Place, Thing");
                 Check.True(!string.IsNullOrWhiteSpace(p.Answer), "an answer");
                 Check.True(answers.Add(p.Answer), $"{p.Answer} appears twice");
                 Check.Equal(PasswordGame.WordsPerPuzzle, p.Words.Length, $"{p.Answer}: five words");

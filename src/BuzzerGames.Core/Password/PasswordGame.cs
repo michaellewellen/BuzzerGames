@@ -78,7 +78,7 @@ public sealed class PasswordGame
     private IReadOnlyList<PasswordPuzzle> _puzzles = [];
     private int _puzzleIndex;
     private int _wordIndex;     // 0 to 4, within the puzzle
-    private int _wordNumber;    // counts every word played in the game; decides who gives clues
+    private int _lastSolverTeam = -1; // the team that most recently guessed a word in this puzzle
     private readonly WordState[] _wordStates = new WordState[WordsPerPuzzle];
     private bool _bigWordRevealed;
 
@@ -176,7 +176,7 @@ public sealed class PasswordGame
         Array.Clear(_scores);
         _puzzleIndex = 0;
         _wordIndex = 0;
-        _wordNumber = 0;
+        _lastSolverTeam = -1;
         _winners = [];
         _controlTeam = _rng.Next(Teams);
         StartWord($"{TeamNames[_controlTeam]} won the coin flip.");
@@ -190,7 +190,7 @@ public sealed class PasswordGame
         _puzzles = [];
         _puzzleIndex = 0;
         _wordIndex = 0;
-        _wordNumber = 0;
+        _lastSolverTeam = -1;
         Array.Clear(_wordStates);
         _bigWordRevealed = false;
         _turnTeam = -1;
@@ -221,9 +221,8 @@ public sealed class PasswordGame
     });
 
     /// <summary>
-    /// The clue-giver on the clock sends a one-word clue. It must be a single plain word that doesn't contain the
-    /// password (or part of it) and wasn't already used on this word. The emcee may also send it, as a safety net
-    /// for a dead phone. The emcee can still throw a clue out afterwards with <see cref="RejectClue"/>.
+    /// The clue-giver on the clock sends a one-word clue. The emcee, not the computer, judges whether it is legal.
+    /// The emcee may also send it, as a safety net for a dead phone. The emcee can still throw a clue out afterwards with <see cref="RejectClue"/>.
     /// </summary>
     public Result SubmitClue(Guid token, string? text) => Run(() =>
     {
@@ -231,7 +230,7 @@ public sealed class PasswordGame
         var giver = PlayerAt(_turnTeam, GiverSlot);
         if (!IsEmcee(token) && giver.Token != token)
             return Result.Fail($"{giver.Name} is giving the clues for {TeamNames[_turnTeam]} on this word.");
-        if (!TryCleanClue(text, CurrentPuzzle.Words[_wordIndex], _clues.Select(c => c.Text), out var clean, out var error))
+        if (!TryCleanClue(text, out var clean, out var error))
             return Result.Fail(error);
 
         _clues.Add(new ClueEntry(_turnTeam, clean));
@@ -256,13 +255,13 @@ public sealed class PasswordGame
         clue.Outcome = ClueOutcome.Hit;
         _wordStates[_wordIndex] = WordState.Solved;
         _controlTeam = clue.Team;
-        BeginBigWordGuess(clue.Team);
+        _lastSolverTeam = clue.Team;
+        BeginBigWordGuess(clue.Team, null);
         return Result.Success;
     });
 
     /// <summary>
-    /// The emcee throws out the clue that was just given (it was a made-up word, an antonym, a gesture, part of the
-    /// password...). It still counts as that side's clue, and nobody guesses.
+    /// The emcee throws out the clue that was just given (more than one word, part of the answer, a made-up word...). It still counts as that side's clue, nobody guesses, and the turn passes.
     /// </summary>
     public Result RejectClue(Guid emceeToken) => Run(() =>
     {
@@ -283,8 +282,17 @@ public sealed class PasswordGame
             var word = CurrentPuzzle.Words[_wordIndex];
             if (_wordIndex == WordsPerPuzzle - 1)
             {
-                // Nobody got the last word, so nobody may guess the big word and the puzzle is thrown out.
-                EndPuzzle($"Nobody got \"{word}\", so nobody may guess the big word. No points for this puzzle.");
+                // Nobody got the last word. The last team to guess a word in this puzzle gets the first shot at the big word.
+                if (_lastSolverTeam >= 0)
+                {
+                    var guesserName = PlayerAt(_lastSolverTeam, 1 - GiverSlot).Name;
+                    BeginBigWordGuess(_lastSolverTeam,
+                        $"Nobody got \"{word}\". {guesserName} was the last to guess a word, so they get the first shot at the big word.");
+                }
+                else
+                {
+                    EndPuzzle($"Nobody got a single word, so there's no shot at the big word. No points for this puzzle.");
+                }
             }
             else
             {
@@ -301,7 +309,7 @@ public sealed class PasswordGame
 
     // ---- The big word --------------------------------------------------------------------
 
-    private void BeginBigWordGuess(int team)
+    private void BeginBigWordGuess(int team, string? message)
     {
         var giverSlot = GiverSlot;
         var guesserSlot = 1 - giverSlot;
@@ -318,7 +326,7 @@ public sealed class PasswordGame
         }
         _attemptPos = 0;
         _turnTeam = team;
-        _message = $"{guesser.Name} got \"{CurrentPuzzle.Words[_wordIndex]}\"! Now a guess at the big word.";
+        _message = message ?? $"{guesser.Name} got \"{CurrentPuzzle.Words[_wordIndex]}\"! Now a guess at the big word.";
         _phase = PasswordPhase.PuzzleGuess;
     }
 
@@ -382,7 +390,6 @@ public sealed class PasswordGame
         {
             case PasswordPhase.WordResult:
                 _wordIndex++;
-                _wordNumber++;
                 StartWord(null);
                 return Result.Success;
 
@@ -403,7 +410,6 @@ public sealed class PasswordGame
                 }
                 _puzzleIndex++;
                 _wordIndex = 0;
-                _wordNumber++;
                 StartWord(null);
                 return Result.Success;
 
@@ -427,6 +433,7 @@ public sealed class PasswordGame
         if (_wordIndex == 0)
         {
             Array.Clear(_wordStates);
+            _lastSolverTeam = -1;
             _bigWordRevealed = false;
         }
         _wordStates[_wordIndex] = WordState.Current;
@@ -531,8 +538,9 @@ public sealed class PasswordGame
     private PlayerState PlayerAt(int team, int slot) => _players.First(p => p.Team == team && p.Slot == slot);
     private PasswordPuzzle CurrentPuzzle => _puzzles[_puzzleIndex];
 
-    /// <summary>Which player on each team gives the clues on this word: player 1 (slot 0), then player 2, and so on.</summary>
-    private int GiverSlot => _wordNumber % 2;
+    /// <summary>Which player on each team gives the clues in this puzzle: player 1 (slot 0) in puzzle 1, player 2 in puzzle 2, and so on.
+    /// The roles only swap when a new puzzle (a new big word) begins.</summary>
+    private int GiverSlot => _puzzleIndex % 2;
 
     private static bool TryCleanName(string? name, out string clean)
     {
@@ -542,37 +550,14 @@ public sealed class PasswordGame
         return true;
     }
 
-    private static string Letters(string text) =>
-        new(text.Where(char.IsLetter).Select(char.ToLowerInvariant).ToArray());
-
-    private static bool TryCleanClue(string? text, string password, IEnumerable<string> alreadyUsed, out string clean, out string error)
+    // The emcee decides whether a clue is legal (one word, no part of the answer). All that's checked here is that
+    // something sensible was typed; a bad clue is thrown out by the emcee, which ends just that clue.
+    private static bool TryCleanClue(string? text, out string clean, out string error)
     {
         clean = (text ?? "").Trim();
         error = "";
-
-        if (clean.Length == 0) { error = "Type a one-word clue first."; return false; }
+        if (clean.Length == 0) { error = "Type a clue first."; return false; }
         if (clean.Length > ClueMaxLength) { error = $"That's too long for a one-word clue (the limit is {ClueMaxLength} letters)."; return false; }
-        if (clean.Any(char.IsWhiteSpace)) { error = "One word only."; return false; }
-        if (clean.Contains('-')) { error = "No hyphens: a clue must be one plain word."; return false; }
-        if (!clean.All(c => char.IsLetter(c) || c == '\'')) { error = "Letters only, please."; return false; }
-
-        var clue = Letters(clean);
-        var word = Letters(password);
-        if (clue.Length == 0) { error = "Letters only, please."; return false; }
-
-        // No part of the password: the clue can't be it, hold it, or be a piece of it (a short clue like "a" is let through).
-        if (clue == word || clue.Contains(word) || (clue.Length >= 3 && word.Contains(clue)))
-        {
-            error = "That's too close to the password. Try a different clue.";
-            return false;
-        }
-
-        if (alreadyUsed.Any(used => Letters(used) == clue))
-        {
-            error = "That clue was already used on this word.";
-            return false;
-        }
-
         return true;
     }
 }

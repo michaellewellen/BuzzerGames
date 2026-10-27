@@ -53,24 +53,21 @@ Same setup as Jeopardy: create it on the TV at `/press-your-luck`, one emcee and
 Five people: **Emcee**, **Team A** (player 1, player 2) and **Team B** (player 1, player 2). Everyone joins from a phone; the TV
 is the `/board` address.
 
-**A puzzle** has a secret "big word" (a person, place, thing, title or idea) and five password words that hint at it.
-The five words are played one after another. The TV shows five slots; a word only appears there once it is guessed or posted.
+**A puzzle (a round)** has a secret "big word" (always a person, place or thing) and five password words that hint at it, played one after another, getting easier: word 1 is true but almost useless, word 5 makes it obvious. The TV shows five slots; a word only appears there once it is guessed or posted.
 
-**A word.** Both clue-givers see the password on their phones; guessers never do. The team on the clock gives a one-word clue
-(typed on the phone and shown on the TV), the emcee rules on the guess out loud, and the turn passes to the other team. Each side gets
-4 clues, 8 in all. If nobody gets the word it goes up on the board and nobody gets a shot at the big word.
+**Roles swap per puzzle, not per word.** In puzzle 1 player 1 on each team gives clues and player 2 guesses; in puzzle 2 they swap; and so on.
 
-**Roles swap every word.** On word 1, player 1 gives and player 2 guesses; on word 2 they swap, and so on.
+**A word.** Both clue-givers see the password on their phones; guessers never do. The team on the clock gives ONE word as a clue (typed on the phone, shown on the TV) and their guesser says a guess out loud. The emcee rules on it. Wrong, or a clue the emcee throws out (more than one word, part of the answer...), and the turn passes to the other team. A thrown-out clue costs only that clue. Each side gets 4 clues, 8 in all. If nobody gets the word it goes up on the board, and the puzzle carries on with the next word (nobody gets a shot at the big word from that one).
 
 **Control.** A coin flip decides the first word. After that, the team that last got a word right chooses **Play** (they give the first clue) or **Pass** (the other team does).
 
-**The big word.** When a word is guessed, only the guesser may try the big word. The exception is word 5, where the order is: that team's guesser, that team's clue-giver, then the other team's guesser, then their clue-giver. A right answer scores the puzzle's value and ends the puzzle, revealing everything.
+**The big word.** When a word is guessed, only that guesser may try the big word. If they miss, the puzzle carries on to the next word. The exception is word 5: the guesser, then their clue-giver, then the other team's guesser, then their clue-giver. If nobody gets word 5, the last team to guess a word in this puzzle starts that same chain. If nobody guessed a single word, the puzzle is thrown out. A right big word scores the puzzle's value and reveals everything (all five words and the big word).
 
-**Scoring.** Puzzles are worth 100, 100, 200, 200, 300, 300, then 400 each. The first team to **500** wins and goes on to the bonus round (not built yet), or the team ahead after 12 puzzles.
+**Scoring.** Puzzles are worth 100, 100, 200, 200, 300, 300, then 400 each. The first team to **500** goes to the bonus round (not built yet), or the team ahead after 12 puzzles wins.
 
-**Emcee tools.** The emcee's phone shows the password, the big word and the other answers to accept, and has Correct / Wrong buttons, "Throw out that clue" (made-up word, part of the word, and so on), and can type a clue for a player whose phone died.
+**Emcee tools.** The emcee's phone shows the password, the big word and the other answers to accept, and has Correct / Wrong buttons, "Throw out that clue", and can type a clue for a player whose phone died.
 
-**Puzzles.** `src/BuzzerGames.Core/Data/Password/puzzles.json`: each entry has a `kind`, the `answer`, five `words` and optional `alsoAccept`. Each game deals 12, avoiding the same kind twice in a row.
+**Puzzles.** `src/BuzzerGames.Core/Data/Password/puzzles.json`: each entry has a `kind` (Person, Place or Thing), the `answer`, five `words` ordered from vague to obvious, and optional `alsoAccept`. Each game deals 12, avoiding the same kind twice in a row.
 
 ## Run it on your computer
 
