@@ -8,8 +8,7 @@ public enum PasswordPhase
 {
     Lobby,        // waiting for 1 emcee + 2 teams of 2
     Control,      // the team with control chooses: play (give the first clue) or pass
-    Clue,         // the clue-giver on the clock types a one-word clue
-    Guess,        // a clue is up; the guesser says a guess out loud and the emcee rules on it
+    Clue,         // the clue-giver on the clock says a word, the guesser guesses, and the emcee rules: right, wrong or invalid
     PuzzleGuess,  // the word was guessed; someone gets a shot at the big word
     WordResult,   // the word is done and the puzzle is still open; the emcee taps Continue
     PuzzleResult, // the puzzle is done (solved or thrown out); the emcee taps Continue
@@ -36,8 +35,6 @@ public enum BonusSlotState
     Zapped    // a clue rule was broken, so the word is lost
 }
 
-public enum ClueOutcome { Pending, Miss, Hit, Rejected }
-
 public sealed record PasswordPlayerInfo(
     Guid Id,
     string Name,
@@ -58,8 +55,6 @@ public sealed record PasswordTeamInfo(
     IReadOnlyList<Guid> PlayerIds);
 
 public sealed record PasswordWordInfo(int Number, string Text, WordState State);
-
-public sealed record PasswordClueInfo(int Team, string Text, ClueOutcome Outcome);
 
 public sealed record BonusSlotInfo(char Letter, string Word, BonusSlotState State);
 
@@ -82,7 +77,6 @@ public sealed record PasswordSnapshot(
     string BigWord,             // SECRET until BigWordRevealed
     string? BigWordAlso,        // SECRET: other answers the emcee should accept
     bool BigWordRevealed,
-    IReadOnlyList<PasswordClueInfo> Clues,
     Guid? AttemptingId,
     int AttemptsLeft,           // including the current one
     string? Message,

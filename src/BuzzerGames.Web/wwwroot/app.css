@@ -672,3 +672,23 @@ a.game-tile:hover { border-color: var(--gold); }
 .bonus-right { background: #1faa59; }
 .bonus-wrong { background: #d63a2f; }
 .bonus-pass { background: #f2c230; color: #222; font-size: 1.5rem; }
+
+
+/* ---- Password Plus: the puzzle board, after the TV show's Password Puzzle ---- */
+.pw-board { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2vh 3vw; box-sizing: border-box; }
+.pw-frame { width: min(100%, 120vh); padding: 1.6vh 1.6vw 2vh; border-radius: 1.2vw; background: linear-gradient(160deg, #2a1c63, #14103a);
+  box-shadow: 0 0 0 .5vh #2fa8ff, 0 0 2.4vh .8vh rgba(47,168,255,.65), inset 0 0 0 .4vh #ff8a2b; }
+.pw-sign { text-align: center; background: #1b1546; border: .45vh solid #ff5fa8; border-radius: 1vw; padding: 1.2vh 1vw; margin-bottom: 1.6vh;
+  box-shadow: 0 0 1.6vh rgba(255,95,168,.6), inset 0 0 1.4vh rgba(255,95,168,.35); }
+.pw-bigword { display: block; color: #ffd23f; font-weight: 900; line-height: 1.05; text-shadow: 0 .25vh 0 #b8730d, 0 0 1.4vh rgba(255,210,63,.65); font-size: clamp(2.6rem, 9vh, 7rem); letter-spacing: .04em; }
+.pw-bigword.revealed { text-transform: uppercase; animation: pw-pop .5s ease-out; }
+.pw-sign-script { font-style: italic; font-size: .8em; }
+.pw-sign-block { text-transform: uppercase; }
+@keyframes pw-pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.pw-stage { display: grid; grid-template-columns: 9% 1fr 9%; gap: 1.2vw; align-items: stretch; }
+.pw-checks { border-radius: .5vw; min-height: 100%;
+  background: repeating-conic-gradient(#ff3d9a 0 25%, #2fa8ff 0 50%, #ffd23f 0 75%, #5b2bb8 0) 0 0 / 5.2vh 5.2vh; border: .35vh solid #1b1546; }
+.pw-screen { background: #0b0812; border: .5vh solid #3a2d86; border-radius: .6vw; padding: 2.2vh 1vw; display: flex; flex-direction: column; justify-content: space-around; min-height: 52vh; }
+.pw-word { text-align: center; color: #ffd23f; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; font-size: clamp(2rem, 7vh, 5rem); line-height: 1.15; min-height: 1.15em; text-shadow: 0 0 1vh rgba(255,210,63,.45); }
+.pw-word.solved .pw-word-text { animation: pw-pop .45s ease-out; }
+.pw-word.posted .pw-word-text { opacity: .8; }

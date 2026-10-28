@@ -19,22 +19,6 @@ public static class PasswordText
     /// <summary>The CSS class that gives a team its color.</summary>
     public static string TeamClass(int team) => team == 0 ? "team-a" : "team-b";
 
-    public static string OutcomeMark(ClueOutcome outcome) => outcome switch
-    {
-        ClueOutcome.Hit => "✓",
-        ClueOutcome.Miss => "✗",
-        ClueOutcome.Rejected => "⊘",
-        _ => "…"
-    };
-
-    public static string OutcomeClass(ClueOutcome outcome) => outcome switch
-    {
-        ClueOutcome.Hit => "hit",
-        ClueOutcome.Miss => "miss",
-        ClueOutcome.Rejected => "rejected",
-        _ => "pending"
-    };
-
     public static string BonusClass(BonusSlotState state) => state switch
     {
         BonusSlotState.Current => "current",

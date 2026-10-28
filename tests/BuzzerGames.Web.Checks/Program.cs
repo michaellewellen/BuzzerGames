@@ -495,6 +495,8 @@ void AssertPasswordSecrets(PasswordTable t)
     if (!s.BigWordRevealed)
         Check.True(!Render.ShowsAnyCase(tv, s.BigWord), $"the TV shows the big word early in phase {s.Phase}");
     Check.True(!Render.Has(tv, "pw-secret") && !Render.Has(tv, "emcee-clue"), $"the TV drew a secret panel in phase {s.Phase}");
+    foreach (var extra in new[] { "tv-top", "pw-status", "pw-clue", "pw-scores", "Team A", "Team B", "Room" })
+        Check.True(!Render.Has(tv, extra), $"the TV board is only the board, but it shows \"{extra}\" in phase {s.Phase}");
 
     var current = s.Words[s.WordNumber - 1];
     for (var i = 0; i < 4; i++)
@@ -504,7 +506,7 @@ void AssertPasswordSecrets(PasswordTable t)
         Check.True(!Render.ShowsAnyCase(phone, "Mystery"), $"player {i}'s phone shows the big word in phase {s.Phase}");
 
         var mayKnowWord = current.State is WordState.Solved or WordState.Posted
-            || (me.IsGiver && s.Phase is PasswordPhase.Clue or PasswordPhase.Guess);
+            || (me.IsGiver && s.Phase == PasswordPhase.Clue);
         foreach (var w in s.Words)
         {
             var revealed = w.State is WordState.Solved or WordState.Posted;
@@ -575,37 +577,32 @@ Run("pw room page: no stray '_error', the TV address shows the QR code and no jo
     Check.True(Render.Has(Render.PwRoom(rooms, "ZZZZ", board: true), "Game not found"), "unknown code says game not found");
 });
 
-Run("pw tv: never shows the password or the big word until the game reveals them", () =>
+Run("pw tv: only the board; never the password or the big word until the game reveals them", () =>
 {
     var t = new PasswordTable();
     var html = Render.PwTv(t);
-    Check.True(Render.Has(html, "A THING"), "announces what kind of answer it is");
-    Check.True(Render.Has(html, "? ? ? ?"), "the big word is hidden");
+    Check.True(Render.Has(html, "pw-sign") && Render.Has(html, "Password") && Render.Has(html, "PUZZLE"), "the Password PUZZLE sign is up");
+    Check.True(!Render.Has(html, "class=\"pw-bigword revealed\""), "the big word is not revealed");
     Check.Equal(5, Render.Count(html, "class=\"pw-word "), "five word slots");
-    Check.True(Render.Has(html, "play or pass?") && Render.Has(html, "coin flip"), "announces the coin flip and asks play or pass");
+    Check.Equal(0, Render.Count(html, "<span class=\"pw-word-text\">A") + Render.Count(html, "<span class=\"pw-word-text\">B"), "and no words in them yet");
+    foreach (var extra in new[] { "tv-top", "pw-status", "pw-clue", "pw-scores", "play or pass", "coin flip", "A THING" })
+        Check.True(!Render.Has(html, extra), $"the TV is only the board, but it shows \"{extra}\"");
     foreach (var w in FixedPasswordPuzzleSource.Words)
         Check.True(!Render.ShowsAnyCase(html, w), $"{w} must not be on the TV at the start");
     Check.True(!Render.ShowsAnyCase(html, "Mystery1"), "the big word must not be on the TV");
 
     t.Open(0);
-    html = Render.PwTv(t);
-    Check.True(Render.Has(html, "is giving clue 1 of 4"), "says who is giving a clue");
-    Check.True(!Render.ShowsAnyCase(html, "Anchor"), "the password must not show while a clue is being typed");
-
-    t.Clue();
-    html = Render.PwTv(t);
-    Check.Equal(1, Render.Count(html, "class=\"pw-clue "), "the clue is up on the TV");
-    Check.True(Render.Has(html, "what's the word?") || Render.Has(html, "what&#x27;s the word?"), "says who is guessing");
-    Check.True(!Render.ShowsAnyCase(html, "Anchor"), "the password must not show while someone guesses");
-
+    Check.Equal(Render.PwTv(t), html, "choosing play or pass changes nothing on the TV");
     Check.Ok(t.Game.JudgeGuess(t.Emcee, false));
-    t.Clue();
-    Check.Ok(t.Game.JudgeGuess(t.Emcee, true));          // Team B gets it
+    Check.Ok(t.Game.RejectClue(t.Emcee));
+    Check.Equal(Render.PwTv(t), html, "wrong guesses and invalid clues change nothing on the TV: the game is spoken");
+
+    Check.Ok(t.Game.JudgeGuess(t.Emcee, true));          // Team A gets it on the third clue
     html = Render.PwTv(t);
     Check.True(Render.Has(html, "pw-word solved") && Render.ShowsAnyCase(html, "Anchor"), "a guessed word goes up on the board");
+    Check.Equal(1, Render.Count(html, "pw-word solved"), "just the one word");
     Check.True(!Render.ShowsAnyCase(html, "Mystery1"), "but the big word is still secret");
     Check.True(!Render.ShowsAnyCase(html, "Banjo"), "and later words are still hidden");
-    Check.True(Render.Has(html, "what's the big word?") || Render.Has(html, "what&#x27;s the big word?"), "asks for the big word");
 
     Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, false));
     Check.Ok(t.Game.Continue(t.Emcee));
@@ -615,10 +612,10 @@ Run("pw tv: never shows the password or the big word until the game reveals them
     t.SolveWord(t.S.ControlTeam, bigWordRight: true);
     html = Render.PwTv(t);
     Check.True(Render.ShowsAnyCase(html, "Mystery1"), "the big word shows once the puzzle is solved");
+    Check.True(Render.Has(html, "class=\"pw-bigword revealed\""), "the big word takes the place of the sign");
+    Check.True(!Render.Has(html, "PUZZLE"), "so the Password PUZZLE sign is gone");
     foreach (var w in FixedPasswordPuzzleSource.Words)
         Check.True(Render.ShowsAnyCase(html, w), $"{w} is shown when the puzzle ends");
-    Check.True(Render.Has(html, "pw-bigword revealed"), "the big word is drawn as revealed");
-    Check.True(Render.Has(html, "solved it!"), "says who solved it");
 });
 
 Run("pw tv: a word nobody guessed is posted on the board, and the big word stays secret", () =>
@@ -628,9 +625,8 @@ Run("pw tv: a word nobody guessed is posted on the board, and the big word stays
     t.MissAllClues();
     var html = Render.PwTv(t);
     Check.True(Render.Has(html, "pw-word posted") && Render.ShowsAnyCase(html, "Anchor"), "the missed word is up, marked as posted");
-    Check.Equal(8, Render.Count(html, "class=\"pw-clue "), "all eight clues are listed");
     Check.True(!Render.ShowsAnyCase(html, "Mystery1"), "the big word is still secret");
-    Check.True(Render.ShowsAnyCase(html, "goes up on the board"), "the TV says so");
+    Check.True(!Render.Has(html, "goes up on the board") && !Render.Has(html, "pw-status"), "and the TV says nothing else");
 });
 
 Console.WriteLine("The Password Plus phones");
@@ -649,7 +645,7 @@ Run("pw players: nobody sees the word at the control choice; only the team with 
     }
 });
 
-Run("pw players: both clue-givers see the word, the guessers never do, and only the giver on the clock gets the clue box", () =>
+Run("pw players: both clue-givers see the word, the guessers never do, and nobody has anything to type", () =>
 {
     var t = new PasswordTable();
     t.Open(0);                                           // Team A clues: Ann (0) gives, Bob (1) guesses; Cy (2) gives, Dee (3) guesses for Team B
@@ -663,25 +659,26 @@ Run("pw players: both clue-givers see the word, the guessers never do, and only 
         var html = Render.PwPlayer(t, guesser);
         Check.True(!Render.ShowsAnyCase(html, "Anchor") && !Render.Has(html, "pw-secret"), $"guesser {guesser} must not see the word");
     }
-    Check.True(Render.Has(Render.PwPlayer(t, 0), "Send clue"), "the giver on the clock can send a clue");
-    Check.True(!Render.Has(Render.PwPlayer(t, 2), "Send clue"), "the other team's giver cannot");
-    Check.True(Render.Has(Render.PwPlayer(t, 2), "Keep the word to yourself"), "and is reminded to stay quiet");
-    Check.True(!Render.Has(Render.PwPlayer(t, 1), "Send clue") && !Render.Has(Render.PwPlayer(t, 3), "Send clue"), "guessers have no clue box");
-});
-
-Run("pw players: after a clue, the guesser on the clock is told it is their turn and everyone sees the clue", () =>
-{
-    var t = new PasswordTable();
-    t.Open(0);
-    t.Clue();
-    Check.True(Render.Has(Render.PwPlayer(t, 1), "Your guess!"), "Bob (Team A's guesser) is up");
     for (var i = 0; i < 4; i++)
     {
         var html = Render.PwPlayer(t, i);
-        if (i != 1) Check.True(!Render.Has(html, "Your guess!"), $"player {i} is not the one guessing");
-        Check.Equal(1, Render.Count(html, "class=\"pw-clue "), $"player {i} sees the clue");
+        Check.True(!Render.Has(html, "<input") && !Render.Has(html, "Send clue"), $"player {i} has no clue box: it is spoken");
+        Check.True(!Render.Has(html, "pw-clue"), $"player {i} sees no clue list");
     }
-    Check.True(Render.ShowsAnyCase(Render.PwPlayer(t, 0), "Anchor") && Render.ShowsAnyCase(Render.PwPlayer(t, 2), "Anchor"), "the clue-givers still see the word");
+    Check.True(Render.Has(Render.PwPlayer(t, 0), "Your clue!") && Render.Has(Render.PwPlayer(t, 0), "ONE word out loud"), "the giver on the clock is told to speak");
+    Check.True(Render.Has(Render.PwPlayer(t, 2), "Keep the word to yourself"), "the other team's giver is reminded to stay quiet");
+    Check.True(Render.Has(Render.PwPlayer(t, 1), "Your guess!"), "Bob (Team A's guesser) is up");
+    Check.True(!Render.Has(Render.PwPlayer(t, 3), "Your guess!"), "Dee isn't");
+});
+
+Run("pw players: the turn follows the emcee's rulings, and the roles hold for the puzzle", () =>
+{
+    var t = new PasswordTable();
+    t.Open(0);
+    Check.Ok(t.Game.JudgeGuess(t.Emcee, false));         // Team A misses: Team B is up
+    Check.True(Render.Has(Render.PwPlayer(t, 3), "Your guess!") && !Render.Has(Render.PwPlayer(t, 1), "Your guess!"), "now Dee guesses and Bob doesn't");
+    Check.True(Render.Has(Render.PwPlayer(t, 2), "Your clue!") && !Render.Has(Render.PwPlayer(t, 0), "Your clue!"), "and Cy gives the clue");
+    Check.True(Render.ShowsAnyCase(Render.PwPlayer(t, 0), "Anchor") && Render.ShowsAnyCase(Render.PwPlayer(t, 2), "Anchor"), "both givers still see the word");
     Check.True(!Render.ShowsAnyCase(Render.PwPlayer(t, 1), "Anchor") && !Render.ShowsAnyCase(Render.PwPlayer(t, 3), "Anchor"), "the guessers still don't");
 });
 
@@ -690,6 +687,7 @@ Run("pw players: only the player whose turn it is gets the shot at the big word,
     var t = new PasswordTable();
     t.PlayToWordFive(0);
     t.Open(0);
+    if (t.S.TurnTeam != 0) t.ClueAndJudge(false);        // Team B clues first and misses
     t.ClueAndJudge(true);                                // word 5: Bob, then Ann, then Dee, then Cy
     var order = new[] { 1, 0, 3, 2 };
     for (var attempt = 0; attempt < 4; attempt++)
@@ -701,7 +699,6 @@ Run("pw players: only the player whose turn it is gets the shot at the big word,
             Check.True(!Render.ShowsAnyCase(html, "Mystery"), "no phone shows the big word");
         }
         var tv = Render.PwTv(t);
-        Check.True(Render.Has(tv, "tries left") == (attempt < 3), $"the TV counts the remaining tries (attempt {attempt + 1})");
         Check.True(!Render.ShowsAnyCase(tv, "Mystery1"), "the TV doesn't show the big word either");
         if (attempt < 3) Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, false));
     }
@@ -724,13 +721,11 @@ Run("pw emcee: sees the password, the big word and the other answers, with the r
 
     t.Open(0);
     html = Render.PwEmcee(t);
-    Check.True(Render.Has(html, "Send clue for them"), "the emcee can type a clue for a dead phone");
-
-    t.Clue();
-    html = Render.PwEmcee(t);
-    Check.True(Render.Has(html, "Correct") && Render.Has(html, "Wrong"), "yes/no buttons");
-    Check.True(Render.Has(html, "Throw out that clue"), "a button to throw out the clue");
-    Check.True(Render.ShowsAnyCase(html, "Bob"), "says who is guessing");
+    Check.True(!Render.Has(html, "<input") && !Render.Has(html, "Send clue"), "nothing to type: it is spoken");
+    Check.True(Render.Has(html, "bonus-right") && Render.Has(html, "bonus-wrong") && Render.Has(html, "bonus-pass"), "the green check, the red X and the yellow button");
+    Check.True(Render.Has(html, "✓") && Render.Has(html, "✗") && Render.Has(html, "Bad clue"), "right, wrong and invalid clue");
+    Check.True(Render.ShowsAnyCase(html, "Ann") && Render.ShowsAnyCase(html, "Bob"), "says who is giving and who is guessing");
+    Check.True(Render.Has(html, "clue 1 of 4"), "and which clue it is");
 
     Check.Ok(t.Game.JudgeGuess(t.Emcee, true));
     html = Render.PwEmcee(t);
@@ -739,6 +734,7 @@ Run("pw emcee: sees the password, the big word and the other answers, with the r
 
     Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, false));
     Check.True(Render.Has(Render.PwEmcee(t), "Next word"), "a Next word button after a missed big word");
+    Check.True(Render.Has(Render.PwEmcee(t), "Control goes to Team B"), "and it says control goes to the other team");
 
     Check.Ok(t.Game.Continue(t.Emcee));
     t.SolveWord(t.S.ControlTeam, bigWordRight: true);
@@ -798,9 +794,6 @@ Run("pw: a whole game, drawing the TV, the emcee and all four phones after every
                 Check.Ok(t.Game.ChooseControl(t.TokenOf(s.Players.First(p => p.Team == s.ControlTeam).Id), n % 3 != 0));
                 break;
             case PasswordPhase.Clue:
-                t.Clue();
-                break;
-            case PasswordPhase.Guess:
                 if (n % 7 == 0) Check.Ok(t.Game.RejectClue(t.Emcee));
                 else Check.Ok(t.Game.JudgeGuess(t.Emcee, n % 3 == 0));
                 break;
@@ -827,7 +820,7 @@ Run("pw: a whole game, drawing the TV, the emcee and all four phones after every
 
     Check.Equal(PasswordPhase.GameOver, t.S.Phase, "the game finished");
     Check.True(draws > 60, $"expected dozens of redraws, got {draws}");
-    foreach (var phase in new[] { PasswordPhase.Control, PasswordPhase.Clue, PasswordPhase.Guess, PasswordPhase.PuzzleGuess, PasswordPhase.WordResult, PasswordPhase.PuzzleResult, PasswordPhase.BonusReady, PasswordPhase.BonusPlay, PasswordPhase.BonusResult })
+    foreach (var phase in new[] { PasswordPhase.Control, PasswordPhase.Clue, PasswordPhase.PuzzleGuess, PasswordPhase.WordResult, PasswordPhase.PuzzleResult, PasswordPhase.BonusReady, PasswordPhase.BonusPlay, PasswordPhase.BonusResult })
         Check.True(phases.Contains(phase), $"the game should have passed through {phase}");
 
     // And once more with the real puzzle bank, so every real word draws without trouble.
@@ -842,8 +835,7 @@ Run("pw: a whole game, drawing the TV, the emcee and all four phones after every
         switch (s.Phase)
         {
             case PasswordPhase.Control: Check.Ok(real.Game.ChooseControl(real.Emcee, true)); break;
-            case PasswordPhase.Clue: real.Clue(); break;
-            case PasswordPhase.Guess: Check.Ok(real.Game.JudgeGuess(real.Emcee, n % 3 == 0)); break;
+            case PasswordPhase.Clue: Check.Ok(real.Game.JudgeGuess(real.Emcee, n % 3 == 0)); break;
             case PasswordPhase.PuzzleGuess: Check.Ok(real.Game.JudgePuzzleGuess(real.Emcee, n % 4 == 0)); break;
             case PasswordPhase.BonusReady:
                 if (n % 2 == 0) Check.Ok(real.Game.BonusSwapRoles(real.Emcee));

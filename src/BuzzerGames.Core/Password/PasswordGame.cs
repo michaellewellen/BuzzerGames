@@ -6,18 +6,19 @@ namespace BuzzerGames.Core.Password;
 /// One Password Plus game: two teams of two, one emcee, and puzzles worth more and more points until a team
 /// reaches 500, then a bonus round for the winners.
 ///
-///   A puzzle (a round) is a mystery "big word" and five password words that each hint at it, getting easier. A word
-///   is played by clue-giving: one partner gives one-word clues, the other guesses. The emcee judges every clue and guess.
+///   A puzzle (a round) is a mystery "big word" and five password words that each hint at it, getting easier. The game is
+///   spoken: the clue-giver sees the password on their phone and says one word out loud, their partner guesses out loud, and
+///   the emcee rules with three buttons: right, wrong, or an invalid clue (more than one word, part of the password...).
 ///
-///   The team that most recently got a word right has control (a coin flip decides the first word) and chooses to
-///   play (their clue-giver gives the first clue) or pass. Clues then alternate between the teams, each clue followed by
-///   one guess from that team's guesser. Each side gets at most 4 clues. A clue the emcee throws out is just spent.
-///   If all 8 clues miss, the word is posted on the board and the puzzle carries on with the next word.
+///   The coin-flip winner (and later, whoever solved the last puzzle) chooses to play (their clue-giver gives the first clue) or pass.
+///   Clues then alternate between the teams. Each side gets at most 4 clues. A wrong guess or an invalid clue passes the turn.
+///   If all 8 clues miss, the word is posted on the board, the other team gives the first clue on the next word, and the
+///   puzzle carries on.
 ///
 ///   When a guesser gets the word, that guesser (and only that guesser) gets one shot at the big word. The exception is the
 ///   fifth word: the guesser tries first, then their clue-giver, then the other team's guesser, then the other team's
 ///   clue-giver. If nobody gets the fifth word, the last team to guess a word in the puzzle starts that same chain.
-///   A right guess scores the puzzle's value (100, 100, then 200 each) and reveals the whole puzzle.
+///   A right guess scores the puzzle's value (100, 100, then 200 each) and reveals the whole puzzle. A wrong big-word guess on words 1 to 4 hands control to the other team, who give the first clue on the next word.
 ///
 ///   Roles swap only when a new puzzle begins: player 1 gives and player 2 guesses in the first puzzle, then they swap.
 ///
@@ -34,7 +35,6 @@ public sealed class PasswordGame
     public const int TeamSize = 2;
     public const int PlayerSeats = Teams * TeamSize;
     public const int NameMaxLength = 20;
-    public const int ClueMaxLength = 24;
     public const int WordsPerPuzzle = 5;
     public const int CluesPerSide = 4;
     public const int WinScore = 500;
@@ -63,13 +63,6 @@ public sealed class PasswordGame
         public required int Slot { get; init; }
     }
 
-    private sealed class ClueEntry(int team, string text)
-    {
-        public int Team { get; } = team;
-        public string Text { get; } = text;
-        public ClueOutcome Outcome { get; set; } = ClueOutcome.Pending;
-    }
-
     private readonly object _gate = new();
     private readonly IPasswordPuzzleSource _source;
     private readonly Random _rng;
@@ -90,7 +83,9 @@ public sealed class PasswordGame
 
     private int _controlTeam;
     private int _turnTeam = -1;
-    private readonly List<ClueEntry> _clues = [];
+    private readonly List<int> _clueTeams = [];   // the team that gave each clue on this word, in order
+    private int _startTeam;                       // the team that gave the first clue on this word
+    private int _nextStartTeam;                   // who gives the first clue on the next word
 
     private readonly List<Guid> _attempts = [];
     private int _attemptPos;
@@ -212,7 +207,7 @@ public sealed class PasswordGame
     public Result SwapPuzzle(Guid emceeToken) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can swap the puzzle.");
-        if (_phase is not (PasswordPhase.Control or PasswordPhase.Clue or PasswordPhase.Guess or PasswordPhase.PuzzleGuess or PasswordPhase.WordResult))
+        if (_phase is not (PasswordPhase.Control or PasswordPhase.Clue or PasswordPhase.PuzzleGuess or PasswordPhase.WordResult))
             return Result.Fail("There's no puzzle in play to swap.");
 
         var list = _puzzles.ToList();
@@ -252,7 +247,7 @@ public sealed class PasswordGame
         Array.Clear(_wordStates);
         _bigWordRevealed = false;
         _turnTeam = -1;
-        _clues.Clear();
+        _clueTeams.Clear();
         _attempts.Clear();
         _attemptPos = 0;
         _winners = [];
@@ -286,61 +281,47 @@ public sealed class PasswordGame
                 return Result.Fail($"{TeamNames[_controlTeam]} has control, so only they can choose.");
         }
 
-        _turnTeam = play ? _controlTeam : 1 - _controlTeam;
+        _startTeam = play ? _controlTeam : 1 - _controlTeam;
+        _turnTeam = _startTeam;
         _message = null;
         _phase = PasswordPhase.Clue;
         return Result.Success;
     });
 
     /// <summary>
-    /// The clue-giver on the clock sends a one-word clue. The emcee, not the computer, judges whether it is legal.
-    /// The emcee may also send it, as a safety net for a dead phone. The emcee can still throw a clue out afterwards with <see cref="RejectClue"/>.
+    /// The emcee rules on a clue-and-guess: the clue-giver on the clock said one word out loud and their partner guessed. Right
+    /// reveals the word and gives that guesser a shot at the big word; wrong passes the turn to the other team.
     /// </summary>
-    public Result SubmitClue(Guid token, string? text) => Run(() =>
-    {
-        if (_phase != PasswordPhase.Clue) return Result.Fail("It isn't time for a clue.");
-        var giver = PlayerAt(_turnTeam, GiverSlot);
-        if (!IsEmcee(token) && giver.Token != token)
-            return Result.Fail($"{giver.Name} is giving the clues for {TeamNames[_turnTeam]} on this word.");
-        if (!TryCleanClue(text, out var clean, out var error))
-            return Result.Fail(error);
-
-        _clues.Add(new ClueEntry(_turnTeam, clean));
-        _phase = PasswordPhase.Guess;
-        return Result.Success;
-    });
-
-    /// <summary>The emcee rules on what the guesser said out loud after a clue.</summary>
     public Result JudgeGuess(Guid emceeToken, bool correct) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can judge guesses.");
-        if (_phase != PasswordPhase.Guess) return Result.Fail("Nobody is guessing right now.");
+        if (_phase != PasswordPhase.Clue) return Result.Fail("Nobody is giving a clue right now.");
 
-        var clue = _clues[^1];
+        var team = _turnTeam;
+        _clueTeams.Add(team);
         if (!correct)
         {
-            clue.Outcome = ClueOutcome.Miss;
             AfterMiss();
             return Result.Success;
         }
 
-        clue.Outcome = ClueOutcome.Hit;
         _wordStates[_wordIndex] = WordState.Solved;
-        _controlTeam = clue.Team;
-        _lastSolverTeam = clue.Team;
-        BeginBigWordGuess(clue.Team, null);
+        _controlTeam = team;
+        _lastSolverTeam = team;
+        BeginBigWordGuess(team, null);
         return Result.Success;
     });
 
     /// <summary>
-    /// The emcee throws out the clue that was just given (more than one word, part of the answer, a made-up word...). It still counts as that side's clue, nobody guesses, and the turn passes.
+    /// The emcee calls the clue invalid (more than one word, part of the password, a made-up word...). It still counts as that side's
+    /// clue, nobody guesses, and the turn passes to the other team.
     /// </summary>
     public Result RejectClue(Guid emceeToken) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can throw out a clue.");
-        if (_phase != PasswordPhase.Guess) return Result.Fail("There's no clue to throw out.");
+        if (_phase != PasswordPhase.Clue) return Result.Fail("There's no clue to throw out.");
 
-        _clues[^1].Outcome = ClueOutcome.Rejected;
+        _clueTeams.Add(_turnTeam);
         AfterMiss();
         return Result.Success;
     });
@@ -348,7 +329,7 @@ public sealed class PasswordGame
     // A clue was wrong or thrown out: the other team is next, unless all eight clues are used up.
     private void AfterMiss()
     {
-        if (_clues.Count >= Teams * CluesPerSide)
+        if (_clueTeams.Count >= Teams * CluesPerSide)
         {
             _wordStates[_wordIndex] = WordState.Posted;
             var word = CurrentPuzzle.Words[_wordIndex];
@@ -369,7 +350,9 @@ public sealed class PasswordGame
             else
             {
                 _turnTeam = -1;
-                _message = $"Nobody got it. The word was \"{word}\", and it goes up on the board.";
+                _nextStartTeam = 1 - _startTeam;
+                _controlTeam = _nextStartTeam;
+                _message = $"Nobody got it. The word was \"{word}\", and it goes up on the board. {TeamNames[_nextStartTeam]} gives the first clue next.";
                 _phase = PasswordPhase.WordResult;
             }
             return;
@@ -434,7 +417,9 @@ public sealed class PasswordGame
         else
         {
             _turnTeam = -1;
-            _message = $"{who.Name} missed. The big word stays secret, and the puzzle carries on.";
+            _nextStartTeam = 1 - who.Team;
+            _controlTeam = _nextStartTeam;
+            _message = $"{who.Name} missed. Control goes to {TeamNames[_nextStartTeam]}, who give the first clue on the next word.";
             _phase = PasswordPhase.WordResult;
         }
         return Result.Success;
@@ -468,7 +453,7 @@ public sealed class PasswordGame
 
             case PasswordPhase.WordResult:
                 _wordIndex++;
-                StartWord(null);
+                StartWord($"{TeamNames[_nextStartTeam]} gives the first clue.", choose: false);
                 return Result.Success;
 
             case PasswordPhase.PuzzleResult:
@@ -505,7 +490,9 @@ public sealed class PasswordGame
         _phase = PasswordPhase.GameOver;
     }
 
-    private void StartWord(string? message)
+    // Starts a word. The first word of a game or puzzle begins with the control choice (play or pass); later words in the same
+    // puzzle have no choice: whoever is next simply gives the first clue.
+    private void StartWord(string? message, bool choose = true)
     {
         if (_wordIndex == 0)
         {
@@ -514,12 +501,22 @@ public sealed class PasswordGame
             _bigWordRevealed = false;
         }
         _wordStates[_wordIndex] = WordState.Current;
-        _clues.Clear();
+        _clueTeams.Clear();
         _attempts.Clear();
         _attemptPos = 0;
-        _turnTeam = -1;
         _message = message;
-        _phase = PasswordPhase.Control;
+        if (choose)
+        {
+            _turnTeam = -1;
+            _phase = PasswordPhase.Control;
+        }
+        else
+        {
+            _startTeam = _nextStartTeam;
+            _controlTeam = _startTeam;
+            _turnTeam = _startTeam;
+            _phase = PasswordPhase.Clue;
+        }
     }
 
     // ---- The bonus round -----------------------------------------------------------------
@@ -640,7 +637,7 @@ public sealed class PasswordGame
             var inBonus = _phase is PasswordPhase.BonusReady or PasswordPhase.BonusPlay or PasswordPhase.BonusResult;
             var playing = inGame && _phase != PasswordPhase.GameOver && !inBonus;
             var puzzle = inGame ? _puzzles[_puzzleIndex] : null;
-            var onClock = _phase is PasswordPhase.Clue or PasswordPhase.Guess or PasswordPhase.PuzzleGuess;
+            var onClock = _phase is PasswordPhase.Clue or PasswordPhase.PuzzleGuess;
             var attempting = _phase == PasswordPhase.PuzzleGuess ? _attempts[_attemptPos] : (Guid?)null;
 
             var players = _players
@@ -654,7 +651,7 @@ public sealed class PasswordGame
                 .ToList();
 
             var cluesUsed = new int[Teams];
-            foreach (var c in _clues) cluesUsed[c.Team]++;
+            foreach (var team in _clueTeams) cluesUsed[team]++;
 
             var teams = Enumerable.Range(0, Teams)
                 .Select(t => new PasswordTeamInfo(
@@ -686,7 +683,6 @@ public sealed class PasswordGame
                 BigWord: puzzle?.Answer ?? "",
                 BigWordAlso: puzzle is { AlsoAccept.Count: > 0 } ? string.Join(", ", puzzle.AlsoAccept) : null,
                 BigWordRevealed: _bigWordRevealed,
-                Clues: _clues.Select(c => new PasswordClueInfo(c.Team, c.Text, c.Outcome)).ToList(),
                 AttemptingId: attempting,
                 AttemptsLeft: _phase == PasswordPhase.PuzzleGuess ? _attempts.Count - _attemptPos : 0,
                 Message: _message,
@@ -735,17 +731,6 @@ public sealed class PasswordGame
         clean = (name ?? "").Trim();
         if (clean.Length == 0) return false;
         if (clean.Length > NameMaxLength) clean = clean[..NameMaxLength].Trim();
-        return true;
-    }
-
-    // The emcee decides whether a clue is legal (one word, no part of the answer). All that's checked here is that
-    // something sensible was typed; a bad clue is thrown out by the emcee, which ends just that clue.
-    private static bool TryCleanClue(string? text, out string clean, out string error)
-    {
-        clean = (text ?? "").Trim();
-        error = "";
-        if (clean.Length == 0) { error = "Type a clue first."; return false; }
-        if (clean.Length > ClueMaxLength) { error = $"That's too long for a one-word clue (the limit is {ClueMaxLength} letters)."; return false; }
         return true;
     }
 }
