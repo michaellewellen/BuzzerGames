@@ -495,8 +495,9 @@ void AssertPasswordSecrets(PasswordTable t)
     if (!s.BigWordRevealed)
         Check.True(!Render.ShowsAnyCase(tv, s.BigWord), $"the TV shows the big word early in phase {s.Phase}");
     Check.True(!Render.Has(tv, "pw-secret") && !Render.Has(tv, "emcee-clue"), $"the TV drew a secret panel in phase {s.Phase}");
-    foreach (var extra in new[] { "tv-top", "pw-status", "pw-clue", "pw-scores", "Team A", "Team B", "Room" })
+    foreach (var extra in new[] { "tv-top", "pw-status", "pw-clue", "Room" })
         Check.True(!Render.Has(tv, extra), $"the TV board is only the board, but it shows \"{extra}\" in phase {s.Phase}");
+    Check.True(Render.Has(tv, "pw-scores") && Render.Has(tv, "Team A") && Render.Has(tv, "Team B"), $"the TV board shows both team scores in phase {s.Phase}");
 
     var current = s.Words[s.WordNumber - 1];
     for (var i = 0; i < 4; i++)
@@ -581,21 +582,24 @@ Run("pw tv: only the board; never the password or the big word until the game re
 {
     var t = new PasswordTable();
     var html = Render.PwTv(t);
+    string Board(string h) => h[h.IndexOf("pw-stage", StringComparison.Ordinal)..h.IndexOf("scores pw-scores", StringComparison.Ordinal)];
+    var board = Board(html);
     Check.True(Render.Has(html, "pw-sign") && Render.Has(html, "Password") && Render.Has(html, "PUZZLE"), "the Password PUZZLE sign is up");
     Check.True(!Render.Has(html, "class=\"pw-bigword revealed\""), "the big word is not revealed");
     Check.Equal(5, Render.Count(html, "class=\"pw-word "), "five word slots");
     Check.Equal(0, Render.Count(html, "<span class=\"pw-word-text\">A") + Render.Count(html, "<span class=\"pw-word-text\">B"), "and no words in them yet");
-    foreach (var extra in new[] { "tv-top", "pw-status", "pw-clue", "pw-scores", "play or pass", "coin flip", "A THING" })
+    foreach (var extra in new[] { "tv-top", "pw-status", "pw-clue", "play or pass", "coin flip", "A THING" })
         Check.True(!Render.Has(html, extra), $"the TV is only the board, but it shows \"{extra}\"");
     foreach (var w in FixedPasswordPuzzleSource.Words)
         Check.True(!Render.ShowsAnyCase(html, w), $"{w} must not be on the TV at the start");
     Check.True(!Render.ShowsAnyCase(html, "Mystery1"), "the big word must not be on the TV");
+    Check.True(Render.Has(html, "pw-scores") && Render.Has(html, "Team A") && Render.Has(html, "Team B"), "but both team scores are on it");
 
     t.Open(0);
-    Check.Equal(Render.PwTv(t), html, "choosing play or pass changes nothing on the TV");
+    Check.Equal(board, Board(Render.PwTv(t)), "choosing play or pass changes nothing on the board");
     Check.Ok(t.Game.JudgeGuess(t.Emcee, false));
     Check.Ok(t.Game.RejectClue(t.Emcee));
-    Check.Equal(Render.PwTv(t), html, "wrong guesses and invalid clues change nothing on the TV: the game is spoken");
+    Check.Equal(board, Board(Render.PwTv(t)), "wrong guesses and invalid clues change nothing on the board: the game is spoken");
 
     Check.Ok(t.Game.JudgeGuess(t.Emcee, true));          // Team A gets it on the third clue
     html = Render.PwTv(t);
@@ -734,7 +738,7 @@ Run("pw emcee: sees the password, the big word and the other answers, with the r
 
     Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, false));
     Check.True(Render.Has(Render.PwEmcee(t), "Next word"), "a Next word button after a missed big word");
-    Check.True(Render.Has(Render.PwEmcee(t), "Control goes to Team B"), "and it says control goes to the other team");
+    Check.True(Render.Has(Render.PwEmcee(t), "keeps control"), "and it says the team keeps control");
 
     Check.Ok(t.Game.Continue(t.Emcee));
     t.SolveWord(t.S.ControlTeam, bigWordRight: true);

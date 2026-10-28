@@ -85,7 +85,6 @@ public sealed class PasswordGame
     private int _turnTeam = -1;
     private readonly List<int> _clueTeams = [];   // the team that gave each clue on this word, in order
     private int _startTeam;                       // the team that gave the first clue on this word
-    private int _nextStartTeam;                   // who gives the first clue on the next word
 
     private readonly List<Guid> _attempts = [];
     private int _attemptPos;
@@ -350,9 +349,7 @@ public sealed class PasswordGame
             else
             {
                 _turnTeam = -1;
-                _nextStartTeam = 1 - _startTeam;
-                _controlTeam = _nextStartTeam;
-                _message = $"Nobody got it. The word was \"{word}\", and it goes up on the board. {TeamNames[_nextStartTeam]} gives the first clue next.";
+                _message = $"Nobody got it. The word was \"{word}\", and it goes up on the board. {TeamNames[_controlTeam]} still has control.";
                 _phase = PasswordPhase.WordResult;
             }
             return;
@@ -417,9 +414,7 @@ public sealed class PasswordGame
         else
         {
             _turnTeam = -1;
-            _nextStartTeam = 1 - who.Team;
-            _controlTeam = _nextStartTeam;
-            _message = $"{who.Name} missed. Control goes to {TeamNames[_nextStartTeam]}, who give the first clue on the next word.";
+            _message = $"{who.Name} missed. {TeamNames[who.Team]} keeps control and chooses play or pass on the next word.";
             _phase = PasswordPhase.WordResult;
         }
         return Result.Success;
@@ -453,7 +448,7 @@ public sealed class PasswordGame
 
             case PasswordPhase.WordResult:
                 _wordIndex++;
-                StartWord($"{TeamNames[_nextStartTeam]} gives the first clue.", choose: false);
+                StartWord($"{TeamNames[_controlTeam]} has control.");
                 return Result.Success;
 
             case PasswordPhase.PuzzleResult:
@@ -490,9 +485,8 @@ public sealed class PasswordGame
         _phase = PasswordPhase.GameOver;
     }
 
-    // Starts a word. The first word of a game or puzzle begins with the control choice (play or pass); later words in the same
-    // puzzle have no choice: whoever is next simply gives the first clue.
-    private void StartWord(string? message, bool choose = true)
+    // Starts a word with the control choice: the team with control picks play (give the first clue) or pass.
+    private void StartWord(string? message)
     {
         if (_wordIndex == 0)
         {
@@ -505,18 +499,8 @@ public sealed class PasswordGame
         _attempts.Clear();
         _attemptPos = 0;
         _message = message;
-        if (choose)
-        {
-            _turnTeam = -1;
-            _phase = PasswordPhase.Control;
-        }
-        else
-        {
-            _startTeam = _nextStartTeam;
-            _controlTeam = _startTeam;
-            _turnTeam = _startTeam;
-            _phase = PasswordPhase.Clue;
-        }
+        _turnTeam = -1;
+        _phase = PasswordPhase.Control;
     }
 
     // ---- The bonus round -----------------------------------------------------------------

@@ -692,3 +692,5 @@ a.game-tile:hover { border-color: var(--gold); }
 .pw-word { text-align: center; color: #ffd23f; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; font-size: clamp(2rem, 7vh, 5rem); line-height: 1.15; min-height: 1.15em; text-shadow: 0 0 1vh rgba(255,210,63,.45); }
 .pw-word.solved .pw-word-text { animation: pw-pop .45s ease-out; }
 .pw-word.posted .pw-word-text { opacity: .8; }
+
+.pw-frame .pw-scores { margin-top: 1.6vh; }

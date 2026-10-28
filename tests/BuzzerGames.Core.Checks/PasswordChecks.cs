@@ -136,8 +136,8 @@ sealed class PasswordTable
             Check.Ok(Game.Continue(Emcee));
         }
         Check.Equal(PasswordGame.WordsPerPuzzle, S.WordNumber, "now on the last word");
-        Check.Equal(PasswordPhase.Clue, S.Phase, "clues underway: the team that missed the big word does not give the first clue");
-        Check.Equal(1 - team, S.TurnTeam, "the other team gives the first clue");
+        Check.Equal(PasswordPhase.Control, S.Phase, "the control choice for word 5");
+        Check.Equal(team, S.ControlTeam, "the team that keeps getting the words keeps control");
     }
 }
 
@@ -365,7 +365,7 @@ static class PasswordChecks
             Check.Equal(WordState.Current, s.Words[0].State, "nobody guessed, so the word stays hidden");
         });
 
-        run("password: after eight misses the word is posted, nobody may guess the big word, and the other team clues first next", () =>
+        run("password: after eight misses the word is posted, nobody may guess the big word, and control stays put", () =>
         {
             var t = new PasswordTable();
             var control = t.S.ControlTeam;
@@ -382,10 +382,9 @@ static class PasswordChecks
             Check.Fails(t.Game.Continue(t.Tokens[0]), "a player continuing");
             Check.Ok(t.Game.Continue(t.Emcee));
             s = t.S;
-            Check.Equal(PasswordPhase.Clue, s.Phase, "straight into the clues: no choice mid-puzzle");
+            Check.Equal(PasswordPhase.Control, s.Phase, "the next word starts with the control choice");
             Check.Equal(2, s.WordNumber, "word 2");
-            Check.Equal(control, s.TurnTeam, "the team that did not start the last word gives the first clue");
-            Check.Equal(control, s.ControlTeam, "and has control");
+            Check.Equal(control, s.ControlTeam, "nobody earned control, so it stays where it was");
             Check.Equal(WordState.Current, s.Words[1].State, "the second word is now current");
             Check.Equal(WordState.Waiting, s.Words[2].State, "later words wait");
         });
@@ -414,9 +413,8 @@ static class PasswordChecks
             Check.Equal(0, s.Teams[0].Score, "no points yet");
             Check.Ok(t.Game.Continue(t.Emcee));
             s = t.S;
-            Check.Equal(PasswordPhase.Clue, s.Phase, "the next word starts straight away: no choice mid-puzzle");
-            Check.Equal(1, s.TurnTeam, "Team A missed the big word, so Team B gives the first clue");
-            Check.Equal(1, s.ControlTeam, "control went to Team B");
+            Check.Equal(PasswordPhase.Control, s.Phase, "the next word starts with the control choice");
+            Check.Equal(0, s.ControlTeam, "Team A got the word, missed the big word, and keeps control");
             Check.Equal(2, s.WordNumber, "word 2 of the same puzzle");
             Check.Equal(1, s.PuzzleNumber, "still puzzle 1");
         });
@@ -635,7 +633,7 @@ static class PasswordChecks
             Check.Ok(t.Game.JoinPlayer("New", 0));
         });
 
-        run("password: play-or-pass is only offered on a puzzle's first word; after that the rules say who clues first", () =>
+        run("password: whoever has control chooses play or pass on every word, and getting a word keeps or wins control", () =>
         {
             var t = new PasswordTable();
             Check.Equal(PasswordPhase.Control, t.S.Phase, "word 1 of puzzle 1: a choice");
@@ -651,10 +649,18 @@ static class PasswordChecks
             Check.Ok(t.Game.JudgeGuess(t.Emcee, true));         // Team A gets word 1
             Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, false));  // but misses the big word
             Check.Ok(t.Game.Continue(t.Emcee));
-            Check.Equal(PasswordPhase.Clue, t.S.Phase, "word 2: no choice");
-            Check.Equal(1, t.S.TurnTeam, "the other team (B) gives the first clue");
-            Check.Equal(1, t.S.ControlTeam, "and has control");
-            Check.Fails(t.Game.ChooseControl(t.Emcee, true), "a play-or-pass choice mid-puzzle");
+            Check.Equal(PasswordPhase.Control, t.S.Phase, "word 2: a choice again");
+            Check.Equal(0, t.S.ControlTeam, "Team A got the word, so they keep control even though they missed the big word");
+            Check.Fails(t.Game.ChooseControl(t.Tokens[2], true), "the other team choosing");
+            Check.Ok(t.Game.ChooseControl(t.Tokens[0], play: false));   // Team A passes: strategy, B clues first
+            Check.Equal(1, t.S.TurnTeam, "so Team B gives the first clue");
+            Check.Ok(t.Game.JudgeGuess(t.Emcee, true));         // Team B gets word 2
+            Check.Equal(1, t.S.ControlTeam, "and takes control");
+            Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, false));
+            Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Equal(PasswordPhase.Control, t.S.Phase, "word 3: a choice");
+            Check.Equal(1, t.S.ControlTeam, "for Team B");
+
         });
 
         run("password: the game never ends by running out of puzzles, and there are never ties", () =>
@@ -706,7 +712,7 @@ static class PasswordChecks
             Check.Ok(t.Game.JudgeGuess(t.Emcee, false));        // a clue has missed on word 2
             var before = t.S;
             Check.Equal("Mystery1", before.BigWord, "the first puzzle");
-            Check.Equal(0, before.ControlTeam, "Team B missed the big word, so Team A has control");
+            Check.Equal(1, before.ControlTeam, "Team B got the word, so they keep control");
 
             Check.Fails(t.Game.SwapPuzzle(t.Tokens[0]), "a player swapping");
             Check.Ok(t.Game.SwapPuzzle(t.Emcee));
@@ -715,7 +721,7 @@ static class PasswordChecks
             Check.Equal(1, s.PuzzleNumber, "still the first puzzle of the game");
             Check.Equal(1, s.WordNumber, "back at word 1");
             Check.Equal(PasswordPhase.Control, s.Phase, "the control choice again");
-            Check.Equal(0, s.ControlTeam, "control is unchanged");
+            Check.Equal(1, s.ControlTeam, "control is unchanged");
             Check.True(s.Teams.All(team => team.CluesLeft == PasswordGame.CluesPerSide), "no clues carried over");
             Check.True(s.Words.Count(w => w.State == WordState.Waiting) == 4 && s.Words[0].State == WordState.Current, "a fresh set of words");
             Check.Equal(0, s.Teams[0].Score + s.Teams[1].Score, "scores untouched");
