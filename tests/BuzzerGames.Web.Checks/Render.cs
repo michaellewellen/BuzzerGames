@@ -144,7 +144,7 @@ static class Render
     public static bool ButtonDisabled(string html, string label) =>
         Regex.IsMatch(html, @"<button[^>]*\bdisabled\b[^>]*>\s*" + Regex.Escape(label));
 
-    private sealed class NoJs : IJSRuntime
+    public sealed class NoJs : IJSRuntime
     {
         public ValueTask<TValue> InvokeAsync<TValue>(string identifier, object?[]? args) => default;
         public ValueTask<TValue> InvokeAsync<TValue>(string identifier, CancellationToken cancellationToken, object?[]? args) => default;

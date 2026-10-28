@@ -2,6 +2,7 @@ using BuzzerGames.Core.Jeopardy;
 using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
 using BuzzerGames.Web;
+using BuzzerGames.Web.Components.Password;
 
 // Run with:  dotnet run --project tests/BuzzerGames.Web.Checks
 // Plays real games with the real engine, draws each screen to HTML, and checks what each device
@@ -858,6 +859,123 @@ Run("pw: a whole game, drawing the TV, the emcee and all four phones after every
         }
     }
     Check.Equal(PasswordPhase.GameOver, real.S.Phase, "the real-bank game finished");
+});
+
+Run("pw live: screens that stay open while the game moves on redraw without trouble, through the bonus round too", () =>
+{
+    foreach (var seed in new[] { 1, 2, 3, 4 })
+    {
+        var t = new PasswordTable(seed: seed, source: new JsonPasswordPuzzleSource(), bonus: new TextBonusWordSource());
+        var views = new List<LiveView>();
+        Dictionary<string, object?> P(int who) => who switch
+        {
+            -2 => new() { ["Snapshot"] = t.S },
+            -1 => new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee },
+            _ => new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[who], ["PlayerId"] = t.Ids[who] }
+        };
+        views.Add(new LiveView("TV", typeof(PasswordTvView), P(-2)));
+        views.Add(new LiveView("emcee", typeof(PasswordEmceeView), P(-1)));
+        for (var i = 0; i < 4; i++) views.Add(new LiveView($"player {i}", typeof(PasswordPlayerView), P(i)));
+        var who = new[] { -2, -1, 0, 1, 2, 3 };
+        var redraws = 0;
+        t.Game.Changed += () =>
+        {
+            for (var v = 0; v < views.Count; v++) views[v].Update(P(who[v]));
+            redraws++;
+        };
+
+        var n = 0; var bonusMoves = 0; var guard = 0;
+        while (t.S.Phase != PasswordPhase.GameOver && guard++ < 3000)
+        {
+            var s = t.S;
+            n++;
+            switch (s.Phase)
+            {
+                case PasswordPhase.Control:
+                    Check.Ok(t.Game.ChooseControl(t.TokenOf(s.Players.First(p => p.Team == s.ControlTeam && p.IsGiver).Id), n % 3 != 0));
+                    break;
+                case PasswordPhase.Clue:
+                    if (n % 7 == 0) Check.Ok(t.Game.RejectClue(t.Emcee));
+                    else Check.Ok(t.Game.JudgeGuess(t.Emcee, n % 3 == 0));
+                    break;
+                case PasswordPhase.PuzzleGuess: Check.Ok(t.Game.JudgePuzzleGuess(t.Emcee, n % 4 == 0)); break;
+                case PasswordPhase.BonusReady:
+                    if (n % 2 == 0) Check.Ok(t.Game.BonusSwapRoles(t.Emcee));
+                    Check.Ok(t.Game.StartBonus(t.Emcee));
+                    bonusMoves = 0;
+                    break;
+                case PasswordPhase.BonusPlay:
+                    bonusMoves++;
+                    if (bonusMoves > 14) { t.Advance(61); Check.Ok(t.Game.Tick()); }
+                    else if (bonusMoves % 5 == 0) Check.Ok(t.Game.BonusPass(t.Emcee));
+                    else if (bonusMoves % 7 == 0) Check.Ok(t.Game.BonusZap(t.Emcee));
+                    else Check.Ok(t.Game.BonusCorrect(t.Emcee));
+                    break;
+                default: Check.Ok(t.Game.Continue(t.Emcee)); break;
+            }
+        }
+        Check.Equal(PasswordPhase.GameOver, t.S.Phase, $"seed {seed}: the game finished");
+        Check.True(redraws > 50, "many redraws");
+        foreach (var v in views) v.Dispose();
+    }
+});
+
+Run("pw live fuzz: random play, swaps and restarts keep every open screen drawing", () =>
+{
+    for (var seed = 100; seed < 140; seed++)
+    {
+        var rnd = new Random(seed);
+        var t = new PasswordTable(seed: seed, source: new JsonPasswordPuzzleSource(), bonus: new TextBonusWordSource());
+        var views = new List<LiveView>();
+        Dictionary<string, object?> P(int who) => who switch
+        {
+            -2 => new() { ["Snapshot"] = t.S },
+            -1 => new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee },
+            _ => new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[who], ["PlayerId"] = t.Ids[who] }
+        };
+        var who = new[] { -2, -1, 0, 1, 2, 3 };
+        views.Add(new LiveView("TV", typeof(PasswordTvView), P(-2)));
+        views.Add(new LiveView("emcee", typeof(PasswordEmceeView), P(-1)));
+        for (var i = 0; i < 4; i++) views.Add(new LiveView($"player {i}", typeof(PasswordPlayerView), P(i)));
+        t.Game.Changed += () => { for (var v = 0; v < views.Count; v++) views[v].Update(P(who[v])); };
+
+        var bonusMoves = 0;
+        for (var step = 0; step < 4000; step++)
+        {
+            var s = t.S;
+            if (s.Phase == PasswordPhase.GameOver)
+            {
+                var pick = rnd.Next(3);
+                if (pick == 0) t.Game.Restart(t.Emcee, true); else if (pick == 1) t.Game.RestartSwitched(t.Emcee); else break;
+                continue;
+            }
+            switch (s.Phase)
+            {
+                case PasswordPhase.Control:
+                    if (rnd.Next(12) == 0) t.Game.SwapPuzzle(t.Emcee);
+                    else t.Game.ChooseControl(rnd.Next(2) == 0 ? t.Emcee : t.TokenOf(s.Players.First(p => p.Team == s.ControlTeam && p.IsGiver).Id), rnd.Next(2) == 0);
+                    break;
+                case PasswordPhase.Clue:
+                    if (rnd.Next(15) == 0) t.Game.SwapPuzzle(t.Emcee);
+                    else if (rnd.Next(6) == 0) t.Game.RejectClue(t.Emcee);
+                    else t.Game.JudgeGuess(t.Emcee, rnd.Next(3) == 0);
+                    break;
+                case PasswordPhase.PuzzleGuess: t.Game.JudgePuzzleGuess(t.Emcee, rnd.Next(3) == 0); break;
+                case PasswordPhase.BonusReady:
+                    if (rnd.Next(2) == 0) t.Game.BonusSwapRoles(t.Emcee);
+                    t.Game.StartBonus(t.Emcee);
+                    bonusMoves = 0;
+                    break;
+                case PasswordPhase.BonusPlay:
+                    bonusMoves++;
+                    if (bonusMoves > 14) { t.Advance(61); t.Game.Tick(); }
+                    else switch (rnd.Next(3)) { case 0: t.Game.BonusCorrect(t.Emcee); break; case 1: t.Game.BonusPass(t.Emcee); break; default: t.Game.BonusZap(t.Emcee); break; }
+                    break;
+                default: t.Game.Continue(t.Emcee); break;
+            }
+        }
+        foreach (var v in views) v.Dispose();
+    }
 });
 
 Console.WriteLine("The Password Plus bonus round");

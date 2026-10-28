@@ -396,8 +396,8 @@ public sealed class PasswordGame
         {
             var value = PuzzleValue(_puzzleIndex);
             _scores[who.Team] += value;
-            _controlTeam = who.Team;
-            EndPuzzle($"{who.Name} solved it! {TeamNames[who.Team]} scores {value}.");
+            _controlTeam = 1 - who.Team;      // whoever just scored hands control to the other team, so one team can't run away with it
+            EndPuzzle($"{who.Name} solved it! {TeamNames[who.Team]} scores {value}. {TeamNames[_controlTeam]} has control next.");
             return Result.Success;
         }
 

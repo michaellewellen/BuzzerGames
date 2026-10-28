@@ -14,7 +14,12 @@ if (!string.IsNullOrWhiteSpace(port))
 }
 
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents(options =>
+    {
+        // Shows the real error text in the browser's console (F12) instead of the generic "unhandled exception" line.
+        // Fine for a private party game; the details are only ever internal error messages.
+        options.DetailedErrors = true;
+    });
 
 // Where Jeopardy questions come from. To use a real dataset later, write a class that
 // implements IGameDataSource and swap it in on this one line.
