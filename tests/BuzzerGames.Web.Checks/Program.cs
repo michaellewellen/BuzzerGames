@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using BuzzerGames.Core.Jeopardy;
 using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
@@ -976,6 +977,26 @@ Run("pw live fuzz: random play, swaps and restarts keep every open screen drawin
         }
         foreach (var v in views) v.Dispose();
     }
+});
+
+Run("pw wiring: the app's own service setup hands Password Plus real puzzles and real bonus words", () =>
+{
+    var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection().AddPasswordPlus().BuildServiceProvider();
+    var bonus = services.GetService(typeof(IBonusWordSource)) as IBonusWordSource;
+    Check.True(bonus is not null, "a bonus word source is registered");
+    for (var i = 0; i < 50; i++)
+    {
+        var round = bonus!.CreateRound(new Random(i));
+        Check.Equal(10, round.Words.Count, "ten words");
+        for (var k = 0; k < 10; k++)
+            Check.True(round.Words[k].Length > 0 && char.ToUpperInvariant(round.Words[k][0]) == round.LetterAt(k), $"word {k} starts with its letter");
+    }
+    var rooms = (PasswordRoomManager)services.GetService(typeof(PasswordRoomManager))!;
+    var game = rooms.Create();
+    game.JoinEmcee("Host");
+    for (var i = 0; i < 4; i++) Check.Ok(game.JoinPlayer("P" + i, i / 2));
+    Check.Ok(game.Start());
+    Check.True(game.Snapshot().Words.Count == 5, "the real puzzle bank deals a puzzle");
 });
 
 Console.WriteLine("The Password Plus bonus round");

@@ -1,3 +1,4 @@
+using BuzzerGames.Web;
 using BuzzerGames.Core.Jeopardy;
 using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
@@ -33,9 +34,7 @@ builder.Services.AddSingleton<IPylQuestionSource, JsonPylQuestionSource>();
 builder.Services.AddSingleton<PylRoomManager>();
 
 // Password Plus has its own puzzle bank and its own set of running games.
-builder.Services.AddSingleton<IPasswordPuzzleSource, JsonPasswordPuzzleSource>();
-builder.Services.AddSingleton<IBonusWordSource, TextBonusWordSource>();
-builder.Services.AddSingleton<PasswordRoomManager>();
+builder.Services.AddPasswordPlus();
 
 var app = builder.Build();
 
