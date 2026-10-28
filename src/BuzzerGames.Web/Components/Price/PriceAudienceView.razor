@@ -1,0 +1,191 @@
+@*
+    An audience member's phone. Mostly it lets you cheer, boo, shout "higher" or "lower", and say something. If your name is
+    called, it tells you to come on down; when it is your turn to bid, it gives you a place to type your bid.
+    The item's real price is never shown until the bids are in.
+*@
+
+<main class="phone pr-phone">
+    <header class="phone-header">
+        <span class="pr-me"><PriceAvatar Avatar="Me.Avatar" Label="@Me.Name" /></span>
+        <span class="phone-name">@Me.Name</span>
+        <span class="pill @(MySeat is not null ? "pr-pill-on" : "")">@Role</span>
+    </header>
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case PricePhase.Lobby:
+            <p class="big-message">You're in the audience!</p>
+            <p class="hint">The show starts soon. Keep your phone handy: you might hear your name.</p>
+            break;
+
+        case PricePhase.Callout:
+            @if (Snapshot.LastCalledId == Me.Id && Me.InRow)
+            {
+                <p class="big-message pr-comedown-phone">@Me.Name, COME ON DOWN!</p>
+            }
+            else if (Me.InRow)
+            {
+                <p class="big-message">You're in Contestants' Row!</p>
+                <p class="hint">Get ready to bid.</p>
+            }
+            else
+            {
+                <p class="big-message">Waiting to hear your name…</p>
+            }
+            break;
+
+        case PricePhase.Reveal:
+            <PriceItemCard Item="Snapshot.Item" Class="small" />
+            @if (Me.InRow)
+            {
+                <p class="hint">Bidding opens in a moment. Think about the price!</p>
+            }
+            break;
+
+        case PricePhase.Bidding:
+            <PriceItemCard Item="Snapshot.Item" ShowDescription="false" Class="small" />
+            @if (Snapshot.BidCeiling > 0)
+            {
+                <p class="hint">The price is less than <strong>@PriceGame.Money(Snapshot.BidCeiling)</strong>.</p>
+            }
+            @if (MyTurn)
+            {
+                <p class="big-message">Your bid!</p>
+                <input class="text-input pr-bid-input" type="number" inputmode="numeric" min="1" placeholder="$ amount"
+                       @bind="_bid" @bind:event="oninput" @onkeydown="OnBidKey" />
+                <button class="btn btn-start btn-wide" @onclick="PlaceBid">BID</button>
+                @if (Snapshot.Bids.Count > 0)
+                {
+                    <p class="hint">Already bid: @string.Join(", ", Snapshot.Bids.Select(b => PriceGame.Money(b.Amount)))</p>
+                }
+            }
+            else if (Me.InRow)
+            {
+                <p class="big-message">@Snapshot.InSlot(Snapshot.BidTurnPosition)?.Name is bidding</p>
+                @if (Snapshot.Bids.Count > 0)
+                {
+                    <p class="hint">Bids so far: @string.Join(", ", Snapshot.Bids.Select(b => PriceGame.Money(b.Amount)))</p>
+                }
+            }
+            else
+            {
+                <p class="big-message">@Snapshot.InSlot(Snapshot.BidTurnPosition)?.Name is bidding</p>
+                <p class="hint">Tell them: higher or lower?</p>
+            }
+            break;
+
+        case PricePhase.BidResult:
+            <p class="big-message">The price is @PriceGame.Money(Snapshot.Price)!</p>
+            <p class="hint">@Snapshot.Message</p>
+            break;
+
+        case PricePhase.OnStage:
+            @if (Snapshot.OnStageId == Me.Id)
+            {
+                <p class="big-message pr-comedown-phone">You're on stage!</p>
+            }
+            else
+            {
+                <p class="big-message">@Snapshot.Find(Snapshot.OnStageId)?.Name is on stage</p>
+            }
+            break;
+
+        case PricePhase.ShowOver:
+            @if (Snapshot.PartingGifts.FirstOrDefault(g => g.Name == Me.Name) is { } gift)
+            {
+                <p class="big-message">Your parting gift:</p>
+                <p class="hint pr-gift">@gift.Gift</p>
+            }
+            else
+            {
+                <p class="big-message">Thanks for coming on down!</p>
+            }
+            break;
+    }
+
+    @if (Snapshot.Phase != PricePhase.Lobby)
+    {
+        <div class="pr-react">
+            <button class="pr-react-btn" @onclick="() => React(Reaction.Cheer)">👏<small>Cheer</small></button>
+            <button class="pr-react-btn" @onclick="() => React(Reaction.Boo)">👎<small>Boo</small></button>
+            <button class="pr-react-btn" @onclick="() => React(Reaction.Higher)">⬆️<small>Higher!</small></button>
+            <button class="pr-react-btn" @onclick="() => React(Reaction.Lower)">⬇️<small>Lower!</small></button>
+        </div>
+    }
+
+    @if (Snapshot.CommentsOn)
+    {
+        <div class="pr-comment-box">
+            <input class="text-input" placeholder="Say something to the studio" maxlength="@PriceGame.CommentMaxLength"
+                   @bind="_comment" @bind:event="oninput" @onkeydown="OnCommentKey" />
+            <button class="btn" @onclick="SendComment">Send</button>
+        </div>
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public PriceGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public PriceSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+    [Parameter, EditorRequired] public Guid AudienceId { get; set; }
+
+    private int? _bid;
+    private string _comment = "";
+    private string? _error;
+    private PricePhase _lastPhase;
+    private int _lastTurn = -2;
+
+    // If the emcee sent this person home mid-show they fall back to the join page before this draws, but just in case:
+    private AudienceInfo Me => Snapshot.Find(AudienceId) ?? new AudienceInfo(AudienceId, "Guest", new Avatar(0, 0, 0, 0, false), false, false, false);
+
+    private int? MySeat => Me.InRow ? Snapshot.Row.FirstOrDefault(r => r.AudienceId == AudienceId)?.Position : null;
+
+    private bool MyTurn => Snapshot.Phase == PricePhase.Bidding && MySeat is { } seat && Snapshot.BidTurnPosition == seat;
+
+    private string Role => Snapshot.OnStageId == AudienceId ? "ON STAGE"
+        : MySeat is { } seat ? $"CONTESTANT {seat + 1}"
+        : "AUDIENCE";
+
+    protected override void OnParametersSet()
+    {
+        if (Snapshot.Phase == _lastPhase && Snapshot.BidTurnPosition == _lastTurn) return;
+        _lastPhase = Snapshot.Phase;
+        _lastTurn = Snapshot.BidTurnPosition;
+        _error = null;
+        _bid = null;
+    }
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private void PlaceBid()
+    {
+        if (_bid is not { } amount) { _error = "Type your bid first."; return; }
+        Act(Game.Bid(Token, amount));
+    }
+
+    private void OnBidKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") PlaceBid();
+    }
+
+    // A tap that is too fast is quietly ignored: it is not worth an error message.
+    private void React(Reaction kind) => Game.React(Token, kind);
+
+    private void SendComment()
+    {
+        if (string.IsNullOrWhiteSpace(_comment)) return;
+        var result = Game.Comment(Token, _comment);
+        if (result.Ok) _comment = "";
+        Act(result);
+    }
+
+    private void OnCommentKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") SendComment();
+    }
+}

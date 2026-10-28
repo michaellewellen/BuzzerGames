@@ -1,0 +1,22 @@
+# Consolation prizes the announcer reads to contestants who were called down but never made it on stage.
+# One per line; the announcer says "{name}, you will receive {gift}!" Feel free to add jokes about your own crowd.
+a year's supply of Rice-A-Roni, the San Francisco treat
+a lifetime supply of turtle wax
+a gift basket of assorted hotel soaps
+a case of mustard in six exciting flavors
+a handsome set of lawn darts, safely stored in the garage
+a ten-pound bag of pinto beans
+a fabulous box of mismatched socks
+a yearly subscription to a magazine of the winner's choice, delivered to somebody else
+a pair of novelty oven mitts shaped like lobsters
+a collection of commemorative spoons
+a coupon for one free car wash, valid in a state of your choice
+a three-pound bag of assorted rubber bands
+a home version of this game, with no pieces
+a brand-new box of kitchen sponges
+a deluxe sampler of canned vegetables
+a framed photo of the studio audience
+a set of twelve decorative napkin rings
+a portable pencil sharpener with a stunning wood-grain finish
+a six-month supply of dish soap in a gorgeous lemon scent
+a lovely bar of artisanal soap from the back of a drawer

@@ -1,0 +1,437 @@
+// The things people bid on. One entry per item:
+//   name         shown on the screens
+//   say          what the announcer says after "This": "This {say} could be yours, if the price is right!"
+//   description  the announcer reads this out loud when the item comes out (one to two sentences; avoid abbreviations)
+//   price        the real retail price in whole dollars (the contest is about getting close without going over)
+//   icon         an emoji, shown big until a real photo exists
+//   image        optional: a file name in src/BuzzerGames.Web/wwwroot/images/price/ (a .jpg or .png shown instead of the icon)
+// Prices are rough 2026 retail numbers: fix any you know are off.
+[
+ {
+  "name": "Flat-screen TV",
+  "say": "65-inch 4K television",
+  "description": "Movie night just got enormous with this 65-inch 4K smart television, packed with brilliant color and every streaming app you can name.",
+  "price": 650,
+  "icon": "📺"
+ },
+ {
+  "name": "Noise-canceling headphones",
+  "say": "pair of noise-canceling headphones",
+  "description": "Shut out the whole world with these wireless over-ear headphones, featuring thirty hours of battery life and a case that fits in your carry-on.",
+  "price": 350,
+  "icon": "🎧"
+ },
+ {
+  "name": "Laptop computer",
+  "say": "fifteen-inch laptop",
+  "description": "Work from anywhere with this fifteen-inch laptop, with a razor-thin body, a bright high-resolution screen and all-day battery life.",
+  "price": 900,
+  "icon": "💻"
+ },
+ {
+  "name": "Tablet",
+  "say": "tablet",
+  "description": "Read, draw, stream and video chat on this ten-inch tablet with a gorgeous display and a sleek keyboard case.",
+  "price": 450,
+  "icon": "📱"
+ },
+ {
+  "name": "Robot vacuum",
+  "say": "robot vacuum",
+  "description": "Let a little robot do the chores! It maps your whole house, sweeps and mops, and even empties itself.",
+  "price": 400,
+  "icon": "🤖"
+ },
+ {
+  "name": "Smartwatch",
+  "say": "smartwatch",
+  "description": "Track your steps, your sleep and your heart rate with this smartwatch, which also takes your calls and keeps you on schedule.",
+  "price": 330,
+  "icon": "⌚"
+ },
+ {
+  "name": "Mirrorless camera",
+  "say": "mirrorless camera",
+  "description": "Capture every family moment in stunning detail with this mirrorless camera, complete with a zoom lens and a padded carrying bag.",
+  "price": 1200,
+  "icon": "📷"
+ },
+ {
+  "name": "Game console",
+  "say": "game console",
+  "description": "Get the whole living room in on the action with this latest game console, with two wireless controllers and your first three games.",
+  "price": 500,
+  "icon": "🎮"
+ },
+ {
+  "name": "Bluetooth speaker",
+  "say": "waterproof speaker",
+  "description": "Take the party anywhere with this rugged, waterproof Bluetooth speaker that floats and plays for twenty hours straight.",
+  "price": 130,
+  "icon": "🔊"
+ },
+ {
+  "name": "Soundbar",
+  "say": "soundbar system",
+  "description": "Fill your living room with rich, room-shaking sound from this soundbar with a wireless subwoofer and surround speakers.",
+  "price": 300,
+  "icon": "🔈"
+ },
+ {
+  "name": "Stand mixer",
+  "say": "stand mixer",
+  "description": "Bake like a pro with this classic stand mixer in a gorgeous candy-apple red, plus the dough hook, whisk and paddle.",
+  "price": 450,
+  "icon": "🍰"
+ },
+ {
+  "name": "Air fryer",
+  "say": "air fryer",
+  "description": "Crispy fries, juicy wings and golden chicken with almost no oil, all from one big air fryer with a six-quart basket.",
+  "price": 130,
+  "icon": "🍟"
+ },
+ {
+  "name": "Espresso machine",
+  "say": "espresso machine",
+  "description": "Skip the coffee shop line with this stainless steel espresso machine, complete with a built-in grinder and a steam wand for lattes.",
+  "price": 700,
+  "icon": "☕"
+ },
+ {
+  "name": "High-power blender",
+  "say": "high-power blender",
+  "description": "Smoothies, soups and nut butter in seconds with this professional blender that can crush ice like snow.",
+  "price": 400,
+  "icon": "🥤"
+ },
+ {
+  "name": "Cookware set",
+  "say": "twelve-piece cookware set",
+  "description": "Equip your whole kitchen with this twelve-piece stainless steel cookware set, from the saute pan to the stock pot with every lid.",
+  "price": 350,
+  "icon": "🍳"
+ },
+ {
+  "name": "Gas grill",
+  "say": "gas grill",
+  "description": "Fire up the backyard with this gas grill with six burners, a side burner, and enough cooking space for the entire neighborhood.",
+  "price": 800,
+  "icon": "🍔"
+ },
+ {
+  "name": "Pellet smoker",
+  "say": "pellet smoker",
+  "description": "Slow-smoke brisket, ribs and turkey to perfection with this wood-pellet smoker with wi-fi temperature control.",
+  "price": 900,
+  "icon": "🥩"
+ },
+ {
+  "name": "Dishwasher",
+  "say": "dishwasher",
+  "description": "Say goodbye to dish duty with this whisper-quiet stainless steel dishwasher with a third rack for your silverware.",
+  "price": 750,
+  "icon": "🍽️"
+ },
+ {
+  "name": "French-door refrigerator",
+  "say": "French-door refrigerator",
+  "description": "Keep everything fresh with this big stainless steel French-door refrigerator with an ice maker and a water dispenser in the door.",
+  "price": 1900,
+  "icon": "🧊"
+ },
+ {
+  "name": "Washer and dryer",
+  "say": "matching washer and dryer",
+  "description": "Laundry day looks good in this matching front-loading washer and dryer set, with steam cycles and a smartphone app.",
+  "price": 1600,
+  "icon": "🧺"
+ },
+ {
+  "name": "Cordless vacuum",
+  "say": "cordless vacuum",
+  "description": "Clean every floor in the house with this lightweight cordless vacuum, with a laser that shows you the dust you can't see.",
+  "price": 550,
+  "icon": "🧹"
+ },
+ {
+  "name": "Queen mattress",
+  "say": "queen mattress",
+  "description": "Wake up refreshed on this queen-size memory-foam mattress with cooling gel and a one-hundred-night sleep trial.",
+  "price": 1200,
+  "icon": "🛏️"
+ },
+ {
+  "name": "Sectional sofa",
+  "say": "sectional sofa",
+  "description": "Stretch out and relax on this big, comfy sectional sofa with a reversible chaise and enough room for the whole family.",
+  "price": 1600,
+  "icon": "🛋️"
+ },
+ {
+  "name": "Dining set",
+  "say": "seven-piece dining set",
+  "description": "Gather everyone around this solid-wood dining table with six upholstered chairs, ready for holiday dinners for years.",
+  "price": 1300,
+  "icon": "🪑"
+ },
+ {
+  "name": "Patio set",
+  "say": "patio furniture set",
+  "description": "Turn your backyard into a resort with this weatherproof patio set with a sofa, two chairs, a coffee table and thick cushions.",
+  "price": 1000,
+  "icon": "⛱️"
+ },
+ {
+  "name": "Fire pit",
+  "say": "fire pit",
+  "description": "Roast marshmallows and gather round with this hammered-steel fire pit with a spark screen and a grill grate.",
+  "price": 250,
+  "icon": "🔥"
+ },
+ {
+  "name": "Mountain bike",
+  "say": "mountain bike",
+  "description": "Hit the trails on this lightweight mountain bike with front suspension, hydraulic disc brakes and twenty-one speeds.",
+  "price": 1100,
+  "icon": "🚵"
+ },
+ {
+  "name": "Electric scooter",
+  "say": "electric scooter",
+  "description": "Zip around town on this folding electric scooter with a twenty-mile range, a bright headlight and an easy-to-read display.",
+  "price": 600,
+  "icon": "🛴"
+ },
+ {
+  "name": "Electric bike",
+  "say": "electric bike",
+  "description": "Glide up the biggest hills with this electric bike with a pedal-assist motor, a removable battery and a rear cargo rack.",
+  "price": 1600,
+  "icon": "🚲"
+ },
+ {
+  "name": "Kayak",
+  "say": "two-person kayak",
+  "description": "Paddle your favorite lake in this stable two-person kayak, complete with paddles, life jackets and a dry bag.",
+  "price": 550,
+  "icon": "🛶"
+ },
+ {
+  "name": "Camping tent",
+  "say": "six-person tent",
+  "description": "Sleep under the stars, and stay dry, in this six-person tent that sets up in under ten minutes, with a rain fly and a screened porch.",
+  "price": 300,
+  "icon": "⛺"
+ },
+ {
+  "name": "Treadmill",
+  "say": "folding treadmill",
+  "description": "Walk, jog or run without leaving the house on this folding treadmill with a big touchscreen and built-in workout classes.",
+  "price": 1300,
+  "icon": "🏃"
+ },
+ {
+  "name": "Golf club set",
+  "say": "full set of golf clubs",
+  "description": "Lower your score with this complete set of golf clubs: driver, irons, wedges, putter and a stand bag to carry them in.",
+  "price": 900,
+  "icon": "⛳"
+ },
+ {
+  "name": "Paddleboard",
+  "say": "inflatable paddleboard",
+  "description": "Spend a day on the water with this inflatable stand-up paddleboard with a paddle, a pump and a backpack to carry it all.",
+  "price": 700,
+  "icon": "🏄"
+ },
+ {
+  "name": "Snowboard",
+  "say": "snowboard",
+  "description": "Carve the mountain on this all-mountain snowboard, complete with bindings and a padded travel bag.",
+  "price": 600,
+  "icon": "🏂"
+ },
+ {
+  "name": "Hot tub",
+  "say": "six-person hot tub",
+  "description": "Soak away your stress in this six-person hot tub, with forty-two jets, LED lighting and a built-in sound system.",
+  "price": 6000,
+  "icon": "🛁"
+ },
+ {
+  "name": "Pool table",
+  "say": "pool table",
+  "description": "Rack 'em up! This regulation pool table comes with cues, a rack, a full set of balls and a felt top in your choice of color.",
+  "price": 2200,
+  "icon": "🎱"
+ },
+ {
+  "name": "Riding mower",
+  "say": "riding lawn mower",
+  "description": "Cut the grass in half the time with this riding lawn mower with a forty-two-inch deck and a comfortable high-back seat.",
+  "price": 2800,
+  "icon": "🚜"
+ },
+ {
+  "name": "Portable generator",
+  "say": "portable generator",
+  "description": "Keep the lights on during any storm with this portable generator with a twelve-thousand-watt engine and an electric start.",
+  "price": 1100,
+  "icon": "⚡"
+ },
+ {
+  "name": "Chainsaw",
+  "say": "chainsaw",
+  "description": "Tackle every storm cleanup with this powerful cordless chainsaw, with an eighteen-inch bar and two long-lasting batteries.",
+  "price": 350,
+  "icon": "🪚"
+ },
+ {
+  "name": "Power tool kit",
+  "say": "ten-piece power tool kit",
+  "description": "Build, fix and drill everything with this ten-piece cordless power tool kit with two batteries and a rolling case.",
+  "price": 400,
+  "icon": "🔧"
+ },
+ {
+  "name": "Rolling tool chest",
+  "say": "rolling tool chest",
+  "description": "Keep your garage organized with this rolling tool chest with eleven ball-bearing drawers and a stainless steel top.",
+  "price": 800,
+  "icon": "🧰"
+ },
+ {
+  "name": "Pressure washer",
+  "say": "pressure washer",
+  "description": "Blast away years of grime from your deck, driveway and siding with this gas-powered pressure washer.",
+  "price": 450,
+  "icon": "💦"
+ },
+ {
+  "name": "Trampoline",
+  "say": "fourteen-foot trampoline",
+  "description": "Bounce into summer on this fourteen-foot trampoline with a safety net, a ladder and a weatherproof cover.",
+  "price": 500,
+  "icon": "🤸"
+ },
+ {
+  "name": "Ping-pong table",
+  "say": "ping-pong table",
+  "description": "Get the competition going on this tournament-size ping-pong table that folds up when the match is over.",
+  "price": 600,
+  "icon": "🏓"
+ },
+ {
+  "name": "Acoustic guitar",
+  "say": "acoustic guitar",
+  "description": "Strum around the campfire with this beautiful spruce-top acoustic guitar, which includes a hard-shell case, a tuner and picks.",
+  "price": 500,
+  "icon": "🎸"
+ },
+ {
+  "name": "Digital piano",
+  "say": "digital piano",
+  "description": "Make beautiful music on this eighty-eight-key digital piano with weighted keys, a sustain pedal and a matching bench.",
+  "price": 800,
+  "icon": "🎹"
+ },
+ {
+  "name": "Camera drone",
+  "say": "camera drone",
+  "description": "See the world from above with this folding camera drone that shoots stunning 4K video and follows you wherever you go.",
+  "price": 800,
+  "icon": "🚁"
+ },
+ {
+  "name": "Telescope",
+  "say": "computerized telescope",
+  "description": "Explore the planets and the stars with this computerized telescope that finds the night sky's best sights for you.",
+  "price": 450,
+  "icon": "🔭"
+ },
+ {
+  "name": "Luggage set",
+  "say": "three-piece luggage set",
+  "description": "Travel in style with this three-piece hard-shell luggage set with spinner wheels and a built-in phone charger.",
+  "price": 350,
+  "icon": "🧳"
+ },
+ {
+  "name": "Designer sunglasses",
+  "say": "pair of designer sunglasses",
+  "description": "Look like a star with these polarized designer sunglasses, and a handsome leather case to keep them safe.",
+  "price": 400,
+  "icon": "🕶️"
+ },
+ {
+  "name": "Gold necklace",
+  "say": "fourteen-karat gold necklace",
+  "description": "Give someone a gift to treasure with this elegant fourteen-karat gold necklace with a delicate pendant.",
+  "price": 1200,
+  "icon": "📿"
+ },
+ {
+  "name": "Wristwatch",
+  "say": "automatic wristwatch",
+  "description": "Tell time in style with this automatic stainless steel wristwatch with a sapphire crystal and a sweeping second hand.",
+  "price": 1300,
+  "icon": "⌚"
+ },
+ {
+  "name": "Golf cart",
+  "say": "electric golf cart",
+  "description": "Cruise the neighborhood in this four-seat electric golf cart with headlights, a rain enclosure and a lifted suspension.",
+  "price": 9000,
+  "icon": "🛺"
+ },
+ {
+  "name": "Pontoon boat",
+  "say": "pontoon boat",
+  "description": "Spend every summer weekend on the lake aboard this twenty-two-foot pontoon boat with a motor, a bimini top and a trailer.",
+  "price": 30000,
+  "icon": "🚤"
+ },
+ {
+  "name": "Compact car",
+  "say": "brand-new compact car",
+  "description": "Drive off the lot in this brand-new compact car, with great gas mileage, a backup camera and a full factory warranty.",
+  "price": 25000,
+  "icon": "🚗"
+ },
+ {
+  "name": "Motorcycle",
+  "say": "touring motorcycle",
+  "description": "Hit the open road on this touring motorcycle with a big windshield, saddlebags and a comfortable seat for two.",
+  "price": 10000,
+  "icon": "🏍️"
+ },
+ {
+  "name": "Home theater",
+  "say": "complete home theater",
+  "description": "Build your own cinema with this home theater package with a projector, a hundred-and-twenty-inch screen and surround sound.",
+  "price": 2500,
+  "icon": "🎬"
+ },
+ {
+  "name": "Grandfather clock",
+  "say": "grandfather clock",
+  "description": "Add a touch of class to your hallway with this handcrafted grandfather clock that chimes every hour on the hour.",
+  "price": 3000,
+  "icon": "🕰️"
+ },
+ {
+  "name": "Hammock stand",
+  "say": "hammock with stand",
+  "description": "Swing the afternoon away in this extra-wide quilted hammock with a sturdy steel stand and a carrying case.",
+  "price": 150,
+  "icon": "🌴"
+ },
+ {
+  "name": "Electric guitar",
+  "say": "electric guitar and amp",
+  "description": "Rock out with this electric guitar, a thirty-watt amp, a strap, a cable and a lifetime of bad ideas.",
+  "price": 600,
+  "icon": "🎸"
+ }
+]

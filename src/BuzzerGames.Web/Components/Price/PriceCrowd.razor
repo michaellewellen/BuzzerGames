@@ -1,0 +1,12 @@
+@* The studio audience: everyone who is not in Contestants' Row, as little people along the bottom of the screen. *@
+
+<div class="pr-crowd" aria-label="The studio audience">
+    @foreach (var person in Snapshot.Audience.Where(a => !a.InRow && a.Id != Snapshot.OnStageId).Take(48))
+    {
+        <span class="pr-crowd-person" title="@person.Name"><PriceAvatar Avatar="person.Avatar" Label="@person.Name" /></span>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PriceSnapshot Snapshot { get; set; } = default!;
+}

@@ -22,6 +22,7 @@
     <Compile Include="..\BuzzerGames.Core.Checks\Check.cs" Link="Check.cs" />
     <Compile Include="..\BuzzerGames.Core.Checks\PylChecks.cs" Link="PylChecks.cs" />
     <Compile Include="..\BuzzerGames.Core.Checks\PasswordChecks.cs" Link="PasswordChecks.cs" />
+    <Compile Include="..\BuzzerGames.Core.Checks\PriceChecks.cs" Link="PriceChecks.cs" />
   </ItemGroup>
 
 </Project>

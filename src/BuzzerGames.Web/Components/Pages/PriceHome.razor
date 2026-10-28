@@ -1,0 +1,55 @@
+@page "/price-is-right"
+@inject PriceRoomManager Rooms
+@inject NavigationManager Navigation
+
+<PageTitle>The Price Is Right</PageTitle>
+
+<main class="card center jeopardy-home">
+    <h1>The Price Is Right</h1>
+    <p class="muted">Create the show on the big screen (the TV). Everyone else, as many as you like, scans its QR code or opens this site on their phone and types the room code below to join the studio audience. One person takes the emcee's chair.</p>
+
+    <button class="btn btn-start" @onclick="CreateGame">Create a new show</button>
+
+    <hr />
+
+    <h2>Have a room code?</h2>
+    <div class="button-row">
+        <input class="text-input code-input" placeholder="ABCD" maxlength="4"
+               @bind="_code" @bind:event="oninput" @onkeydown="OnKeyDown" />
+        <button class="btn" @onclick="JoinGame">Go</button>
+    </div>
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    <a class="back-link" href="/">All games</a>
+</main>
+
+@code {
+    private string _code = "";
+    private string? _error;
+
+    private void CreateGame()
+    {
+        // Whoever creates the show is setting up the big screen, so they land on the /board address.
+        var game = Rooms.Create();
+        Navigation.NavigateTo($"/price-is-right/{game.Code}/board");
+    }
+
+    private void JoinGame()
+    {
+        var game = Rooms.Find(_code);
+        if (game is null)
+        {
+            _error = "We couldn't find a show with that code.";
+            return;
+        }
+        Navigation.NavigateTo($"/price-is-right/{game.Code}");
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") JoinGame();
+    }
+}

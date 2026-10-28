@@ -1,0 +1,109 @@
+@*
+    How a person gets into the studio: a name, an optional "say it like this" spelling for the announcer, and a little cartoon of
+    themselves. Anyone can join the audience at any time. One person can instead take the emcee's chair.
+*@
+
+<main class="card center pr-join">
+    <h1 class="pr-title small">THE PRICE IS RIGHT</h1>
+    <p class="room-line">Room <span class="room-code">@Snapshot.Code</span></p>
+
+    @if (_asEmcee)
+    {
+        <h2>Be the emcee</h2>
+        <input class="text-input" placeholder="Your name" maxlength="@PriceGame.NameMaxLength"
+               @bind="_name" @bind:event="oninput" />
+        <div class="button-row">
+            <button class="btn" @onclick="JoinEmcee">Take the chair</button>
+            <button class="btn btn-quiet" @onclick="() => _asEmcee = false">Back</button>
+        </div>
+    }
+    else
+    {
+        <h2>Join the audience</h2>
+        <div class="pr-join-preview"><PriceAvatar Avatar="_avatar" Pose="cheer" Label="Your person" /></div>
+
+        <input class="text-input" placeholder="Your name" maxlength="@PriceGame.NameMaxLength"
+               @bind="_name" @bind:event="oninput" />
+        <input class="text-input" placeholder="How to say it (only if it's tricky)" maxlength="@PriceGame.SayAsMaxLength"
+               @bind="_sayAs" @bind:event="oninput" />
+
+        <div class="pr-picker">
+            <button class="btn btn-quiet" @onclick="Randomize">🎲 Randomize</button>
+
+            <p class="pr-picker-label">Skin</p>
+            <div class="pr-swatches">
+                @for (var i = 0; i < PriceAvatar.Skins.Length; i++)
+                {
+                    var n = i;
+                    <button class="pr-swatch @(_avatar.Skin == n ? "on" : "")" style="background:@PriceAvatar.Skins[n]" aria-label="Skin @(n + 1)"
+                            @onclick="() => _avatar = _avatar with { Skin = n }"></button>
+                }
+            </div>
+
+            <p class="pr-picker-label">Hair</p>
+            <div class="pr-swatches">
+                @for (var i = 0; i < HairNames.Length; i++)
+                {
+                    var n = i;
+                    <button class="pr-chip @(_avatar.Hair == n ? "on" : "")" @onclick="() => _avatar = _avatar with { Hair = n }">@HairNames[n]</button>
+                }
+            </div>
+            <div class="pr-swatches">
+                @for (var i = 0; i < PriceAvatar.HairColors.Length; i++)
+                {
+                    var n = i;
+                    <button class="pr-swatch @(_avatar.HairColor == n ? "on" : "")" style="background:@PriceAvatar.HairColors[n]" aria-label="Hair color @(n + 1)"
+                            @onclick="() => _avatar = _avatar with { HairColor = n }"></button>
+                }
+            </div>
+
+            <p class="pr-picker-label">Shirt</p>
+            <div class="pr-swatches">
+                @for (var i = 0; i < PriceAvatar.Shirts.Length; i++)
+                {
+                    var n = i;
+                    <button class="pr-swatch @(_avatar.Shirt == n ? "on" : "")" style="background:@PriceAvatar.Shirts[n]" aria-label="Shirt @(n + 1)"
+                            @onclick="() => _avatar = _avatar with { Shirt = n }"></button>
+                }
+            </div>
+
+            <label class="pr-glasses">
+                <input type="checkbox" checked="@_avatar.Glasses" @onchange="e => _avatar = _avatar with { Glasses = (bool)e.Value! }" /> Glasses
+            </label>
+        </div>
+
+        <button class="btn btn-start btn-wide" @onclick="JoinAudience">Take my seat</button>
+
+        @if (Snapshot.EmceeName is null)
+        {
+            <button class="btn btn-quiet btn-wide" @onclick="BeginEmcee">I'm the emcee</button>
+        }
+    }
+
+    @if (Error is not null)
+    {
+        <p class="error">@Error</p>
+    }
+</main>
+
+@code {
+    private static readonly string[] HairNames = ["Short", "Bald", "Long", "Curly", "Ponytail", "Swoop"];
+
+    [Parameter, EditorRequired] public PriceSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback<(string Name, string? SayAs, Avatar Avatar)> OnJoinAudience { get; set; }
+    [Parameter] public EventCallback<string> OnJoinEmcee { get; set; }
+
+    private string _name = "";
+    private string _sayAs = "";
+    private bool _asEmcee;
+    private Avatar _avatar = Avatar.Random(Random.Shared);
+
+    private void BeginEmcee() { _asEmcee = true; _name = ""; }
+
+    private void Randomize() => _avatar = Avatar.Random(Random.Shared);
+
+    private Task JoinAudience() => OnJoinAudience.InvokeAsync((_name, _sayAs, _avatar));
+
+    private Task JoinEmcee() => OnJoinEmcee.InvokeAsync(_name);
+}

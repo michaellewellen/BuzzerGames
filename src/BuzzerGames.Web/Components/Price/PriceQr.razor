@@ -1,0 +1,19 @@
+@inject IJSRuntime JS
+
+<div class="pr-qr">
+    <div id="qr-@Code" class="qr"></div>
+    <p class="join-url">@_joinUrl</p>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Code { get; set; } = "";
+    private string _joinUrl = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        // The QR code points at the phone address (/price-is-right/ABCD), never at the /board address.
+        _joinUrl = await JS.InvokeAsync<string>("bg.renderQr", $"qr-{Code}", $"/price-is-right/{Code}");
+        StateHasChanged();
+    }
+}

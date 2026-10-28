@@ -1,9 +1,11 @@
 using System.Text.RegularExpressions;
 using BuzzerGames.Core.Jeopardy;
 using BuzzerGames.Core.Password;
+using BuzzerGames.Core.Price;
 using BuzzerGames.Core.PressYourLuck;
 using BuzzerGames.Web.Components.Jeopardy;
 using BuzzerGames.Web.Components.Password;
+using BuzzerGames.Web.Components.Price;
 using BuzzerGames.Web.Components.PressYourLuck;
 using BuzzerGames.Web.Components.Pages;
 using Microsoft.AspNetCore.Components;
@@ -69,6 +71,43 @@ static class Render
     /// <summary>One player's phone (0 = Ann, 1 = Bob on Team A; 2 = Cy, 3 = Dee on Team B).</summary>
     public static string PwPlayer(PasswordTable t, int i) =>
         Html<PasswordPlayerView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[i], ["PlayerId"] = t.Ids[i] });
+
+    // ---- The Price Is Right ----
+
+    public static string PrTv(PriceTable t) => Html<PriceTvView>(new() { ["Snapshot"] = t.S });
+
+    public static string PrEmcee(PriceTable t) =>
+        Html<PriceEmceeView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee });
+
+    /// <summary>One audience member's phone (0 = Ann, 1 = Bob, 2 = Cy ...).</summary>
+    public static string PrAudience(PriceTable t, int i) =>
+        Html<PriceAudienceView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[i], ["AudienceId"] = t.Ids[i] });
+
+    public static string PrAudienceRaw(PriceGame game, Guid token) =>
+        Html<PriceAudienceView>(new() { ["Game"] = game, ["Snapshot"] = game.Snapshot(), ["Token"] = token, ["AudienceId"] = game.GetSeat(token).PlayerId!.Value });
+
+    public static string PrJoin(PriceSnapshot snapshot) => Html<PriceJoinPanel>(new() { ["Snapshot"] = snapshot });
+
+    public static string PrAvatar(Avatar avatar, string pose = "stand") =>
+        Html<PriceAvatar>(new() { ["Avatar"] = avatar, ["Pose"] = pose });
+
+    /// <summary>The whole Price Is Right room page, at the phone address or the big-screen /board address.</summary>
+    public static string PrRoom(PriceRoomManager rooms, string code, bool board)
+    {
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<IJSRuntime, NoJs>()
+            .AddSingleton(rooms)
+            .AddSingleton<NavigationManager>(new FakeNav($"http://localhost/price-is-right/{code}" + (board ? "/board" : "")))
+            .BuildServiceProvider();
+        using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
+        return renderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await renderer.RenderComponentAsync<PriceRoom>(
+                ParameterView.FromDictionary(new Dictionary<string, object?> { ["Code"] = code }));
+            return output.ToHtmlString();
+        }).GetAwaiter().GetResult();
+    }
 
     public static string PwLobby(PasswordGame game, Seat seat, bool boardMode = false) =>
         Html<PasswordLobbyView>(new() { ["Snapshot"] = game.Snapshot(), ["Seat"] = seat, ["BoardMode"] = boardMode });

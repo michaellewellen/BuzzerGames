@@ -16,6 +16,6 @@ public static class GameCatalog
         new("Password Plus", "/password-plus", "One-word clues, two teams, five secret words, one big word.", IsPlayable: true),
         new("Wheel of Fortune", "/wheel-of-fortune", "Spin, solve, and buy a vowel.", IsPlayable: false),
         new("Classic Concentration", "/classic-concentration", "Match the prizes to reveal the rebus.", IsPlayable: false),
-        new("The Price Is Right", "/price-is-right", "Come on down!", IsPlayable: false),
+        new("The Price Is Right", "/price-is-right", "A whole studio audience. Come on down and bid!", IsPlayable: true),
     ];
 }

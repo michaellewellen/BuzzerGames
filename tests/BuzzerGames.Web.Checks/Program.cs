@@ -1,9 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using BuzzerGames.Core.Jeopardy;
 using BuzzerGames.Core.Password;
+using BuzzerGames.Core.Price;
 using BuzzerGames.Core.PressYourLuck;
 using BuzzerGames.Web;
 using BuzzerGames.Web.Components.Password;
+using BuzzerGames.Web.Components.Price;
 
 // Run with:  dotnet run --project tests/BuzzerGames.Web.Checks
 // Plays real games with the real engine, draws each screen to HTML, and checks what each device
@@ -1083,6 +1085,288 @@ Run("pw home page: Password Plus is listed as playable, and Super Password is go
     var tile = BuzzerGames.Web.Games.GameCatalog.All.Single(g => g.Name == "Password Plus");
     Check.True(tile.IsPlayable && tile.Url == "/password-plus", "the Password Plus tile points at /password-plus");
     Check.True(BuzzerGames.Web.Games.GameCatalog.All.All(g => g.Name != "Super Password"), "no separate Super Password tile");
+});
+
+Console.WriteLine();
+Console.WriteLine("The Price Is Right screens");
+
+Run("price home page: the tile is playable and points at /price-is-right", () =>
+{
+    var tile = BuzzerGames.Web.Games.GameCatalog.All.Single(g => g.Name == "The Price Is Right");
+    Check.True(tile.IsPlayable && tile.Url == "/price-is-right", "the Price Is Right tile is live");
+});
+
+Run("price wiring: the app's own service setup deals real items and gifts", () =>
+{
+    var services = new ServiceCollection().AddPriceIsRight().BuildServiceProvider();
+    var items = (IPriceItemSource)services.GetService(typeof(IPriceItemSource))!;
+    var gifts = (IPartingGiftSource)services.GetService(typeof(IPartingGiftSource))!;
+    Check.Equal(24, items.CreateItems(new Random(1), 24).Count, "24 items");
+    Check.Equal(3, gifts.PickGifts(new Random(1), 3).Count(g => g.Length > 5), "3 real gifts");
+    var rooms = (PriceRoomManager)services.GetService(typeof(PriceRoomManager))!;
+    var game = rooms.Create();
+    var emcee = game.JoinEmcee("Host").Token;
+    for (var i = 0; i < 4; i++) game.JoinAudience("P" + i, null, new Avatar(0, 0, 0, 0, false));
+    Check.Ok(game.Start(emcee));
+    for (var i = 0; i < 4; i++) Check.Ok(game.CallDown(emcee));
+    Check.Ok(game.ShowItem(emcee));
+    Check.True(game.Snapshot().AnnounceText.Contains("could be yours"), "a real description is read");
+});
+
+Run("price avatar: the cartoon uses the chosen colors, glasses and pose", () =>
+{
+    var plain = Render.PrAvatar(new Avatar(0, 0, 0, 0, false));
+    Check.True(Render.Has(plain, "pr-avatar") && Render.Has(plain, PriceAvatar.Skins[0]) && Render.Has(plain, PriceAvatar.Shirts[0]), "skin and shirt colors");
+    Check.True(!Render.Has(plain, "stroke-width=\"2\" />") || !Render.Has(plain, "rgba(255,255,255,.18)"), "no glasses");
+    var fancy = Render.PrAvatar(new Avatar(5, 3, 4, 7, true), "cheer");
+    Check.True(Render.Has(fancy, PriceAvatar.Skins[5]) && Render.Has(fancy, PriceAvatar.HairColors[4]) && Render.Has(fancy, PriceAvatar.Shirts[7]), "the chosen colors");
+    Check.True(Render.Has(fancy, "rgba(255,255,255,.18)"), "glasses");
+    Check.True(Render.Count(fancy, "<line") > Render.Count(plain, "<line"), "arms go up in the cheer pose");
+    for (var hair = 0; hair < Avatar.Hairs; hair++)
+        Check.True(Render.Has(Render.PrAvatar(new Avatar(1, hair, 1, 1, false)), "<svg"), $"hair style {hair} draws");
+});
+
+Run("price join: anyone can join the audience, with a picker; one person may be the emcee", () =>
+{
+    var game = new PriceGame("TEST", new FixedPriceItemSource(), new FixedPartingGiftSource(), new Random(1));
+    var html = Render.PrJoin(game.Snapshot());
+    Check.True(Render.Has(html, "Join the audience") && Render.Has(html, "Take my seat"), "a join button");
+    Check.True(Render.Has(html, "Randomize") && Render.Has(html, "Glasses") && Render.Count(html, "pr-swatch") >= PriceAvatar.Skins.Length, "an avatar picker");
+    Check.True(Render.Has(html, "tricky"), "a box for how to say the name");
+    Check.True(Render.ShowsAnyCase(html, "I'm the emcee"), "while the chair is empty there is a button for it");
+    game.JoinEmcee("Host");
+    html = Render.PrJoin(game.Snapshot());
+    Check.True(!Render.ShowsAnyCase(html, "I'm the emcee"), "and not once someone has taken it");
+});
+
+Run("price tv: the lobby is a QR code, the room code and who has arrived", () =>
+{
+    var t = new PriceTable(start: false);
+    var html = Render.PrTv(t);
+    Check.True(Render.Has(html, "THE PRICE IS RIGHT") && Render.Has(html, "id=\"qr-TEST\""), "a title and a QR code");
+    Check.True(Render.Has(html, "TEST") && Render.Has(html, "<strong>8</strong>"), "the room code and the audience count");
+    Check.Equal(8, Render.Count(html, "class=\"pr-crowd-person\""), "everyone is drawn in the crowd");
+});
+
+Run("price tv: Contestants' Row has four podiums and shows who was called down", () =>
+{
+    var t = new PriceTable();
+    var html = Render.PrTv(t);
+    Check.Equal(4, Render.Count(html, "class=\"pr-podium "), "four podiums");
+    Check.Equal(4, Render.Count(html, "pr-podium empty"), "all empty at first");
+    Check.Ok(t.Game.CallDown(t.Emcee));
+    var s = t.S;
+    var name = t.NameOf(s.LastCalledId);
+    html = Render.PrTv(t);
+    Check.True(Render.Has(html, "pr-comedown") && Render.ShowsAnyCase(html, name + ","), $"the big banner calls {name}");
+    Check.True(Render.Has(html, "come on down!"), "come on down!");
+    Check.Equal(3, Render.Count(html, "pr-podium empty"), "one podium is filled");
+    Check.Equal(7, Render.Count(html, "class=\"pr-crowd-person\""), "and that person has left the crowd");
+    t.FillRow();
+    html = Render.PrTv(t);
+    Check.Equal(0, Render.Count(html, "pr-podium empty"), "a full row");
+    Check.Equal(4, Render.Count(html, "pr-avatar") - Render.Count(html, "class=\"pr-crowd-person\""), "four people stand at the podiums");
+});
+
+Run("price tv and phones: the real price stays secret until the bids are in", () =>
+{
+    var t = new PriceTable();
+    t.FillRow();
+    Check.Ok(t.Game.ShowItem(t.Emcee));
+    var price = PriceGame.Money(t.S.Price);                // "$100"
+    var item = t.S.Item!;
+    var tv = Render.PrTv(t);
+    Check.True(Render.ShowsAnyCase(tv, item.Name) && Render.ShowsAnyCase(tv, item.Description), "the TV shows the item and its description");
+    Check.True(Render.Has(tv, "pr-item-icon"), "with a big icon while there is no photo");
+    foreach (var phase in new[] { "reveal", "bidding" })
+    {
+        if (phase == "bidding") { Check.Ok(t.Game.OpenBidding(t.Emcee)); Check.Ok(t.Game.BidFor(t.Emcee, 37)); }
+        tv = Render.PrTv(t);
+        Check.True(!Render.Has(tv, price), $"the TV must not show {price} while {phase}");
+        for (var i = 0; i < 8; i++)
+            Check.True(!Render.Has(Render.PrAudience(t, i), price), $"audience member {i} must not see {price} while {phase}");
+        Check.True(Render.Has(Render.PrEmcee(t), price), $"the emcee does see {price} while {phase}");
+    }
+    t.Bids(41, 43, 47);
+    Check.Equal(PricePhase.BidResult, t.S.Phase, "bids are in");
+    Check.True(Render.Has(Render.PrTv(t), price) && Render.Has(Render.PrTv(t), "ACTUAL RETAIL PRICE"), "now the TV announces the price");
+    Check.True(Render.Has(Render.PrAudience(t, 0), price), "and phones show it");
+});
+
+Run("price tv: bids appear on the podiums, the bidder up is lit, and winners cheer", () =>
+{
+    var t = new PriceTable();
+    t.OpenBidding();
+    var html = Render.PrTv(t);
+    Check.Equal(1, Render.Count(html, "pr-podium active"), "one podium is lit");
+    Check.True(Render.ShowsAnyCase(html, ", what's your bid?"), "the TV asks the bidder");
+    Check.Ok(t.Game.BidFor(t.Emcee, 63));
+    html = Render.PrTv(t);
+    Check.True(Render.Has(html, "$63"), "their bid is on their podium");
+    Check.Equal(1, Render.Count(html, "pr-podium active") , "the next podium is lit");
+    t.Bids(77, 55, 90);                                      // $90 is over $100? no: Item 1 costs $100, so $90 wins
+    html = Render.PrTv(t);
+    Check.Equal(1, Render.Count(html, "pr-podium winner"), "the winner's podium is gold");
+    Check.True(Render.Has(html, "$90") && Render.Has(html, "$77") && Render.Has(html, "$63") && Render.Has(html, "$55"), "all four bids are showing");
+});
+
+Run("price tv: an all-over round tells everyone the price is lower", () =>
+{
+    var t = new PriceTable();
+    t.OpenBidding();
+    t.Bids(300, 250, 400, 200);
+    var html = Render.PrTv(t);
+    Check.True(Render.Has(html, "Everyone went over") && Render.ShowsAnyCase(html, "less than $200"), "the TV says so");
+    Check.True(Render.ShowsAnyCase(Render.PrAudience(t, 0), "less than"), "so does a phone");
+});
+
+Run("price tv: on stage, and the parting gifts at the end", () =>
+{
+    var t = new PriceTable(stageRounds: 1);
+    t.PlayRound();
+    Check.Ok(t.Game.Continue(t.Emcee));
+    var star = t.NameOf(t.S.OnStageId);
+    var html = Render.PrTv(t);
+    Check.True(Render.Has(html, "COME ON UP") && Render.ShowsAnyCase(html, star), "the winner is on stage");
+    Check.Ok(t.Game.Continue(t.Emcee));
+    html = Render.PrTv(t);
+    Check.True(Render.Has(html, "THAT&#x27;S THE SHOW") || Render.Has(html, "THAT'S THE SHOW"), "the show is over");
+    foreach (var gift in t.S.PartingGifts)
+        Check.True(Render.ShowsAnyCase(html, gift.Name) && Render.ShowsAnyCase(html, gift.Gift), $"{gift.Name}'s parting gift is on the screen");
+});
+
+Run("price phones: the contestant whose turn it is gets a bid box; nobody else does", () =>
+{
+    var t = new PriceTable();
+    t.OpenBidding();
+    var s = t.S;
+    var bidderId = s.Row[s.BidTurnPosition].AudienceId!.Value;
+    for (var i = 0; i < 8; i++)
+    {
+        var html = Render.PrAudience(t, i);
+        var mine = t.Ids[i] == bidderId;
+        Check.True(Render.Has(html, "pr-bid-input") == mine, $"player {i}: bid box only for the bidder");
+        Check.True(Render.Has(html, ">BID<") == mine, $"player {i}: BID button only for the bidder");
+    }
+    Check.True(Render.ShowsAnyCase(Render.PrAudience(t, Array.IndexOf(t.Ids, bidderId)), "Your bid!"), "the bidder is told");
+});
+
+Run("price phones: reactions and comments, which the emcee can switch off", () =>
+{
+    var t = new PriceTable();
+    var lobbyish = new PriceTable(start: false);
+    Check.True(!Render.Has(Render.PrAudience(lobbyish, 0), "pr-react-btn"), "no reaction buttons before the show");
+    var html = Render.PrAudience(t, 0);
+    Check.Equal(4, Render.Count(html, "class=\"pr-react-btn\""), "four reaction buttons");
+    Check.True(Render.Has(html, "Higher!") && Render.Has(html, "Lower!") && Render.Has(html, "Cheer") && Render.Has(html, "Boo"), "cheer, boo, higher, lower");
+    Check.True(Render.Has(html, "pr-comment-box"), "a comment box");
+    Check.Ok(t.Game.SetComments(t.Emcee, false));
+    Check.True(!Render.Has(Render.PrAudience(t, 0), "pr-comment-box"), "no comment box once comments are off");
+    Check.True(Render.Has(Render.PrAudience(t, 0), "pr-react-btn"), "but the reactions stay");
+});
+
+Run("price tv: comments show up on the big screen and vanish when deleted or switched off", () =>
+{
+    var t = new PriceTable();
+    t.OpenBidding();
+    Check.Ok(t.Game.Comment(t.Tokens[0], "Higher, Bob, higher!"));
+    var html = Render.PrTv(t);
+    Check.True(Render.Has(html, "pr-comments") && Render.ShowsAnyCase(html, "Higher, Bob, higher!"), "the comment is on screen");
+    Check.True(Render.Has(html, "pr-meters"), "so are the reaction meters");
+    Check.Ok(t.Game.DeleteComment(t.Emcee, t.S.Comments[0].Id));
+    Check.True(!Render.Has(Render.PrTv(t), "pr-comments"), "gone once deleted");
+});
+
+Run("price emcee: the right buttons for each moment, and moderation tools", () =>
+{
+    var lobby = new PriceTable(start: false);
+    Check.True(Render.Has(Render.PrEmcee(lobby), "Start the show") && !Render.ButtonDisabled(Render.PrEmcee(lobby), "Start the show"), "start is ready with eight in the audience");
+    var tiny = new PriceTable(start: false, audience: 3);
+    Check.True(Render.ButtonDisabled(Render.PrEmcee(tiny), "Start the show"), "start is disabled with three");
+
+    var t = new PriceTable();
+    var html = Render.PrEmcee(t);
+    Check.True(Render.Has(html, "Call someone down") && !Render.Has(html, "Bring out the item"), "calling people down");
+    t.FillRow();
+    html = Render.PrEmcee(t);
+    Check.True(Render.ButtonDisabled(html, "Call someone down") && Render.Has(html, "Bring out the item"), "the row is full: bring out the item");
+    Check.True(Render.Has(html, "call someone else"), "and the last person can be sent back");
+    Check.Ok(t.Game.ShowItem(t.Emcee));
+    html = Render.PrEmcee(t);
+    Check.True(Render.Has(html, "Open bidding") && Render.Has(html, "Pick a different item"), "open bidding or swap the item");
+    Check.Ok(t.Game.OpenBidding(t.Emcee));
+    html = Render.PrEmcee(t);
+    Check.True(Render.Has(html, "Enter bid for") && Render.Has(html, "pr-bid-input"), "the emcee can bid for someone");
+    t.Bids(10, 20, 30, 40);
+    Check.True(Render.Has(Render.PrEmcee(t), "up on stage"), "send the winner up on stage");
+    Check.Ok(t.Game.Continue(t.Emcee));
+    Check.True(Render.Has(Render.PrEmcee(t), "next contestant"), "then on to the next contestant");
+    var tools = Render.PrEmcee(t);
+    Check.True(Render.Has(tools, "Say it again") && Render.Has(tools, "Stop talking") && Render.Has(tools, "turn them off"), "announcer and comment controls");
+    Check.True(Render.Has(tools, "The audience (8)"), "the audience list");
+    foreach (var i in new[] { 0, 1 }) Check.True(!Render.Has(Render.PrAudience(t, i), "Say it again"), "audience phones have no emcee tools");
+});
+
+Run("price room: the big screen has the announcer button; phones do not; a stranger sees the join page", () =>
+{
+    var rooms = new PriceRoomManager(new FixedPriceItemSource(), new FixedPartingGiftSource());
+    var game = rooms.Create();
+    var board = Render.PrRoom(rooms, game.Code, board: true);
+    Check.True(Render.Has(board, "pr-sound-btn") && Render.ShowsAnyCase(board, "Turn on the announcer"), "the TV can switch the voice on");
+    Check.True(Render.Has(board, "id=\"qr-" + game.Code + "\""), "and it shows the QR code in the lobby");
+    var phone = Render.PrRoom(rooms, game.Code, board: false);
+    Check.True(!Render.Has(phone, "pr-sound-btn"), "phones have no announcer button");
+    Check.True(Render.Has(phone, "Connecting") || Render.Has(phone, "Join the audience"), "a phone connects, then offers the join page");
+    Check.True(Render.Has(Render.PrRoom(rooms, "ZZZZ", false), "Show not found"), "an unknown code is handled");
+});
+
+Run("price live: every open screen survives a whole show, with reactions, comments, rerolls and swaps", () =>
+{
+    for (var seed = 1; seed <= 6; seed++)
+    {
+        var rnd = new Random(seed);
+        var t = new PriceTable(seed, audience: 6, stageRounds: 3);
+        Dictionary<string, object?> P(int who) => who switch
+        {
+            -2 => new() { ["Snapshot"] = t.S },
+            -1 => new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee },
+            _ => new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[who], ["AudienceId"] = t.Ids[who] }
+        };
+        var views = new List<LiveView> { new("TV", typeof(PriceTvView), P(-2)), new("emcee", typeof(PriceEmceeView), P(-1)) };
+        for (var i = 0; i < 6; i++) views.Add(new LiveView($"audience {i}", typeof(PriceAudienceView), P(i)));
+        var who = new[] { -2, -1, 0, 1, 2, 3, 4, 5 };
+        t.Game.Changed += () => { for (var v = 0; v < views.Count; v++) views[v].Update(P(who[v])); };
+
+        for (var step = 0; step < 500 && t.S.Phase != PricePhase.ShowOver; step++)
+        {
+            var s = t.S;
+            t.Advance(4);
+            if (rnd.Next(3) == 0) t.Game.React(t.Tokens[rnd.Next(6)], (Reaction)rnd.Next(4));
+            if (rnd.Next(6) == 0) t.Game.Comment(t.Tokens[rnd.Next(6)], "hello " + step);
+            switch (s.Phase)
+            {
+                case PricePhase.Callout:
+                    if (s.Row.All(r => r.AudienceId is not null)) Check.Ok(t.Game.ShowItem(t.Emcee));
+                    else if (rnd.Next(5) == 0 && s.LastCalledId is not null) t.Game.Reroll(t.Emcee);
+                    else Check.Ok(t.Game.CallDown(t.Emcee));
+                    break;
+                case PricePhase.Reveal:
+                    if (rnd.Next(4) == 0) Check.Ok(t.Game.SwapItem(t.Emcee)); else Check.Ok(t.Game.OpenBidding(t.Emcee));
+                    break;
+                case PricePhase.Bidding:
+                    var turn = s.Row[s.BidTurnPosition].AudienceId!.Value;
+                    var max = s.BidCeiling > 0 ? s.BidCeiling - 1 : 900;
+                    var amount = rnd.Next(1, max + 1);
+                    if (rnd.Next(2) == 0) t.Game.Bid(t.TokenOf(turn), amount); else t.Game.BidFor(t.Emcee, amount);
+                    break;
+                default:
+                    Check.Ok(t.Game.Continue(t.Emcee));
+                    break;
+            }
+        }
+        Check.Equal(PricePhase.ShowOver, t.S.Phase, $"seed {seed}: the show finished");
+        foreach (var v in views) v.Dispose();
+    }
 });
 
 Console.WriteLine();

@@ -1,0 +1,18 @@
+@* How the studio audience is feeling right now: four bars that grow as people tap on their phones. *@
+
+<div class="pr-meters" aria-label="Audience reactions">
+    @for (var i = 0; i < Labels.Length; i++)
+    {
+        var count = i < Snapshot.Reactions.Count ? Snapshot.Reactions[i] : 0;
+        var pct = Math.Min(100, count * 100 / Math.Max(8, Snapshot.Reactions.Max()));
+        <div class="pr-meter">
+            <div class="pr-meter-bar"><div class="pr-meter-fill m@(i)" style="height:@(pct)%"></div></div>
+            <div class="pr-meter-label">@Labels[i]</div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PriceSnapshot Snapshot { get; set; } = default!;
+    private static readonly string[] Labels = ["👏", "👎", "⬆️", "⬇️"];
+}

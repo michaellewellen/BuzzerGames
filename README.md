@@ -77,6 +77,22 @@ is the `/board` address.
 
 **Puzzles.** `src/BuzzerGames.Core/Data/Password/puzzles.json`: each entry has a `kind` (Person, Place or Thing), the `answer`, five `words` ordered from vague to obvious, and optional `alsoAccept`. Each game deals 12, avoiding the same kind twice in a row.
 
+## How a Price Is Right game works
+
+One TV, one emcee, and a whole studio audience (up to 200 phones).
+
+1. Put the game on the TV (`/price-is-right`, then Create). Tap **Turn on the announcer** on the TV once so the browser allows the voice.
+2. Everyone scans the QR code, types a name, picks a cartoon person, and joins the audience. The name field has an optional "how to say it" box for names the voice mangles. The emcee joins with "I'm the emcee".
+3. The emcee starts the show (needs 4 audience members). The voice calls four people down to Contestants' Row, then introduces an item, reads its description and ends with "could be yours, if the price is right!"
+4. Bidding goes one contestant at a time. Nobody may repeat a bid. Closest without going over wins; if everyone is over, the lowest bid becomes the ceiling and they bid again.
+5. The winner goes on stage, the other three stay, and one new person is called down. After the last round, everyone who never made it on stage gets a parting gift read out.
+6. The audience can cheer, boo, and shout higher/lower from their phones, and (if the emcee leaves it on) type short comments. The emcee can delete a comment, turn comments off, and repeat or hush the announcer.
+
+The on-stage pricing games are not built yet; for now the emcee taps Continue.
+
+**Item bank:** `src/BuzzerGames.Core/Data/Price/items.json` (name, description, price, emoji `icon`, optional `image`, optional `say`). Put photos in `src/BuzzerGames.Web/wwwroot/images/price/` and set `"image": "stereo.jpg"`. Items without a photo show their emoji.
+**Parting gifts:** `src/BuzzerGames.Core/Data/Price/parting-gifts.txt`, one per line.
+
 ## Run it on your computer
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).

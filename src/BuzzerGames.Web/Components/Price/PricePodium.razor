@@ -1,0 +1,26 @@
+@* One seat in Contestants' Row: a person standing behind a podium, with their name and their bid on the front. *@
+
+<div class="@Classes">
+    <div class="pr-podium-person">
+        @if (Person is not null)
+        {
+            <PriceAvatar Avatar="Person.Avatar" Pose="@Pose" Label="@Person.Name" />
+        }
+    </div>
+    <div class="pr-podium-front">
+        <div class="pr-podium-number">@(Number)</div>
+        <div class="pr-podium-name">@(Person?.Name ?? "")</div>
+        <div class="pr-podium-bid @(Bid is null ? "none" : "")">@(Bid is { } b ? PriceGame.Money(b) : (Active ? "bidding…" : ""))</div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public AudienceInfo? Person { get; set; }
+    [Parameter] public int Number { get; set; }
+    [Parameter] public int? Bid { get; set; }
+    [Parameter] public bool Active { get; set; }
+    [Parameter] public string Pose { get; set; } = "stand";
+    [Parameter] public string? Highlight { get; set; }
+
+    private string Classes => "pr-podium" + (Active ? " active" : "") + (Person is null ? " empty" : "") + (Highlight is { Length: > 0 } ? " " + Highlight : "");
+}

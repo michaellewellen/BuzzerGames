@@ -36,6 +36,9 @@ builder.Services.AddSingleton<PylRoomManager>();
 // Password Plus has its own puzzle bank and its own set of running games.
 builder.Services.AddPasswordPlus();
 
+// The Price Is Right: an item bank, a list of parting gifts, and its own set of running shows.
+builder.Services.AddPriceIsRight();
+
 var app = builder.Build();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);

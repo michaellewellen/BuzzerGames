@@ -1,0 +1,190 @@
+@*
+    The emcee's phone: calls people down, brings out the item, enters bids if a phone dies, sends the winner up on stage, and
+    keeps the studio in order (the announcer's voice, the audience's comments, who is in the room).
+    This phone sees the item's real price before anyone else does.
+*@
+
+<main class="phone emcee pr-emcee">
+    <header class="phone-header">
+        <span class="pill">EMCEE</span>
+        <span class="phone-sub">Room @Snapshot.Code · @Snapshot.Audience.Count in the audience@(Snapshot.Phase == PricePhase.Lobby ? "" : $" · Game {Snapshot.StageRound + 1} of {Snapshot.StageRounds}")</span>
+    </header>
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @if (Snapshot.Message is { Length: > 0 } && Snapshot.Phase is not PricePhase.Lobby)
+    {
+        <p class="hint">@Snapshot.Message</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case PricePhase.Lobby:
+            <p class="big-message">@Snapshot.Audience.Count in the audience</p>
+            <p class="hint">You need at least @PriceGame.RowSize. Everyone scans the QR code on the big screen.</p>
+            <button class="btn btn-start btn-wide" disabled="@(!Snapshot.CanStart)" @onclick="() => Act(Game.Start(Token))">Start the show</button>
+            break;
+
+        case PricePhase.Callout:
+            var seated = Snapshot.Row.Count(r => r.AudienceId is not null);
+            <p class="big-message">Contestants' Row: @seated of @PriceGame.RowSize</p>
+            @if (Snapshot.Find(Snapshot.LastCalledId) is { } called)
+            {
+                <p class="hint">Just called: <strong>@called.Name</strong></p>
+            }
+            <button class="btn btn-start btn-wide" disabled="@(seated >= PriceGame.RowSize)" @onclick="() => Act(Game.CallDown(Token))">Call someone down</button>
+            @if (Snapshot.LastCalledId is not null && Snapshot.Row.Any(r => r.AudienceId == Snapshot.LastCalledId))
+            {
+                <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.Reroll(Token))">They're not here: call someone else</button>
+            }
+            @if (seated >= PriceGame.RowSize)
+            {
+                <button class="btn btn-start btn-wide" @onclick="() => Act(Game.ShowItem(Token))">Bring out the item</button>
+            }
+            break;
+
+        case PricePhase.Reveal:
+            @SecretPanel
+            <p class="hint">The announcer is describing the item. Wait for the voice, then open bidding.</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.OpenBidding(Token))">Open bidding</button>
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.SwapItem(Token))">Pick a different item</button>
+            break;
+
+        case PricePhase.Bidding:
+            @SecretPanel
+            @if (Snapshot.InSlot(Snapshot.BidTurnPosition) is { } bidder)
+            {
+                <p class="big-message">@bidder.Name is bidding</p>
+                @if (Snapshot.BidCeiling > 0)
+                {
+                    <p class="hint">Everyone went over: the price is less than @PriceGame.Money(Snapshot.BidCeiling).</p>
+                }
+                <p class="hint">Their phone has a bid box. If it isn't working, enter their bid here:</p>
+                <input class="text-input pr-bid-input" type="number" inputmode="numeric" min="1" placeholder="$ amount"
+                       @bind="_bid" @bind:event="oninput" @onkeydown="OnBidKey" />
+                <button class="btn btn-wide" @onclick="BidForThem">Enter bid for @bidder.Name</button>
+            }
+            @if (Snapshot.Bids.Count > 0)
+            {
+                <ul class="pr-bidlist">
+                    @foreach (var bid in Snapshot.Bids)
+                    {
+                        <li><span>@Snapshot.Find(bid.AudienceId)?.Name</span><strong>@PriceGame.Money(bid.Amount)</strong></li>
+                    }
+                </ul>
+            }
+            break;
+
+        case PricePhase.BidResult:
+            <p class="big-message">@Snapshot.Message</p>
+            <p class="hint">Actual retail price: <strong>@PriceGame.Money(Snapshot.Price)</strong></p>
+            <ul class="pr-bidlist">
+                @foreach (var bid in Snapshot.Bids)
+                {
+                    <li class="@(bid.AudienceId == Snapshot.WinnerId ? "win" : bid.Amount > Snapshot.Price ? "over" : "")">
+                        <span>@Snapshot.Find(bid.AudienceId)?.Name</span><strong>@PriceGame.Money(bid.Amount)</strong>
+                    </li>
+                }
+            </ul>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">Send @(Snapshot.Find(Snapshot.WinnerId)?.Name) up on stage</button>
+            break;
+
+        case PricePhase.OnStage:
+            <p class="big-message">@Snapshot.Find(Snapshot.OnStageId)?.Name is on stage</p>
+            <p class="hint">The pricing games aren't built yet. Tap Continue when you're done on stage.</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">
+                @(Snapshot.StageRound + 1 >= Snapshot.StageRounds ? "That's the last game: finish the show" : "Pricing game over: next contestant")
+            </button>
+            break;
+
+        case PricePhase.ShowOver:
+            <p class="big-message">That's the show!</p>
+            @if (Snapshot.PartingGifts.Count > 0)
+            {
+                <ul class="pr-bidlist">
+                    @foreach (var gift in Snapshot.PartingGifts)
+                    {
+                        <li><span>@gift.Name</span><strong>@gift.Gift</strong></li>
+                    }
+                </ul>
+            }
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Restart(Token))">Another show with this audience</button>
+            break;
+    }
+
+    <section class="pr-tools">
+        <h3>Announcer</h3>
+        <div class="button-row">
+            <button class="btn btn-quiet" @onclick="() => Act(Game.Repeat(Token))">🔁 Say it again</button>
+            <button class="btn btn-quiet" @onclick="() => Act(Game.Hush(Token))">🤫 Stop talking</button>
+        </div>
+
+        <h3>Audience comments</h3>
+        <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.SetComments(Token, !Snapshot.CommentsOn))">
+            @(Snapshot.CommentsOn ? "Comments are ON: turn them off" : "Comments are OFF: turn them on")
+        </button>
+        @if (Snapshot.CommentsOn)
+        {
+            <ul class="pr-moderate">
+                @foreach (var c in Snapshot.Comments)
+                {
+                    <li @key="c.Id"><span><strong>@c.Name</strong> @c.Text</span>
+                        <button class="btn btn-no" aria-label="Delete comment" @onclick="() => Act(Game.DeleteComment(Token, c.Id))">✗</button></li>
+                }
+            </ul>
+        }
+
+        <details>
+            <summary>The audience (@Snapshot.Audience.Count)</summary>
+            <ul class="pr-moderate">
+                @foreach (var person in Snapshot.Audience)
+                {
+                    <li @key="person.Id"><span>@person.Name@(person.InRow ? " (in the row)" : person.WentOnStage ? " (played)" : "")</span>
+                        <button class="btn btn-no" aria-label="Remove @person.Name" @onclick="() => Act(Game.RemoveAudience(Token, person.Id))">✗</button></li>
+                }
+            </ul>
+        </details>
+    </section>
+</main>
+
+@code {
+    [Parameter, EditorRequired] public PriceGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public PriceSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+
+    private int? _bid;
+    private string? _error;
+    private PricePhase _lastPhase;
+    private int _lastTurn = -2;
+
+    protected override void OnParametersSet()
+    {
+        if (Snapshot.Phase == _lastPhase && Snapshot.BidTurnPosition == _lastTurn) return;
+        _lastPhase = Snapshot.Phase;
+        _lastTurn = Snapshot.BidTurnPosition;
+        _error = null;
+        _bid = null;
+    }
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private void BidForThem()
+    {
+        if (_bid is not { } amount) { _error = "Type the bid first."; return; }
+        Act(Game.BidFor(Token, amount));
+    }
+
+    private void OnBidKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") BidForThem();
+    }
+
+    // The secret: the item's real price. Only the emcee's phone ever draws this.
+    private RenderFragment SecretPanel => @<div class="emcee-clue pr-secret">
+        <p class="emcee-clue-meta">@Snapshot.Item?.Name</p>
+        <p class="emcee-clue-answer">Actual price: @PriceGame.Money(Snapshot.Price)</p>
+    </div>;
+}

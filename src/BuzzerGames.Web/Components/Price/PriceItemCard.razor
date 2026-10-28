@@ -1,0 +1,30 @@
+@* The item up for bid: a photo if there is one, otherwise a big emoji. Never shows the price. *@
+
+@if (Item is not null)
+{
+    <div class="pr-item @Class">
+        <div class="pr-item-pic">
+            @if (!string.IsNullOrWhiteSpace(Item.Image))
+            {
+                <img src="/images/price/@Item.Image" alt="@Item.Name" />
+            }
+            else
+            {
+                <span class="pr-item-icon" aria-hidden="true">@Item.Icon</span>
+            }
+        </div>
+        <div class="pr-item-text">
+            <h2 class="pr-item-name">@Item.Name</h2>
+            @if (ShowDescription)
+            {
+                <p class="pr-item-desc">@Item.Description</p>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public PriceItemInfo? Item { get; set; }
+    [Parameter] public bool ShowDescription { get; set; } = true;
+    [Parameter] public string Class { get; set; } = "";
+}

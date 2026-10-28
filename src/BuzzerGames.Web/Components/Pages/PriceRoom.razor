@@ -1,0 +1,157 @@
+@page "/price-is-right/{Code}"
+@page "/price-is-right/{Code}/board"
+@implements IDisposable
+@inject PriceRoomManager Rooms
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<PageTitle>The Price Is Right · @Code.ToUpperInvariant()</PageTitle>
+
+@*
+    This one page is every screen in a show, and it answers two web addresses, like the other games:
+      /price-is-right/ABCD         for people. Phones scan the QR code and land here.
+      /price-is-right/ABCD/board   for the big screen. It never joins; it only watches, and it is the one that talks.
+    It also plays the announcer: whenever the game has something to say, the big screen reads it aloud.
+*@
+
+@if (_game is null)
+{
+    <main class="card center">
+        <h1>Show not found</h1>
+        <p>There's no show with the code <strong>@Code.ToUpperInvariant()</strong>. It may have ended, or the server may have restarted.</p>
+        <a class="btn" href="/price-is-right">Start or join a show</a>
+    </main>
+}
+else if (!_ready)
+{
+    <main class="card center"><p class="muted">Connecting…</p></main>
+}
+else if (_boardMode)
+{
+    <PriceTvView Snapshot="_snapshot" />
+    @if (!_soundOn)
+    {
+        <button class="pr-sound-btn" @onclick="EnableSound">🔈 Turn on the announcer</button>
+    }
+}
+else if (_seat.Role == Role.Emcee)
+{
+    <PriceEmceeView Game="_game" Snapshot="_snapshot" Token="_token" />
+}
+else if (_seat.Role == Role.Player && _snapshot.Find(_seat.PlayerId) is not null)
+{
+    <PriceAudienceView Game="_game" Snapshot="_snapshot" Token="_token" AudienceId="_seat.PlayerId!.Value" />
+}
+else
+{
+    <PriceJoinPanel Snapshot="_snapshot" Error="@_error" OnJoinAudience="JoinAudienceAsync" OnJoinEmcee="JoinEmceeAsync" />
+}
+
+@code {
+    [Parameter] public string Code { get; set; } = "";
+
+    private PriceGame? _game;
+    private PriceSnapshot _snapshot = default!;
+    private Seat _seat = new(Role.Spectator);
+    private Guid _token;
+    private bool _ready;
+    private bool _boardMode;
+    private bool _soundOn;
+    private int _spokenSeq;
+    private string? _error;
+
+    // Testing aid: opening the page as .../ABCD?seat=2 gives that tab its own saved seat, so one browser can be several people.
+    private string StorageKey
+    {
+        get
+        {
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+            var slot = query.TryGetValue("seat", out var v) ? v.ToString() : "";
+            return $"bg.price.{Code.ToUpperInvariant()}" + (slot.Length > 0 ? $".{slot}" : "");
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _boardMode = new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/')
+            .EndsWith("/board", StringComparison.OrdinalIgnoreCase);
+
+        _game = Rooms.Find(Code);
+        if (_game is null) return;
+
+        _snapshot = _game.Snapshot();
+        _spokenSeq = _snapshot.AnnounceSeq;
+        _game.Changed += OnGameChanged;
+
+        if (_boardMode) _ready = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_game is null) return;
+
+        if (firstRender && !_boardMode)
+        {
+            var saved = await JS.InvokeAsync<string?>("bg.getItem", StorageKey);
+            if (Guid.TryParse(saved, out var token))
+            {
+                _token = token;
+                _seat = _game.GetSeat(token);
+            }
+            _ready = true;
+            StateHasChanged();
+            return;
+        }
+
+        // The big screen is the announcer: say whatever is new.
+        if (_boardMode && _soundOn && _snapshot.AnnounceSeq != _spokenSeq)
+        {
+            _spokenSeq = _snapshot.AnnounceSeq;
+            await JS.InvokeVoidAsync("bg.speak", _snapshot.AnnounceText, _snapshot.AnnounceFanfare);
+        }
+    }
+
+    private async Task EnableSound()
+    {
+        // Browsers only allow sound after a tap, so the big screen has a button for it.
+        _soundOn = await JS.InvokeAsync<bool>("bg.unlockSpeech");
+        _spokenSeq = _snapshot.AnnounceSeq;
+        if (_soundOn) await JS.InvokeVoidAsync("bg.speak", "The announcer is ready. Let's play the Price Is Right!", true);
+    }
+
+    private void OnGameChanged() => _ = InvokeAsync(() =>
+    {
+        _snapshot = _game!.Snapshot();
+        // If the emcee sent this person home, they become a spectator and see the join page again.
+        if (_token != Guid.Empty) _seat = _game.GetSeat(_token);
+        StateHasChanged();
+    });
+
+    private async Task JoinAudienceAsync((string Name, string? SayAs, Avatar Avatar) request)
+    {
+        _error = null;
+        var result = _game!.JoinAudience(request.Name, request.SayAs, request.Avatar);
+        if (!result.Ok) { _error = result.Error; return; }
+        await Remember(result.Token);
+    }
+
+    private async Task JoinEmceeAsync(string name)
+    {
+        _error = null;
+        var result = _game!.JoinEmcee(name);
+        if (!result.Ok) { _error = result.Error; return; }
+        await Remember(result.Token);
+    }
+
+    private async Task Remember(Guid token)
+    {
+        _token = token;
+        _seat = _game!.GetSeat(token);
+        await JS.InvokeVoidAsync("bg.setItem", StorageKey, token.ToString());
+    }
+
+    public void Dispose()
+    {
+        if (_game is not null) _game.Changed -= OnGameChanged;
+    }
+}

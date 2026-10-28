@@ -1,0 +1,153 @@
+@*
+    The big screen. It draws the studio: Contestants' Row with four podiums, the item up for bid, the audience's reactions and
+    comments, the stage, and the parting gifts. It never takes a seat. The announcer's voice is played by the page that hosts this.
+
+    This screen is shown to the whole room, so it must not show the item's real price until the bids are in.
+*@
+
+@if (Snapshot.Phase == PricePhase.Lobby)
+{
+    <main class="tv pr-tv pr-lobby">
+        <h1 class="pr-title">THE PRICE IS RIGHT</h1>
+        <p class="pr-sub">Join the studio audience! You could be called down.</p>
+        <div class="pr-lobby-row">
+            <PriceQr Code="@Snapshot.Code" />
+            <div class="pr-lobby-info">
+                <p class="room-line">Room <span class="room-code">@Snapshot.Code</span></p>
+                <p class="pr-count"><strong>@Snapshot.Audience.Count</strong> in the audience</p>
+                <p class="muted">Scan the code, make your person, and wait to hear your name.</p>
+            </div>
+        </div>
+        <PriceCrowd Snapshot="Snapshot" />
+    </main>
+}
+else if (Snapshot.Phase == PricePhase.ShowOver)
+{
+    <main class="tv pr-tv pr-over">
+        <h1 class="pr-title">THAT'S THE SHOW!</h1>
+        @if (Snapshot.PartingGifts.Count > 0)
+        {
+            <p class="pr-sub">Our parting gifts for contestants who didn't make it on stage:</p>
+            <ul class="pr-gifts">
+                @foreach (var gift in Snapshot.PartingGifts)
+                {
+                    <li><strong>@gift.Name</strong> <span>wins @gift.Gift</span></li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="pr-sub">@Snapshot.Message</p>
+        }
+        <PriceCrowd Snapshot="Snapshot" />
+    </main>
+}
+else if (Snapshot.Phase == PricePhase.OnStage)
+{
+    var star = Snapshot.Find(Snapshot.OnStageId);
+    <main class="tv pr-tv pr-stage-view">
+        <div class="pr-curtain">
+            <p class="pr-sub">COME ON UP!</p>
+            @if (star is not null)
+            {
+                <div class="pr-star"><PriceAvatar Avatar="star.Avatar" Pose="cheer" Label="@star.Name" /></div>
+                <h1 class="pr-star-name">@star.Name</h1>
+            }
+            <p class="pr-sub">Pricing game @(Snapshot.StageRound + 1) of @Snapshot.StageRounds</p>
+        </div>
+        <PriceCrowd Snapshot="Snapshot" />
+    </main>
+}
+else
+{
+    <main class="tv pr-tv pr-row-view">
+        <header class="pr-header">
+            <span class="pr-title small">THE PRICE IS RIGHT</span>
+            <span class="pr-round">Pricing game @(Snapshot.StageRound + 1) of @Snapshot.StageRounds</span>
+        </header>
+
+        @if (Snapshot.Phase == PricePhase.Callout)
+        {
+            var called = Snapshot.Find(Snapshot.LastCalledId);
+            <section class="pr-callout">
+                @if (called is not null)
+                {
+                    <p class="pr-comedown" @key="Snapshot.AnnounceSeq">@called.Name, <span>come on down!</span></p>
+                }
+                else
+                {
+                    <p class="pr-comedown quiet">Who will be called down next?</p>
+                }
+            </section>
+        }
+        else
+        {
+            <section class="pr-board">
+                <PriceItemCard Item="Snapshot.Item" ShowDescription="@(Snapshot.Phase == PricePhase.Reveal)" />
+
+                @if (Snapshot.Phase == PricePhase.BidResult)
+                {
+                    <div class="pr-price-reveal">
+                        <p>ACTUAL RETAIL PRICE</p>
+                        <strong>@PriceGame.Money(Snapshot.Price)</strong>
+                        @if (Snapshot.ExactPrice)
+                        {
+                            <span class="pr-exact">RIGHT ON THE MONEY!</span>
+                        }
+                    </div>
+                }
+                else if (Snapshot.Phase == PricePhase.Bidding)
+                {
+                    <div class="pr-bid-prompt">
+                        @if (Snapshot.BidCeiling > 0)
+                        {
+                            <p class="pr-ceiling">Everyone went over! The price is <strong>less than @PriceGame.Money(Snapshot.BidCeiling)</strong>.</p>
+                        }
+                        @if (Snapshot.InSlot(Snapshot.BidTurnPosition) is { } bidder)
+                        {
+                            <p class="pr-turn"><strong>@bidder.Name</strong>, what's your bid?</p>
+                        }
+                    </div>
+                }
+            </section>
+        }
+
+        <section class="pr-row" aria-label="Contestants' Row">
+            @for (var i = 0; i < Snapshot.Row.Count; i++)
+            {
+                var slot = Snapshot.Row[i];
+                var person = Snapshot.Find(slot.AudienceId);
+                var bid = Snapshot.Bids.FirstOrDefault(b => b.Position == slot.Position);
+                var won = Snapshot.Phase == PricePhase.BidResult && person is not null && Snapshot.WinnerId == person.Id;
+                var over = Snapshot.Phase == PricePhase.BidResult && bid is not null && bid.Amount > Snapshot.Price;
+                <PricePodium Person="person" Number="@(i + 1)" Bid="@(bid?.Amount)"
+                             Active="@(Snapshot.Phase == PricePhase.Bidding && Snapshot.BidTurnPosition == slot.Position)"
+                             Pose="@(won ? "cheer" : "stand")"
+                             Highlight="@(won ? "winner" : over ? "over" : null)" />
+            }
+        </section>
+
+        <div class="pr-side">
+            @if (Snapshot.Phase is PricePhase.Bidding or PricePhase.Reveal)
+            {
+                <PriceReactionMeters Snapshot="Snapshot" />
+            }
+        </div>
+
+        @if (Snapshot.CommentsOn && Snapshot.Comments.Count > 0)
+        {
+            <ul class="pr-comments">
+                @foreach (var c in Snapshot.Comments.TakeLast(5))
+                {
+                    <li @key="c.Id"><strong>@c.Name</strong> @c.Text</li>
+                }
+            </ul>
+        }
+
+        <PriceCrowd Snapshot="Snapshot" />
+    </main>
+}
+
+@code {
+    [Parameter, EditorRequired] public PriceSnapshot Snapshot { get; set; } = default!;
+}
