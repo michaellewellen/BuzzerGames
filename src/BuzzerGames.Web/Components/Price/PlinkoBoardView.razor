@@ -1,0 +1,104 @@
+@using System.Globalization
+@using System.Text
+
+@*
+    The Plinko pegboard, drawn as one SVG: nine slots along the top, 13 rows of pegs (rows alternate eight pegs and seven pegs, starting
+    and ending with eight), and nine paying slots at the bottom.
+
+    A falling chip is animated with CSS, not SVG's own animation: an SVG animation counts time from when the whole picture first appeared,
+    so one added later would already be over. The chip gets its path as CSS variables (--x0 ... --x14, --yend) and the shared
+    "pr-plinko-fall" keyframes in app.css do the rest. Chips that have landed are drawn at rest in their slot, and a chip's payout is
+    only highlighted once it has landed.
+*@
+
+<svg class="pr-pegboard" viewBox="0 0 600 720" role="img" aria-label="The Plinko board">
+    <rect class="pr-peg-panel" x="4" y="76" width="592" height="500" rx="14" />
+
+    @* The top: nine slots; the one the contestant is lining up lights up. *@
+    @for (var slot = 0; slot < PlinkoBoard.Slots; slot++)
+    {
+        var aimed = Info.Stage == PlinkoStage.Dropping && Info.Aim == slot;
+        <g class="pr-top-slot @(aimed ? "aimed" : "")" transform="translate(@Px(slot) 0)">
+            <text class="pr-slot-number" y="24" text-anchor="middle">@(slot + 1)</text>
+            <path class="pr-slot-arrow" d="M -10 56 L 10 56 L 0 70 Z" />
+        </g>
+    }
+
+    @* The pegs. *@
+    @for (var row = 1; row <= PlinkoBoard.Rows; row++)
+    {
+        var y = RowY(row);
+        @for (var i = 0; i < (row % 2 == 1 ? 8 : 7); i++)
+        {
+            var u = row % 2 == 1 ? i + 0.5 : i + 1.0;
+            <circle class="pr-peg" cx="@Px(u)" cy="@y.ToString(CultureInfo.InvariantCulture)" r="5.5" />
+        }
+    }
+
+    @* The bottom: nine paying slots. *@
+    @for (var slot = 0; slot < PlinkoBoard.Slots; slot++)
+    {
+        var pay = PlinkoBoard.Payouts[slot];
+        var hit = LastLanded is { } last && last.Slot == slot;
+        <g class="pr-bottom-slot @(pay == 10000 ? "jackpot" : pay == 0 ? "zero" : pay >= 1000 ? "big" : "") @(hit ? "hit" : "")" transform="translate(@Px(slot) 0)">
+            <rect x="-32" y="580" width="64" height="120" rx="6" />
+            <text class="pr-slot-pay" y="618" text-anchor="middle">@PlinkoBoard.Money(pay)</text>
+        </g>
+    }
+
+    @* Chips at rest, stacked in their slots. *@
+    @foreach (var drop in Info.Drops.Where(d => d.Landed))
+    {
+        <g class="pr-chip" transform="translate(@Px(drop.Path[^1]) @RestY(drop).ToString(CultureInfo.InvariantCulture))" @key="@("rest" + drop.Number)">
+            <circle r="15" /><circle class="ring" r="9.5" />
+        </g>
+    }
+
+    @* The chip waiting at the top while the contestant aims. *@
+    @if (Info.Stage == PlinkoStage.Dropping)
+    {
+        <g class="pr-chip aiming" transform="translate(@Px(Info.Aim) 44)">
+            <circle r="15" /><circle class="ring" r="9.5" />
+        </g>
+    }
+
+    @* The chip in the air. A new key for each chip starts its animation at the right moment. *@
+    @if (Info.Falling is { } falling)
+    {
+        <g class="pr-chip falling" @key="@("fall" + falling.Number)" style="@FallStyle(falling)">
+            <circle r="15" /><circle class="ring" r="9.5" />
+        </g>
+    }
+</svg>
+
+@code {
+    [Parameter, EditorRequired] public PlinkoInfo Info { get; set; } = default!;
+
+    private const double Left = 36, Gap = 66, FirstRow = 100, RowGap = 36, Floor = 668, StackStep = 14;
+
+    private static string Num(double v) => v.ToString("0.##", CultureInfo.InvariantCulture);
+
+    private static string Px(double u) => Num(Left + u * Gap);
+
+    private static double RowY(int row) => FirstRow + (row - 1) * RowGap;
+
+    private PlinkoDropInfo? LastLanded => Info.Drops.LastOrDefault(d => d.Landed);
+
+    // Chips that landed earlier in the same slot are underneath.
+    private double RestY(PlinkoDropInfo drop) =>
+        Floor - Info.Drops.Count(d => d.Landed && d.Number < drop.Number && d.Path[^1] == drop.Path[^1]) * StackStep;
+
+    private string FallStyle(PlinkoDropInfo drop)
+    {
+        var sb = new StringBuilder();
+        // Point 0 is above the slot; point r (1..13) is the chip arriving at row r; point 14 is the bottom.
+        for (var i = 0; i <= 14; i++)
+        {
+            var u = i == 0 ? drop.Path[0] : i <= PlinkoBoard.Rows ? drop.Path[i - 1] : drop.Path[PlinkoBoard.Rows];
+            sb.Append("--x").Append(i).Append(':').Append(Px(u)).Append("px;");
+        }
+        var under = Info.Drops.Count(d => d.Landed && d.Number < drop.Number && d.Path[^1] == drop.Path[^1]);
+        sb.Append("--yend:").Append(Num(Floor - under * StackStep)).Append("px;");
+        return sb.ToString();
+    }
+}

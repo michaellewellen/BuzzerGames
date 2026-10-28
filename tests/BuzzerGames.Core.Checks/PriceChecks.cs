@@ -43,6 +43,21 @@ sealed class PriceTable
         Check.Ok(Game.OpenBidding(Emcee));
     }
 
+    /// <summary>A round is bid and won, and the winner is on stage. Returns the winner's token.</summary>
+    public Guid GoOnStage()
+    {
+        PlayRound();
+        Check.Ok(Game.Continue(Emcee));
+        return TokenOf(S.OnStageId!.Value);
+    }
+
+    /// <summary>The pricing game on stage is over (skipped), and the emcee moves the show along.</summary>
+    public void FinishStage()
+    {
+        Check.Ok(Game.SkipPricingGame(Emcee));
+        Check.Ok(Game.Continue(Emcee));
+    }
+
     /// <summary>The emcee enters each bid in turn.</summary>
     public void Bids(params int[] amounts)
     {
@@ -285,7 +300,7 @@ static class PriceChecks
                 var price = t.S.Price;
                 t.Bids(price - 1, price - 2, price - 3, price - 4);
                 Check.Ok(t.Game.Continue(t.Emcee));              // winner goes on stage
-                Check.Ok(t.Game.Continue(t.Emcee));              // and is done
+                t.FinishStage();                                 // and is done
             }
             Check.True(starts.SequenceEqual([0, 1, 2]), $"first bidders were {string.Join(",", starts)}");
         });
@@ -315,7 +330,7 @@ static class PriceChecks
             Check.True(s.Row.All(r => r.AudienceId != winner), "no longer in the row");
             Check.True(s.AnnounceText.Contains("up to the stage") && s.AnnounceFanfare, "the announcer calls them up");
             Check.Fails(t.Game.CallDown(t.Emcee), "calling someone down during a pricing game");
-            Check.Ok(t.Game.Continue(t.Emcee));
+            t.FinishStage();
             s = t.S;
             Check.Equal(PricePhase.Callout, s.Phase, "back to calling people down");
             Check.True(s.Find(winner)!.WentOnStage, "the winner has played");
@@ -332,14 +347,14 @@ static class PriceChecks
         {
             var t = new PriceTable(stageRounds: 2);
             t.PlayRound();
-            Check.Ok(t.Game.Continue(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Ok(t.Game.Continue(t.Emcee)); t.FinishStage();
             Check.Ok(t.Game.CallDown(t.Emcee));
             t.Game.ShowItem(t.Emcee); t.Game.OpenBidding(t.Emcee);
             var price = t.S.Price;
             t.Bids(price - 1, price - 2, price - 3, price - 4);
             Check.Ok(t.Game.Continue(t.Emcee));
             Check.Equal(PricePhase.OnStage, t.S.Phase, "the second winner is on stage");
-            Check.Ok(t.Game.Continue(t.Emcee));
+            t.FinishStage();
             var s = t.S;
             Check.Equal(PricePhase.ShowOver, s.Phase, "the show is over after two pricing games");
             var expected = s.Audience.Where(a => a.Appeared && !a.WentOnStage).Select(a => a.Name).OrderBy(n => n).ToList();
@@ -356,7 +371,7 @@ static class PriceChecks
             var t = new PriceTable(stageRounds: 1);
             t.PlayRound();
             Check.Fails(t.Game.Restart(t.Emcee), "restarting mid-show");
-            Check.Ok(t.Game.Continue(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Ok(t.Game.Continue(t.Emcee)); t.FinishStage();
             Check.Equal(PricePhase.ShowOver, t.S.Phase, "over");
             Check.Fails(t.Game.Restart(t.Tokens[0]), "an audience member restarting");
             Check.Ok(t.Game.Restart(t.Emcee));
@@ -456,7 +471,7 @@ static class PriceChecks
                             t.Game.BidFor(t.Emcee, rnd.Next(1, max + 1));     // a repeat is simply refused
                             break;
                         default:
-                            Check.Ok(t.Game.Continue(t.Emcee));
+                            if (s.Phase == PricePhase.OnStage) Check.Ok(t.Game.SkipPricingGame(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
                             break;
                     }
                     var after = t.S;

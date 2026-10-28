@@ -836,3 +836,88 @@ a.game-tile:hover { border-color: var(--gold); }
 .pr-moderate { list-style: none; padding: 0; margin: .4rem 0; }
 .pr-moderate li { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .3rem 0; border-bottom: 1px solid rgba(255, 255, 255, .12); }
 .pr-moderate .btn { padding: .2rem .7rem; min-width: 0; flex: 0 0 auto; }
+
+/* ---- Plinko (the pricing game on stage) ---- */
+.pr-plinko { gap: 1vh; }
+.pr-plinko-grid { flex: 1; display: grid; grid-template-columns: auto 1fr; gap: 3vw; align-items: start; min-height: 0; }
+.pr-pegboard { height: 76vh; width: auto; max-width: 52vw; display: block; }
+.pr-peg-panel { fill: rgba(0, 0, 0, .35); stroke: var(--edge); stroke-width: 2; }
+.pr-peg { fill: #e8ecff; }
+.pr-slot-number { fill: var(--muted, #9aa3d6); font-size: 20px; font-weight: 700; }
+.pr-slot-arrow { fill: rgba(255, 255, 255, .25); }
+.pr-top-slot.aimed .pr-slot-number { fill: var(--gold); }
+.pr-top-slot.aimed .pr-slot-arrow { fill: var(--gold); }
+.pr-bottom-slot rect { fill: rgba(255, 255, 255, .08); stroke: var(--edge); stroke-width: 2; }
+.pr-bottom-slot.big rect { fill: rgba(79, 195, 247, .25); }
+.pr-bottom-slot.jackpot rect { fill: rgba(255, 211, 90, .55); stroke: var(--gold); }
+.pr-bottom-slot.zero rect { fill: rgba(200, 40, 60, .25); }
+.pr-bottom-slot.hit rect { stroke: #fff; stroke-width: 5; }
+.pr-slot-pay { fill: #fff; font-size: 15px; font-weight: 800; }
+.pr-bottom-slot.jackpot .pr-slot-pay { fill: #fff; font-size: 15px; }
+.pr-chip circle { fill: #d7263d; stroke: #fff; stroke-width: 2; }
+.pr-chip circle.ring { fill: none; stroke: #fff; stroke-width: 2; stroke-dasharray: 5 4; }
+.pr-chip.aiming { animation: pr-bob 1s ease-in-out infinite alternate; }
+@keyframes pr-bob { from { opacity: .7; } to { opacity: 1; } }
+.pr-chip.falling { animation: pr-plinko-fall 5.9s linear forwards; transform: translate(var(--x0), 48px); }
+@keyframes pr-plinko-fall {
+  0% { transform: translate(var(--x0), 48px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  7.143% { transform: translate(var(--x1), 100px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  14.286% { transform: translate(var(--x2), 136px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  21.429% { transform: translate(var(--x3), 172px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  28.571% { transform: translate(var(--x4), 208px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  35.714% { transform: translate(var(--x5), 244px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  42.857% { transform: translate(var(--x6), 280px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  50% { transform: translate(var(--x7), 316px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  57.143% { transform: translate(var(--x8), 352px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  64.286% { transform: translate(var(--x9), 388px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  71.429% { transform: translate(var(--x10), 424px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  78.571% { transform: translate(var(--x11), 460px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  85.714% { transform: translate(var(--x12), 496px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  92.857% { transform: translate(var(--x13), 532px); animation-timing-function: cubic-bezier(.35, 0, .75, .55); }
+  100% { transform: translate(var(--x14), var(--yend)); }
+}
+
+.pr-plinko-side { display: flex; flex-direction: column; gap: 1.2vh; padding-right: 1vw; min-width: 0; }
+.pr-plinko-star { display: flex; align-items: center; gap: 1.5vw; }
+.pr-plinko-avatar { display: inline-block; height: 12vh; width: 9vh; }
+.pr-plinko-name { font-size: clamp(1.8rem, 3.6vw, 3.4rem); font-weight: 900; color: var(--gold); }
+.pr-plinko-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1vh; }
+.pr-plinko-item { display: grid; grid-template-columns: 4vw 1fr auto auto 3vw; align-items: center; gap: 1vw; padding: 1vh 1.2vw;
+                  background: rgba(255, 255, 255, .07); border: .25vh solid transparent; border-radius: 1vh; font-size: clamp(1rem, 1.9vw, 1.8rem); }
+.pr-plinko-item.current { border-color: var(--gold); background: rgba(255, 211, 90, .15); }
+.pr-plinko-item.right { background: rgba(40, 200, 120, .22); }
+.pr-plinko-item.wrong { background: rgba(215, 38, 61, .22); }
+.pr-plinko-icon { font-size: 2.6em; line-height: 1; text-align: center; }
+.pr-plinko-itemname { font-weight: 700; }
+.pr-plinko-tag, .pr-plinko-actual { display: flex; flex-direction: column; align-items: flex-end; font-family: ui-monospace, Consolas, monospace; font-weight: 800; }
+.pr-plinko-tag small, .pr-plinko-actual small { font-size: .5em; letter-spacing: .15em; opacity: .7; font-family: inherit; }
+.pr-plinko-actual { color: var(--gold); }
+.pr-plinko-mark { font-size: 1.6em; font-weight: 900; }
+.pr-plinko-item.right .pr-plinko-mark { color: #5be39a; }
+.pr-plinko-item.wrong .pr-plinko-mark { color: #ff7d8d; }
+.pr-plinko-ask { grid-column: 3 / 6; text-align: right; color: var(--gold); font-weight: 800; }
+.pr-plinko-chips { display: flex; align-items: center; gap: .8vw; flex-wrap: wrap; }
+.pr-plinko-label { font-size: clamp(.9rem, 1.5vw, 1.4rem); letter-spacing: .2em; opacity: .75; }
+.pr-chip-icon { display: inline-block; width: 3.4vh; height: 3.4vh; border-radius: 50%; background: #d7263d; border: .35vh dashed #fff; box-sizing: border-box; }
+.pr-chip-icon.used { background: transparent; opacity: .35; }
+.pr-plinko-total { display: flex; align-items: baseline; gap: 1.5vw; }
+.pr-plinko-total strong { font-size: clamp(2.4rem, 6vw, 5.5rem); color: var(--gold); line-height: 1; text-shadow: 0 0 .4em rgba(255, 211, 90, .6); }
+.pr-plinko-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 2vw; }
+.pr-plinko-score { display: flex; flex-direction: column; gap: 1vh; }
+.pr-plinko-side .pr-meter-bar { height: 6vh; }
+.pr-plinko-comments { top: auto; bottom: 9vh; left: 2vw; }
+
+/* Plinko on phones */
+.pr-plinko-phone-item { display: flex; align-items: center; justify-content: center; gap: .8rem; font-size: 1.3rem; margin: .5rem 0 0; }
+.pr-plinko-phone-item .pr-plinko-icon { font-size: 3rem; }
+.pr-plinko-phone-tag { text-align: center; font-size: 3rem; font-weight: 900; margin: .2rem 0; color: var(--gold); font-family: ui-monospace, Consolas, monospace; }
+.pr-hilo { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin-top: .8rem; }
+.pr-hilo-btn { font-size: 1.3rem; padding: 1.2rem .4rem; font-weight: 900; }
+.pr-hilo-btn.up { background: #2ecc71; color: #052; }
+.pr-hilo-btn.down { background: #ff7d8d; color: #400; }
+.pr-plinko-aim { text-align: center; font-size: 1.4rem; margin: .4rem 0; }
+.pr-slider { width: 100%; height: 3rem; accent-color: var(--gold); margin: 0; }
+.pr-slider-ticks { display: grid; grid-template-columns: repeat(9, 1fr); text-align: center; font-size: .9rem; opacity: .7; margin-bottom: 1rem; }
+.pr-slider-ticks .on { color: var(--gold); font-weight: 900; opacity: 1; }
+.pr-slotpad { display: grid; grid-template-columns: repeat(9, 1fr); gap: .3rem; margin: .5rem 0 1rem; }
+.pr-slotpad .btn { padding: .6rem 0; min-width: 0; }

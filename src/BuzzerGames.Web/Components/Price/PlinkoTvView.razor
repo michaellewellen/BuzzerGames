@@ -1,0 +1,91 @@
+@*
+    Plinko on the big screen: the pegboard on the left; on the right, the contestant, the four hi-lo items, their chips and winnings.
+    A price tag is shown for every item, but the real price only appears after the contestant has answered that item.
+*@
+
+@{
+    var p = Snapshot.Plinko!;
+    var star = Snapshot.Find(Snapshot.OnStageId);
+}
+
+<main class="tv pr-tv pr-plinko">
+    <header class="pr-header">
+        <span class="pr-title small">THE PRICE IS RIGHT · PLINKO</span>
+        <span class="pr-round">Pricing game @(Snapshot.StageRound + 1) of @Snapshot.StageRounds</span>
+    </header>
+
+    <div class="pr-plinko-grid">
+        <PlinkoBoardView Info="p" />
+
+        <section class="pr-plinko-side">
+            @if (star is not null)
+            {
+                <div class="pr-plinko-star">
+                    <span class="pr-plinko-avatar"><PriceAvatar Avatar="star.Avatar" Pose="@(p.Stage == PlinkoStage.Done ? "cheer" : "stand")" Label="@star.Name" /></span>
+                    <span class="pr-plinko-name">@star.Name</span>
+                </div>
+            }
+
+            <ol class="pr-plinko-items">
+                @for (var i = 0; i < p.Items.Count; i++)
+                {
+                    var item = p.Items[i];
+                    var current = p.Stage == PlinkoStage.Guessing && i == p.CurrentItem;
+                    <li class="pr-plinko-item @(current ? "current" : "") @(item.Answered ? (item.Correct ? "right" : "wrong") : "")">
+                        <span class="pr-plinko-icon" aria-hidden="true">@item.Icon</span>
+                        <span class="pr-plinko-itemname">@item.Name</span>
+                        <span class="pr-plinko-tag">
+                            <small>@(item.Answered ? "MARKED" : "PRICE TAG")</small>
+                            @PlinkoBoard.Cents(item.ShownCents)
+                        </span>
+                        @if (item.Answered)
+                        {
+                            <span class="pr-plinko-actual">
+                                <small>ACTUAL</small>
+                                @PlinkoBoard.Cents(item.ActualCents)
+                            </span>
+                            <span class="pr-plinko-mark" aria-label="@(item.Correct ? "right" : "wrong")">@(item.Correct ? "✔" : "✘")</span>
+                        }
+                        else if (current)
+                        {
+                            <span class="pr-plinko-ask">Higher or lower?</span>
+                        }
+                    </li>
+                }
+            </ol>
+
+            <div class="pr-plinko-foot">
+                <div class="pr-plinko-score">
+                    <div class="pr-plinko-chips" aria-label="Chips">
+                        <span class="pr-plinko-label">CHIPS</span>
+                        @for (var n = 0; n < p.ChipsEarned; n++)
+                        {
+                            <span class="pr-chip-icon @(n < p.Drops.Count ? "used" : "")"></span>
+                        }
+                    </div>
+                    <div class="pr-plinko-total">
+                        <span class="pr-plinko-label">@(p.Stage == PlinkoStage.Done ? "YOU WON" : "WINNINGS")</span>
+                        <strong>@PriceGame.Money(p.Total)</strong>
+                    </div>
+                </div>
+                <PriceReactionMeters Snapshot="Snapshot" />
+            </div>
+        </section>
+    </div>
+
+    @if (Snapshot.CommentsOn && Snapshot.Comments.Count > 0)
+    {
+        <ul class="pr-comments pr-plinko-comments">
+            @foreach (var c in Snapshot.Comments.TakeLast(3))
+            {
+                <li @key="c.Id"><strong>@c.Name</strong> @c.Text</li>
+            }
+        </ul>
+    }
+
+    <PriceCrowd Snapshot="Snapshot" />
+</main>
+
+@code {
+    [Parameter, EditorRequired] public PriceSnapshot Snapshot { get; set; } = default!;
+}

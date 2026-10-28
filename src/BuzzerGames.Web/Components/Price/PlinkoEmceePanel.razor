@@ -1,0 +1,72 @@
+@*
+    The Plinko part of the emcee's phone. The emcee sees the real price of the item being guessed (nobody else does yet), can answer or
+    drop a chip for the contestant if their phone isn't working, can skip the wait for a chip to land, and can skip the whole game.
+*@
+
+@{
+    var p = Snapshot.Plinko!;
+    var item = p.Items[p.CurrentItem];
+    var star = Snapshot.Find(Snapshot.OnStageId);
+    var last = Snapshot.StageRound + 1 >= Snapshot.StageRounds;
+}
+
+@if (_error is not null)
+{
+    <p class="error">@_error</p>
+}
+
+<p class="big-message">@star?.Name is playing Plinko</p>
+
+@switch (p.Stage)
+{
+    case PlinkoStage.Guessing:
+        <div class="emcee-clue pr-secret">
+            <p class="emcee-clue-meta">@item.Name (item @(p.CurrentItem + 1) of @p.Items.Count): tag @PlinkoBoard.Cents(item.ShownCents)</p>
+            <p class="emcee-clue-answer">Actual price: @PlinkoBoard.Cents(item.ActualCents) (@(item.ActualCents > item.ShownCents ? "higher" : "lower"))</p>
+        </div>
+        <p class="hint">Their phone has Higher and Lower buttons. If it isn't working, answer for them:</p>
+        <div class="button-row">
+            <button class="btn" @onclick="() => Act(Game.PlinkoGuessFor(Token, true))">⬆️ Higher</button>
+            <button class="btn" @onclick="() => Act(Game.PlinkoGuessFor(Token, false))">⬇️ Lower</button>
+        </div>
+        break;
+
+    case PlinkoStage.Dropping:
+        <p class="hint">@p.ChipsLeft @(p.ChipsLeft == 1 ? "chip" : "chips") left. They are lined up over slot <strong>@(p.Aim + 1)</strong>. Winnings so far: <strong>@PriceGame.Money(p.Total)</strong>.</p>
+        <p class="hint">If their phone isn't working, drop for them:</p>
+        <div class="pr-slotpad">
+            @for (var slot = 0; slot < PlinkoBoard.Slots; slot++)
+            {
+                var s = slot;
+                <button class="btn @(s == p.Aim ? "" : "btn-quiet")" @onclick="() => Act(Game.PlinkoDropFor(Token, s))">@(s + 1)</button>
+            }
+        </div>
+        break;
+
+    case PlinkoStage.Falling:
+        <p class="hint">A chip is falling. The screen reports when it lands. If the screen is stuck:</p>
+        <button class="btn btn-wide" @onclick="() => Act(Game.PlinkoLand(p.Falling!.Number))">The chip has landed</button>
+        break;
+
+    default:
+        <p class="hint">Plinko is over: <strong>@PriceGame.Money(p.Total)</strong> won@(p.Skipped ? " (skipped)" : "").</p>
+        <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">
+            @(last ? "That's the last game: finish the show" : "Next contestant")
+        </button>
+        break;
+}
+
+@if (p.Stage != PlinkoStage.Done)
+{
+    <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.SkipPricingGame(Token))">Skip this pricing game</button>
+}
+
+@code {
+    [Parameter, EditorRequired] public PriceGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public PriceSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+
+    private string? _error;
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+}

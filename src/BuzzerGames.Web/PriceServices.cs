@@ -12,6 +12,7 @@ public static class PriceServices
     {
         services.AddSingleton<IPriceItemSource>(_ => new JsonPriceItemSource());
         services.AddSingleton<IPartingGiftSource>(_ => new TextPartingGiftSource());
+        services.AddSingleton<IPlinkoItemSource>(_ => new JsonPlinkoItemSource());
         services.AddSingleton<PriceRoomManager>();
         return services;
     }

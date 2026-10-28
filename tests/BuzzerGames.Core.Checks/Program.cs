@@ -592,6 +592,7 @@ Run("shuffle: real data plays through the engine (500 games started, 1 clue pick
 PylChecks.Run(Run);
 PasswordChecks.Run(Run);
 PriceChecks.Run(Run);
+PlinkoChecks.Run(Run);
 
 Console.WriteLine();
 Console.WriteLine($"{passed} passed, {failed} failed");

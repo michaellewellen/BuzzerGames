@@ -93,11 +93,14 @@
             break;
 
         case PricePhase.OnStage:
-            <p class="big-message">@Snapshot.Find(Snapshot.OnStageId)?.Name is on stage</p>
-            <p class="hint">The pricing games aren't built yet. Tap Continue when you're done on stage.</p>
-            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">
-                @(Snapshot.StageRound + 1 >= Snapshot.StageRounds ? "That's the last game: finish the show" : "Pricing game over: next contestant")
-            </button>
+            @if (Snapshot.Plinko is not null)
+            {
+                <PlinkoEmceePanel Game="Game" Snapshot="Snapshot" Token="Token" />
+            }
+            else
+            {
+                <p class="big-message">@Snapshot.Find(Snapshot.OnStageId)?.Name is on stage</p>
+            }
             break;
 
         case PricePhase.ShowOver:

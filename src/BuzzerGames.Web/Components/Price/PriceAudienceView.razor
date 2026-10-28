@@ -85,9 +85,9 @@
             break;
 
         case PricePhase.OnStage:
-            @if (Snapshot.OnStageId == Me.Id)
+            @if (Snapshot.Plinko is not null)
             {
-                <p class="big-message pr-comedown-phone">You're on stage!</p>
+                <PlinkoPlayerPanel Game="Game" Snapshot="Snapshot" Token="Token" AudienceId="AudienceId" />
             }
             else
             {

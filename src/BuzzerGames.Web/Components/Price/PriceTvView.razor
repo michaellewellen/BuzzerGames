@@ -1,6 +1,6 @@
 @*
     The big screen. It draws the studio: Contestants' Row with four podiums, the item up for bid, the audience's reactions and
-    comments, the stage, and the parting gifts. It never takes a seat. The announcer's voice is played by the page that hosts this.
+    comments, the stage (the pricing game), and the parting gifts. It never takes a seat. The announcer's voice is played by the page that hosts this.
 
     This screen is shown to the whole room, so it must not show the item's real price until the bids are in.
 *@
@@ -42,21 +42,9 @@ else if (Snapshot.Phase == PricePhase.ShowOver)
         <PriceCrowd Snapshot="Snapshot" />
     </main>
 }
-else if (Snapshot.Phase == PricePhase.OnStage)
+else if (Snapshot.Phase == PricePhase.OnStage && Snapshot.Plinko is not null)
 {
-    var star = Snapshot.Find(Snapshot.OnStageId);
-    <main class="tv pr-tv pr-stage-view">
-        <div class="pr-curtain">
-            <p class="pr-sub">COME ON UP!</p>
-            @if (star is not null)
-            {
-                <div class="pr-star"><PriceAvatar Avatar="star.Avatar" Pose="cheer" Label="@star.Name" /></div>
-                <h1 class="pr-star-name">@star.Name</h1>
-            }
-            <p class="pr-sub">Pricing game @(Snapshot.StageRound + 1) of @Snapshot.StageRounds</p>
-        </div>
-        <PriceCrowd Snapshot="Snapshot" />
-    </main>
+    <PlinkoTvView Snapshot="Snapshot" />
 }
 else
 {

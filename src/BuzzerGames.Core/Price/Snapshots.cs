@@ -10,7 +10,7 @@ public enum PricePhase
     Reveal,     // the announcer introduces the item up for bid
     Bidding,    // the four contestants bid in turn
     BidResult,  // the price is revealed and someone wins (or everyone went over)
-    OnStage,    // the winner is up on stage for a pricing game (the games themselves come later)
+    OnStage,    // the winner is up on stage playing a pricing game (Plinko)
     ShowOver    // parting gifts
 }
 
@@ -74,7 +74,8 @@ public sealed record PriceSnapshot(
     bool AnnounceFanfare,
     IReadOnlyList<PartingGiftInfo> PartingGifts,
     string? Message,
-    bool CanStart)
+    bool CanStart,
+    PlinkoInfo? Plinko = null)   // the pricing game being played on stage, if any; its real prices are SECRET until answered
 {
     public AudienceInfo? Find(Guid? id) => id is null ? null : Audience.FirstOrDefault(a => a.Id == id);
 

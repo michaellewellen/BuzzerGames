@@ -1,0 +1,114 @@
+@*
+    The Plinko part of an audience member's phone.
+      - The contestant on stage: "higher" and "lower" for each item, then a slider to line up each chip and a button to drop it.
+      - Everyone else: a look at the current price tag, so they can shout advice with the reaction buttons.
+    The real price of an item is only shown once it has been answered.
+*@
+
+@{
+    var p = Snapshot.Plinko!;
+    var item = p.Items[p.CurrentItem];
+    var star = Snapshot.Find(Snapshot.OnStageId);
+}
+
+@if (_error is not null)
+{
+    <p class="error">@_error</p>
+}
+
+@if (IsMe)
+{
+    <p class="big-message pr-comedown-phone">You're playing Plinko!</p>
+
+    @switch (p.Stage)
+    {
+        case PlinkoStage.Guessing:
+            <div class="pr-plinko-phone-item">
+                <span class="pr-plinko-icon">@item.Icon</span>
+                <strong>@item.Name</strong>
+            </div>
+            <p class="pr-plinko-phone-tag">@PlinkoBoard.Cents(item.ShownCents)</p>
+            <p class="hint">Is the actual price higher or lower than the tag? (Item @(p.CurrentItem + 1) of @p.Items.Count)</p>
+            <div class="pr-hilo">
+                <button class="btn pr-hilo-btn up" @onclick="() => Guess(true)">⬆️ HIGHER</button>
+                <button class="btn pr-hilo-btn down" @onclick="() => Guess(false)">⬇️ LOWER</button>
+            </div>
+            break;
+
+        case PlinkoStage.Dropping:
+            <p class="hint">You have <strong>@p.ChipsLeft</strong> @(p.ChipsLeft == 1 ? "chip" : "chips") to drop. Slide to line it up, then let it go!</p>
+            <p class="pr-plinko-aim">Slot <strong>@(_aim + 1)</strong></p>
+            <input class="pr-slider" type="range" min="0" max="8" step="1" value="@_aimStart" @oninput="OnAim" aria-label="Where to drop the chip" />
+            <div class="pr-slider-ticks" aria-hidden="true">
+                @for (var slot = 0; slot < PlinkoBoard.Slots; slot++)
+                {
+                    <span class="@(slot == _aim ? "on" : "")">@(slot + 1)</span>
+                }
+            </div>
+            <button class="btn btn-start btn-wide" @onclick="Drop">DROP CHIP</button>
+            break;
+
+        case PlinkoStage.Falling:
+            <p class="big-message">Watch the screen!</p>
+            <p class="hint">@p.ChipsLeft more @(p.ChipsLeft == 1 ? "chip" : "chips") to drop.</p>
+            break;
+
+        default:
+            <p class="big-message">You won @PriceGame.Money(p.Total)!</p>
+            <p class="hint">Plinko is over. Take a bow.</p>
+            break;
+    }
+}
+else
+{
+    <p class="big-message">@star?.Name is playing Plinko</p>
+    @if (p.Stage == PlinkoStage.Guessing)
+    {
+        <div class="pr-plinko-phone-item">
+            <span class="pr-plinko-icon">@item.Icon</span>
+            <strong>@item.Name</strong>
+        </div>
+        <p class="pr-plinko-phone-tag">@PlinkoBoard.Cents(item.ShownCents)</p>
+        <p class="hint">Higher or lower? Tell them!</p>
+    }
+    else
+    {
+        <p class="hint">Winnings so far: <strong>@PriceGame.Money(p.Total)</strong></p>
+    }
+}
+
+@code {
+    [Parameter, EditorRequired] public PriceGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public PriceSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+    [Parameter, EditorRequired] public Guid AudienceId { get; set; }
+
+    private string? _error;
+    private int _aim = PlinkoBoard.Slots / 2;
+    private int _aimStart = PlinkoBoard.Slots / 2;     // where the slider starts each time it is drawn: kept still so a redraw never fights your finger
+    private PlinkoStage _stage = PlinkoStage.Done;
+
+    private bool IsMe => Snapshot.OnStageId == AudienceId;
+
+    protected override void OnParametersSet()
+    {
+        var stage = Snapshot.Plinko?.Stage ?? PlinkoStage.Done;
+        if (stage == _stage) return;
+        if (stage == PlinkoStage.Dropping) _aim = _aimStart = Snapshot.Plinko!.Aim;
+        _stage = stage;
+        _error = null;
+    }
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private void Guess(bool higher) => Act(Game.PlinkoGuess(Token, higher));
+
+    private void OnAim(ChangeEventArgs e)
+    {
+        if (!int.TryParse(e.Value?.ToString(), out var slot)) return;
+        _aim = slot;
+        Game.PlinkoAim(Token, slot);     // the big screen follows live; "already there" is not worth an error
+    }
+
+    private void Drop() => Act(Game.PlinkoDrop(Token, _aim));
+}

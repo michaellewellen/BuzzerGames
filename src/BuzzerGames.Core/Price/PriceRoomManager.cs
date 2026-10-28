@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 namespace BuzzerGames.Core.Price;
 
 /// <summary>Keeps every running Price Is Right show in memory, findable by its short room code.</summary>
-public sealed class PriceRoomManager(IPriceItemSource items, IPartingGiftSource gifts)
+public sealed class PriceRoomManager(IPriceItemSource items, IPartingGiftSource gifts, IPlinkoItemSource? plinkoItems = null)
 {
     // No vowels, so a room code can never spell a word you'd rather not show on the big screen.
     private const string CodeAlphabet = "BCDFGHJKLMNPQRSTVWXZ";
@@ -20,7 +20,7 @@ public sealed class PriceRoomManager(IPriceItemSource items, IPartingGiftSource 
             {
                 for (var i = 0; i < span.Length; i++) span[i] = CodeAlphabet[Random.Shared.Next(CodeAlphabet.Length)];
             });
-            var game = new PriceGame(code, items, gifts);
+            var game = new PriceGame(code, items, gifts, plinkoItems: plinkoItems);
             if (_games.TryAdd(code, game)) return game;
         }
     }

@@ -58,6 +58,8 @@ else
     private bool _boardMode;
     private bool _soundOn;
     private int _spokenSeq;
+    private string? _landKey;
+    private bool _disposed;
     private string? _error;
 
     // Testing aid: opening the page as .../ABCD?seat=2 gives that tab its own saved seat, so one browser can be several people.
@@ -103,12 +105,25 @@ else
             return;
         }
 
+        // The big screen also times the Plinko chips: once one has had time to fall, it reports that the chip has landed.
+        if (_boardMode && _snapshot.Plinko?.Falling is { } falling && _landKey != $"{_snapshot.StageRound}:{falling.Number}")
+        {
+            _landKey = $"{_snapshot.StageRound}:{falling.Number}";
+            _ = LandLater(falling.Number);
+        }
+
         // The big screen is the announcer: say whatever is new.
         if (_boardMode && _soundOn && _snapshot.AnnounceSeq != _spokenSeq)
         {
             _spokenSeq = _snapshot.AnnounceSeq;
             await JS.InvokeVoidAsync("bg.speak", _snapshot.AnnounceText, _snapshot.AnnounceFanfare);
         }
+    }
+
+    private async Task LandLater(int dropNumber)
+    {
+        await Task.Delay(PlinkoBoard.FallMs);
+        if (!_disposed) _game?.PlinkoLand(dropNumber);     // if the emcee already skipped the wait this is quietly refused
     }
 
     private async Task EnableSound()
@@ -152,6 +167,7 @@ else
 
     public void Dispose()
     {
+        _disposed = true;
         if (_game is not null) _game.Changed -= OnGameChanged;
     }
 }

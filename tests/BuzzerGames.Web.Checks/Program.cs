@@ -1227,8 +1227,8 @@ Run("price tv: on stage, and the parting gifts at the end", () =>
     Check.Ok(t.Game.Continue(t.Emcee));
     var star = t.NameOf(t.S.OnStageId);
     var html = Render.PrTv(t);
-    Check.True(Render.Has(html, "COME ON UP") && Render.ShowsAnyCase(html, star), "the winner is on stage");
-    Check.Ok(t.Game.Continue(t.Emcee));
+    Check.True(Render.Has(html, "PLINKO") && Render.ShowsAnyCase(html, star), "the winner is on stage, playing Plinko");
+    t.FinishStage();
     html = Render.PrTv(t);
     Check.True(Render.Has(html, "THAT&#x27;S THE SHOW") || Render.Has(html, "THAT'S THE SHOW"), "the show is over");
     foreach (var gift in t.S.PartingGifts)
@@ -1300,7 +1300,8 @@ Run("price emcee: the right buttons for each moment, and moderation tools", () =
     t.Bids(10, 20, 30, 40);
     Check.True(Render.Has(Render.PrEmcee(t), "up on stage"), "send the winner up on stage");
     Check.Ok(t.Game.Continue(t.Emcee));
-    Check.True(Render.Has(Render.PrEmcee(t), "next contestant"), "then on to the next contestant");
+    Check.True(Render.Has(Render.PrEmcee(t), "Skip this pricing game"), "then the emcee can skip the pricing game");
+    t.FinishStage();
     var tools = Render.PrEmcee(t);
     Check.True(Render.Has(tools, "Say it again") && Render.Has(tools, "Stop talking") && Render.Has(tools, "turn them off"), "announcer and comment controls");
     Check.True(Render.Has(tools, "The audience (8)"), "the audience list");
@@ -1318,6 +1319,106 @@ Run("price room: the big screen has the announcer button; phones do not; a stran
     Check.True(!Render.Has(phone, "pr-sound-btn"), "phones have no announcer button");
     Check.True(Render.Has(phone, "Connecting") || Render.Has(phone, "Join the audience"), "a phone connects, then offers the join page");
     Check.True(Render.Has(Render.PrRoom(rooms, "ZZZZ", false), "Show not found"), "an unknown code is handled");
+});
+
+Run("plinko tv: the pegboard, the payouts, and price tags without real prices until each is answered", () =>
+{
+    var t = new PriceTable();
+    t.GoOnStage();
+    var p = t.S.Plinko!;
+    var html = Render.PrTv(t);
+    Check.Equal(98, System.Text.RegularExpressions.Regex.Matches(html, "class=\"pr-peg\"").Count, "seven rows of 8 pegs and six rows of 7");
+    foreach (var pay in new[] { "$100", "$500", "$1,000", "$0", "$10,000" }) Check.True(Render.Has(html, ">" + pay + "<"), $"the board shows {pay}");
+    Check.Equal(9, System.Text.RegularExpressions.Regex.Matches(html, "class=\"pr-slot-pay\"").Count, "nine paying slots");
+    foreach (var item in p.Items) Check.True(Render.ShowsAnyCase(html, item.Name) && Render.Has(html, PlinkoBoard.Cents(item.ShownCents)), $"{item.Name} and its tag");
+    Check.True(!Render.Has(html, "pr-plinko-actual") && !Render.Has(html, "ACTUAL"), "no real price before any answer");
+    Check.True(Render.Has(html, "Higher or lower?"), "the current item asks the question");
+    Check.True(!Render.Has(html, "pr-chip aiming") && !Render.Has(html, "falling"), "no chip yet");
+
+    var star = t.TokenOf(t.S.OnStageId!.Value);
+    PlinkoChecks.Answer(t, star, right: true);
+    html = Render.PrTv(t);
+    Check.Equal(1, System.Text.RegularExpressions.Regex.Matches(html, "class=\"pr-plinko-actual\"").Count, "one real price, for the answered item");
+    Check.True(Render.Has(html, PlinkoBoard.Cents(p.Items[0].ActualCents)) && Render.ShowsAnyCase(html, "✔"), "it is shown with a tick");
+    PlinkoChecks.Answer(t, star, right: false);
+    Check.True(Render.ShowsAnyCase(Render.PrTv(t), "✘"), "a wrong answer gets a cross");
+    PlinkoChecks.Answer(t, star, right: true);
+    PlinkoChecks.Answer(t, star, right: true);
+
+    html = Render.PrTv(t);
+    Check.True(Render.Has(html, "pr-chip aiming") && Render.Has(html, "pr-top-slot aimed"), "a chip waits at the top, over a lit slot");
+    Check.Equal(4, System.Text.RegularExpressions.Regex.Matches(html, "class=\"pr-chip-icon").Count, "free chip plus three right answers");
+    Check.Ok(t.Game.PlinkoAim(star, 2));
+    Check.True(Render.Has(Render.PrTv(t), "pr-top-slot aimed\" transform=\"translate(168 0)"), "the lit slot follows the contestant's slider");
+    Check.Ok(t.Game.PlinkoDrop(star, 2));
+    html = Render.PrTv(t);
+    Check.True(Render.Has(html, "pr-chip falling") && Render.Has(html, "--x0:168px") && Render.Has(html, "--x14:") && Render.Has(html, "--yend:668px"), "the chip falls along its path");
+    Check.True(!Render.Has(html, " hit\"") && Render.Has(html, ">$0<"), "no slot lights up until the chip lands");
+    Check.Ok(t.Game.PlinkoLand(1));
+    html = Render.PrTv(t);
+    Check.True(!Render.Has(html, "pr-chip falling") && Render.Has(html, "pr-chip\" transform"), "the chip comes to rest");
+    Check.True(Render.Has(html, " hit\""), "and its slot lights up");
+    Check.True(Render.Has(html, PriceGame.Money(t.S.Plinko!.Total)), "the winnings update");
+    PlinkoChecks.DropAll(t, star, new Random(3));
+    html = Render.PrTv(t);
+    Check.True(Render.Has(html, "YOU WON"), "the game ends with a total");
+    Check.Equal(4, System.Text.RegularExpressions.Regex.Matches(html, "pr-chip-icon used").Count, "every chip is used up");
+});
+
+Run("plinko phones: the contestant plays, everyone else watches and shouts", () =>
+{
+    var t = new PriceTable();
+    t.GoOnStage();
+    var starIndex = Array.IndexOf(t.Ids, t.S.OnStageId!.Value);
+    var otherIndex = starIndex == 0 ? 1 : 0;
+    var p = t.S.Plinko!;
+    var mine = Render.PrAudience(t, starIndex);
+    Check.True(Render.Has(mine, "HIGHER") && Render.Has(mine, "LOWER") && Render.Has(mine, PlinkoBoard.Cents(p.Items[0].ShownCents)), "the contestant gets the first tag and two buttons");
+    Check.True(!Render.Has(mine, PlinkoBoard.Cents(p.Items[0].ActualCents)) || p.Items[0].ActualCents == p.Items[0].ShownCents, "and not the real price");
+    var theirs = Render.PrAudience(t, otherIndex);
+    Check.True(Render.Has(theirs, "is playing Plinko") && !Render.Has(theirs, "pr-hilo") && Render.Has(theirs, "Higher or lower? Tell them"), "watchers see the tag but have no buttons");
+    Check.True(Render.Has(theirs, "pr-react-btn"), "watchers can still cheer and boo");
+
+    var star = t.Tokens[starIndex];
+    for (var i = 0; i < 4; i++) PlinkoChecks.Answer(t, star, right: i < 2);
+    mine = Render.PrAudience(t, starIndex);
+    Check.True(Render.Has(mine, "type=\"range\"") && Render.Has(mine, "DROP CHIP") && Render.Has(mine, "<strong>3</strong> chips"), "three chips and a slider");
+    Check.True(!Render.Has(Render.PrAudience(t, otherIndex), "type=\"range\""), "only the contestant has the slider");
+    Check.Ok(t.Game.PlinkoDrop(star, 4));
+    Check.True(Render.Has(Render.PrAudience(t, starIndex), "Watch the screen") && !Render.Has(Render.PrAudience(t, starIndex), "DROP CHIP"), "no dropping while a chip falls");
+    Check.Ok(t.Game.PlinkoLand(1));
+    PlinkoChecks.DropAll(t, star, new Random(1));
+    Check.True(Render.Has(Render.PrAudience(t, starIndex), "You won"), "the contestant sees their winnings");
+});
+
+Run("plinko emcee: the secret price, fallback buttons, and a way to skip", () =>
+{
+    var t = new PriceTable();
+    t.GoOnStage();
+    var p = t.S.Plinko!;
+    var html = Render.PrEmcee(t);
+    Check.True(Render.Has(html, "is playing Plinko") && Render.Has(html, "Actual price: " + PlinkoBoard.Cents(p.Items[0].ActualCents)), "the emcee sees the real price");
+    Check.True(Render.Has(html, "Higher") && Render.Has(html, "Lower") && Render.Has(html, "Skip this pricing game"), "answer for them, or skip");
+    Check.True(!Render.Has(html, "Next contestant"), "can't move on yet");
+    for (var i = 0; i < 4; i++) Check.Ok(t.Game.PlinkoGuessFor(t.Emcee, true));
+    html = Render.PrEmcee(t);
+    Check.Equal(9, System.Text.RegularExpressions.Regex.Matches(html, "<button class=\"btn[^\"]*\"[^>]*>[1-9]</button>").Count, "nine slot buttons to drop for them");
+    Check.Ok(t.Game.PlinkoDropFor(t.Emcee, 4));
+    Check.True(Render.Has(Render.PrEmcee(t), "The chip has landed"), "the emcee can skip the wait for a chip");
+    Check.Ok(t.Game.SkipPricingGame(t.Emcee));
+    html = Render.PrEmcee(t);
+    Check.True(Render.Has(html, "Plinko is over") && Render.Has(html, "(skipped)") && Render.Has(html, "Next contestant") && !Render.Has(html, "Skip this pricing game"), "after skipping, move on");
+});
+
+Run("plinko wiring: the real container deals grocery items", () =>
+{
+    var services = new ServiceCollection().AddPriceIsRight().BuildServiceProvider();
+    var source = services.GetRequiredService<IPlinkoItemSource>();
+    var items = source.CreateItems(new Random(1), 4);
+    Check.Equal(4, items.Select(i => i.Name).Distinct().Count(), "four different items");
+    Check.True(items.All(i => i.Cents is > 0 and < 2000), "small prices");
+    var game = services.GetRequiredService<PriceRoomManager>().Create();
+    Check.True(game.Code.Length == 4, "rooms still work");
 });
 
 Run("price live: every open screen survives a whole show, with reactions, comments, rerolls and swaps", () =>
@@ -1358,6 +1459,20 @@ Run("price live: every open screen survives a whole show, with reactions, commen
                     var max = s.BidCeiling > 0 ? s.BidCeiling - 1 : 900;
                     var amount = rnd.Next(1, max + 1);
                     if (rnd.Next(2) == 0) t.Game.Bid(t.TokenOf(turn), amount); else t.Game.BidFor(t.Emcee, amount);
+                    break;
+                case PricePhase.OnStage:
+                    var p = s.Plinko!;
+                    var star = t.TokenOf(s.OnStageId!.Value);
+                    switch (p.Stage)
+                    {
+                        case PlinkoStage.Guessing: Check.Ok(t.Game.PlinkoGuess(star, rnd.Next(2) == 0)); break;
+                        case PlinkoStage.Dropping:
+                            t.Game.PlinkoAim(star, rnd.Next(9));
+                            Check.Ok(rnd.Next(2) == 0 ? t.Game.PlinkoDrop(star, rnd.Next(9)) : t.Game.PlinkoDropFor(t.Emcee, rnd.Next(9)));
+                            break;
+                        case PlinkoStage.Falling: Check.Ok(t.Game.PlinkoLand(p.Falling!.Number)); break;
+                        default: Check.Ok(t.Game.Continue(t.Emcee)); break;
+                    }
                     break;
                 default:
                     Check.Ok(t.Game.Continue(t.Emcee));

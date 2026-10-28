@@ -12,7 +12,8 @@ namespace BuzzerGames.Core.Price;
 /// are over, the price is announced to be lower than the lowest bid and everyone bids again. After the last pricing game, contestants
 /// who were called down but never made it on stage receive parting gifts.
 ///
-/// The pricing games themselves are not built yet: when a winner is "on stage" the emcee just taps Continue.
+/// The winner plays a pricing game on stage (Plinko so far; see Plinko.cs). While it is being played the winner's phone runs it, and the
+/// emcee can step in or skip it. When it is over the emcee taps Continue.
 ///
 /// Like the other games, this is plain C# with one lock. Every action returns a Result instead of throwing, and
 /// Snapshot() hands out frozen pictures for the screens.
@@ -50,6 +51,7 @@ public sealed class PriceGame
     private readonly string _code;
     private readonly IPriceItemSource _itemSource;
     private readonly IPartingGiftSource _giftSource;
+    private readonly IPlinkoItemSource _plinkoSource;
     private readonly Random _rng;
     private readonly Func<DateTime> _now;
     private readonly int _stageRounds;
@@ -71,6 +73,7 @@ public sealed class PriceGame
     private bool _exact;
     private Guid? _onStage;
     private int _stageDone;
+    private PlinkoRound? _plinko;
     private readonly int[] _reactions = new int[Enum.GetValues<Reaction>().Length];
     private readonly List<PriceComment> _comments = [];
     private int _commentSeq;
@@ -82,9 +85,10 @@ public sealed class PriceGame
     private string? _message;
 
     public PriceGame(string code, IPriceItemSource items, IPartingGiftSource gifts, Random? rng = null,
-        Func<DateTime>? clock = null, int stageRounds = DefaultStageRounds)
+        Func<DateTime>? clock = null, int stageRounds = DefaultStageRounds, IPlinkoItemSource? plinkoItems = null)
     {
         _code = code;
+        _plinkoSource = plinkoItems ?? new FixedPlinkoItemSource();
         _itemSource = items;
         _giftSource = gifts;
         _rng = rng ?? new Random();
@@ -264,13 +268,17 @@ public sealed class PriceGame
                 for (var i = 0; i < RowSize; i++) if (_row[i] == winner.Id) _row[i] = null;
                 _onStage = winner.Id;
                 _phase = PricePhase.OnStage;
-                _message = $"{winner.Name} is on stage! (The pricing games aren't built yet, so tap Continue when it's over.)";
-                Say($"{winner.Spoken}, come on up to the stage!", fanfare: true);
+                _message = $"{winner.Name} is on stage for Plinko!";
+                _plinko = new PlinkoRound(_plinkoSource.CreateItems(_rng, PlinkoBoard.ItemCount), _rng, Say);
+                ClearReactions();
+                _plinko.Begin($"{winner.Spoken}, come on up to the stage!");
                 return Result.Success;
             }
 
             case PricePhase.OnStage:
             {
+                if (_plinko is { Done: false }) return Result.Fail("The pricing game isn't over yet. You can skip it if it's stuck.");
+                _plinko = null;
                 var player = _audience.FirstOrDefault(m => m.Id == _onStage);
                 if (player is not null) player.WentOnStage = true;
                 _onStage = null;
@@ -292,6 +300,37 @@ public sealed class PriceGame
                 return Result.Fail("There's nothing to continue from.");
         }
     });
+
+    // ---- Plinko (the contestant on stage plays it from their phone; the emcee can do any of it for them) ---
+
+    public Result PlinkoGuess(Guid token, bool higher) => Run(() => Plinko(token, false, r => r.Guess(higher)));
+    public Result PlinkoGuessFor(Guid emceeToken, bool higher) => Run(() => Plinko(emceeToken, true, r => r.Guess(higher)));
+
+    /// <summary>Slides the chip along the top. This returns a failure when nothing changed, so quiet repeats don't redraw every screen.</summary>
+    public Result PlinkoAim(Guid token, int slot) => Run(() => Plinko(token, false, r => r.Aim(slot)));
+
+    public Result PlinkoDrop(Guid token, int slot) => Run(() => Plinko(token, false, r => r.DropChip(slot)));
+    public Result PlinkoDropFor(Guid emceeToken, int slot) => Run(() => Plinko(emceeToken, true, r => r.DropChip(slot)));
+
+    /// <summary>
+    /// The big screen says a chip has finished falling. Anyone may report it: the result was settled when the chip dropped,
+    /// so reporting early only moves the scoreboard up a few seconds.
+    /// </summary>
+    public Result PlinkoLand(int dropNumber) => Run(() => _phase != PricePhase.OnStage || _plinko is null
+        ? Result.Fail("Plinko isn't being played.")
+        : _plinko.Land(dropNumber));
+
+    /// <summary>The emcee gives up on the pricing game (a phone died, someone walked off). Chips already dropped still count.</summary>
+    public Result SkipPricingGame(Guid emceeToken) => Run(() => Plinko(emceeToken, true, r => r.Skip()));
+
+    private Result Plinko(Guid token, bool emceeOnly, Func<PlinkoRound, Result> act)
+    {
+        if (_phase != PricePhase.OnStage || _plinko is null) return Result.Fail("Plinko isn't being played.");
+        var allowed = IsEmcee(token)
+            || (!emceeOnly && _onStage is not null && _audience.FirstOrDefault(m => m.Token == token)?.Id == _onStage);
+        if (!allowed) return Result.Fail(emceeOnly ? "Only the emcee can do that." : "Only the contestant on stage can do that.");
+        return act(_plinko);
+    }
 
     /// <summary>After the show: do it again with the same audience.</summary>
     public Result Restart(Guid emceeToken) => Run(() =>
@@ -374,6 +413,7 @@ public sealed class PriceGame
         _lastCalled = null;
         _winner = null;
         _onStage = null;
+        _plinko = null;
         _stageDone = 0;
         _gifts = [];
         ClearReactions();
@@ -515,7 +555,8 @@ public sealed class PriceGame
                 AnnounceFanfare: _announceFanfare,
                 PartingGifts: _gifts.ToList(),
                 Message: _message,
-                CanStart: _phase == PricePhase.Lobby && _emceeToken is not null && _audience.Count >= RowSize);
+                CanStart: _phase == PricePhase.Lobby && _emceeToken is not null && _audience.Count >= RowSize,
+                Plinko: _plinko?.Info());
         }
     }
 

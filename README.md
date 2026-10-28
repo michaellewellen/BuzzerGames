@@ -88,7 +88,11 @@ One TV, one emcee, and a whole studio audience (up to 200 phones).
 5. The winner goes on stage, the other three stay, and one new person is called down. After the last round, everyone who never made it on stage gets a parting gift read out.
 6. The audience can cheer, boo, and shout higher/lower from their phones, and (if the emcee leaves it on) type short comments. The emcee can delete a comment, turn comments off, and repeat or hush the announcer.
 
-The on-stage pricing games are not built yet; for now the emcee taps Continue.
+7. The winner plays a pricing game on stage. So far there is one: **Plinko**.
+
+**Plinko:** the contestant sees four small grocery items, each with a price tag that is wrong. For each, they tap Higher or Lower on their phone to say whether the real price is above or below the tag. Every right answer wins a chip, and they start with one free chip (so one to five). Each chip is lined up with a slider on the contestant's phone (the chip follows it live on the TV), then dropped. It bounces down 13 rows of pegs (seven rows of 8, six rows of 7) into one of nine slots paying $100, $500, $1,000, $0, $10,000, $0, $1,000, $500, $100. The bounces are random; dropping at the edges always pays $100, and the middle is the best plan (about $2,600 a chip on average). The big screen times each fall; the emcee phone has a "chip has landed" button, "answer / drop for them" buttons if a phone dies, and "Skip this pricing game". The emcee taps the last button (Next contestant) when Plinko is over.
+
+**Plinko items:** `src/BuzzerGames.Core/Data/Price/plinko-items.json` (name, emoji icon, price in `cents`). Keep them to a few dollars.
 
 **Item bank:** `src/BuzzerGames.Core/Data/Price/items.json` (name, description, price, emoji `icon`, optional `image`, optional `say`). Put photos in `src/BuzzerGames.Web/wwwroot/images/price/` and set `"image": "stereo.jpg"`. Items without a photo show their emoji.
 **Parting gifts:** `src/BuzzerGames.Core/Data/Price/parting-gifts.txt`, one per line.
