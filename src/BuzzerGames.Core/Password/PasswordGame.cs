@@ -10,15 +10,15 @@ namespace BuzzerGames.Core.Password;
 ///   spoken: the clue-giver sees the password on their phone and says one word out loud, their partner guesses out loud, and
 ///   the emcee rules with three buttons: right, wrong, or an invalid clue (more than one word, part of the password...).
 ///
-///   The coin-flip winner (and later, whoever solved the last puzzle) chooses to play (their clue-giver gives the first clue) or pass.
+///   The team with control (coin flip first, then whoever last got a word right) chooses to play (they give the first clue) or pass, on every word.
 ///   Clues then alternate between the teams. Each side gets at most 4 clues. A wrong guess or an invalid clue passes the turn.
-///   If all 8 clues miss, the word is posted on the board, the other team gives the first clue on the next word, and the
+///   If all 8 clues miss, the word is posted on the board, control stays put, and the
 ///   puzzle carries on.
 ///
 ///   When a guesser gets the word, that guesser (and only that guesser) gets one shot at the big word. The exception is the
 ///   fifth word: the guesser tries first, then their clue-giver, then the other team's guesser, then the other team's
 ///   clue-giver. If nobody gets the fifth word, the last team to guess a word in the puzzle starts that same chain.
-///   A right guess scores the puzzle's value (100, 100, then 200 each) and reveals the whole puzzle. A wrong big-word guess on words 1 to 4 hands control to the other team, who give the first clue on the next word.
+///   A right guess scores the puzzle's value (100, 100, then 200 each) and reveals the whole puzzle. A wrong big-word guess on words 1 to 4 leaves control with the team that got the word.
 ///
 ///   Roles swap only when a new puzzle begins: player 1 gives and player 2 guesses in the first puzzle, then they swap.
 ///
