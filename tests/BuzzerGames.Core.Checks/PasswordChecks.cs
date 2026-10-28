@@ -47,7 +47,7 @@ sealed class PasswordTable
         if (S.Phase == PasswordPhase.Control)
         {
             var control = S.ControlTeam;
-            var chooser = TokenOf(S.Players.First(p => p.Team == control).Id);
+            var chooser = TokenOf(S.Players.First(p => p.Team == control && p.IsGiver).Id);
             Check.Ok(Game.ChooseControl(chooser, play: team == control));
             Check.Equal(team, S.TurnTeam, "the team giving the first clue");
         }
@@ -237,7 +237,8 @@ static class PasswordChecks
             Check.Fails(t.Game.ChooseControl(t.Tokens[other * 2], true), "the other team choosing");
             Check.Fails(t.Game.ChooseControl(t.Tokens[other * 2 + 1], false), "the other team's second player choosing");
             Check.Fails(t.Game.JudgeGuess(t.Emcee, true), "a ruling before the choice is made");
-            Check.Ok(t.Game.ChooseControl(t.Tokens[control * 2 + 1], play: true));
+            Check.Fails(t.Game.ChooseControl(t.Tokens[control * 2 + 1], true), "the team's guesser choosing: only the clue-giver has seen the word");
+            Check.Ok(t.Game.ChooseControl(t.Tokens[control * 2], play: true));
             Check.Equal(control, t.S.TurnTeam, "play: the team with control clues first");
             Check.Fails(t.Game.ChooseControl(t.Tokens[control * 2], false), "choosing twice");
         });
@@ -643,7 +644,8 @@ static class PasswordChecks
             Check.Equal(PasswordPhase.Control, t.S.Phase, "word 1 of puzzle 2: a choice again");
             Check.Equal(1, t.S.ControlTeam, "for the team that solved the last puzzle");
             Check.Fails(t.Game.ChooseControl(t.Tokens[0], true), "the other team choosing");
-            Check.Ok(t.Game.ChooseControl(t.Tokens[2], play: false));   // Team B passes
+            Check.Fails(t.Game.ChooseControl(t.Tokens[2], true), "Cy, Team B's guesser this puzzle: only the clue-giver chooses");
+            Check.Ok(t.Game.ChooseControl(t.Tokens[3], play: false));   // Dee, Team B's clue-giver in puzzle 2, has seen the word and passes
             Check.Equal(0, t.S.TurnTeam, "so Team A gives the first clue");
 
             Check.Ok(t.Game.JudgeGuess(t.Emcee, true));         // Team A gets word 1
@@ -652,7 +654,8 @@ static class PasswordChecks
             Check.Equal(PasswordPhase.Control, t.S.Phase, "word 2: a choice again");
             Check.Equal(0, t.S.ControlTeam, "Team A got the word, so they keep control even though they missed the big word");
             Check.Fails(t.Game.ChooseControl(t.Tokens[2], true), "the other team choosing");
-            Check.Ok(t.Game.ChooseControl(t.Tokens[0], play: false));   // Team A passes: strategy, B clues first
+            Check.Fails(t.Game.ChooseControl(t.Tokens[0], true), "Ann, the guesser this puzzle, choosing");
+            Check.Ok(t.Game.ChooseControl(t.Tokens[1], play: false));   // Bob has seen the word and passes: strategy, B clues first
             Check.Equal(1, t.S.TurnTeam, "so Team B gives the first clue");
             Check.Ok(t.Game.JudgeGuess(t.Emcee, true));         // Team B gets word 2
             Check.Equal(1, t.S.ControlTeam, "and takes control");

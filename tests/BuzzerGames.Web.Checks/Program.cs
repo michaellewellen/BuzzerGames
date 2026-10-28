@@ -507,7 +507,7 @@ void AssertPasswordSecrets(PasswordTable t)
         Check.True(!Render.ShowsAnyCase(phone, "Mystery"), $"player {i}'s phone shows the big word in phase {s.Phase}");
 
         var mayKnowWord = current.State is WordState.Solved or WordState.Posted
-            || (me.IsGiver && s.Phase == PasswordPhase.Clue);
+            || (me.IsGiver && s.Phase is PasswordPhase.Clue or PasswordPhase.Control);
         foreach (var w in s.Words)
         {
             var revealed = w.State is WordState.Solved or WordState.Posted;
@@ -635,15 +635,16 @@ Run("pw tv: a word nobody guessed is posted on the board, and the big word stays
 
 Console.WriteLine("The Password Plus phones");
 
-Run("pw players: nobody sees the word at the control choice; only the team with control gets Play and Pass", () =>
+Run("pw players: both clue-givers see the word at the control choice; only the giver with control gets Play and Pass", () =>
 {
     var t = new PasswordTable();
     var control = t.S.ControlTeam;
     for (var i = 0; i < 4; i++)
     {
         var html = Render.PwPlayer(t, i);
-        Check.True(!Render.ShowsAnyCase(html, "Anchor") && !Render.Has(html, "pw-secret"), $"player {i} must not see the word yet");
-        var onControl = i / 2 == control;
+        var giver = i % 2 == 0;                          // puzzle 1: Ann and Cy give
+        Check.True(Render.ShowsAnyCase(html, "Anchor") == giver, $"player {i}: the word is for the clue-givers only");
+        var onControl = i / 2 == control && giver;
         Check.True(Render.Has(html, "PLAY") == onControl, $"Play button for player {i}");
         Check.True(Render.Has(html, "PASS") == onControl, $"Pass button for player {i}");
     }
@@ -795,7 +796,7 @@ Run("pw: a whole game, drawing the TV, the emcee and all four phones after every
         switch (s.Phase)
         {
             case PasswordPhase.Control:
-                Check.Ok(t.Game.ChooseControl(t.TokenOf(s.Players.First(p => p.Team == s.ControlTeam).Id), n % 3 != 0));
+                Check.Ok(t.Game.ChooseControl(t.TokenOf(s.Players.First(p => p.Team == s.ControlTeam && p.IsGiver).Id), n % 3 != 0));
                 break;
             case PasswordPhase.Clue:
                 if (n % 7 == 0) Check.Ok(t.Game.RejectClue(t.Emcee));

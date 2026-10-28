@@ -268,7 +268,7 @@ public sealed class PasswordGame
 
     // ---- One word ------------------------------------------------------------------------
 
-    /// <summary>The team with control chooses: play (give the first clue) or pass (the other team does).</summary>
+    /// <summary>The clue-giver of the team with control (who has seen the word) chooses: play (give the first clue) or pass (the other team does). The emcee can choose for them.</summary>
     public Result ChooseControl(Guid token, bool play) => Run(() =>
     {
         if (_phase != PasswordPhase.Control) return Result.Fail("There's no choice to make right now.");
@@ -278,6 +278,8 @@ public sealed class PasswordGame
             if (player is null) return Result.Fail("Only the team with control can choose.");
             if (player.Team != _controlTeam)
                 return Result.Fail($"{TeamNames[_controlTeam]} has control, so only they can choose.");
+            if (player.Slot != GiverSlot)
+                return Result.Fail("Only the clue-giver chooses: they have seen the word.");
         }
 
         _startTeam = play ? _controlTeam : 1 - _controlTeam;
