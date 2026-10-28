@@ -512,7 +512,7 @@ void AssertPasswordSecrets(PasswordTable t)
         {
             var revealed = w.State is WordState.Solved or WordState.Posted;
             if (revealed || (w.Number == s.WordNumber && mayKnowWord)) continue;
-            Check.True(!Render.ShowsAnyCase(phone, w.Text), $"player {i} sees \"{w.Text}\" in phase {s.Phase}");
+            Check.True(!Render.ShowsAnyCase(phone, w.Text), $"player {i} sees \"{w.Text}\" in phase {s.Phase}, word {s.WordNumber}, giver={me.IsGiver}, puzzle {s.PuzzleNumber}, msg={s.Message}");
         }
     }
 }
