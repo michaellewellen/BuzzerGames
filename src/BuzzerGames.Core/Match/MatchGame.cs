@@ -201,7 +201,7 @@ public sealed class MatchGame
 
     /// <summary>
     /// The emcee closes the answers. Celebrities who typed nothing sit this question out. Then the team (or the contestant) says
-    /// its answer out loud; in the first part of the Super Match there is nothing to guess, so it goes straight to the reveal.
+    /// its answer out loud; the first part of the Super Match never comes here, because its advisors only talk.
     /// </summary>
     public Result CloseAnswers(Guid emceeToken) => Run(() =>
     {
@@ -211,18 +211,10 @@ public sealed class MatchGame
         if (answered.Count == 0) return Result.Fail("Nobody has answered yet.");
         _participants = answered;
 
-        if (_stage == MatchStage.Super)
-        {
-            BeginReveal();
-            _message = "The celebrities reveal their suggestions, one at a time.";
-        }
-        else
-        {
-            _phase = MatchPhase.Guessing;
-            _message = _stage == MatchStage.Final
-                ? "The contestant says their answer out loud."
-                : $"{_teamNames[_team]}: say your answer out loud!";
-        }
+        _phase = MatchPhase.Guessing;
+        _message = _stage == MatchStage.Final
+            ? "The contestant says their answer out loud."
+            : $"{_teamNames[_team]}: say your answer out loud!";
         return Result.Success;
     });
 
@@ -267,7 +259,6 @@ public sealed class MatchGame
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can rule on answers.");
         if (_phase != MatchPhase.Reveal) return Result.Fail("There's nothing to rule on.");
-        if (_stage == MatchStage.Super) return Result.Fail("The celebrities' suggestions aren't ruled on.");
         if (CurrentState() != RevealState.Shown) return Result.Fail("The answer hasn't been revealed yet.");
 
         var id = _participants[_revealIndex];
@@ -283,8 +274,8 @@ public sealed class MatchGame
     });
 
     /// <summary>
-    /// First part of the Super Match, step two. The celebrities were only suggesting; the contestant goes with one of their answers
-    /// or one of their own, says it out loud, and the emcee records which of the three popular answers it is (1 to 3, best first), or 0 for none.
+    /// First part of the Super Match, step two. The three advisors speak their advice out loud (nothing is typed); the contestant decides what to say
+    /// and says it out loud, and the emcee records which of the three popular answers it is (1 to 3, best first), or 0 for none.
     /// That answer alone sets the stake, and its row lights up on the board.
     /// </summary>
     public Result ChooseSuperAnswer(Guid emceeToken, string? answer, int rank) => Run(() =>
@@ -379,8 +370,8 @@ public sealed class MatchGame
         _participants = _celebs.Where(c => ids.Contains(c.Id)).Select(c => c.Id).ToList();
         ClearQuestionState();
         _questionText = _super!.Text;
-        _phase = MatchPhase.Answering;
-        _message = "Celebrities: type your answers!";
+        _phase = MatchPhase.SuperChoice;
+        _message = "The advisors give their advice out loud. The contestant decides.";
         return Result.Success;
     });
 
@@ -434,7 +425,6 @@ public sealed class MatchGame
                     Answer: answer,
                     Reveal: state,
                     Outcome: _outcomes.GetValueOrDefault(c.Id, 0),
-                    SuggestedRank: _stage == MatchStage.Super && _super is not null ? MatchText.SuggestRank(_super, answer) : 0,
                     OutForTeam: _stage == MatchStage.Regular && _team >= 0 && _matched[_team].Contains(c.Id),
                     MatchedA: _matched[0].Contains(c.Id),
                     MatchedB: _matched[1].Contains(c.Id));
@@ -578,12 +568,6 @@ public sealed class MatchGame
         if (_participants[_revealIndex] != celebrityId) return Result.Fail("It isn't your turn to reveal.");
         if (CurrentState() != RevealState.Hidden) return Result.Fail("That answer is already showing.");
         _revealed[celebrityId] = RevealState.Shown;
-        if (_stage == MatchStage.Super)
-        {
-            // Nobody rules on the celebrities' suggestions: they are only help for the contestant.
-            _revealed[celebrityId] = RevealState.Judged;
-            AdvanceReveal();
-        }
         return Result.Success;
     }
 
@@ -597,11 +581,6 @@ public sealed class MatchGame
 
         switch (_stage)
         {
-            case MatchStage.Super:
-                _phase = MatchPhase.SuperChoice;
-                _message = "The contestant picks an answer: one of theirs or their own.";
-                break;
-
             case MatchStage.Final:
                 _finalWon = _outcomes[_participants[0]] == 1;
                 _phase = MatchPhase.GameOver;

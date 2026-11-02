@@ -92,11 +92,11 @@ just know which team they are on and speak their answers out loud. Only the emce
    nobody left is skipped.
 4. **Ties** after the six questions are settled by one tiebreaker question per team with every celebrity back in play, repeated until someone leads.
 5. **The Super Match** goes to the team with more matches. Each blank has three fixed popular answers worth **$500, $250 and $100**
-   ("Super ___": Mario, Man, Market). Part one: the contestant calls on three celebrities, who only *suggest* answers (they may all be
-   garbage). The contestant takes one of those or says their own, and the emcee records which popular answer it matches, if any. That answer alone sets the stake,
-   or a consolation **$50** if it isn't on the board. The emcee then reveals the board slowly, $100 first, then $250, then $500. The matched row lights up,
-   and all three are shown. Part two: the contestant plays for **ten times** the stake, picks one celebrity, says their answer out loud,
-   and wins only if the emcee judges an exact match.
+   ("Super ___": Mario, Man, Market). Part one is all spoken: the emcee picks three celebrities as advisors, they advise the contestant out loud
+   (they may all be garbage), and the contestant says an answer. The emcee records which popular answer it matched, if any, and only that answer
+   sets the stake, or a consolation **$50** if it isn't on the board. Then the emcee reveals the board slowly, $100 first, then $250, then $500.
+   The matched row lights up, and all three are shown. Part two uses the phones again: the contestant plays for **ten times** the stake and picks one celebrity,
+   who secretly types an answer. The contestant says theirs out loud, the celebrity does the reveal on their own phone, and the emcee judges an exact match.
 
 Celebrities who join after the start play from the next question. After the game the emcee can play again with the same panel.
 

@@ -10,7 +10,11 @@
     @if (Celebrity.Playing)
     {
         <span class="mg-card">
-            @if (Celebrity.Reveal == RevealState.Hidden)
+            @if (InSuper)
+            {
+                <span class="mg-status">advising</span>
+            }
+            else if (Celebrity.Reveal == RevealState.Hidden)
             {
                 @if (Snapshot.Phase == MatchPhase.Answering)
                 {

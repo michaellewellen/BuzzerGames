@@ -31,7 +31,6 @@
 
         case MatchPhase.Answering:
             <p class="mg-emcee-question">@Snapshot.QuestionText</p>
-            @SuperSecrets
             <ul class="roster">
                 @foreach (var c in Snapshot.PlayingNow)
                 {
@@ -58,7 +57,6 @@
             {
                 <p class="hint">They said: <strong>“@Snapshot.Guess”</strong></p>
             }
-            @SuperSecrets
             @if (Snapshot.Revealing is { } up)
             {
                 <div class="emcee-clue">
@@ -111,14 +109,7 @@
 
         case MatchPhase.SuperChoice:
             <p class="mg-emcee-question">@Snapshot.QuestionText</p>
-            <p class="hint">The celebrities' suggestions. The contestant can take one, or say their own.</p>
-            <ul class="mg-choose">
-                @foreach (var c in Snapshot.PlayingNow)
-                {
-                    var answer = c.Answer;
-                    <li><button class="btn btn-quiet" @onclick="() => _choice = answer">@c.Name<small>@answer</small></button></li>
-                }
-            </ul>
+            <p class="hint">The advisors are talking it over out loud. When the contestant answers, type it in (optional) and tell me which popular answer it was. The TV doesn't find out until you reveal the board.</p>
             <input class="text-input" placeholder="What the contestant said" maxlength="@MatchGame.GuessMaxLength" @bind="_choice" @bind:event="oninput" />
             @SuperSecrets
             var suggested = Game.SuggestSuperRank(_choice);

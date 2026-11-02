@@ -152,7 +152,7 @@ static class MatchWebChecks
             Check.True(Render.Has(Render.MgTv(t.S), "1") && Render.Has(Render.MgTv(t.S), "match"), "the score strip");
         });
 
-        run("mg super match: celebrities suggest, the contestant chooses, the board posts slowly and the stake stays hidden until it is up", () =>
+        run("mg super match: the advisors only talk, the contestant chooses, the board posts slowly and the stake stays hidden until it is up", () =>
         {
             var t = new MatchTable(celebrities: 4);
             for (var q = 0; q < 6; q++) t.PlayAndContinue(n => t.S.Team == 0 && n == 1);
@@ -169,22 +169,15 @@ static class MatchWebChecks
             for (var i = 0; i < 4; i++) Check.True(!Render.Has(Render.MgPlayer(t, i), "Alpha") && !Render.Has(Render.MgPlayer(t, i), "Charlie"), "no celebrity sees them");
             Check.True(Render.Has(Render.MgPlayer(t, 1), "You're sitting out"), "the celebrity who wasn't called on sits out");
 
-            Check.Ok(t.Game.Answer(t.Tokens[0], "alpha"));
-            Check.Ok(t.Game.Answer(t.Tokens[2], "zebra"));
-            Check.Ok(t.Game.Answer(t.Tokens[3], "charlie"));
-            Check.Ok(t.Game.CloseAnswers(t.Emcee));
-            Check.True(!Render.Has(Render.MgTv(t.S), "zebra"), "suggestions stay hidden until each celebrity reveals");
-            Check.Ok(t.Game.RevealAnswer(t.Tokens[0]));
-            Check.True(Render.Has(Render.MgTv(t.S), "alpha") && !Render.Has(Render.MgEmcee(t), "★ Match"), "a suggestion is shown, and the emcee has nothing to rule on");
-            Check.Ok(t.Game.RevealAnswer(t.Tokens[2]));
-            Check.Ok(t.Game.RevealAnswer(t.Tokens[3]));
-            Check.Equal(MatchPhase.SuperChoice, t.S.Phase, "the contestant chooses");
+            Check.Equal(MatchPhase.SuperChoice, t.S.Phase, "the contestant chooses: part one is all spoken");
+            Check.True(Render.Has(Render.MgPlayer(t, 0), "You&#x27;re an advisor") || Render.ShowsAnyCase(Render.MgPlayer(t, 0), "You're an advisor"), "an advisor's phone says to speak, not type");
+            Check.True(!Render.Has(Render.MgPlayer(t, 0), "mg-answer-input"), "and has no box to type in");
+            Check.True(Render.Has(Render.MgTv(t.S), "advising"), "the TV shows the three advisors");
             emcee = Render.MgEmcee(t);
-            Check.True(Render.Has(emcee, "Cel1") && Render.Has(emcee, "zebra") && Render.Has(emcee, "Not on the board") && Render.Has(emcee, "#3"), "the emcee sees the suggestions and the rank buttons");
-            tv = Render.MgTv(t.S);
-            Check.True(Render.Has(tv, "zebra") && !Render.Has(tv, "Bravo") && !Render.Has(tv, "Alpha"), "the TV shows suggestions but no popular answers");
-            for (var i = 0; i < 4; i++) Check.True(!Render.Has(Render.MgPlayer(t, i), "Bravo"), "no phone shows a popular answer");
-            // The contestant ignores every suggestion and says "charlie" (the $100 answer).
+            Check.True(Render.Has(emcee, "Not on the board") && Render.Has(emcee, "#3") && Render.Has(emcee, "What the contestant said"), "the emcee has the rank buttons");
+            var tv2 = Render.MgTv(t.S);
+            Check.True(!Render.Has(tv2, "Bravo") && !Render.Has(tv2, "Alpha"), "the TV shows no popular answers");
+            // The contestant says "charlie" (the $100 answer).
             Check.Ok(t.Game.ChooseSuperAnswer(t.Emcee, "charlie", 3));
             tv = Render.MgTv(t.S);
             Check.True(Render.Has(tv, "Contestant") && Render.Has(tv, "charlie"), "the TV shows what the contestant said");

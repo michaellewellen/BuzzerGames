@@ -12,7 +12,7 @@ public enum MatchPhase
     Reveal,         // the celebrities show their answers one at a time and the emcee rules on each
     QuestionDone,   // the results of that question
     SuperPick,      // the winning team's contestant calls on three celebrities
-    SuperChoice,    // the celebrities have shown their suggestions; the contestant picks one (or their own) and the emcee records it
+    SuperChoice,    // the three advisors advise out loud; the contestant answers, and the emcee records which popular answer it was
     SuperResult,    // the emcee posts the board a row at a time, and the stake becomes known
     FinalPick,      // the contestant picks the one celebrity they will try to match exactly
     GameOver
@@ -32,7 +32,6 @@ public sealed record CelebrityInfo(
     string Answer,             // SECRET until Reveal is Shown or Judged
     RevealState Reveal,
     int Outcome,               // when Judged: 1 = match, 0 = no match; in the Super Match: 0 = not on the list, 1 to 3 = which popular answer
-    int SuggestedRank,         // Super Match only: the computer's guess at which popular answer this is (0 = none). The emcee decides.
     bool OutForTeam,           // has already matched for the team that is up, so sits out its remaining questions
     bool MatchedA,
     bool MatchedB);
