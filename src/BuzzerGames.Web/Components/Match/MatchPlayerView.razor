@@ -16,7 +16,7 @@
         <p class="error">@_error</p>
     }
 
-    @if (!Snapshot.PlayingNow.Any(c => c.Id == Me.Id) && Snapshot.Phase is MatchPhase.Answering or MatchPhase.Guessing or MatchPhase.Reveal or MatchPhase.QuestionDone or MatchPhase.Ready)
+    @if (!Snapshot.PlayingNow.Any(c => c.Id == Me.Id) && Snapshot.Phase is MatchPhase.Answering or MatchPhase.Guessing or MatchPhase.Reveal or MatchPhase.QuestionDone or MatchPhase.SuperChoice or MatchPhase.Ready)
     {
         <p class="big-message">You're sitting out</p>
         <p class="hint">@(Me.OutForTeam ? $"You already matched for {Snapshot.TeamName(Snapshot.Team)}, so you rest until the next team's turn." : "This question isn't yours. Watch the big screen.")</p>
@@ -71,6 +71,11 @@
             case MatchPhase.FinalPick:
                 <p class="big-message">Super Match</p>
                 <p class="hint">@Snapshot.Message</p>
+                break;
+
+            case MatchPhase.SuperChoice:
+                <p class="big-message">Your suggestion is in</p>
+                <p class="hint">The contestant decides whether to use it.</p>
                 break;
 
             case MatchPhase.SuperResult:

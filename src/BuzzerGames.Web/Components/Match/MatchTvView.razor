@@ -35,6 +35,10 @@
 
             case MatchPhase.SuperResult:
                 <p class="mg-kicker">SUPER MATCH</p>
+                @if (Snapshot.Guess.Length > 0)
+                {
+                    <p class="mg-guess">Contestant: <strong>“@Snapshot.Guess”</strong></p>
+                }
                 @if (Snapshot.SuperRows.All(r => r.Revealed))
                 {
                     <p class="mg-headline">@MatchGame.Money(Snapshot.SuperAmount) × 10 = @MatchGame.Money(Snapshot.FinalStake)</p>
@@ -58,13 +62,13 @@
                 {
                     <MatchSuperBoard Snapshot="Snapshot" />
                 }
-                @if (Snapshot.Guess.Length > 0 && Snapshot.Stage != MatchStage.Super)
+                @if (Snapshot.Guess.Length > 0)
                 {
                     <p class="mg-guess @PasswordText.TeamClass(Snapshot.Team)">
-                        @(Snapshot.Stage == MatchStage.Final ? "Contestant" : Snapshot.TeamName(Snapshot.Team)): <strong>“@Snapshot.Guess”</strong>
+                        @(Snapshot.Stage is MatchStage.Final or MatchStage.Super ? "Contestant" : Snapshot.TeamName(Snapshot.Team)): <strong>“@Snapshot.Guess”</strong>
                     </p>
                 }
-                else if (Snapshot.Phase == MatchPhase.Guessing && Snapshot.Stage != MatchStage.Super)
+                else if (Snapshot.Phase is MatchPhase.Guessing or MatchPhase.SuperChoice)
                 {
                     <p class="mg-guess @PasswordText.TeamClass(Snapshot.Team)">@Snapshot.Message</p>
                 }
@@ -93,5 +97,5 @@
     [Parameter, EditorRequired] public MatchSnapshot Snapshot { get; set; } = default!;
 
     // The desks are the panel: shown for every question, hidden on the title-card screens between questions.
-    private bool ShowDesks => Snapshot.Phase is MatchPhase.Ready or MatchPhase.Answering or MatchPhase.Guessing or MatchPhase.Reveal or MatchPhase.QuestionDone;
+    private bool ShowDesks => Snapshot.Phase is MatchPhase.Ready or MatchPhase.Answering or MatchPhase.Guessing or MatchPhase.Reveal or MatchPhase.QuestionDone or MatchPhase.SuperChoice;
 }

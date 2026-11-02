@@ -12,7 +12,8 @@ public enum MatchPhase
     Reveal,         // the celebrities show their answers one at a time and the emcee rules on each
     QuestionDone,   // the results of that question
     SuperPick,      // the winning team's contestant calls on three celebrities
-    SuperResult,    // the top three are posted and the stake is known
+    SuperChoice,    // the celebrities have shown their suggestions; the contestant picks one (or their own) and the emcee records it
+    SuperResult,    // the emcee posts the board a row at a time, and the stake becomes known
     FinalPick,      // the contestant picks the one celebrity they will try to match exactly
     GameOver
 }
@@ -70,5 +71,5 @@ public sealed record MatchSnapshot(
     public string TeamName(int team) => team >= 0 && team < TeamNames.Count ? TeamNames[team] : "";
 
     /// <summary>True once the emcee has asked the question, so the room may read it.</summary>
-    public bool QuestionAsked => Phase is MatchPhase.Answering or MatchPhase.Guessing or MatchPhase.Reveal or MatchPhase.QuestionDone;
+    public bool QuestionAsked => Phase is MatchPhase.Answering or MatchPhase.Guessing or MatchPhase.Reveal or MatchPhase.QuestionDone or MatchPhase.SuperChoice;
 }

@@ -26,7 +26,7 @@
                 <span class="mg-answer">@Celebrity.Answer</span>
             }
         </span>
-        @if (Celebrity.Reveal == RevealState.Judged)
+        @if (Celebrity.Reveal == RevealState.Judged && !InSuper)
         {
             <span class="mg-stamp">@Stamp</span>
         }
@@ -45,14 +45,8 @@
 
     private bool InSuper => Snapshot.Stage == MatchStage.Super;
 
-    // In the Super Match a ruling stays secret until the whole board is up, or the desk would give the answer away.
-    private bool BoardUp => Snapshot.SuperRows.Count > 0 && Snapshot.SuperRows.All(r => r.Revealed);
-
-    private string OutcomeClass => Celebrity.Reveal != RevealState.Judged ? ""
-        : InSuper ? (!BoardUp ? "" : Celebrity.Outcome > 0 ? "match" : "nomatch")
+    private string OutcomeClass => Celebrity.Reveal != RevealState.Judged || InSuper ? ""
         : Celebrity.Outcome == 1 ? "match" : "nomatch";
 
-    private string Stamp => InSuper
-        ? (!BoardUp ? "✔" : Celebrity.Outcome > 0 ? $"#{Celebrity.Outcome} · {MatchGame.Money(MatchGame.SuperPayouts[Celebrity.Outcome - 1])}" : "NOT ON THE BOARD")
-        : Celebrity.Outcome == 1 ? "★ MATCH ★" : "NO MATCH";
+    private string Stamp => Celebrity.Outcome == 1 ? "★ MATCH ★" : "NO MATCH";
 }

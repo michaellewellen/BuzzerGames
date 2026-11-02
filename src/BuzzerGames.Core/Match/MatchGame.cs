@@ -82,6 +82,7 @@ public sealed class MatchGame
     private readonly bool[] _superRevealed = new bool[SuperPicks];   // posted on the board (the emcee reveals them $100, $250, $500)
     private readonly bool[] _superLit = new bool[SuperPicks];        // a celebrity's answer matched this one
     private int _superAmount;
+    private int _superRank;
     private Guid? _finalCelebrity;
     private bool? _finalWon;
 
@@ -213,7 +214,7 @@ public sealed class MatchGame
         if (_stage == MatchStage.Super)
         {
             BeginReveal();
-            _message = "Reveal the answers one at a time, and rank each against the popular answers.";
+            _message = "The celebrities reveal their suggestions, one at a time.";
         }
         else
         {
@@ -266,7 +267,7 @@ public sealed class MatchGame
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can rule on answers.");
         if (_phase != MatchPhase.Reveal) return Result.Fail("There's nothing to rule on.");
-        if (_stage == MatchStage.Super) return Result.Fail("Rank this answer against the popular answers instead.");
+        if (_stage == MatchStage.Super) return Result.Fail("The celebrities' suggestions aren't ruled on.");
         if (CurrentState() != RevealState.Shown) return Result.Fail("The answer hasn't been revealed yet.");
 
         var id = _participants[_revealIndex];
@@ -282,20 +283,22 @@ public sealed class MatchGame
     });
 
     /// <summary>
-    /// First part of the Super Match: which of the three popular answers (1 to 3, best first) the answer just revealed is, or 0 for none of them.
+    /// First part of the Super Match, step two. The celebrities were only suggesting; the contestant goes with one of their answers
+    /// or one of their own, says it out loud, and the emcee records which of the three popular answers it is (1 to 3, best first), or 0 for none.
+    /// That answer alone sets the stake, and its row lights up on the board.
     /// </summary>
-    public Result Rank(Guid emceeToken, int rank) => Run(() =>
+    public Result ChooseSuperAnswer(Guid emceeToken, string? answer, int rank) => Run(() =>
     {
-        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can rule on answers.");
-        if (_phase != MatchPhase.Reveal || _stage != MatchStage.Super) return Result.Fail("There's nothing to rank.");
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
+        if (_phase != MatchPhase.SuperChoice) return Result.Fail("The contestant isn't choosing an answer right now.");
         if (rank is < 0 or > SuperPicks) return Result.Fail("Pick one of the three popular answers, or none.");
-        if (CurrentState() != RevealState.Shown) return Result.Fail("The answer hasn't been revealed yet.");
-
-        var id = _participants[_revealIndex];
-        _revealed[id] = RevealState.Judged;
-        _outcomes[id] = rank;
+        TryCleanText(answer, GuessMaxLength, out var clean);
+        _guess = clean;
+        _superRank = rank;
+        _superAmount = rank > 0 ? SuperPayouts[rank - 1] : SuperFloor;
         if (rank > 0) _superLit[rank - 1] = true;
-        AdvanceReveal();
+        _phase = MatchPhase.SuperResult;
+        _message = "Now the board! Reveal the popular answers, lowest first.";
         return Result.Success;
     });
 
@@ -312,7 +315,7 @@ public sealed class MatchGame
         _superRevealed[next.Value] = true;
         if (_superRevealed.All(r => r))
         {
-            var best = _participants.Select(id => _outcomes[id]).Where(r => r > 0).DefaultIfEmpty(0).Min();
+            var best = _superRank;
             _message = best > 0
                 ? $"Popular answer number {best}! That's {Money(_superAmount)}, so the final match is for {Money(FinalStake)}."
                 : $"No popular answers this time. A consolation {Money(_superAmount)}, so the final match is for {Money(FinalStake)}.";
@@ -398,6 +401,9 @@ public sealed class MatchGame
         return Result.Success;
     });
 
+    /// <summary>The computer's guess at which popular answer some typed words are (0 = none). A hint for the emcee only.</summary>
+    public int SuggestSuperRank(string? text) { lock (_gate) return _super is null ? 0 : MatchText.SuggestRank(_super, text); }
+
     public int FinalStake { get { lock (_gate) return _superAmount * FinalMultiplier; } }
 
     // ---- Seats and snapshots -------------------------------------------------------------
@@ -416,7 +422,7 @@ public sealed class MatchGame
     {
         lock (_gate)
         {
-            var inReveal = _phase is MatchPhase.Reveal or MatchPhase.QuestionDone or MatchPhase.SuperResult or MatchPhase.GameOver;
+            var inReveal = _phase is MatchPhase.Reveal or MatchPhase.QuestionDone or MatchPhase.SuperChoice or MatchPhase.SuperResult or MatchPhase.GameOver;
             var celebs = _celebs.Select((c, i) =>
             {
                 var state = inReveal ? _revealed.GetValueOrDefault(c.Id, RevealState.Hidden) : RevealState.Hidden;
@@ -481,6 +487,7 @@ public sealed class MatchGame
         Array.Clear(_superRevealed);
         Array.Clear(_superLit);
         _superAmount = 0;
+        _superRank = 0;
         _finalCelebrity = null;
         _finalWon = null;
         _questionDeck = _content.CreateQuestions(_rng, 30).ToList();
@@ -571,6 +578,12 @@ public sealed class MatchGame
         if (_participants[_revealIndex] != celebrityId) return Result.Fail("It isn't your turn to reveal.");
         if (CurrentState() != RevealState.Hidden) return Result.Fail("That answer is already showing.");
         _revealed[celebrityId] = RevealState.Shown;
+        if (_stage == MatchStage.Super)
+        {
+            // Nobody rules on the celebrities' suggestions: they are only help for the contestant.
+            _revealed[celebrityId] = RevealState.Judged;
+            AdvanceReveal();
+        }
         return Result.Success;
     }
 
@@ -585,10 +598,8 @@ public sealed class MatchGame
         switch (_stage)
         {
             case MatchStage.Super:
-                var best = _participants.Select(id => _outcomes[id]).Where(r => r > 0).DefaultIfEmpty(0).Min();
-                _superAmount = best > 0 ? SuperPayouts[best - 1] : SuperFloor;
-                _phase = MatchPhase.SuperResult;
-                _message = "Now the board! Reveal the popular answers, lowest first.";
+                _phase = MatchPhase.SuperChoice;
+                _message = "The contestant picks an answer: one of theirs or their own.";
                 break;
 
             case MatchStage.Final:

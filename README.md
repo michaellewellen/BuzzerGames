@@ -91,16 +91,18 @@ just know which team they are on and speak their answers out loud. Only the emce
    its next question uses only 4, 5 and 6, while Team B still has everyone. Only the celebrities in a question answer and reveal. A team with
    nobody left is skipped.
 4. **Ties** after the six questions are settled by one tiebreaker question per team with every celebrity back in play, repeated until someone leads.
-5. **The Super Match** goes to the team with more matches. Part one: the contestant calls on three celebrities to fill in a simple blank
-   ("Super ___"). The emcee ranks each answer against the three most popular answers, which only the emcee can see. Then the emcee reveals the board slowly, $100 first, then $250, then $500; a row a celebrity matched lights up, and all three are shown. The best match sets the stake:
-   **$500, $250 or $100**, or a consolation **$50** if none made the board. Part two: the contestant plays for **ten times** that, picks one celebrity,
-   says their answer out loud, and wins only if the emcee judges an exact match.
+5. **The Super Match** goes to the team with more matches. Each blank has three fixed popular answers worth **$500, $250 and $100**
+   ("Super ___": Mario, Man, Market). Part one: the contestant calls on three celebrities, who only *suggest* answers (they may all be
+   garbage). The contestant takes one of those or says their own, and the emcee records which popular answer it matches, if any. That answer alone sets the stake,
+   or a consolation **$50** if it isn't on the board. The emcee then reveals the board slowly, $100 first, then $250, then $500. The matched row lights up,
+   and all three are shown. Part two: the contestant plays for **ten times** the stake, picks one celebrity, says their answer out loud,
+   and wins only if the emcee judges an exact match.
 
 Celebrities who join after the start play from the next question. After the game the emcee can play again with the same panel.
 
 **Question bank:** `src/BuzzerGames.Core/Data/Match/match-game.json`. `names` are the family first names that fill `{name}` in each of the `questions`.
 Each of the `supers` has a blank (`text`) and `answers`: three lists, most popular first, each holding the accepted spellings. The computer only
-*suggests* a rank by matching spelling; the emcee always decides. The starter rankings are guesses, so replace them with answers you have actually surveyed.
+*suggests* which row an answer matches, by spelling; the emcee always decides. The starter blanks and rankings are guesses; replace them with your own.
 
 ## Run it on your computer
 
