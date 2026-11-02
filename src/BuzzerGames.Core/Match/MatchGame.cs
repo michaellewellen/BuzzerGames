@@ -79,7 +79,8 @@ public sealed class MatchGame
 
     private int _superTeam = -1;
     private SuperQuestion? _super;
-    private readonly bool[] _superRevealed = new bool[SuperPicks];
+    private readonly bool[] _superRevealed = new bool[SuperPicks];   // posted on the board (the emcee reveals them $100, $250, $500)
+    private readonly bool[] _superLit = new bool[SuperPicks];        // a celebrity's answer matched this one
     private int _superAmount;
     private Guid? _finalCelebrity;
     private bool? _finalWon;
@@ -293,8 +294,29 @@ public sealed class MatchGame
         var id = _participants[_revealIndex];
         _revealed[id] = RevealState.Judged;
         _outcomes[id] = rank;
-        if (rank > 0) _superRevealed[rank - 1] = true;
+        if (rank > 0) _superLit[rank - 1] = true;
         AdvanceReveal();
+        return Result.Success;
+    });
+
+    /// <summary>
+    /// After the celebrities' answers are ranked, the emcee posts the three popular answers one at a time, lowest first ($100, $250, $500).
+    /// Every row is posted even if nobody matched it, because the room is curious. A row a celebrity matched lights up.
+    /// </summary>
+    public Result RevealSuperRow(Guid emceeToken) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
+        if (_phase != MatchPhase.SuperResult) return Result.Fail("There's no board to reveal.");
+        var next = Enumerable.Range(0, SuperPicks).Reverse().Cast<int?>().FirstOrDefault(i => !_superRevealed[i.Value]);
+        if (next is null) return Result.Fail("The whole board is already up.");
+        _superRevealed[next.Value] = true;
+        if (_superRevealed.All(r => r))
+        {
+            var best = _participants.Select(id => _outcomes[id]).Where(r => r > 0).DefaultIfEmpty(0).Min();
+            _message = best > 0
+                ? $"Popular answer number {best}! That's {Money(_superAmount)}, so the final match is for {Money(FinalStake)}."
+                : $"No popular answers this time. A consolation {Money(_superAmount)}, so the final match is for {Money(FinalStake)}.";
+        }
         return Result.Success;
     });
 
@@ -329,6 +351,7 @@ public sealed class MatchGame
                 return Result.Success;
 
             case MatchPhase.SuperResult:
+                if (!_superRevealed.All(r => r)) return Result.Fail("Reveal the whole board first.");
                 _phase = MatchPhase.FinalPick;
                 _message = $"Playing for {Money(FinalStake)}! The contestant picks one celebrity to match exactly.";
                 return Result.Success;
@@ -413,7 +436,10 @@ public sealed class MatchGame
 
             var rows = _super is null
                 ? []
-                : Enumerable.Range(0, SuperPicks).Select(i => new SuperRowInfo(i + 1, SuperPayouts[i], _super.Shown(i), _superRevealed[i])).ToList();
+                : Enumerable.Range(0, SuperPicks).Select(i => new SuperRowInfo(i + 1, SuperPayouts[i], _super.Shown(i), _superRevealed[i], _superRevealed[i] && _superLit[i])).ToList();
+
+            // Until the board is up the stake would give away which popular answer was matched.
+            var boardHidden = _phase == MatchPhase.SuperResult && !_superRevealed.All(r => r);
 
             return new MatchSnapshot(
                 Code: Code,
@@ -430,8 +456,8 @@ public sealed class MatchGame
                 RevealIndex: _revealIndex,
                 SuperTeam: _superTeam,
                 SuperRows: rows,
-                SuperAmount: _superAmount,
-                FinalStake: _superAmount * FinalMultiplier,
+                SuperAmount: boardHidden ? 0 : _superAmount,
+                FinalStake: boardHidden ? 0 : _superAmount * FinalMultiplier,
                 FinalCelebrityId: _finalCelebrity,
                 FinalWon: _finalWon,
                 Message: _message,
@@ -453,6 +479,7 @@ public sealed class MatchGame
         _superTeam = -1;
         _super = null;
         Array.Clear(_superRevealed);
+        Array.Clear(_superLit);
         _superAmount = 0;
         _finalCelebrity = null;
         _finalWon = null;
@@ -521,6 +548,7 @@ public sealed class MatchGame
         _label = "Super Match";
         _super = _content.CreateSupers(_rng, 1)[0];
         Array.Clear(_superRevealed);
+        Array.Clear(_superLit);
         _participants = [];
         ClearQuestionState();
         _phase = MatchPhase.SuperPick;
@@ -559,11 +587,8 @@ public sealed class MatchGame
             case MatchStage.Super:
                 var best = _participants.Select(id => _outcomes[id]).Where(r => r > 0).DefaultIfEmpty(0).Min();
                 _superAmount = best > 0 ? SuperPayouts[best - 1] : SuperFloor;
-                for (var i = 0; i < SuperPicks; i++) _superRevealed[i] = true;
                 _phase = MatchPhase.SuperResult;
-                _message = best > 0
-                    ? $"Popular answer number {best}! That's {Money(_superAmount)}, so the final match is for {Money(FinalStake)}."
-                    : $"No popular answers this time. A consolation {Money(_superAmount)}, so the final match is for {Money(FinalStake)}.";
+                _message = "Now the board! Reveal the popular answers, lowest first.";
                 break;
 
             case MatchStage.Final:

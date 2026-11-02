@@ -129,7 +129,17 @@
         case MatchPhase.SuperResult:
             <p class="hint">@Snapshot.Message</p>
             <MatchSuperBoard Snapshot="Snapshot" ShowSecrets="true" />
-            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">On to the final match</button>
+            @if (Snapshot.SuperRows.All(r => r.Revealed))
+            {
+                <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">On to the final match</button>
+            }
+            else
+            {
+                var nextRank = Snapshot.SuperRows.Last(r => !r.Revealed).Rank;
+                <button class="btn btn-start btn-wide" @onclick="() => Act(Game.RevealSuperRow(Token))">
+                    Reveal the @MatchGame.Money(MatchGame.SuperPayouts[nextRank - 1]) answer<small>@(Snapshot.SuperRows.Any(r => !r.Revealed && r.Rank == nextRank && Snapshot.Celebrities.Any(c => c.Outcome == nextRank && c.Playing)) ? "A celebrity matched this one" : "Nobody matched this one")</small>
+                </button>
+            }
             break;
 
         case MatchPhase.FinalPick:

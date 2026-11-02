@@ -35,7 +35,14 @@
 
             case MatchPhase.SuperResult:
                 <p class="mg-kicker">SUPER MATCH</p>
-                <p class="mg-headline">@MatchGame.Money(Snapshot.SuperAmount) × 10 = @MatchGame.Money(Snapshot.FinalStake)</p>
+                @if (Snapshot.SuperRows.All(r => r.Revealed))
+                {
+                    <p class="mg-headline">@MatchGame.Money(Snapshot.SuperAmount) × 10 = @MatchGame.Money(Snapshot.FinalStake)</p>
+                }
+                else
+                {
+                    <p class="mg-headline">The popular answers…</p>
+                }
                 <MatchSuperBoard Snapshot="Snapshot" />
                 break;
 

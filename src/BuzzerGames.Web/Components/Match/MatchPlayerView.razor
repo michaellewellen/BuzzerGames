@@ -74,7 +74,7 @@
                 break;
 
             case MatchPhase.SuperResult:
-                <p class="big-message">@MatchGame.Money(Snapshot.SuperAmount)</p>
+                <p class="big-message">@(Snapshot.SuperAmount > 0 ? MatchGame.Money(Snapshot.SuperAmount) : "The board…")</p>
                 <p class="hint">@Snapshot.Message</p>
                 break;
 

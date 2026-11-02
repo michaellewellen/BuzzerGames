@@ -6,7 +6,7 @@
 <ol class="mg-super-board">
     @foreach (var row in Snapshot.SuperRows)
     {
-        <li class="mg-super-row @(row.Revealed ? "posted" : "")">
+        <li class="mg-super-row @(row.Revealed ? "posted" : "") @(row.Lit ? "lit" : "")">
             <span class="mg-super-rank">@row.Rank</span>
             <span class="mg-super-answer">
                 @if (row.Revealed)
@@ -22,7 +22,7 @@
                     <span class="mg-hidden">• • •</span>
                 }
             </span>
-            <span class="mg-super-pay">@MatchGame.Money(row.Payout)</span>
+            <span class="mg-super-pay">@(row.Lit ? "★ " : "")@MatchGame.Money(row.Payout)</span>
         </li>
     }
 </ol>

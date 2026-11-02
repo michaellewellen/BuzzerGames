@@ -36,6 +36,20 @@ sealed class MatchTable
         Check.Ok(Game.CloseAnswers(Emcee));
     }
 
+    /// <summary>After the Super Match answers are ranked, the emcee posts the board: $100, $250, then $500.</summary>
+    public void PostBoard()
+    {
+        Check.Equal(0, S.SuperAmount, "the stake is hidden until the board is up");
+        Check.Fails(Game.Continue(Emcee), "moving on before the board is up");
+        foreach (var rank in new[] { 3, 2, 1 })
+        {
+            Check.True(S.SuperRows.Count(r => r.Revealed) == 3 - rank, "rows post from the bottom");
+            Check.Ok(Game.RevealSuperRow(Emcee));
+            Check.True(S.SuperRows[rank - 1].Revealed, $"row {rank} is up");
+        }
+        Check.Fails(Game.RevealSuperRow(Emcee), "a fourth row");
+    }
+
     /// <summary>For stages that go straight to answering (Super and Final): everybody in play answers and the emcee closes.</summary>
     public void AnswerOnly()
     {
@@ -326,13 +340,16 @@ static class MatchChecks
             Check.Fails(t.Game.Rank(t.Emcee, 4), "rank 4");
             Check.Fails(t.Game.Rank(t.Tokens[0], 1), "a celebrity ranking themselves");
             Check.Ok(t.Game.Rank(t.Emcee, 1));
-            Check.True(t.S.SuperRows[0].Revealed && !t.S.SuperRows[1].Revealed, "the top answer is posted on the board");
+            Check.True(t.S.SuperRows.All(r => !r.Revealed), "ranking doesn't post anything: the emcee does that slowly");
             Check.Ok(t.Game.RevealAnswer(t.Tokens[2]));
             Check.Ok(t.Game.Rank(t.Emcee, 0));
             Check.Ok(t.Game.RevealFor(t.Emcee));
             Check.Ok(t.Game.Rank(t.Emcee, 3));
             s = t.S;
             Check.Equal(MatchPhase.SuperResult, s.Phase, "result");
+            t.PostBoard();
+            s = t.S;
+            Check.True(s.SuperRows[0].Lit && !s.SuperRows[1].Lit && s.SuperRows[2].Lit, "rows 1 and 3 were matched, so they light up");
             Check.Equal(500, s.SuperAmount, "the best answer was number one: $500");
             Check.Equal(5000, s.FinalStake, "so the final match is for ten times that");
             Check.True(s.SuperRows.All(r => r.Revealed), "the whole board is posted");
@@ -352,6 +369,7 @@ static class MatchChecks
                     Check.Ok(t.Game.RevealAnswer(t.Tokens[n - 1]));
                     Check.Ok(t.Game.Rank(t.Emcee, rank));
                 }
+                t.PostBoard();
                 Check.Equal(expected, t.S.SuperAmount, $"ranks {string.Join(",", ranks)}");
                 Check.Equal(expected * 10, t.S.FinalStake, "ten times");
             }
@@ -368,6 +386,7 @@ static class MatchChecks
                 Check.Ok(t.Game.RevealAnswer(t.Tokens[0])); Check.Ok(t.Game.Rank(t.Emcee, 2));
                 Check.Ok(t.Game.RevealAnswer(t.Tokens[1])); Check.Ok(t.Game.Rank(t.Emcee, 3));
                 Check.Ok(t.Game.RevealAnswer(t.Tokens[2])); Check.Ok(t.Game.Rank(t.Emcee, 0));
+                t.PostBoard();
                 Check.Equal(250, t.S.SuperAmount, "$250 for the second answer");
                 Check.Fails(t.Game.PickFinalCelebrity(t.Emcee, t.Ids[3]), "picking before the result is acknowledged");
                 Check.Ok(t.Game.Continue(t.Emcee));
@@ -403,7 +422,9 @@ static class MatchChecks
             Check.Ok(t.Game.PickSuperCelebrities(t.Emcee, t.Ids));
             t.AnswerOnly();
             foreach (var tk in t.Tokens) { Check.Ok(t.Game.RevealAnswer(tk)); Check.Ok(t.Game.Rank(t.Emcee, 0)); }
+            t.PostBoard();
             Check.Equal(50, t.S.SuperAmount, "the consolation");
+            Check.True(t.S.SuperRows.All(r => r.Revealed && !r.Lit), "all three rows are posted and none lit");
             Check.Ok(t.Game.Continue(t.Emcee));
             Check.Ok(t.Game.PickFinalCelebrity(t.Emcee, t.Ids[0]));
             t.AnswerOnly();
@@ -481,7 +502,7 @@ static class MatchChecks
                             var need = Math.Min(3, s.Celebrities.Count);
                             Check.Ok(t.Game.PickSuperCelebrities(t.Emcee, s.Celebrities.OrderBy(_ => rnd.Next()).Take(need).Select(c => c.Id)));
                             break;
-                        case MatchPhase.SuperResult: Check.Ok(t.Game.Continue(t.Emcee)); break;
+                        case MatchPhase.SuperResult: t.PostBoard(); Check.Ok(t.Game.Continue(t.Emcee)); break;
                         case MatchPhase.FinalPick: Check.Ok(t.Game.PickFinalCelebrity(t.Emcee, s.Celebrities[rnd.Next(s.Celebrities.Count)].Id)); break;
                         default: throw new Exception("unexpected phase " + s.Phase);
                     }

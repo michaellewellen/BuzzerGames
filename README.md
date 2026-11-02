@@ -92,7 +92,7 @@ just know which team they are on and speak their answers out loud. Only the emce
    nobody left is skipped.
 4. **Ties** after the six questions are settled by one tiebreaker question per team with every celebrity back in play, repeated until someone leads.
 5. **The Super Match** goes to the team with more matches. Part one: the contestant calls on three celebrities to fill in a simple blank
-   ("Super ___"). The emcee ranks each answer against the three most popular answers, which only the emcee can see, and the best one sets the stake:
+   ("Super ___"). The emcee ranks each answer against the three most popular answers, which only the emcee can see. Then the emcee reveals the board slowly, $100 first, then $250, then $500; a row a celebrity matched lights up, and all three are shown. The best match sets the stake:
    **$500, $250 or $100**, or a consolation **$50** if none made the board. Part two: the contestant plays for **ten times** that, picks one celebrity,
    says their answer out loud, and wins only if the emcee judges an exact match.
 

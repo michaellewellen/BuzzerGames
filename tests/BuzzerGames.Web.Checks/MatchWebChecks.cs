@@ -178,15 +178,29 @@ static class MatchWebChecks
             Check.True(Render.Has(emcee, "Looks like #1") && Render.Has(emcee, "Not on the board") && Render.Has(emcee, "#3"), "rank buttons with the computer's suggestion");
             Check.Ok(t.Game.Rank(t.Emcee, 1));
             tv = Render.MgTv(t.S);
-            Check.True(Render.Has(tv, "Alpha") && !Render.Has(tv, "Charlie"), "only the posted answer is on the TV");
-            Check.True(Render.ShowsAnyCase(tv, "#1 · $500"), "and the celebrity's desk says what it earned");
+            Check.True(!Render.Has(tv, "Alpha") && !Render.Has(tv, "Charlie"), "ranking posts nothing on the TV");
+            Check.True(!Render.ShowsAnyCase(tv, "#1 · $500"), "and the desk doesn't give the rank away");
             Check.Ok(t.Game.RevealAnswer(t.Tokens[2])); Check.Ok(t.Game.Rank(t.Emcee, 0));
-            Check.True(Render.Has(Render.MgTv(t.S), "NOT ON THE BOARD"), "an answer that wasn't on the board");
             Check.Ok(t.Game.RevealAnswer(t.Tokens[3])); Check.Ok(t.Game.Rank(t.Emcee, 3));
 
             tv = Render.MgTv(t.S);
-            Check.True(Render.Has(tv, "$500 × 10 = $5,000"), "the stake on the TV");
-            Check.True(Render.Has(tv, "Charlie"), "the whole board is posted now");
+            Check.True(Render.Has(tv, "The popular answers") && !Render.Has(tv, "$5,000"), "the board is next and the stake is still hidden");
+            Check.True(!Render.Has(tv, "Alpha") && !Render.Has(tv, "Charlie"), "no answer posted yet");
+            Check.True(Render.Has(Render.MgEmcee(t), "Reveal the $100 answer") && Render.Has(Render.MgEmcee(t), "A celebrity matched this one"), "the emcee reveals $100 first");
+            for (var i = 0; i < 4; i++) Check.True(!Render.Has(Render.MgPlayer(t, i), "$500"), "no phone spells out the stake");
+            Check.Ok(t.Game.RevealSuperRow(t.Emcee));
+            tv = Render.MgTv(t.S);
+            Check.True(Render.Has(tv, "Charlie") && !Render.Has(tv, "Bravo") && !Render.Has(tv, "Alpha"), "just the $100 answer is up");
+            Check.True(Render.Has(tv, "mg-super-row posted  lit") || Render.Has(tv, "lit"), "and it lights up because it was matched");
+            Check.True(Render.Has(Render.MgEmcee(t), "Reveal the $250 answer") && Render.Has(Render.MgEmcee(t), "Nobody matched this one"), "then $250, which nobody matched");
+            Check.Ok(t.Game.RevealSuperRow(t.Emcee));
+            tv = Render.MgTv(t.S);
+            Check.True(Render.Has(tv, "Bravo") && Render.Count(tv, "mg-super-row posted") == 2 && Render.Count(tv, " lit\"") == 1, "an unmatched row is shown but not lit");
+            Check.True(!Render.Has(Render.MgEmcee(t), "On to the final match"), "not done until the $500 row is up");
+            Check.Ok(t.Game.RevealSuperRow(t.Emcee));
+            tv = Render.MgTv(t.S);
+            Check.True(Render.Has(tv, "Alpha") && Render.Has(tv, "$500 × 10 = $5,000") || Render.ShowsAnyCase(tv, "$500 × 10 = $5,000"), "the whole board and the stake");
+            Check.True(Render.Has(Render.MgEmcee(t), "On to the final match"), "and the emcee can go on");
             Check.Ok(t.Game.Continue(t.Emcee));
             Check.True(Render.Has(Render.MgTv(t.S), "Playing for $5,000"), "the final match");
             Check.Ok(t.Game.PickFinalCelebrity(t.Emcee, t.Ids[1]));
@@ -224,7 +238,8 @@ static class MatchWebChecks
                             Check.Ok(t.Game.RevealAnswer(t.TokenOfNumber(s.Revealing!.Number)));
                             Check.Ok(s.Stage == MatchStage.Super ? t.Game.Rank(t.Emcee, rnd.Next(4)) : t.Game.Judge(t.Emcee, rnd.Next(3) == 0));
                             break;
-                        case MatchPhase.QuestionDone: case MatchPhase.SuperResult: Check.Ok(t.Game.Continue(t.Emcee)); break;
+                        case MatchPhase.QuestionDone: Check.Ok(t.Game.Continue(t.Emcee)); break;
+                        case MatchPhase.SuperResult: t.PostBoard(); Check.Ok(t.Game.Continue(t.Emcee)); break;
                         case MatchPhase.SuperPick:
                             Check.Ok(t.Game.PickSuperCelebrities(t.Emcee, s.Celebrities.OrderBy(_ => rnd.Next()).Take(Math.Min(3, s.Celebrities.Count)).Select(c => c.Id)));
                             break;

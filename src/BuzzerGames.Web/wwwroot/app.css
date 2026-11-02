@@ -758,3 +758,5 @@ a.game-tile:hover { border-color: var(--gold); }
 .mg-choose .btn { width: 100%; }
 .mg-rank-buttons { flex-wrap: wrap; }
 .mg-rejudge { padding: .3rem .6rem; font-size: .85rem; }
+.mg-super-row.lit { border-color: var(--good); background: #14633a; box-shadow: 0 0 2vw var(--good); animation: mg-pop .6s ease-out both; }
+.mg-super-row.lit .mg-super-pay { color: var(--gold); }

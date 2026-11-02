@@ -36,7 +36,7 @@ public sealed record CelebrityInfo(
     bool MatchedA,
     bool MatchedB);
 
-public sealed record SuperRowInfo(int Rank, int Payout, string Answer, bool Revealed);   // Answer is SECRET until Revealed
+public sealed record SuperRowInfo(int Rank, int Payout, string Answer, bool Revealed, bool Lit);   // Answer is SECRET until Revealed; Lit = a celebrity matched it (only once Revealed)
 
 public sealed record MatchSnapshot(
     string Code,
