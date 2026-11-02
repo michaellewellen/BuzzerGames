@@ -1,0 +1,55 @@
+@*
+    One celebrity's desk. What it shows depends on how far the question has got, and a typed answer stays hidden until that
+    celebrity's reveal. On the big screen nobody's answer is ever drawn before then.
+*@
+
+<div class="mg-desk @(Celebrity.Playing ? "" : "out") @(Up ? "up" : "") @OutcomeClass">
+    <span class="mg-desk-num">@Celebrity.Number</span>
+    <span class="mg-desk-name">@Celebrity.Name</span>
+
+    @if (Celebrity.Playing)
+    {
+        <span class="mg-card">
+            @if (Celebrity.Reveal == RevealState.Hidden)
+            {
+                @if (Snapshot.Phase == MatchPhase.Answering)
+                {
+                    <span class="mg-status">@(Celebrity.Submitted ? "✔ locked in" : "typing…")</span>
+                }
+                else
+                {
+                    <span class="mg-status">@(Celebrity.Submitted ? "✔" : "")<span class="mg-hidden"> • • •</span></span>
+                }
+            }
+            else
+            {
+                <span class="mg-answer">@Celebrity.Answer</span>
+            }
+        </span>
+        @if (Celebrity.Reveal == RevealState.Judged)
+        {
+            <span class="mg-stamp">@Stamp</span>
+        }
+    }
+    else
+    {
+        <span class="mg-status">@(Celebrity.OutForTeam ? "matched, sitting out" : "sitting out")</span>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public MatchSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public CelebrityInfo Celebrity { get; set; } = default!;
+
+    private bool Up => Snapshot.Revealing?.Id == Celebrity.Id;
+
+    private bool InSuper => Snapshot.Stage == MatchStage.Super;
+
+    private string OutcomeClass => Celebrity.Reveal != RevealState.Judged ? ""
+        : InSuper ? (Celebrity.Outcome > 0 ? "match" : "nomatch")
+        : Celebrity.Outcome == 1 ? "match" : "nomatch";
+
+    private string Stamp => InSuper
+        ? (Celebrity.Outcome > 0 ? $"#{Celebrity.Outcome} · {MatchGame.Money(MatchGame.SuperPayouts[Celebrity.Outcome - 1])}" : "NOT ON THE BOARD")
+        : Celebrity.Outcome == 1 ? "★ MATCH ★" : "NO MATCH";
+}

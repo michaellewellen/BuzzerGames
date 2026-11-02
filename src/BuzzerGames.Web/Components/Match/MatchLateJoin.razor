@@ -1,0 +1,27 @@
+@* A small strip for someone who opens the game after it has started: join the panel, and play from the next question. *@
+
+<section class="card mg-late">
+    <h2>Join the panel</h2>
+    <p class="muted">The game is already under way. Join as a celebrity and you'll be in from the next question.</p>
+    <input class="text-input" placeholder="Your name" maxlength="@MatchGame.NameMaxLength"
+           @bind="_name" @bind:event="oninput" @onkeydown="OnKeyDown" />
+    <button class="btn btn-wide" @onclick="Join">Join as a celebrity</button>
+    @if (Error is not null)
+    {
+        <p class="error">@Error</p>
+    }
+</section>
+
+@code {
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback<(Role Role, string Name)> OnJoin { get; set; }
+
+    private string _name = "";
+
+    private Task Join() => OnJoin.InvokeAsync((Role.Player, _name));
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Join();
+    }
+}

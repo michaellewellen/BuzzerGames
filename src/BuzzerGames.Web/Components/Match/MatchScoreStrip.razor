@@ -1,0 +1,23 @@
+@* The two teams and their match counts. The team that is up is highlighted. Shared by the big screen and the emcee's phone. *@
+
+<div class="scores mg-scores">
+    @for (var team = 0; team < MatchGame.Teams; team++)
+    {
+        var t = team;
+        <div class="score mg-team @PasswordText.TeamClass(t) @(Snapshot.Team == t ? "control" : "")">
+            <span class="score-name">
+                @Snapshot.TeamName(t)
+                @if (Snapshot.Team == t && Snapshot.Phase is not (MatchPhase.GameOver or MatchPhase.Lobby))
+                {
+                    <span class="control-tag">@(Snapshot.Stage is MatchStage.Super or MatchStage.Final || Snapshot.SuperTeam == t ? "SUPER" : "UP")</span>
+                }
+            </span>
+            <span class="score-value">@Snapshot.Scores[t]</span>
+            <span class="mg-matches-label">@(Snapshot.Scores[t] == 1 ? "match" : "matches")</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public MatchSnapshot Snapshot { get; set; } = default!;
+}

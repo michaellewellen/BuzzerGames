@@ -12,6 +12,7 @@
     <EmbeddedResource Include="Data\PressYourLuck\*.json" />
     <EmbeddedResource Include="Data\Password\*.json" />
     <EmbeddedResource Include="Data\Password\*.txt" />
+    <EmbeddedResource Include="Data\Match\*.json" />
   </ItemGroup>
 
 </Project>

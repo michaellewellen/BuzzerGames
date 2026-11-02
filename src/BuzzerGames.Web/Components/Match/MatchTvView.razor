@@ -1,0 +1,90 @@
+@*
+    The big screen. It is the studio: the two teams' match counts, the question once it has been asked, and the panel of celebrity
+    desks. A desk never shows its answer before that celebrity's reveal, and the Super Match board never shows an answer before
+    the emcee posts it.
+*@
+
+<main class="tv mg-tv">
+    <header class="tv-top">
+        <span>MATCH GAME · @Snapshot.Label.ToUpperInvariant()</span>
+        <span>Room @Snapshot.Code</span>
+    </header>
+
+    <section class="mg-stage">
+        @switch (Snapshot.Phase)
+        {
+            case MatchPhase.Ready:
+                <p class="mg-kicker">@Snapshot.Label</p>
+                <p class="mg-headline @PasswordText.TeamClass(Snapshot.Team)">@Snapshot.TeamName(Snapshot.Team) is up!</p>
+                <p class="mg-sub">@Snapshot.Message</p>
+                break;
+
+            case MatchPhase.SuperPick:
+                <p class="mg-kicker">SUPER MATCH</p>
+                <p class="mg-headline @PasswordText.TeamClass(Snapshot.SuperTeam)">@Snapshot.TeamName(Snapshot.SuperTeam) goes to the Super Match!</p>
+                <p class="mg-sub">Call on three celebrities.</p>
+                <MatchSuperBoard Snapshot="Snapshot" />
+                break;
+
+            case MatchPhase.FinalPick:
+                <p class="mg-kicker">SUPER MATCH · FINAL</p>
+                <p class="mg-headline">Playing for @MatchGame.Money(Snapshot.FinalStake)</p>
+                <p class="mg-sub">Pick one celebrity. Match them exactly.</p>
+                <MatchSuperBoard Snapshot="Snapshot" />
+                break;
+
+            case MatchPhase.SuperResult:
+                <p class="mg-kicker">SUPER MATCH</p>
+                <p class="mg-headline">@MatchGame.Money(Snapshot.SuperAmount) × 10 = @MatchGame.Money(Snapshot.FinalStake)</p>
+                <MatchSuperBoard Snapshot="Snapshot" />
+                break;
+
+            case MatchPhase.GameOver:
+                <p class="mg-kicker">GAME OVER</p>
+                <p class="mg-headline">@Snapshot.Message</p>
+                <MatchSuperBoard Snapshot="Snapshot" />
+                break;
+
+            default:
+                <p class="mg-question">@Snapshot.QuestionText</p>
+                @if (Snapshot.Stage == MatchStage.Super)
+                {
+                    <MatchSuperBoard Snapshot="Snapshot" />
+                }
+                @if (Snapshot.Guess.Length > 0 && Snapshot.Stage != MatchStage.Super)
+                {
+                    <p class="mg-guess @PasswordText.TeamClass(Snapshot.Team)">
+                        @(Snapshot.Stage == MatchStage.Final ? "Contestant" : Snapshot.TeamName(Snapshot.Team)): <strong>“@Snapshot.Guess”</strong>
+                    </p>
+                }
+                else if (Snapshot.Phase == MatchPhase.Guessing && Snapshot.Stage != MatchStage.Super)
+                {
+                    <p class="mg-guess @PasswordText.TeamClass(Snapshot.Team)">@Snapshot.Message</p>
+                }
+                else if (Snapshot.Phase == MatchPhase.Answering)
+                {
+                    <p class="mg-guess">@Snapshot.Message</p>
+                }
+                break;
+        }
+    </section>
+
+    @if (ShowDesks)
+    {
+        <section class="mg-panel">
+            @foreach (var c in Snapshot.Celebrities)
+            {
+                <MatchDesk Snapshot="Snapshot" Celebrity="c" />
+            }
+        </section>
+    }
+
+    <MatchScoreStrip Snapshot="Snapshot" />
+</main>
+
+@code {
+    [Parameter, EditorRequired] public MatchSnapshot Snapshot { get; set; } = default!;
+
+    // The desks are the panel: shown for every question, hidden on the title-card screens between questions.
+    private bool ShowDesks => Snapshot.Phase is MatchPhase.Ready or MatchPhase.Answering or MatchPhase.Guessing or MatchPhase.Reveal or MatchPhase.QuestionDone;
+}

@@ -1085,6 +1085,8 @@ Run("pw home page: Password Plus is listed as playable, and Super Password is go
     Check.True(BuzzerGames.Web.Games.GameCatalog.All.All(g => g.Name != "Super Password"), "no separate Super Password tile");
 });
 
+MatchWebChecks.Run(Run);
+
 Console.WriteLine();
 Console.WriteLine($"{passed} passed, {failed} failed");
 return failed == 0 ? 0 : 1;

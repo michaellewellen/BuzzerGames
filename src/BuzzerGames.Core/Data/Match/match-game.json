@@ -1,0 +1,175 @@
+// Match Game content. Replace all of this with your own.
+//
+// names:      first names that fill the {name} in a question (family, friends). Each name is used once before any repeats.
+//             The questions avoid "he" and "she" on purpose, so any name fits any question.
+// questions:  the blanks the celebrities fill in. {name} becomes the next name. Write the blank as ___.
+// supers:     the Super Match blanks. "answers" is the top three popular answers, best first ($500, $250, $100). Each answer is a list of
+//             spellings that count as it (the first one is shown on the board). The computer only suggests a ranking; the emcee decides.
+//             The ranked answers below are guesses, not survey results: change them to what you think your room would say.
+{
+  "names": [
+    "Donald",
+    "Dolly",
+    "Gus",
+    "Marge",
+    "Walt"
+  ],
+  "questions": [
+    "{name} is so cheap, there's a ___ in the pantry that expired in 1998.",
+    "The one thing {name} is terrible at hiding is ___.",
+    "{name}'s favorite thing to say at a restaurant is, \"Is there anything on the menu with ___?\"",
+    "Nobody wants to be stuck in an elevator with {name} because of the ___.",
+    "{name} once got in trouble for putting ___ in the microwave.",
+    "At 3 a.m., {name} can be found in the kitchen eating ___.",
+    "{name} would win a gold medal for ___.",
+    "If {name} ever became famous, it would be for ___.",
+    "The strangest thing in {name}'s car right now is ___.",
+    "Whenever {name} hosts a party, there's always too much ___.",
+    "{name} takes forever to get ready because of ___.",
+    "{name} is so stubborn, even a ___ couldn't change that mind.",
+    "{name}'s secret talent is ___.",
+    "The worst gift {name} ever gave anyone was ___.",
+    "{name} spends way too much money on ___.",
+    "The first thing {name} would grab in a fire is ___."
+  ],
+  "supers": [
+    {
+      "text": "Super ___",
+      "answers": [
+        [
+          "Bowl",
+          "Super Bowl"
+        ],
+        [
+          "Man",
+          "Superman"
+        ],
+        [
+          "Mario",
+          "Super Mario"
+        ]
+      ]
+    },
+    {
+      "text": "___ chips",
+      "answers": [
+        [
+          "Potato",
+          "Potato chips"
+        ],
+        [
+          "Poker",
+          "Poker chips"
+        ],
+        [
+          "Fish and",
+          "Fish & chips",
+          "Fish n"
+        ]
+      ]
+    },
+    {
+      "text": "___ cream",
+      "answers": [
+        [
+          "Ice",
+          "Ice cream"
+        ],
+        [
+          "Sour",
+          "Sour cream"
+        ],
+        [
+          "Whipped",
+          "Whipped cream"
+        ]
+      ]
+    },
+    {
+      "text": "Hot ___",
+      "answers": [
+        [
+          "Dog",
+          "Hot dog"
+        ],
+        [
+          "Chocolate",
+          "Cocoa",
+          "Hot chocolate"
+        ],
+        [
+          "Tub",
+          "Hot tub"
+        ]
+      ]
+    },
+    {
+      "text": "___ ball",
+      "answers": [
+        [
+          "Foot",
+          "Football"
+        ],
+        [
+          "Basket",
+          "Basketball"
+        ],
+        [
+          "Base",
+          "Baseball"
+        ]
+      ]
+    },
+    {
+      "text": "___ bread",
+      "answers": [
+        [
+          "Banana",
+          "Banana bread"
+        ],
+        [
+          "Corn",
+          "Cornbread"
+        ],
+        [
+          "White",
+          "White bread"
+        ]
+      ]
+    },
+    {
+      "text": "Black ___",
+      "answers": [
+        [
+          "Friday",
+          "Black Friday"
+        ],
+        [
+          "Cat",
+          "Black cat"
+        ],
+        [
+          "Board",
+          "Blackboard"
+        ]
+      ]
+    },
+    {
+      "text": "Fire ___",
+      "answers": [
+        [
+          "Truck",
+          "Fire truck"
+        ],
+        [
+          "Place",
+          "Fireplace"
+        ],
+        [
+          "Fighter",
+          "Firefighter"
+        ]
+      ]
+    }
+  ]
+}

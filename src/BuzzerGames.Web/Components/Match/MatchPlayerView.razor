@@ -1,0 +1,117 @@
+@*
+    A celebrity's phone. It does three jobs: type your secret answer when you're in the question, press REVEAL when it's your
+    turn, and otherwise wait. It never shows anyone else's answer before the big screen does.
+*@
+
+<main class="phone player mg-player">
+    <header class="phone-header">
+        <span class="pill">@Me.Name</span>
+        <span class="my-score">#@Me.Number</span>
+    </header>
+
+    <p class="phone-sub">@Snapshot.Label · @Snapshot.TeamName(0) @Snapshot.Scores[0] – @Snapshot.Scores[1] @Snapshot.TeamName(1)</p>
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @if (!Snapshot.PlayingNow.Any(c => c.Id == Me.Id) && Snapshot.Phase is MatchPhase.Answering or MatchPhase.Guessing or MatchPhase.Reveal or MatchPhase.QuestionDone or MatchPhase.Ready)
+    {
+        <p class="big-message">You're sitting out</p>
+        <p class="hint">@(Me.OutForTeam ? $"You already matched for {Snapshot.TeamName(Snapshot.Team)}, so you rest until the next team's turn." : "This question isn't yours. Watch the big screen.")</p>
+    }
+    else
+    {
+        @switch (Snapshot.Phase)
+        {
+            case MatchPhase.Ready:
+                <p class="big-message">Get ready…</p>
+                <p class="hint">The emcee is about to read the question to @Snapshot.TeamName(Snapshot.Team).</p>
+                break;
+
+            case MatchPhase.Answering:
+                <p class="mg-phone-question">@Snapshot.QuestionText</p>
+                <input class="text-input mg-answer-input" placeholder="Your answer" maxlength="@MatchGame.AnswerMaxLength"
+                       @bind="_text" @bind:event="oninput" @onkeydown="OnKeyDown" />
+                <button class="btn btn-start btn-wide" @onclick="Send">@(Me.Submitted ? "Change my answer" : "Lock it in")</button>
+                @if (Me.Submitted)
+                {
+                    <p class="hint">✔ Locked in: <strong>@Me.Answer</strong></p>
+                }
+                break;
+
+            case MatchPhase.Guessing:
+                <p class="mg-phone-question">@Snapshot.QuestionText</p>
+                <p class="hint">Your answer is locked in: <strong>@Me.Answer</strong></p>
+                <p class="hint">@Snapshot.TeamName(Snapshot.Team) is deciding…</p>
+                break;
+
+            case MatchPhase.Reveal:
+                @if (Snapshot.Revealing?.Id == Me.Id && Me.Reveal == RevealState.Hidden)
+                {
+                    <p class="mg-phone-question">@Snapshot.QuestionText</p>
+                    <button class="btn btn-start btn-wide mg-reveal-btn" @onclick="() => Act(Game.RevealAnswer(Token))">REVEAL<small>@Me.Answer</small></button>
+                    <p class="hint">Show the room, then explain it, or celebrate!</p>
+                }
+                else
+                {
+                    <p class="mg-phone-question">@Snapshot.QuestionText</p>
+                    <p class="hint">Your answer: <strong>@Me.Answer</strong></p>
+                    <p class="hint">@(Me.Reveal == RevealState.Hidden ? $"Waiting for {Snapshot.Revealing?.Name} to reveal…" : Snapshot.Revealing is { } up ? $"Now it's {up.Name}…" : "")</p>
+                }
+                break;
+
+            case MatchPhase.QuestionDone:
+                <p class="big-message">@(Me.Outcome == 1 ? "★ MATCH! ★" : "No match")</p>
+                <p class="hint">@Snapshot.Message</p>
+                break;
+
+            case MatchPhase.SuperPick:
+            case MatchPhase.FinalPick:
+                <p class="big-message">Super Match</p>
+                <p class="hint">@Snapshot.Message</p>
+                break;
+
+            case MatchPhase.SuperResult:
+                <p class="big-message">@MatchGame.Money(Snapshot.SuperAmount)</p>
+                <p class="hint">@Snapshot.Message</p>
+                break;
+
+            case MatchPhase.GameOver:
+                <p class="winner">@Snapshot.Message</p>
+                break;
+        }
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public MatchGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public MatchSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+    [Parameter, EditorRequired] public Guid CelebrityId { get; set; }
+
+    private string _text = "";
+    private string _lastQuestion = "";
+    private string? _error;
+
+    private CelebrityInfo Me => Snapshot.Find(CelebrityId)!;
+
+    // A new question starts with an empty box (or whatever you already locked in for it).
+    protected override void OnParametersSet()
+    {
+        var key = Snapshot.Label + "|" + Snapshot.QuestionText;
+        if (key == _lastQuestion) return;
+        _lastQuestion = key;
+        _text = Me.Answer;
+        _error = null;
+    }
+
+    private void Act(Result r) => _error = r.Ok ? null : r.Error;
+    private void Send() => Act(Game.Answer(Token, _text));
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") Send();
+    }
+}

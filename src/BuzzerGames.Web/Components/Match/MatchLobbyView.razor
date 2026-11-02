@@ -1,0 +1,174 @@
+@inject IJSRuntime JS
+
+@*
+    The lobby, in the same two flavors as the other games:
+      Phone flavor: join as the Emcee or as a Celebrity; the emcee also names the teams, removes anyone who joined by mistake, and starts.
+      Big-screen flavor (BoardMode): a giant QR code and the roster. It never takes a seat.
+*@
+
+<main class="lobby mg-lobby @(BoardMode ? "board-mode" : "")">
+    <header class="lobby-header">
+        <h1 class="logo">MATCH GAME</h1>
+        <p class="room-line">Room <span class="room-code">@Snapshot.Code</span></p>
+    </header>
+
+    <div class="lobby-grid">
+
+        <section class="card">
+            @if (BoardMode)
+            {
+                <h2>Take a seat</h2>
+                <p>Scan the QR code with your phone, then choose <strong>Emcee</strong> or <strong>Celebrity</strong>. You need an emcee and at least two celebrities, and there's no limit on how many.</p>
+                <p class="muted">The two contestant teams don't need phones.</p>
+            }
+            else if (Seat.Role == Role.Emcee)
+            {
+                <h2>You're the emcee</h2>
+                <p class="muted">Name the two teams, then start once the celebrities are in.</p>
+                <div class="mg-team-edit">
+                    <input class="text-input" maxlength="@MatchGame.NameMaxLength" @bind="_teamA" @bind:event="oninput" aria-label="Team A name" />
+                    <input class="text-input" maxlength="@MatchGame.NameMaxLength" @bind="_teamB" @bind:event="oninput" aria-label="Team B name" />
+                    <button class="btn btn-quiet" @onclick="SaveTeams">Save team names</button>
+                </div>
+                @if (Snapshot.CanStart)
+                {
+                    <button class="btn btn-start btn-wide" @onclick="StartGame">Start Game</button>
+                }
+                else
+                {
+                    <p class="hint">Waiting for at least two celebrities…</p>
+                }
+            }
+            else if (Seat.Role == Role.Player)
+            {
+                <h2>You're in!</h2>
+                <p>You joined as the celebrity <strong>@MyName</strong>. Waiting for the emcee to start…</p>
+            }
+            else if (_pendingRole is not null)
+            {
+                <h2>Join as @(_pendingRole == Role.Emcee ? "emcee" : "a celebrity")</h2>
+                <input class="text-input" placeholder="Your name" maxlength="@MatchGame.NameMaxLength"
+                       @bind="_name" @bind:event="oninput" @onkeydown="OnKeyDown" />
+                <div class="button-row">
+                    <button class="btn" @onclick="ConfirmJoin">Join</button>
+                    <button class="btn btn-quiet" @onclick="CancelJoin">Back</button>
+                </div>
+            }
+            else
+            {
+                <h2>Join the game</h2>
+                <div class="button-column">
+                    <button class="btn" disabled="@(Snapshot.EmceeName is not null)" @onclick="() => BeginJoin(Role.Emcee)">Join as Emcee</button>
+                    <button class="btn mg-join-celeb" @onclick="() => BeginJoin(Role.Player)">Join as a Celebrity</button>
+                </div>
+            }
+
+            @if (Error is not null)
+            {
+                <p class="error">@Error</p>
+            }
+            @if (_error is not null)
+            {
+                <p class="error">@_error</p>
+            }
+        </section>
+
+        <section class="card">
+            <h2>At the table</h2>
+            <ul class="roster">
+                <li class="@(Snapshot.EmceeName is null ? "open" : "filled")">
+                    <span class="seat-label">Emcee</span>
+                    <span class="seat-name">@(Snapshot.EmceeName ?? "waiting…")</span>
+                </li>
+                <li class="filled">
+                    <span class="seat-label">Teams</span>
+                    <span class="seat-name">@Snapshot.TeamName(0) vs @Snapshot.TeamName(1)</span>
+                </li>
+                @foreach (var c in Snapshot.Celebrities)
+                {
+                    <li class="filled">
+                        <span class="seat-label">Celebrity @c.Number</span>
+                        <span class="seat-name">
+                            @c.Name
+                            @if (Seat.Role == Role.Emcee)
+                            {
+                                <button class="mg-remove" aria-label="Remove @c.Name" @onclick="() => Remove(c.Id)">✕</button>
+                            }
+                        </span>
+                    </li>
+                }
+                @if (Snapshot.Celebrities.Count < MatchGame.MinCelebrities)
+                {
+                    <li class="open">
+                        <span class="seat-label">Celebrity @(Snapshot.Celebrities.Count + 1)</span>
+                        <span class="seat-name">waiting…</span>
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <section class="card qr-card">
+            <h2>Scan to join</h2>
+            <div id="qr-@Snapshot.Code" class="qr"></div>
+            <p class="join-url">@_joinUrl</p>
+        </section>
+
+    </div>
+</main>
+
+@code {
+    [Parameter, EditorRequired] public MatchGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public MatchSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Seat Seat { get; set; }
+    [Parameter] public Guid Token { get; set; }
+    [Parameter] public bool BoardMode { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback<(Role Role, string Name)> OnJoin { get; set; }
+
+    private Role? _pendingRole;
+    private string _name = "";
+    private string _joinUrl = "";
+    private string? _error;
+    private string? _teamA;
+    private string? _teamB;
+
+    private string MyName => Snapshot.Find(Seat.PlayerId)?.Name ?? "";
+
+    protected override void OnParametersSet()
+    {
+        _teamA ??= Snapshot.TeamName(0);
+        _teamB ??= Snapshot.TeamName(1);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        _joinUrl = await JS.InvokeAsync<string>("bg.renderQr", $"qr-{Snapshot.Code}", $"/match-game/{Snapshot.Code}");
+        StateHasChanged();
+    }
+
+    private void BeginJoin(Role role) { _pendingRole = role; _name = ""; }
+    private void CancelJoin() => _pendingRole = null;
+
+    private async Task ConfirmJoin()
+    {
+        if (_pendingRole is null) return;
+        await OnJoin.InvokeAsync((_pendingRole.Value, _name));
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await ConfirmJoin();
+    }
+
+    private void Act(Result r) => _error = r.Ok ? null : r.Error;
+    private void SaveTeams() => Act(Game.SetTeamNames(Token, _teamA, _teamB));
+    private void StartGame()
+    {
+        // Whatever is typed in the team boxes counts, saved or not.
+        var named = Game.SetTeamNames(Token, _teamA, _teamB);
+        if (!named.Ok) { _error = named.Error; return; }
+        Act(Game.Start(Token));
+    }
+    private void Remove(Guid id) => Act(Game.RemoveCelebrity(Token, id));
+}

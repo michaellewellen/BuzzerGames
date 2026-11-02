@@ -694,3 +694,67 @@ a.game-tile:hover { border-color: var(--gold); }
 .pw-word.posted .pw-word-text { opacity: .8; }
 
 .pw-frame .pw-scores { margin-top: 1.6vh; }
+
+/* ---------- Match Game ---------- */
+
+.mg-late { max-width: 28rem; margin: 1rem auto; }
+.mg-team-edit { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1rem; }
+.mg-remove { background: transparent; border: 0; color: var(--bad); font-size: 1.1rem; cursor: pointer; margin-left: .6rem; }
+.btn.mg-join-celeb { background: var(--team-b); }
+
+.mg-scores .mg-matches-label { display: block; font-size: .8rem; opacity: .75; text-transform: uppercase; letter-spacing: .08em; }
+.mg-team.team-a .score-name { color: var(--team-a); }
+.mg-team.team-b .score-name { color: var(--team-b); }
+.tv .mg-scores .mg-matches-label { font-size: min(1.2vw, 2.2vh); }
+
+.mg-tv { background: radial-gradient(ellipse at 50% 20%, #1a1f7a 0%, #070a3a 70%); }
+.mg-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6vh; padding: 1vh 4vw; text-align: center; min-height: 0; }
+.mg-kicker { font-size: min(2vw, 3.6vh); letter-spacing: .3em; color: var(--gold); margin: 0; }
+.mg-headline { font-size: min(5.5vw, 10vh); font-weight: 900; line-height: 1.05; margin: 0; text-shadow: .2vw .2vw 0 #000; }
+.mg-headline.team-a { color: var(--team-a); }
+.mg-headline.team-b { color: var(--team-b); }
+.mg-sub { font-size: min(2.4vw, 4vh); opacity: .85; margin: 0; }
+.mg-question { font-size: min(5vw, 9vh); font-weight: 800; line-height: 1.15; margin: 0; max-width: 90vw; text-shadow: .15vw .15vw 0 #000; }
+.mg-guess { font-size: min(2.6vw, 4.6vh); margin: 0; }
+.mg-guess.team-a strong { color: var(--team-a); }
+.mg-guess.team-b strong { color: var(--team-b); }
+
+.mg-panel { display: flex; gap: .8vw; padding: 1vh 1.5vw; justify-content: center; flex: 0 0 auto; flex-wrap: wrap; }
+.mg-desk {
+    position: relative; flex: 1 1 0; min-width: 9vw; max-width: 20vw; min-height: 22vh;
+    display: flex; flex-direction: column; align-items: center; gap: .6vh; padding: 1vh .6vw;
+    background: var(--panel); border: .3vw solid var(--edge); border-radius: 1vw;
+}
+.mg-desk.out { opacity: .35; }
+.mg-desk.up { border-color: var(--gold); box-shadow: 0 0 2vw var(--gold); }
+.mg-desk.match { border-color: var(--good); background: #14633a; }
+.mg-desk.nomatch { border-color: var(--bad); background: #5a1d1d; }
+.mg-desk-num { font-size: min(1.6vw, 3vh); color: var(--gold); font-weight: 800; }
+.mg-desk-name { font-size: min(1.8vw, 3.4vh); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.mg-card { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; width: 100%; }
+.mg-answer { font-size: min(2.2vw, 4.2vh); font-weight: 800; overflow-wrap: anywhere; animation: mg-flip .5s ease-out both; }
+.mg-status { font-size: min(1.5vw, 2.8vh); opacity: .8; }
+.mg-hidden { letter-spacing: .3em; opacity: .6; }
+.mg-stamp { font-size: min(1.7vw, 3.2vh); font-weight: 900; letter-spacing: .06em; animation: mg-pop .5s ease-out both; }
+.mg-desk.match .mg-stamp { color: var(--gold); }
+.mg-desk.nomatch .mg-stamp { color: #ff9a9a; }
+@keyframes mg-flip { from { transform: rotateX(90deg); opacity: 0; } to { transform: rotateX(0); opacity: 1; } }
+@keyframes mg-pop { from { transform: scale(.3); opacity: 0; } 60% { transform: scale(1.25); } to { transform: scale(1); opacity: 1; } }
+
+.mg-super-board { list-style: none; padding: 0; margin: 1vh auto; display: flex; flex-direction: column; gap: 1vh; width: min(80vw, 60rem); }
+.mg-super-row { display: flex; align-items: center; gap: 1.5vw; padding: 1vh 1.5vw; background: var(--panel); border: .25vw solid var(--edge); border-radius: .8vw; font-size: min(3vw, 5.4vh); font-weight: 800; }
+.mg-super-row.posted { border-color: var(--gold); background: #1c2a9a; }
+.mg-super-rank { color: var(--gold); width: 2ch; }
+.mg-super-answer { flex: 1; text-align: left; }
+.mg-super-pay { color: var(--value-gold); }
+.phone .mg-super-board { width: 100%; }
+.phone .mg-super-row { font-size: 1.1rem; padding: .5rem .8rem; gap: .8rem; }
+
+.mg-phone-question, .mg-emcee-question { font-size: 1.4rem; font-weight: 700; text-align: center; margin: .5rem 0; }
+.mg-emcee-answer { font-size: 1.8rem; font-weight: 800; text-align: center; margin: .4rem 0; color: var(--gold); }
+.mg-answer-input { font-size: 1.3rem; }
+.btn.mg-reveal-btn { font-size: 2rem; padding: 1.6rem 1rem; }
+.mg-choose { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .5rem; }
+.mg-choose .btn { width: 100%; }
+.mg-rank-buttons { flex-wrap: wrap; }
+.mg-rejudge { padding: .3rem .6rem; font-size: .85rem; }

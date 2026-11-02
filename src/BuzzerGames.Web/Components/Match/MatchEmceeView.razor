@@ -1,0 +1,200 @@
+@*
+    The emcee's phone: the host of the show. Everything the game needs a person to decide happens here: asking the question,
+    closing the answers, recording what the team said, revealing for a slow celebrity, ruling match or no match, ranking the
+    Super Match answers, picking celebrities, and moving on. The emcee sees the popular Super Match answers; nobody else does.
+*@
+
+<main class="phone emcee mg-emcee">
+    <header class="phone-header">
+        <span class="pill">Emcee</span>
+        <span class="phone-sub">@Snapshot.Label</span>
+    </header>
+
+    <MatchScoreStrip Snapshot="Snapshot" />
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case MatchPhase.Ready:
+            <p class="hint">@Snapshot.Message</p>
+            <div class="emcee-clue">
+                <p class="emcee-clue-meta">@Snapshot.TeamName(Snapshot.Team) · @Snapshot.PlayingNow.Count() celebrities in this question</p>
+                <p class="mg-emcee-question">@Snapshot.QuestionText</p>
+            </div>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.AskQuestion(Token))">Ask it<small>The celebrities start typing</small></button>
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.SwapQuestion(Token))">Swap for a different question</button>
+            break;
+
+        case MatchPhase.Answering:
+            <p class="mg-emcee-question">@Snapshot.QuestionText</p>
+            @SuperSecrets
+            <ul class="roster">
+                @foreach (var c in Snapshot.PlayingNow)
+                {
+                    <li><span class="seat-label">@c.Number · @c.Name</span><span>@(c.Submitted ? "✔ locked in" : "typing…")</span></li>
+                }
+            </ul>
+            <button class="btn btn-start btn-wide" disabled="@(!Snapshot.PlayingNow.Any(c => c.Submitted))" @onclick="() => Act(Game.CloseAnswers(Token))">
+                Close the answers<small>Anyone who hasn't typed anything sits this one out</small>
+            </button>
+            break;
+
+        case MatchPhase.Guessing:
+            <p class="mg-emcee-question">@Snapshot.QuestionText</p>
+            <p class="hint">@(Snapshot.Stage == MatchStage.Final ? "The contestant says their answer out loud." : $"{Snapshot.TeamName(Snapshot.Team)} says their answer out loud.")</p>
+            <input class="text-input" placeholder="What they said (optional, shows on the TV)" maxlength="@MatchGame.GuessMaxLength"
+                   @bind="_guess" @bind:event="oninput" />
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.SetGuess(Token, _guess))">Show it on the TV</button>
+            <button class="btn btn-start btn-wide" @onclick="StartReveal">Start the reveal</button>
+            break;
+
+        case MatchPhase.Reveal:
+            <p class="mg-emcee-question">@Snapshot.QuestionText</p>
+            @if (Snapshot.Guess.Length > 0 && Snapshot.Stage != MatchStage.Super)
+            {
+                <p class="hint">They said: <strong>“@Snapshot.Guess”</strong></p>
+            }
+            @SuperSecrets
+            @if (Snapshot.Revealing is { } up)
+            {
+                <div class="emcee-clue">
+                    <p class="emcee-clue-meta">Celebrity @up.Number · @up.Name</p>
+                    @if (up.Reveal == RevealState.Hidden)
+                    {
+                        <p class="hint">Waiting for @up.Name to press REVEAL.</p>
+                        <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.RevealFor(Token))">Reveal it for them</button>
+                    }
+                    else
+                    {
+                        <p class="mg-emcee-answer">@up.Answer</p>
+                        @if (Snapshot.Stage == MatchStage.Super)
+                        {
+                            <p class="hint">@(up.SuggestedRank > 0 ? $"Looks like #{up.SuggestedRank}. You decide:" : "Not on the list as far as the computer can tell. You decide:")</p>
+                            <div class="judge-buttons mg-rank-buttons">
+                                @for (var r = 1; r <= MatchGame.SuperPicks; r++)
+                                {
+                                    var rank = r;
+                                    <button class="btn @(up.SuggestedRank == rank ? "btn-yes" : "")" @onclick="() => Act(Game.Rank(Token, rank))">
+                                        #@rank<small>@MatchGame.Money(MatchGame.SuperPayouts[rank - 1])</small>
+                                    </button>
+                                }
+                                <button class="btn btn-no" @onclick="() => Act(Game.Rank(Token, 0))">Not on the board</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="judge-buttons">
+                                <button class="btn btn-yes" @onclick="() => Act(Game.Judge(Token, true))">★ Match</button>
+                                <button class="btn btn-no" @onclick="() => Act(Game.Judge(Token, false))">✗ No match</button>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+            break;
+
+        case MatchPhase.QuestionDone:
+            <p class="mg-emcee-question">@Snapshot.QuestionText</p>
+            <p class="hint">@Snapshot.Message</p>
+            <ul class="roster">
+                @foreach (var c in Snapshot.PlayingNow)
+                {
+                    <li>
+                        <span class="seat-label">@c.Number · @c.Name</span>
+                        <span>@c.Answer</span>
+                        <button class="btn btn-quiet mg-rejudge" @onclick="() => Act(Game.Rejudge(Token, c.Id))">@(c.Outcome == 1 ? "★ Match" : "✗ No match") · change</button>
+                    </li>
+                }
+            </ul>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">Next</button>
+            break;
+
+        case MatchPhase.SuperPick:
+            <p class="winner">@Snapshot.TeamName(Snapshot.SuperTeam) plays the Super Match!</p>
+            <p class="hint">The contestant calls on @Math.Min(MatchGame.SuperPicks, Snapshot.Celebrities.Count) celebrities. Tap the ones they choose.</p>
+            <ul class="mg-choose">
+                @foreach (var c in Snapshot.Celebrities)
+                {
+                    var id = c.Id;
+                    <li><button class="btn @(_picked.Contains(id) ? "btn-start" : "btn-quiet")" @onclick="() => Toggle(id)">@(_picked.Contains(id) ? "✔ " : "")@c.Number · @c.Name</button></li>
+                }
+            </ul>
+            <button class="btn btn-start btn-wide" disabled="@(_picked.Count != Math.Min(MatchGame.SuperPicks, Snapshot.Celebrities.Count))" @onclick="ConfirmSuperPick">Go</button>
+            break;
+
+        case MatchPhase.SuperResult:
+            <p class="hint">@Snapshot.Message</p>
+            <MatchSuperBoard Snapshot="Snapshot" ShowSecrets="true" />
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">On to the final match</button>
+            break;
+
+        case MatchPhase.FinalPick:
+            <p class="winner">Playing for @MatchGame.Money(Snapshot.FinalStake)</p>
+            <p class="hint">Which celebrity does the contestant choose?</p>
+            <ul class="mg-choose">
+                @foreach (var c in Snapshot.Celebrities)
+                {
+                    var id = c.Id;
+                    <li><button class="btn btn-quiet" @onclick="() => Act(Game.PickFinalCelebrity(Token, id))">@c.Number · @c.Name</button></li>
+                }
+            </ul>
+            break;
+
+        case MatchPhase.GameOver:
+            <p class="winner">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Restart(Token))">Play again with the same panel</button>
+            <a class="back-link" href="/">All games</a>
+            break;
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public MatchGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public MatchSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+
+    private string? _error;
+    private string _guess = "";
+    private readonly HashSet<Guid> _picked = [];
+    private MatchPhase _lastPhase;
+    private string _lastLabel = "";
+
+    // An error, a half-typed guess and a half-made pick only make sense for the screen they were made on.
+    protected override void OnParametersSet()
+    {
+        if (Snapshot.Phase == _lastPhase && Snapshot.Label == _lastLabel) return;
+        _lastPhase = Snapshot.Phase;
+        _lastLabel = Snapshot.Label;
+        _error = null;
+        _picked.Clear();
+        if (Snapshot.Phase == MatchPhase.Guessing) _guess = "";
+    }
+
+    private void Act(Result r) => _error = r.Ok ? null : r.Error;
+
+    private void StartReveal()
+    {
+        // Whatever is in the box counts, shown or not.
+        if (_guess.Trim().Length > 0) Game.SetGuess(Token, _guess);
+        Act(Game.StartReveal(Token));
+    }
+
+    private void Toggle(Guid id)
+    {
+        if (!_picked.Remove(id)) _picked.Add(id);
+    }
+
+    private void ConfirmSuperPick() => Act(Game.PickSuperCelebrities(Token, _picked.ToList()));
+
+    // The popular answers, for the emcee's eyes only.
+    private RenderFragment SuperSecrets => __builder =>
+    {
+        if (Snapshot.Stage != MatchStage.Super) return;
+        <p class="emcee-clue-meta">The popular answers (only you can see these)</p>
+        <MatchSuperBoard Snapshot="Snapshot" ShowSecrets="true" />
+    };
+}

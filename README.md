@@ -2,7 +2,7 @@
 
 Making our favorite game shows playable, on phones, with a big screen in the middle of the room.
 
-Right now there are three games: **Jeopardy**, **Press Your Luck** and **Password Plus**. The site opens on a
+Right now there are four games: **Jeopardy**, **Press Your Luck**, **Password Plus** and **Match Game**. The site opens on a
 "pick a game" page, with Wheel of Fortune and Classic Concentration waiting in the wings.
 
 ## How a Jeopardy game works
@@ -77,6 +77,31 @@ is the `/board` address.
 
 **Puzzles.** `src/BuzzerGames.Core/Data/Password/puzzles.json`: each entry has a `kind` (Person, Place or Thing), the `answer`, five `words` ordered from vague to obvious, and optional `alsoAccept`. Each game deals 12, avoiding the same kind twice in a row.
 
+## How a Match Game works
+
+An **emcee**, a panel of **celebrities** (two or more, no upper limit) and two contestant **teams, A and B**. The teams never log in: they
+just know which team they are on and speak their answers out loud. Only the emcee and the celebrities use phones.
+
+1. **Each team gets three questions**, alternating A, B, A, B, A, B. The emcee reads a fill-in-the-blank question about a family member.
+   Every celebrity in play types a secret answer on their phone, then the emcee closes the answers. The team says its guess out loud
+   (the emcee may type it in to show on the TV).
+2. **The reveal.** The celebrities reveal in seat order, each with their own button, so they can explain their answer or get excited. The emcee
+   rules **match** or **no match** on each one, and the TV stamps the result. Each match is a point for the team that is up.
+3. **A celebrity who matches sits out that team's remaining questions.** Each team tracks its own list, so if Team A matches celebrities 1, 2 and 3
+   its next question uses only 4, 5 and 6, while Team B still has everyone. Only the celebrities in a question answer and reveal. A team with
+   nobody left is skipped.
+4. **Ties** after the six questions are settled by one tiebreaker question per team with every celebrity back in play, repeated until someone leads.
+5. **The Super Match** goes to the team with more matches. Part one: the contestant calls on three celebrities to fill in a simple blank
+   ("Super ___"). The emcee ranks each answer against the three most popular answers, which only the emcee can see, and the best one sets the stake:
+   **$500, $250 or $100**, or a consolation **$50** if none made the board. Part two: the contestant plays for **ten times** that, picks one celebrity,
+   says their answer out loud, and wins only if the emcee judges an exact match.
+
+Celebrities who join after the start play from the next question. After the game the emcee can play again with the same panel.
+
+**Question bank:** `src/BuzzerGames.Core/Data/Match/match-game.json`. `names` are the family first names that fill `{name}` in each of the `questions`.
+Each of the `supers` has a blank (`text`) and `answers`: three lists, most popular first, each holding the accepted spellings. The computer only
+*suggests* a rank by matching spelling; the emcee always decides. The starter rankings are guesses, so replace them with answers you have actually surveyed.
+
 ## Run it on your computer
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download).
@@ -129,6 +154,8 @@ src/BuzzerGames.Core/          The game itself: plain C#, no web code
   Data/PressYourLuck/            board recipes (counts, values, prizes)
   Password/                      the Password Plus engine, puzzle dealing, room manager
   Data/Password/                 the puzzle bank (puzzles.json) and the bonus words (bonus-words.txt)
+  Match/                         the Match Game engine, question dealing, room manager
+  Data/Match/                    the question bank: names, questions, Super Match blanks (match-game.json)
 
 src/BuzzerGames.Web/           The website
   Program.cs                     startup and wiring
@@ -137,6 +164,7 @@ src/BuzzerGames.Web/           The website
   Components/Jeopardy/           LobbyView, BoardView (TV), EmceeView, PlayerView, ScoreStrip
   Components/PressYourLuck/      the Press Your Luck screens (TV, emcee, player, lobby)
   Components/Password/           the Password Plus screens (TV, emcee, player, lobby)
+  Components/Match/              the Match Game screens (TV desks and Super board, emcee, celebrity phone, lobby)
   wwwroot/app.css, js/bg.js      styling, and the small JavaScript bits (saved seat, QR code)
   wwwroot/js/pyl.js              the flashing Big Board and its sounds
 

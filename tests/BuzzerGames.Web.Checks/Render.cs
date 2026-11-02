@@ -1,5 +1,7 @@
 using System.Text.RegularExpressions;
 using BuzzerGames.Core.Jeopardy;
+using BuzzerGames.Core.Match;
+using BuzzerGames.Web.Components.Match;
 using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
 using BuzzerGames.Web.Components.Jeopardy;
@@ -86,6 +88,39 @@ static class Render
         return renderer.Dispatcher.InvokeAsync(async () =>
         {
             var output = await renderer.RenderComponentAsync<PasswordRoom>(
+                ParameterView.FromDictionary(new Dictionary<string, object?> { ["Code"] = code }));
+            return output.ToHtmlString();
+        }).GetAwaiter().GetResult();
+    }
+
+    // ---- Match Game ----
+
+    public static string MgTv(MatchSnapshot s) => Html<MatchTvView>(new() { ["Snapshot"] = s });
+
+    public static string MgEmcee(MatchTable t) =>
+        Html<MatchEmceeView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee });
+
+    /// <summary>One celebrity's phone (0 = Cel1, 1 = Cel2, ...).</summary>
+    public static string MgPlayer(MatchTable t, int i) =>
+        Html<MatchPlayerView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[i], ["CelebrityId"] = t.Ids[i] });
+
+    public static string MgLobby(MatchGame game, Seat seat, Guid token = default, bool boardMode = false) =>
+        Html<MatchLobbyView>(new() { ["Game"] = game, ["Snapshot"] = game.Snapshot(), ["Seat"] = seat, ["Token"] = token, ["BoardMode"] = boardMode });
+
+    public static string MgLate() => Html<MatchLateJoin>(new());
+
+    public static string MgRoom(MatchRoomManager rooms, string code, bool board)
+    {
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<IJSRuntime, NoJs>()
+            .AddSingleton(rooms)
+            .AddSingleton<NavigationManager>(new FakeNav($"http://localhost/match-game/{code}" + (board ? "/board" : "")))
+            .BuildServiceProvider();
+        using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
+        return renderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await renderer.RenderComponentAsync<MatchRoom>(
                 ParameterView.FromDictionary(new Dictionary<string, object?> { ["Code"] = code }));
             return output.ToHtmlString();
         }).GetAwaiter().GetResult();

@@ -1,0 +1,33 @@
+@*
+    The Super Match board: the three most popular answers and what each pays, posted one at a time as the emcee ranks the
+    celebrities' answers. A row's answer is secret until it is revealed. Pass ShowSecrets (the emcee's phone) to see all three.
+*@
+
+<ol class="mg-super-board">
+    @foreach (var row in Snapshot.SuperRows)
+    {
+        <li class="mg-super-row @(row.Revealed ? "posted" : "")">
+            <span class="mg-super-rank">@row.Rank</span>
+            <span class="mg-super-answer">
+                @if (row.Revealed)
+                {
+                    @row.Answer
+                }
+                else if (ShowSecrets)
+                {
+                    <em>@row.Answer</em>
+                }
+                else
+                {
+                    <span class="mg-hidden">• • •</span>
+                }
+            </span>
+            <span class="mg-super-pay">@MatchGame.Money(row.Payout)</span>
+        </li>
+    }
+</ol>
+
+@code {
+    [Parameter, EditorRequired] public MatchSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public bool ShowSecrets { get; set; }
+}
