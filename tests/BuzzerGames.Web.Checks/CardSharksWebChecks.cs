@@ -75,5 +75,44 @@ static class CardSharksWebChecks
                 Render.CsTv(t.S);
             }
         });
+        run("sharks Money Cards: the TV shows the pot and only the cards turned over; the emcee gets bet controls", () =>
+        {
+            var t = new SharksTable(SharksTable.Rising, "7S 9S 3S 10S 5S 5D 8S KS 2S QS");
+            t.WinGame(0); t.Game.Continue(t.Emcee);
+            t.WinGame(0); t.Game.Continue(t.Emcee);
+            Check.True(Render.Has(Render.CsEmcee(t), "Play Money Cards"), "the emcee can start the bonus");
+            Check.Ok(t.Game.StartBonus(t.Emcee));
+            var tv = Render.CsTv(t.S);
+            Check.True(Render.Has(tv, "$200"), "the pot is up");
+            Check.True(Render.Has(tv, "BIG BET") && Render.Has(tv, "$400"), "the prize tiles are showing");
+            Check.Equal(1, System.Text.RegularExpressions.Regex.Matches(tv, "cs-card face").Count, "only the base card is face up");
+            Check.True(Render.Has(Render.CsEmcee(t), "Keep it"), "base card offer");
+            Check.Ok(t.Game.BonusKeep(t.Emcee));
+            var phone = Render.CsEmcee(t);
+            Check.True(Render.Has(phone, "Higher") && Render.Has(phone, "All in"), "bet controls");
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 50, true));
+            Check.Equal(2, System.Text.RegularExpressions.Regex.Matches(Render.CsTv(t.S), "cs-card face").Count, "two cards face up now");
+        });
+
+        run("sharks Money Cards screens draw through every phase of random rounds", () =>
+        {
+            for (var seed = 1; seed <= 30; seed++)
+            {
+                var t = new SharksTable(SharksTable.Rising, seed: seed);
+                t.WinGame(0); t.Game.Continue(t.Emcee);
+                t.WinGame(0); t.Game.Continue(t.Emcee);
+                t.Game.StartBonus(t.Emcee);
+                var rnd = new Random(seed);
+                while (t.S.Phase != CardPhase.BonusOver)
+                {
+                    Render.CsTv(t.S); Render.CsEmcee(t);
+                    var b = t.S.Bonus!;
+                    if (t.S.Phase == CardPhase.BonusOffer) t.Game.BonusKeep(t.Emcee);
+                    else t.Game.BonusPlay(t.Emcee, b.MinBet, rnd.Next(2) == 0);
+                }
+                Check.True(Render.Has(Render.CsTv(t.S), "WINNINGS"), "the result screen");
+                Render.CsEmcee(t);
+            }
+        });
     }
 }

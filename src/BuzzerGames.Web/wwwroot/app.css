@@ -810,3 +810,16 @@ a.game-tile:hover { border-color: var(--gold); }
 .cs-mini-scores .mg-matches-label { display: block; font-size: .8rem; opacity: .75; text-transform: uppercase; letter-spacing: .08em; }
 .cs-mini-scores .score.team-a .score-name { color: var(--team-a); }
 .cs-mini-scores .score.team-b .score-name { color: var(--team-b); }
+
+/* Money Cards */
+.cs-money { display: flex; flex-direction: column; gap: 1.2vh; padding: 1vh 2vw 2vh; align-items: center; }
+.cs-money-row { display: flex; gap: .8vw; justify-content: center; padding: .6vh 1vw; border: .25vw solid transparent; border-radius: 1vw; }
+.cs-money-row.active { border-color: var(--gold); box-shadow: 0 0 1.6vw var(--gold); }
+.cs-card.prize { display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 900; font-size: min(1.9vw, 1.2rem); color: #fff; background: #0b3d22; border: .2vw solid #fff; }
+.cs-pot { text-align: center; }
+.cs-pot-label { display: block; font-size: min(1.6vw, 3vh); opacity: .85; letter-spacing: .1em; }
+.cs-pot-num { display: block; font-size: min(6vw, 11vh); font-weight: 900; color: var(--gold); text-shadow: .15vw .15vw 0 #000; }
+.phone .cs-money { padding: .5rem 0; }
+.phone .cs-pot-num { font-size: 2.4rem; }
+.phone .cs-pot-label { font-size: .85rem; }
+.phone .cs-card.prize { font-size: .8rem; }

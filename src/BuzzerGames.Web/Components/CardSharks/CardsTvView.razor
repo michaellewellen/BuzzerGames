@@ -10,6 +10,16 @@
         <span>Room @Snapshot.Code</span>
     </header>
 
+    @if (Snapshot.Bonus is { } bonus)
+    {
+        <section class="cs-stage">
+            <p class="mg-kicker">MONEY CARDS · @Snapshot.TeamName(Snapshot.MatchWinner).ToUpperInvariant()</p>
+            <p class="mg-guess">@Snapshot.Message</p>
+        </section>
+        <MoneyCardsView Bonus="bonus" />
+    }
+    else
+    {
     <section class="cs-stage">
         @switch (Snapshot.Phase)
         {
@@ -55,6 +65,7 @@
         <CardRowView Row="Snapshot.Rows[0]" Team="0" Active="@(Snapshot.Turn == 0)" />
         <CardRowView Row="Snapshot.Rows[1]" Team="1" Active="@(Snapshot.Turn == 1)" />
     </section>
+    }
 </main>
 
 @code {

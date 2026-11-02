@@ -64,6 +64,13 @@ public sealed class CardSharksGame
     private int _gameWinner = -1;
     private int _matchWinner = -1;
 
+    // Money Cards
+    private Stack<Card> _bonusDeck = new();
+    private readonly List<List<Card>> _bonusRows = [];
+    private int _bonusRow;
+    private int _pot;
+    private int _winnings = -1;
+
     public CardSharksGame(string code, ICardSharksContent content, Random? rng = null, Func<int, IReadOnlyList<Card>>? deckFactory = null)
     {
         Code = code;
@@ -112,7 +119,7 @@ public sealed class CardSharksGame
     public Result Restart(Guid emceeToken) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
-        if (_phase != CardPhase.MatchOver) return Result.Fail("The match isn't over yet.");
+        if (_phase is not (CardPhase.MatchOver or CardPhase.BonusOver)) return Result.Fail("The match isn't over yet.");
         BeginMatch();
         return Result.Success;
     });
@@ -280,6 +287,117 @@ public sealed class CardSharksGame
         return Result.Success;
     });
 
+    // ---- Money Cards: the winning team's bonus round --------------------------------------
+
+    public const int BonusStartingPot = 200;
+    public const int BonusMinBet = 50;
+    private static readonly int[] BonusRowPlays = [3, 3, 1];     // cards to turn over after the base card
+    private static readonly int[] BonusRowPrizes = [0, 400, 1000];
+
+    /// <summary>After the match, the winners play for money.</summary>
+    public Result StartBonus(Guid emceeToken) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
+        if (_phase != CardPhase.MatchOver) return Result.Fail("Money Cards is played after the match.");
+        _bonusDeck = new Stack<Card>(NewDeck(2));
+        _bonusRows.Clear();
+        _bonusRow = 0;
+        _pot = BonusStartingPot;
+        _winnings = -1;
+        _bonusRows.Add([DrawBonus()]);
+        _phase = CardPhase.BonusOffer;
+        _message = $"{_teamNames[_matchWinner]}, you start with ${_pot}. Your first card is the {_bonusRows[0][0]}. Keep it or change it?";
+        return Result.Success;
+    });
+
+    /// <summary>Keep the row's base card.</summary>
+    public Result BonusKeep(Guid emceeToken) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
+        if (_phase != CardPhase.BonusOffer) return Result.Fail("There's no card to keep.");
+        EnterBetting();
+        return Result.Success;
+    });
+
+    /// <summary>Swap the row's base card for the top card of the deck. The swap is final.</summary>
+    public Result BonusChange(Guid emceeToken) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
+        if (_phase != CardPhase.BonusOffer) return Result.Fail("There's no card to change.");
+        _bonusRows[_bonusRow][0] = DrawBonus();
+        EnterBetting();
+        return Result.Success;
+    });
+
+    /// <summary>The smallest bet allowed right now: $50 (or whatever is left), and on the Big Bet row at least half the money.</summary>
+    private int MinBetNow() => _bonusRow == 2 ? (_pot + 1) / 2 : Math.Min(BonusMinBet, _pot);
+
+    /// <summary>The contestant bets and calls higher or lower. A tie loses.</summary>
+    public Result BonusPlay(Guid emceeToken, int bet, bool higher) => Run(() =>
+    {
+        if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
+        if (_phase != CardPhase.BonusBet) return Result.Fail("It isn't time to bet.");
+        var min = MinBetNow();
+        if (bet < min) return Result.Fail(_bonusRow == 2 ? $"The Big Bet has to be at least half your money: ${min}." : $"The minimum bet is ${min}.");
+        if (bet > _pot) return Result.Fail($"You only have ${_pot}.");
+
+        var row = _bonusRows[_bonusRow];
+        var current = row[^1];
+        var next = DrawBonus();
+        row.Add(next);
+        var right = higher ? next.Rank > current.Rank : next.Rank < current.Rank;
+        _pot += right ? bet : -bet;
+        var how = right ? $"The {next}! Right, you win ${bet}." : next.Rank == current.Rank ? $"The {next}, a tie, and a tie loses ${bet}." : $"The {next}. Wrong, you lose ${bet}.";
+
+        if (_pot <= 0)
+        {
+            FinishBonus($"{how} That's all of it. You leave with nothing.");
+            return Result.Success;
+        }
+        if (row.Count == 1 + BonusRowPlays[_bonusRow])
+        {
+            if (_bonusRow == 2)
+            {
+                FinishBonus($"{how} {_teamNames[_matchWinner]} wins ${_pot}!");
+                return Result.Success;
+            }
+            // The last card played moves up to start the next row, and the row's money is added.
+            _bonusRow++;
+            _pot += BonusRowPrizes[_bonusRow];
+            _bonusRows.Add([next]);
+            _phase = CardPhase.BonusOffer;
+            _message = $"{how} Row cleared! ${BonusRowPrizes[_bonusRow]} added, you have ${_pot}. " + (_bonusRow == 2
+                ? $"Now the Big Bet: at least ${MinBetNow()}. Your card is the {next}. Keep it or change it?"
+                : $"Your card is the {next}. Keep it or change it?");
+            return Result.Success;
+        }
+        _message = $"{how} You have ${_pot}. Bet and call higher or lower than the {next}.";
+        return Result.Success;
+    });
+
+    private void EnterBetting()
+    {
+        _phase = CardPhase.BonusBet;
+        var card = _bonusRows[_bonusRow][^1];
+        _message = _bonusRow == 2
+            ? $"The Big Bet! At least ${MinBetNow()} of your ${_pot}. Higher or lower than the {card}?"
+            : $"You have ${_pot}. Bet at least ${MinBetNow()}, then call higher or lower than the {card}.";
+    }
+
+    private void FinishBonus(string message)
+    {
+        _winnings = Math.Max(_pot, 0);
+        _pot = _winnings;
+        _phase = CardPhase.BonusOver;
+        _message = message;
+    }
+
+    private Card DrawBonus()
+    {
+        if (_bonusDeck.Count == 0) _bonusDeck = new Stack<Card>(Card.FullDeck().OrderBy(_ => _rng.Next()));
+        return _bonusDeck.Pop();
+    }
+
     // ---- Seats and snapshots -------------------------------------------------------------
 
     public Seat GetSeat(Guid token)
@@ -315,18 +433,23 @@ public sealed class CardSharksGame
                 GameWinner: _gameWinner,
                 MatchWinner: _matchWinner,
                 Message: _message,
-                CanStart: _phase == CardPhase.Lobby && _emceeToken is not null);
+                CanStart: _phase == CardPhase.Lobby && _emceeToken is not null,
+                Bonus: _phase is CardPhase.BonusOffer or CardPhase.BonusBet or CardPhase.BonusOver
+                    ? new BonusInfo(_pot, _bonusRow, _bonusRows.Select(r => (IReadOnlyList<Card>)r.ToList()).ToList(),
+                        BonusRowPlays.Select(p => p + 1).ToList(), _phase == CardPhase.BonusOver ? 0 : MinBetNow(), _winnings)
+                    : null);
         }
     }
 
     // ---- Internals -----------------------------------------------------------------------
 
-    private bool IsSuddenDeath => _question >= QuestionsPerGame && _phase is not (CardPhase.Lobby or CardPhase.GameOver or CardPhase.MatchOver);
+    private bool IsSuddenDeath => _question >= QuestionsPerGame && _phase is not (CardPhase.Lobby or CardPhase.GameOver or CardPhase.MatchOver or CardPhase.BonusOffer or CardPhase.BonusBet or CardPhase.BonusOver);
 
     private string Label => _phase switch
     {
         CardPhase.Lobby => "Lobby",
         CardPhase.MatchOver => "Match over",
+        CardPhase.BonusOffer or CardPhase.BonusBet or CardPhase.BonusOver => "Money Cards",
         _ => (_gameNumber == 3 ? "Tiebreaker game" : $"Game {_gameNumber}") + (IsSuddenDeath ? " · Sudden death" : $" · Question {_question} of {QuestionsPerGame}")
     };
 

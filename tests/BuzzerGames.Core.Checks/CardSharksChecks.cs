@@ -358,6 +358,82 @@ static class CardSharksChecks
             Check.Equal(CardPhase.MatchOver, sweep.S.Phase, "2-0 ends the match without a third game");
         });
 
+        run("sharks Money Cards: rows, carried cards, bonuses, the tie and the Big Bet", () =>
+        {
+            var t = new SharksTable(SharksTable.Rising, "7S 9S 3S 10S 5S 5D 8S KS 2S QS");
+            Check.Fails(t.Game.StartBonus(t.Emcee), "no bonus before the match is won");
+            t.WinGame(0); Check.Ok(t.Game.Continue(t.Emcee));
+            t.WinGame(0); Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Equal(CardPhase.MatchOver, t.S.Phase, "match won");
+            Check.Fails(t.Game.StartBonus(Guid.NewGuid()), "a stranger starting the bonus");
+            Check.Ok(t.Game.StartBonus(t.Emcee));
+            var b = t.S.Bonus!;
+            Check.Equal(CardPhase.BonusOffer, t.S.Phase, "base card offered");
+            Check.Equal(200, b.Pot, "starts with $200");
+            Check.Equal(7, b.Rows[0][0].Rank, "the first card");
+            Check.Ok(t.Game.BonusKeep(t.Emcee));
+            Check.Fails(t.Game.BonusPlay(t.Emcee, 49, true), "below the $50 minimum");
+            Check.Fails(t.Game.BonusPlay(t.Emcee, 201, true), "more than the pot");
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 50, true));   // 9: right
+            Check.Equal(250, t.S.Bonus!.Pot, "won $50");
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 100, false)); // 3: right
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 50, true));   // 10: right, row done
+            b = t.S.Bonus!;
+            Check.Equal(CardPhase.BonusOffer, t.S.Phase, "next row offers its card");
+            Check.Equal(1, b.Row, "on the second row");
+            Check.Equal(800, b.Pot, "$400 added to $400");
+            Check.Equal(10, b.Rows[1][0].Rank, "the last card moved up");
+            Check.Ok(t.Game.BonusChange(t.Emcee));            // swapped for the 5
+            Check.Equal(5, t.S.Bonus!.Rows[1][0].Rank, "the changed base card");
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 100, true));  // 5 again: a tie loses
+            Check.Equal(700, t.S.Bonus!.Pot, "a tie loses the bet");
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 50, true));   // 8
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 50, true));   // K, row done
+            b = t.S.Bonus!;
+            Check.Equal(2, b.Row, "the Big Bet row");
+            Check.Equal(1800, b.Pot, "$1000 added");
+            Check.Ok(t.Game.BonusKeep(t.Emcee));
+            Check.Equal(900, t.S.Bonus!.MinBet, "at least half");
+            Check.Fails(t.Game.BonusPlay(t.Emcee, 899, false), "under half");
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 900, false)); // 2: right
+            Check.Equal(CardPhase.BonusOver, t.S.Phase, "done");
+            Check.Equal(2700, t.S.Bonus!.Winnings, "wins what is in the pot");
+            Check.Ok(t.Game.Restart(t.Emcee));
+            Check.True(t.S.Bonus is null && t.S.Phase == CardPhase.Guess, "restart after the bonus");
+        });
+
+        run("sharks Money Cards: losing everything ends it with nothing", () =>
+        {
+            var t = new SharksTable(SharksTable.Rising, "7S 9S 3S");
+            t.WinGame(0); Check.Ok(t.Game.Continue(t.Emcee));
+            t.WinGame(0); Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Ok(t.Game.StartBonus(t.Emcee));
+            Check.Ok(t.Game.BonusKeep(t.Emcee));
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 200, false)); // 9 is higher: wrong
+            Check.Equal(CardPhase.BonusOver, t.S.Phase, "out of money");
+            Check.Equal(0, t.S.Bonus!.Winnings, "nothing won");
+        });
+
+        run("sharks Money Cards: random play always ends with a sane prize", () =>
+        {
+            for (var seed = 1; seed <= 100; seed++)
+            {
+                var t = new SharksTable(SharksTable.Rising, seed: seed);
+                t.WinGame(0); Check.Ok(t.Game.Continue(t.Emcee));
+                t.WinGame(0); Check.Ok(t.Game.Continue(t.Emcee));
+                Check.Ok(t.Game.StartBonus(t.Emcee));
+                var rnd = new Random(seed);
+                for (var steps = 0; t.S.Phase != CardPhase.BonusOver; steps++)
+                {
+                    Check.True(steps < 30, "the round finishes");
+                    var b = t.S.Bonus!;
+                    if (t.S.Phase == CardPhase.BonusOffer) Check.Ok(rnd.Next(2) == 0 ? t.Game.BonusKeep(t.Emcee) : t.Game.BonusChange(t.Emcee));
+                    else Check.Ok(t.Game.BonusPlay(t.Emcee, rnd.Next(b.MinBet, b.Pot + 1), rnd.Next(2) == 0));
+                }
+                Check.True(t.S.Bonus!.Winnings >= 0, "never a negative prize");
+            }
+        });
+
         run("sharks: the real survey bank loads and every answer is 0 to 100", () =>
         {
             var content = new JsonCardSharksContent();

@@ -11,7 +11,10 @@ public enum CardPhase
     TurnOver,     // that team failed or froze
     SuddenPick,   // sudden death: the team in control chooses who finishes their row
     GameOver,     // somebody completed their row
-    MatchOver     // somebody won two games
+    MatchOver,    // somebody won two games
+    BonusOffer,   // Money Cards: the base card of a row is showing; keep it or change it
+    BonusBet,     // Money Cards: the contestant names a bet and calls higher or lower
+    BonusOver     // Money Cards: the last card has been turned or the money ran out
 }
 
 /// <summary>One team's row of cards. Only cards that have been turned over are listed; the rest are face down and nobody can see them.</summary>
@@ -22,6 +25,15 @@ public sealed record RowInfo(
     IReadOnlyList<Card> Cards,         // the cards turned over, in order
     int Frozen,                        // index of the last frozen card, or -1
     bool Failed);                      // the last card turned over sank them (it goes away when the emcee continues)
+
+/// <summary>The Money Cards bonus round. Rows are listed bottom to top; each lists only the cards turned over (the first one is the base card).</summary>
+public sealed record BonusInfo(
+    int Pot,
+    int Row,                               // 0 = the opening row, 1 = the $400 row, 2 = the Big Bet row
+    IReadOnlyList<IReadOnlyList<Card>> Rows,
+    IReadOnlyList<int> RowLengths,         // cards in each row including the base card
+    int MinBet,
+    int Winnings);                         // the final prize once the round is over, otherwise -1
 
 public sealed record CardSnapshot(
     string Code,
@@ -44,12 +56,13 @@ public sealed record CardSnapshot(
     int GameWinner,                    // the team that won the last game (-1 if none yet)
     int MatchWinner,
     string? Message,
-    bool CanStart)
+    bool CanStart,
+    BonusInfo? Bonus = null)
 {
     public string TeamName(int team) => team >= 0 && team < Rows.Count ? Rows[team].Name : "";
 
     /// <summary>The team that did not guess.</summary>
     public int Caller => Guesser < 0 ? -1 : 1 - Guesser;
 
-    public bool QuestionAsked => Phase is not (CardPhase.Lobby or CardPhase.MatchOver) && QuestionText.Length > 0;
+    public bool QuestionAsked => Phase is not (CardPhase.Lobby or CardPhase.MatchOver or CardPhase.BonusOffer or CardPhase.BonusBet or CardPhase.BonusOver) && QuestionText.Length > 0;
 }

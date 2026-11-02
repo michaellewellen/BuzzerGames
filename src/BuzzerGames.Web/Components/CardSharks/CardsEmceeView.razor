@@ -102,6 +102,37 @@
 
         case CardPhase.MatchOver:
             <p class="winner">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.StartBonus(Token))">Play Money Cards</button>
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.Restart(Token))">Skip it, play another match</button>
+            <a class="back-link" href="/">All games</a>
+            break;
+
+        case CardPhase.BonusOffer:
+            <MoneyCardsView Bonus="Snapshot.Bonus!" />
+            <p class="hint">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.BonusKeep(Token))">Keep it</button>
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.BonusChange(Token))">Change it<small>The swap is final</small></button>
+            break;
+
+        case CardPhase.BonusBet:
+            <MoneyCardsView Bonus="Snapshot.Bonus!" />
+            <p class="hint">@Snapshot.Message</p>
+            <input class="text-input cs-number" type="number" inputmode="numeric" min="@Snapshot.Bonus!.MinBet" max="@Snapshot.Bonus!.Pot"
+                   @bind="_bet" @bind:event="oninput" aria-label="Bet" />
+            <div class="button-row">
+                <button class="btn btn-quiet" @onclick="() => _bet = Snapshot.Bonus!.MinBet">Minimum</button>
+                <button class="btn btn-quiet" @onclick="() => _bet = Snapshot.Bonus!.Pot">All in</button>
+            </div>
+            <div class="judge-buttons">
+                <button class="btn btn-yes" @onclick="() => Bet(true)">▲ Higher</button>
+                <button class="btn btn-no" @onclick="() => Bet(false)">▼ Lower</button>
+            </div>
+            break;
+
+        case CardPhase.BonusOver:
+            <p class="winner">@(Snapshot.Bonus!.Winnings > 0 ? $"${Snapshot.Bonus.Winnings}!" : "No prize")</p>
+            <MoneyCardsView Bonus="Snapshot.Bonus!" />
+            <p class="hint">@Snapshot.Message</p>
             <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Restart(Token))">Play another match</button>
             <a class="back-link" href="/">All games</a>
             break;
@@ -115,6 +146,8 @@
 
     private string? _error;
     private int? _guess;
+    private int? _bet;
+    private int _betKey = -1;
     private CardPhase _lastPhase;
     private int _lastQuestion;
     private int _lastTurn;
@@ -123,12 +156,17 @@
     protected override void OnParametersSet()
     {
         if (Snapshot.Turn >= 0) _lastTurn = Snapshot.Turn;
+        // Every new bet starts at the minimum for the new situation.
+        var betKey = Snapshot.Bonus is { } b ? b.Pot * 100 + b.Rows.Sum(r => r.Count) : -1;
+        if (betKey != _betKey) { _betKey = betKey; _bet = Snapshot.Bonus?.MinBet; }
         if (Snapshot.Phase == _lastPhase && Snapshot.QuestionNumber == _lastQuestion) return;
         _lastPhase = Snapshot.Phase;
         _lastQuestion = Snapshot.QuestionNumber;
         _error = null;
         if (Snapshot.Phase == CardPhase.Guess) _guess = null;
     }
+
+    private void Bet(bool higher) => Act(_bet is { } b ? Game.BonusPlay(Token, b, higher) : Result.Fail("Type the bet first."));
 
     private void Act(Result r) => _error = r.Ok ? null : r.Error;
 

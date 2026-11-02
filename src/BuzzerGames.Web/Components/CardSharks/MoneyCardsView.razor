@@ -1,0 +1,36 @@
+@*
+    The Money Cards board, laid out like the show: the Big Bet row on top, the $400 row in the middle, the opening row on the bottom.
+    A row's first slot shows its prize tile until the card from the row below moves up into it.
+*@
+
+<div class="cs-money">
+    <div class="cs-pot"><span class="cs-pot-label">@(Bonus.Winnings >= 0 ? "WINNINGS" : "YOUR MONEY")</span><span class="cs-pot-num">$@(Bonus.Winnings >= 0 ? Bonus.Winnings : Bonus.Pot)</span></div>
+
+    @for (var r = Bonus.Rows.Count > 0 ? 2 : -1; r >= 0; r--)
+    {
+        var row = r;
+        var shown = row < Bonus.Rows.Count ? Bonus.Rows[row] : [];
+        <div class="cs-money-row @(row == Bonus.Row && Bonus.Winnings < 0 ? "active" : "")">
+            @for (var i = 0; i < Bonus.RowLengths[row]; i++)
+            {
+                var slot = i;
+                if (slot < shown.Count)
+                {
+                    <PlayingCardView Card="shown[slot]" Team="0" Current="@(row == Bonus.Row && slot == shown.Count - 1)" />
+                }
+                else if (slot == 0)
+                {
+                    <div class="cs-card prize">@(row == 2 ? "BIG BET" : "$400")</div>
+                }
+                else
+                {
+                    <PlayingCardView Card="null" Team="0" />
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public BonusInfo Bonus { get; set; } = default!;
+}
