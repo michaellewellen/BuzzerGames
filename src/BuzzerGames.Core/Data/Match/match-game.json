@@ -5,7 +5,8 @@
 // questions:  the blanks the celebrities fill in. {name} becomes the next name. Write the blank as ___.
 // supers:     the Super Match blanks. "answers" is the top three popular answers, best first ($500, $250, $100). Each answer is a list of
 //             spellings that count as it (the first one is shown on the board). The computer only suggests a ranking; the emcee decides.
-//             The ranked answers below are guesses, not survey results: change them to what you think your room would say.
+//             The ranked answers below are my own estimates of what people say today, modernized from the original show's ranked answers.
+//             Super Match blanks and rankings are informed by the CC BY 4.0 dataset at matchgame.info (github.com/rebeccadrucker/match-game-data).
 {
   "names": [
     "Donald",
@@ -42,11 +43,113 @@
         ],
         [
           "Man",
-          "Superman"
+          "Super Man"
         ],
         [
           "Mario",
           "Super Mario"
+        ]
+      ]
+    },
+    {
+      "text": "___ rain",
+      "answers": [
+        [
+          "Purple",
+          "Purple rain"
+        ],
+        [
+          "Acid",
+          "Acid rain"
+        ],
+        [
+          "Pouring",
+          "Pouring rain"
+        ]
+      ]
+    },
+    {
+      "text": "Hot ___",
+      "answers": [
+        [
+          "Dog",
+          "Hot Dog"
+        ],
+        [
+          "Sauce",
+          "Hot Sauce"
+        ],
+        [
+          "Tub",
+          "Hot Tub"
+        ]
+      ]
+    },
+    {
+      "text": "Black ___",
+      "answers": [
+        [
+          "Friday",
+          "Black Friday"
+        ],
+        [
+          "Panther",
+          "Black Panther"
+        ],
+        [
+          "Widow",
+          "Black Widow"
+        ]
+      ]
+    },
+    {
+      "text": "Desert ___",
+      "answers": [
+        [
+          "Storm",
+          "Desert Storm"
+        ],
+        [
+          "Island",
+          "Desert Island"
+        ],
+        [
+          "Rose",
+          "Desert Rose"
+        ]
+      ]
+    },
+    {
+      "text": "___ cake",
+      "answers": [
+        [
+          "Cheese",
+          "Cheese cake"
+        ],
+        [
+          "Birthday",
+          "Birthday cake"
+        ],
+        [
+          "Cup",
+          "Cup cake"
+        ]
+      ]
+    },
+    {
+      "text": "___ phone",
+      "answers": [
+        [
+          "Smart",
+          "Smart phone"
+        ],
+        [
+          "Cell",
+          "Cell phone"
+        ],
+        [
+          "Pay",
+          "Pay phone"
         ]
       ]
     },
@@ -62,9 +165,8 @@
           "Poker chips"
         ],
         [
-          "Fish and",
-          "Fish & chips",
-          "Fish n"
+          "Chocolate",
+          "Chocolate chips"
         ]
       ]
     },
@@ -86,37 +188,19 @@
       ]
     },
     {
-      "text": "Hot ___",
-      "answers": [
-        [
-          "Dog",
-          "Hot dog"
-        ],
-        [
-          "Chocolate",
-          "Cocoa",
-          "Hot chocolate"
-        ],
-        [
-          "Tub",
-          "Hot tub"
-        ]
-      ]
-    },
-    {
       "text": "___ ball",
       "answers": [
         [
           "Foot",
-          "Football"
+          "Foot ball"
         ],
         [
           "Basket",
-          "Basketball"
+          "Basket ball"
         ],
         [
           "Base",
-          "Baseball"
+          "Base ball"
         ]
       ]
     },
@@ -128,29 +212,12 @@
           "Banana bread"
         ],
         [
+          "Garlic",
+          "Garlic bread"
+        ],
+        [
           "Corn",
-          "Cornbread"
-        ],
-        [
-          "White",
-          "White bread"
-        ]
-      ]
-    },
-    {
-      "text": "Black ___",
-      "answers": [
-        [
-          "Friday",
-          "Black Friday"
-        ],
-        [
-          "Cat",
-          "Black cat"
-        ],
-        [
-          "Board",
-          "Blackboard"
+          "Corn bread"
         ]
       ]
     },
@@ -159,15 +226,2888 @@
       "answers": [
         [
           "Truck",
-          "Fire truck"
+          "Fire Truck"
         ],
         [
           "Place",
-          "Fireplace"
+          "Fire Place"
         ],
         [
           "Fighter",
-          "Firefighter"
+          "Fire Fighter"
+        ]
+      ]
+    },
+    {
+      "text": "Peanut ___",
+      "answers": [
+        [
+          "Butter",
+          "Peanut Butter"
+        ],
+        [
+          "Brittle",
+          "Peanut Brittle"
+        ],
+        [
+          "Gallery",
+          "Peanut Gallery"
+        ]
+      ]
+    },
+    {
+      "text": "Baby ___",
+      "answers": [
+        [
+          "Shark",
+          "Baby Shark"
+        ],
+        [
+          "Shower",
+          "Baby Shower"
+        ],
+        [
+          "Powder",
+          "Baby Powder"
+        ]
+      ]
+    },
+    {
+      "text": "Snow ___",
+      "answers": [
+        [
+          "Man",
+          "Snow Man"
+        ],
+        [
+          "Ball",
+          "Snow Ball"
+        ],
+        [
+          "Flake",
+          "Snow Flake"
+        ]
+      ]
+    },
+    {
+      "text": "Santa ___",
+      "answers": [
+        [
+          "Claus",
+          "Santa Claus"
+        ],
+        [
+          "Monica",
+          "Santa Monica"
+        ],
+        [
+          "Fe",
+          "Santa Fe"
+        ]
+      ]
+    },
+    {
+      "text": "Christmas ___",
+      "answers": [
+        [
+          "Tree",
+          "Christmas Tree"
+        ],
+        [
+          "Eve",
+          "Christmas Eve"
+        ],
+        [
+          "Carol",
+          "Christmas Carol"
+        ]
+      ]
+    },
+    {
+      "text": "Star ___",
+      "answers": [
+        [
+          "Wars",
+          "Star Wars"
+        ],
+        [
+          "Trek",
+          "Star Trek"
+        ],
+        [
+          "Bucks",
+          "Star Bucks"
+        ]
+      ]
+    },
+    {
+      "text": "Iron ___",
+      "answers": [
+        [
+          "Man",
+          "Iron Man"
+        ],
+        [
+          "Chef",
+          "Iron Chef"
+        ],
+        [
+          "Maiden",
+          "Iron Maiden"
+        ]
+      ]
+    },
+    {
+      "text": "Spider ___",
+      "answers": [
+        [
+          "Man",
+          "Spider Man"
+        ],
+        [
+          "Web",
+          "Spider Web"
+        ],
+        [
+          "Verse",
+          "Spider Verse"
+        ]
+      ]
+    },
+    {
+      "text": "Bat ___",
+      "answers": [
+        [
+          "Man",
+          "Bat Man"
+        ],
+        [
+          "Mobile",
+          "Bat Mobile"
+        ],
+        [
+          "Girl",
+          "Bat Girl"
+        ]
+      ]
+    },
+    {
+      "text": "Harry ___",
+      "answers": [
+        [
+          "Potter",
+          "Harry Potter"
+        ],
+        [
+          "Styles",
+          "Harry Styles"
+        ],
+        [
+          "Truman",
+          "Harry Truman"
+        ]
+      ]
+    },
+    {
+      "text": "Game of ___",
+      "answers": [
+        [
+          "Thrones",
+          "Game of Thrones"
+        ],
+        [
+          "Life",
+          "Game of Life"
+        ],
+        [
+          "Chance",
+          "Game of Chance"
+        ]
+      ]
+    },
+    {
+      "text": "Apple ___",
+      "answers": [
+        [
+          "Pie",
+          "Apple Pie"
+        ],
+        [
+          "Watch",
+          "Apple Watch"
+        ],
+        [
+          "Juice",
+          "Apple Juice"
+        ]
+      ]
+    },
+    {
+      "text": "Pizza ___",
+      "answers": [
+        [
+          "Hut",
+          "Pizza Hut"
+        ],
+        [
+          "Box",
+          "Pizza Box"
+        ],
+        [
+          "Party",
+          "Pizza Party"
+        ]
+      ]
+    },
+    {
+      "text": "Taco ___",
+      "answers": [
+        [
+          "Bell",
+          "Taco Bell"
+        ],
+        [
+          "Tuesday",
+          "Taco Tuesday"
+        ],
+        [
+          "Salad",
+          "Taco Salad"
+        ]
+      ]
+    },
+    {
+      "text": "French ___",
+      "answers": [
+        [
+          "Fries",
+          "French Fries"
+        ],
+        [
+          "Toast",
+          "French Toast"
+        ],
+        [
+          "Kiss",
+          "French Kiss"
+        ]
+      ]
+    },
+    {
+      "text": "Peanut butter and ___",
+      "answers": [
+        [
+          "Jelly",
+          "Peanut butter and Jelly"
+        ],
+        [
+          "Banana",
+          "Peanut butter and Banana"
+        ],
+        [
+          "Honey",
+          "Peanut butter and Honey"
+        ]
+      ]
+    },
+    {
+      "text": "Ice ___",
+      "answers": [
+        [
+          "Cream",
+          "Ice Cream"
+        ],
+        [
+          "Cube",
+          "Ice Cube"
+        ],
+        [
+          "Age",
+          "Ice Age"
+        ]
+      ]
+    },
+    {
+      "text": "Milk ___",
+      "answers": [
+        [
+          "Shake",
+          "Milk Shake"
+        ],
+        [
+          "Chocolate",
+          "Milk Chocolate"
+        ],
+        [
+          "Man",
+          "Milk Man"
+        ]
+      ]
+    },
+    {
+      "text": "Coffee ___",
+      "answers": [
+        [
+          "Table",
+          "Coffee Table"
+        ],
+        [
+          "Cup",
+          "Coffee Cup"
+        ],
+        [
+          "Shop",
+          "Coffee Shop"
+        ]
+      ]
+    },
+    {
+      "text": "Roller ___",
+      "answers": [
+        [
+          "Coaster",
+          "Roller Coaster"
+        ],
+        [
+          "Skates",
+          "Roller Skates"
+        ],
+        [
+          "Blade",
+          "Roller Blade"
+        ]
+      ]
+    },
+    {
+      "text": "Water ___",
+      "answers": [
+        [
+          "Melon",
+          "Water Melon"
+        ],
+        [
+          "Fall",
+          "Water Fall"
+        ],
+        [
+          "Park",
+          "Water Park"
+        ]
+      ]
+    },
+    {
+      "text": "Sun ___",
+      "answers": [
+        [
+          "Screen",
+          "Sun Screen"
+        ],
+        [
+          "Flower",
+          "Sun Flower"
+        ],
+        [
+          "Glasses",
+          "Sun Glasses"
+        ]
+      ]
+    },
+    {
+      "text": "___ board",
+      "answers": [
+        [
+          "Skate",
+          "Skate board"
+        ],
+        [
+          "Surf",
+          "Surf board"
+        ],
+        [
+          "Snow",
+          "Snow board"
+        ]
+      ]
+    },
+    {
+      "text": "___ fall",
+      "answers": [
+        [
+          "Water",
+          "Water fall"
+        ],
+        [
+          "Snow",
+          "Snow fall"
+        ],
+        [
+          "Rain",
+          "Rain fall"
+        ]
+      ]
+    },
+    {
+      "text": "___ house",
+      "answers": [
+        [
+          "White",
+          "White house"
+        ],
+        [
+          "Dog",
+          "Dog house"
+        ],
+        [
+          "Tree",
+          "Tree house"
+        ]
+      ]
+    },
+    {
+      "text": "___ light",
+      "answers": [
+        [
+          "Moon",
+          "Moon light"
+        ],
+        [
+          "Sun",
+          "Sun light"
+        ],
+        [
+          "Night",
+          "Night light"
+        ]
+      ]
+    },
+    {
+      "text": "___ dog",
+      "answers": [
+        [
+          "Hot",
+          "Hot dog"
+        ],
+        [
+          "Corn",
+          "Corn dog"
+        ],
+        [
+          "Top",
+          "Top dog"
+        ]
+      ]
+    },
+    {
+      "text": "___ bear",
+      "answers": [
+        [
+          "Teddy",
+          "Teddy bear"
+        ],
+        [
+          "Polar",
+          "Polar bear"
+        ],
+        [
+          "Gummy",
+          "Gummy bear"
+        ]
+      ]
+    },
+    {
+      "text": "___ party",
+      "answers": [
+        [
+          "Birthday",
+          "Birthday party"
+        ],
+        [
+          "Surprise",
+          "Surprise party"
+        ],
+        [
+          "Bachelor",
+          "Bachelor party"
+        ]
+      ]
+    },
+    {
+      "text": "___ card",
+      "answers": [
+        [
+          "Credit",
+          "Credit card"
+        ],
+        [
+          "Birthday",
+          "Birthday card"
+        ],
+        [
+          "Gift",
+          "Gift card"
+        ]
+      ]
+    },
+    {
+      "text": "___ code",
+      "answers": [
+        [
+          "Zip",
+          "Zip code"
+        ],
+        [
+          "Area",
+          "Area code"
+        ],
+        [
+          "Bar",
+          "Bar code"
+        ]
+      ]
+    },
+    {
+      "text": "___ pie",
+      "answers": [
+        [
+          "Apple",
+          "Apple pie"
+        ],
+        [
+          "Pumpkin",
+          "Pumpkin pie"
+        ],
+        [
+          "Cherry",
+          "Cherry pie"
+        ]
+      ]
+    },
+    {
+      "text": "___ juice",
+      "answers": [
+        [
+          "Orange",
+          "Orange juice"
+        ],
+        [
+          "Apple",
+          "Apple juice"
+        ],
+        [
+          "Grape",
+          "Grape juice"
+        ]
+      ]
+    },
+    {
+      "text": "___ sauce",
+      "answers": [
+        [
+          "Hot",
+          "Hot sauce"
+        ],
+        [
+          "Tomato",
+          "Tomato sauce"
+        ],
+        [
+          "Soy",
+          "Soy sauce"
+        ]
+      ]
+    },
+    {
+      "text": "___ soup",
+      "answers": [
+        [
+          "Chicken noodle",
+          "Chicken noodle soup"
+        ],
+        [
+          "Tomato",
+          "Tomato soup"
+        ],
+        [
+          "Vegetable",
+          "Vegetable soup"
+        ]
+      ]
+    },
+    {
+      "text": "___ salad",
+      "answers": [
+        [
+          "Caesar",
+          "Caesar salad"
+        ],
+        [
+          "Fruit",
+          "Fruit salad"
+        ],
+        [
+          "Potato",
+          "Potato salad"
+        ]
+      ]
+    },
+    {
+      "text": "Chicken ___",
+      "answers": [
+        [
+          "Wings",
+          "Chicken Wings"
+        ],
+        [
+          "Nuggets",
+          "Chicken Nuggets"
+        ],
+        [
+          "Soup",
+          "Chicken Soup"
+        ]
+      ]
+    },
+    {
+      "text": "___ cheese",
+      "answers": [
+        [
+          "Cream",
+          "Cream cheese"
+        ],
+        [
+          "American",
+          "American cheese"
+        ],
+        [
+          "Swiss",
+          "Swiss cheese"
+        ]
+      ]
+    },
+    {
+      "text": "Mac and ___",
+      "answers": [
+        [
+          "Cheese",
+          "Mac and Cheese"
+        ],
+        [
+          "Jack",
+          "Mac and Jack"
+        ],
+        [
+          "Me",
+          "Mac and Me"
+        ]
+      ]
+    },
+    {
+      "text": "Rock ___",
+      "answers": [
+        [
+          "Star",
+          "Rock Star"
+        ],
+        [
+          "Bottom",
+          "Rock Bottom"
+        ],
+        [
+          "Band",
+          "Rock Band"
+        ]
+      ]
+    },
+    {
+      "text": "Pop ___",
+      "answers": [
+        [
+          "Corn",
+          "Pop Corn"
+        ],
+        [
+          "Star",
+          "Pop Star"
+        ],
+        [
+          "Tart",
+          "Pop Tart"
+        ]
+      ]
+    },
+    {
+      "text": "Big ___",
+      "answers": [
+        [
+          "Mac",
+          "Big Mac"
+        ],
+        [
+          "Bang",
+          "Big Bang"
+        ],
+        [
+          "Foot",
+          "Big Foot"
+        ]
+      ]
+    },
+    {
+      "text": "Wonder ___",
+      "answers": [
+        [
+          "Woman",
+          "Wonder Woman"
+        ],
+        [
+          "Bread",
+          "Wonder Bread"
+        ],
+        [
+          "Land",
+          "Wonder Land"
+        ]
+      ]
+    },
+    {
+      "text": "White ___",
+      "answers": [
+        [
+          "House",
+          "White House"
+        ],
+        [
+          "Christmas",
+          "White Christmas"
+        ],
+        [
+          "Castle",
+          "White Castle"
+        ]
+      ]
+    },
+    {
+      "text": "Red ___",
+      "answers": [
+        [
+          "Bull",
+          "Red Bull"
+        ],
+        [
+          "Carpet",
+          "Red Carpet"
+        ],
+        [
+          "Sox",
+          "Red Sox"
+        ]
+      ]
+    },
+    {
+      "text": "Blue ___",
+      "answers": [
+        [
+          "Berry",
+          "Blue Berry"
+        ],
+        [
+          "Jeans",
+          "Blue Jeans"
+        ],
+        [
+          "Jay",
+          "Blue Jay"
+        ]
+      ]
+    },
+    {
+      "text": "Green ___",
+      "answers": [
+        [
+          "Light",
+          "Green Light"
+        ],
+        [
+          "Bean",
+          "Green Bean"
+        ],
+        [
+          "Day",
+          "Green Day"
+        ]
+      ]
+    },
+    {
+      "text": "Golden ___",
+      "answers": [
+        [
+          "Gate",
+          "Golden Gate"
+        ],
+        [
+          "Retriever",
+          "Golden Retriever"
+        ],
+        [
+          "Girls",
+          "Golden Girls"
+        ]
+      ]
+    },
+    {
+      "text": "Silver ___",
+      "answers": [
+        [
+          "Lining",
+          "Silver Lining"
+        ],
+        [
+          "Bullet",
+          "Silver Bullet"
+        ],
+        [
+          "Spoon",
+          "Silver Spoon"
+        ]
+      ]
+    },
+    {
+      "text": "Gold ___",
+      "answers": [
+        [
+          "Fish",
+          "Gold Fish"
+        ],
+        [
+          "Medal",
+          "Gold Medal"
+        ],
+        [
+          "Rush",
+          "Gold Rush"
+        ]
+      ]
+    },
+    {
+      "text": "Dark ___",
+      "answers": [
+        [
+          "Chocolate",
+          "Dark Chocolate"
+        ],
+        [
+          "Knight",
+          "Dark Knight"
+        ],
+        [
+          "Side",
+          "Dark Side"
+        ]
+      ]
+    },
+    {
+      "text": "Bubble ___",
+      "answers": [
+        [
+          "Gum",
+          "Bubble Gum"
+        ],
+        [
+          "Bath",
+          "Bubble Bath"
+        ],
+        [
+          "Tea",
+          "Bubble Tea"
+        ]
+      ]
+    },
+    {
+      "text": "Cotton ___",
+      "answers": [
+        [
+          "Candy",
+          "Cotton Candy"
+        ],
+        [
+          "Ball",
+          "Cotton Ball"
+        ],
+        [
+          "Swab",
+          "Cotton Swab"
+        ]
+      ]
+    },
+    {
+      "text": "Cup ___",
+      "answers": [
+        [
+          "Cake",
+          "Cup Cake"
+        ],
+        [
+          "Holder",
+          "Cup Holder"
+        ],
+        [
+          "Board",
+          "Cup Board"
+        ]
+      ]
+    },
+    {
+      "text": "Cheese ___",
+      "answers": [
+        [
+          "Burger",
+          "Cheese Burger"
+        ],
+        [
+          "Cake",
+          "Cheese Cake"
+        ],
+        [
+          "Steak",
+          "Cheese Steak"
+        ]
+      ]
+    },
+    {
+      "text": "Hand ___",
+      "answers": [
+        [
+          "Sanitizer",
+          "Hand Sanitizer"
+        ],
+        [
+          "Shake",
+          "Hand Shake"
+        ],
+        [
+          "Bag",
+          "Hand Bag"
+        ]
+      ]
+    },
+    {
+      "text": "Foot ___",
+      "answers": [
+        [
+          "Ball",
+          "Foot Ball"
+        ],
+        [
+          "Note",
+          "Foot Note"
+        ],
+        [
+          "Print",
+          "Foot Print"
+        ]
+      ]
+    },
+    {
+      "text": "Head ___",
+      "answers": [
+        [
+          "Ache",
+          "Head Ache"
+        ],
+        [
+          "Phones",
+          "Head Phones"
+        ],
+        [
+          "Band",
+          "Head Band"
+        ]
+      ]
+    },
+    {
+      "text": "Back ___",
+      "answers": [
+        [
+          "Pack",
+          "Back Pack"
+        ],
+        [
+          "Yard",
+          "Back Yard"
+        ],
+        [
+          "Bone",
+          "Back Bone"
+        ]
+      ]
+    },
+    {
+      "text": "Home ___",
+      "answers": [
+        [
+          "Work",
+          "Home Work"
+        ],
+        [
+          "Run",
+          "Home Run"
+        ],
+        [
+          "Town",
+          "Home Town"
+        ]
+      ]
+    },
+    {
+      "text": "Over ___",
+      "answers": [
+        [
+          "Time",
+          "Over Time"
+        ],
+        [
+          "Night",
+          "Over Night"
+        ],
+        [
+          "Weight",
+          "Over Weight"
+        ]
+      ]
+    },
+    {
+      "text": "Sea ___",
+      "answers": [
+        [
+          "Food",
+          "Sea Food"
+        ],
+        [
+          "Shell",
+          "Sea Shell"
+        ],
+        [
+          "Horse",
+          "Sea Horse"
+        ]
+      ]
+    },
+    {
+      "text": "Sand ___",
+      "answers": [
+        [
+          "Castle",
+          "Sand Castle"
+        ],
+        [
+          "Box",
+          "Sand Box"
+        ],
+        [
+          "Paper",
+          "Sand Paper"
+        ]
+      ]
+    },
+    {
+      "text": "Birth ___",
+      "answers": [
+        [
+          "Day",
+          "Birth Day"
+        ],
+        [
+          "Mark",
+          "Birth Mark"
+        ],
+        [
+          "Stone",
+          "Birth Stone"
+        ]
+      ]
+    },
+    {
+      "text": "Moon ___",
+      "answers": [
+        [
+          "Light",
+          "Moon Light"
+        ],
+        [
+          "Walk",
+          "Moon Walk"
+        ],
+        [
+          "Shine",
+          "Moon Shine"
+        ]
+      ]
+    },
+    {
+      "text": "Key ___",
+      "answers": [
+        [
+          "Board",
+          "Key Board"
+        ],
+        [
+          "Chain",
+          "Key Chain"
+        ],
+        [
+          "Stone",
+          "Key Stone"
+        ]
+      ]
+    },
+    {
+      "text": "Mail ___",
+      "answers": [
+        [
+          "Box",
+          "Mail Box"
+        ],
+        [
+          "Man",
+          "Mail Man"
+        ],
+        [
+          "Order",
+          "Mail Order"
+        ]
+      ]
+    },
+    {
+      "text": "Fish ___",
+      "answers": [
+        [
+          "Tank",
+          "Fish Tank"
+        ],
+        [
+          "Sticks",
+          "Fish Sticks"
+        ],
+        [
+          "Bowl",
+          "Fish Bowl"
+        ]
+      ]
+    },
+    {
+      "text": "Dog ___",
+      "answers": [
+        [
+          "House",
+          "Dog House"
+        ],
+        [
+          "Food",
+          "Dog Food"
+        ],
+        [
+          "Walker",
+          "Dog Walker"
+        ]
+      ]
+    },
+    {
+      "text": "Cat ___",
+      "answers": [
+        [
+          "Woman",
+          "Cat Woman"
+        ],
+        [
+          "Nap",
+          "Cat Nap"
+        ],
+        [
+          "Walk",
+          "Cat Walk"
+        ]
+      ]
+    },
+    {
+      "text": "Bird ___",
+      "answers": [
+        [
+          "House",
+          "Bird House"
+        ],
+        [
+          "Feeder",
+          "Bird Feeder"
+        ],
+        [
+          "Bath",
+          "Bird Bath"
+        ]
+      ]
+    },
+    {
+      "text": "Horse ___",
+      "answers": [
+        [
+          "Shoe",
+          "Horse Shoe"
+        ],
+        [
+          "Power",
+          "Horse Power"
+        ],
+        [
+          "Back",
+          "Horse Back"
+        ]
+      ]
+    },
+    {
+      "text": "Monkey ___",
+      "answers": [
+        [
+          "Business",
+          "Monkey Business"
+        ],
+        [
+          "Bars",
+          "Monkey Bars"
+        ],
+        [
+          "Wrench",
+          "Monkey Wrench"
+        ]
+      ]
+    },
+    {
+      "text": "Bull ___",
+      "answers": [
+        [
+          "Dog",
+          "Bull Dog"
+        ],
+        [
+          "Frog",
+          "Bull Frog"
+        ],
+        [
+          "Ring",
+          "Bull Ring"
+        ]
+      ]
+    },
+    {
+      "text": "Lady ___",
+      "answers": [
+        [
+          "Gaga",
+          "Lady Gaga"
+        ],
+        [
+          "Bug",
+          "Lady Bug"
+        ],
+        [
+          "Luck",
+          "Lady Luck"
+        ]
+      ]
+    },
+    {
+      "text": "Tiger ___",
+      "answers": [
+        [
+          "Woods",
+          "Tiger Woods"
+        ],
+        [
+          "King",
+          "Tiger King"
+        ],
+        [
+          "Shark",
+          "Tiger Shark"
+        ]
+      ]
+    },
+    {
+      "text": "Mother ___",
+      "answers": [
+        [
+          "Nature",
+          "Mother Nature"
+        ],
+        [
+          "Teresa",
+          "Mother Teresa"
+        ],
+        [
+          "Goose",
+          "Mother Goose"
+        ]
+      ]
+    },
+    {
+      "text": "Father ___",
+      "answers": [
+        [
+          "Time",
+          "Father Time"
+        ],
+        [
+          "Christmas",
+          "Father Christmas"
+        ],
+        [
+          "Ted",
+          "Father Ted"
+        ]
+      ]
+    },
+    {
+      "text": "Uncle ___",
+      "answers": [
+        [
+          "Sam",
+          "Uncle Sam"
+        ],
+        [
+          "Bob",
+          "Uncle Bob"
+        ],
+        [
+          "Ben",
+          "Uncle Ben"
+        ]
+      ]
+    },
+    {
+      "text": "Tom ___",
+      "answers": [
+        [
+          "Cruise",
+          "Tom Cruise"
+        ],
+        [
+          "Hanks",
+          "Tom Hanks"
+        ],
+        [
+          "Brady",
+          "Tom Brady"
+        ]
+      ]
+    },
+    {
+      "text": "Justin ___",
+      "answers": [
+        [
+          "Bieber",
+          "Justin Bieber"
+        ],
+        [
+          "Timberlake",
+          "Justin Timberlake"
+        ],
+        [
+          "Trudeau",
+          "Justin Trudeau"
+        ]
+      ]
+    },
+    {
+      "text": "Disney ___",
+      "answers": [
+        [
+          "Land",
+          "Disney Land"
+        ],
+        [
+          "World",
+          "Disney World"
+        ],
+        [
+          "Plus",
+          "Disney Plus"
+        ]
+      ]
+    },
+    {
+      "text": "Nintendo ___",
+      "answers": [
+        [
+          "Switch",
+          "Nintendo Switch"
+        ],
+        [
+          "Wii",
+          "Nintendo Wii"
+        ],
+        [
+          "DS",
+          "Nintendo DS"
+        ]
+      ]
+    },
+    {
+      "text": "Video ___",
+      "answers": [
+        [
+          "Game",
+          "Video Game"
+        ],
+        [
+          "Tape",
+          "Video Tape"
+        ],
+        [
+          "Chat",
+          "Video Chat"
+        ]
+      ]
+    },
+    {
+      "text": "Social ___",
+      "answers": [
+        [
+          "Media",
+          "Social Media"
+        ],
+        [
+          "Security",
+          "Social Security"
+        ],
+        [
+          "Distancing",
+          "Social Distancing"
+        ]
+      ]
+    },
+    {
+      "text": "Text ___",
+      "answers": [
+        [
+          "Message",
+          "Text Message"
+        ],
+        [
+          "Book",
+          "Text Book"
+        ],
+        [
+          "Alert",
+          "Text Alert"
+        ]
+      ]
+    },
+    {
+      "text": "Smart ___",
+      "answers": [
+        [
+          "Phone",
+          "Smart Phone"
+        ],
+        [
+          "Watch",
+          "Smart Watch"
+        ],
+        [
+          "TV",
+          "Smart TV"
+        ]
+      ]
+    },
+    {
+      "text": "Face ___",
+      "answers": [
+        [
+          "Book",
+          "Face Book"
+        ],
+        [
+          "Time",
+          "Face Time"
+        ],
+        [
+          "Mask",
+          "Face Mask"
+        ]
+      ]
+    },
+    {
+      "text": "Google ___",
+      "answers": [
+        [
+          "Search",
+          "Google Search"
+        ],
+        [
+          "Maps",
+          "Google Maps"
+        ],
+        [
+          "Earth",
+          "Google Earth"
+        ]
+      ]
+    },
+    {
+      "text": "Rocky ___",
+      "answers": [
+        [
+          "Mountain",
+          "Rocky Mountain"
+        ],
+        [
+          "Road",
+          "Rocky Road"
+        ],
+        [
+          "Balboa",
+          "Rocky Balboa"
+        ]
+      ]
+    },
+    {
+      "text": "___ Mountain",
+      "answers": [
+        [
+          "Rocky",
+          "Rocky Mountain"
+        ],
+        [
+          "Smoky",
+          "Smoky Mountain"
+        ],
+        [
+          "Brokeback",
+          "Brokeback Mountain"
+        ]
+      ]
+    },
+    {
+      "text": "___ Park",
+      "answers": [
+        [
+          "Jurassic",
+          "Jurassic Park"
+        ],
+        [
+          "Central",
+          "Central Park"
+        ],
+        [
+          "Theme",
+          "Theme Park"
+        ]
+      ]
+    },
+    {
+      "text": "___ Island",
+      "answers": [
+        [
+          "Long",
+          "Long Island"
+        ],
+        [
+          "Rhode",
+          "Rhode Island"
+        ],
+        [
+          "Treasure",
+          "Treasure Island"
+        ]
+      ]
+    },
+    {
+      "text": "___ Canyon",
+      "answers": [
+        [
+          "Grand",
+          "Grand Canyon"
+        ],
+        [
+          "Bryce",
+          "Bryce Canyon"
+        ],
+        [
+          "Zion",
+          "Zion Canyon"
+        ]
+      ]
+    },
+    {
+      "text": "Salt ___",
+      "answers": [
+        [
+          "Lake",
+          "Salt Lake"
+        ],
+        [
+          "Water",
+          "Salt Water"
+        ],
+        [
+          "Shaker",
+          "Salt Shaker"
+        ]
+      ]
+    },
+    {
+      "text": "Cold ___",
+      "answers": [
+        [
+          "War",
+          "Cold War"
+        ],
+        [
+          "Brew",
+          "Cold Brew"
+        ],
+        [
+          "Shoulder",
+          "Cold Shoulder"
+        ]
+      ]
+    },
+    {
+      "text": "Brain ___",
+      "answers": [
+        [
+          "Storm",
+          "Brain Storm"
+        ],
+        [
+          "Freeze",
+          "Brain Freeze"
+        ],
+        [
+          "Wash",
+          "Brain Wash"
+        ]
+      ]
+    },
+    {
+      "text": "Heart ___",
+      "answers": [
+        [
+          "Attack",
+          "Heart Attack"
+        ],
+        [
+          "Beat",
+          "Heart Beat"
+        ],
+        [
+          "Break",
+          "Heart Break"
+        ]
+      ]
+    },
+    {
+      "text": "Broken ___",
+      "answers": [
+        [
+          "Heart",
+          "Broken Heart"
+        ],
+        [
+          "Record",
+          "Broken Record"
+        ],
+        [
+          "Arrow",
+          "Broken Arrow"
+        ]
+      ]
+    },
+    {
+      "text": "Blind ___",
+      "answers": [
+        [
+          "Date",
+          "Blind Date"
+        ],
+        [
+          "Spot",
+          "Blind Spot"
+        ],
+        [
+          "Side",
+          "Blind Side"
+        ]
+      ]
+    },
+    {
+      "text": "First ___",
+      "answers": [
+        [
+          "Aid",
+          "First Aid"
+        ],
+        [
+          "Class",
+          "First Class"
+        ],
+        [
+          "Date",
+          "First Date"
+        ]
+      ]
+    },
+    {
+      "text": "Last ___",
+      "answers": [
+        [
+          "Name",
+          "Last Name"
+        ],
+        [
+          "Minute",
+          "Last Minute"
+        ],
+        [
+          "Supper",
+          "Last Supper"
+        ]
+      ]
+    },
+    {
+      "text": "Second ___",
+      "answers": [
+        [
+          "Chance",
+          "Second Chance"
+        ],
+        [
+          "Hand",
+          "Second Hand"
+        ],
+        [
+          "Thought",
+          "Second Thought"
+        ]
+      ]
+    },
+    {
+      "text": "Open ___",
+      "answers": [
+        [
+          "House",
+          "Open House"
+        ],
+        [
+          "Mic",
+          "Open Mic"
+        ],
+        [
+          "Book",
+          "Open Book"
+        ]
+      ]
+    },
+    {
+      "text": "Dead ___",
+      "answers": [
+        [
+          "Line",
+          "Dead Line"
+        ],
+        [
+          "End",
+          "Dead End"
+        ],
+        [
+          "Sea",
+          "Dead Sea"
+        ]
+      ]
+    },
+    {
+      "text": "Wild ___",
+      "answers": [
+        [
+          "Card",
+          "Wild Card"
+        ],
+        [
+          "Fire",
+          "Wild Fire"
+        ],
+        [
+          "West",
+          "Wild West"
+        ]
+      ]
+    },
+    {
+      "text": "Cross ___",
+      "answers": [
+        [
+          "Word",
+          "Cross Word"
+        ],
+        [
+          "Fit",
+          "Cross Fit"
+        ],
+        [
+          "Walk",
+          "Cross Walk"
+        ]
+      ]
+    },
+    {
+      "text": "Power ___",
+      "answers": [
+        [
+          "Point",
+          "Power Point"
+        ],
+        [
+          "Ball",
+          "Power Ball"
+        ],
+        [
+          "Rangers",
+          "Power Rangers"
+        ]
+      ]
+    },
+    {
+      "text": "Smoke ___",
+      "answers": [
+        [
+          "Alarm",
+          "Smoke Alarm"
+        ],
+        [
+          "Signal",
+          "Smoke Signal"
+        ],
+        [
+          "Screen",
+          "Smoke Screen"
+        ]
+      ]
+    },
+    {
+      "text": "Gas ___",
+      "answers": [
+        [
+          "Station",
+          "Gas Station"
+        ],
+        [
+          "Mask",
+          "Gas Mask"
+        ],
+        [
+          "Pedal",
+          "Gas Pedal"
+        ]
+      ]
+    },
+    {
+      "text": "Car ___",
+      "answers": [
+        [
+          "Wash",
+          "Car Wash"
+        ],
+        [
+          "Pool",
+          "Car Pool"
+        ],
+        [
+          "Seat",
+          "Car Seat"
+        ]
+      ]
+    },
+    {
+      "text": "Bus ___",
+      "answers": [
+        [
+          "Stop",
+          "Bus Stop"
+        ],
+        [
+          "Station",
+          "Bus Station"
+        ],
+        [
+          "Driver",
+          "Bus Driver"
+        ]
+      ]
+    },
+    {
+      "text": "Traffic ___",
+      "answers": [
+        [
+          "Light",
+          "Traffic Light"
+        ],
+        [
+          "Jam",
+          "Traffic Jam"
+        ],
+        [
+          "Cone",
+          "Traffic Cone"
+        ]
+      ]
+    },
+    {
+      "text": "Pay ___",
+      "answers": [
+        [
+          "Check",
+          "Pay Check"
+        ],
+        [
+          "Day",
+          "Pay Day"
+        ],
+        [
+          "Pal",
+          "Pay Pal"
+        ]
+      ]
+    },
+    {
+      "text": "Credit ___",
+      "answers": [
+        [
+          "Card",
+          "Credit Card"
+        ],
+        [
+          "Score",
+          "Credit Score"
+        ],
+        [
+          "Union",
+          "Credit Union"
+        ]
+      ]
+    },
+    {
+      "text": "Time ___",
+      "answers": [
+        [
+          "Zone",
+          "Time Zone"
+        ],
+        [
+          "Out",
+          "Time Out"
+        ],
+        [
+          "Machine",
+          "Time Machine"
+        ]
+      ]
+    },
+    {
+      "text": "Air ___",
+      "answers": [
+        [
+          "Plane",
+          "Air Plane"
+        ],
+        [
+          "Port",
+          "Air Port"
+        ],
+        [
+          "Force",
+          "Air Force"
+        ]
+      ]
+    },
+    {
+      "text": "Rain ___",
+      "answers": [
+        [
+          "Bow",
+          "Rain Bow"
+        ],
+        [
+          "Coat",
+          "Rain Coat"
+        ],
+        [
+          "Drop",
+          "Rain Drop"
+        ]
+      ]
+    },
+    {
+      "text": "Thunder ___",
+      "answers": [
+        [
+          "Storm",
+          "Thunder Storm"
+        ],
+        [
+          "Bolt",
+          "Thunder Bolt"
+        ],
+        [
+          "Cats",
+          "Thunder Cats"
+        ]
+      ]
+    },
+    {
+      "text": "Wind ___",
+      "answers": [
+        [
+          "Shield",
+          "Wind Shield"
+        ],
+        [
+          "Mill",
+          "Wind Mill"
+        ],
+        [
+          "Chill",
+          "Wind Chill"
+        ]
+      ]
+    },
+    {
+      "text": "Tooth ___",
+      "answers": [
+        [
+          "Paste",
+          "Tooth Paste"
+        ],
+        [
+          "Brush",
+          "Tooth Brush"
+        ],
+        [
+          "Pick",
+          "Tooth Pick"
+        ]
+      ]
+    },
+    {
+      "text": "Hair ___",
+      "answers": [
+        [
+          "Cut",
+          "Hair Cut"
+        ],
+        [
+          "Brush",
+          "Hair Brush"
+        ],
+        [
+          "Spray",
+          "Hair Spray"
+        ]
+      ]
+    },
+    {
+      "text": "Nail ___",
+      "answers": [
+        [
+          "Polish",
+          "Nail Polish"
+        ],
+        [
+          "Salon",
+          "Nail Salon"
+        ],
+        [
+          "Gun",
+          "Nail Gun"
+        ]
+      ]
+    },
+    {
+      "text": "Night ___",
+      "answers": [
+        [
+          "Mare",
+          "Night Mare"
+        ],
+        [
+          "Club",
+          "Night Club"
+        ],
+        [
+          "Gown",
+          "Night Gown"
+        ]
+      ]
+    },
+    {
+      "text": "Mid ___",
+      "answers": [
+        [
+          "Night",
+          "Mid Night"
+        ],
+        [
+          "Term",
+          "Mid Term"
+        ],
+        [
+          "West",
+          "Mid West"
+        ]
+      ]
+    },
+    {
+      "text": "___ stick",
+      "answers": [
+        [
+          "Lip",
+          "Lip stick"
+        ],
+        [
+          "Chop",
+          "Chop stick"
+        ],
+        [
+          "Drum",
+          "Drum stick"
+        ]
+      ]
+    },
+    {
+      "text": "___ ring",
+      "answers": [
+        [
+          "Wedding",
+          "Wedding ring"
+        ],
+        [
+          "Onion",
+          "Onion ring"
+        ],
+        [
+          "Engagement",
+          "Engagement ring"
+        ]
+      ]
+    },
+    {
+      "text": "___ shirt",
+      "answers": [
+        [
+          "Sweat",
+          "Sweat shirt"
+        ],
+        [
+          "Polo",
+          "Polo shirt"
+        ],
+        [
+          "Dress",
+          "Dress shirt"
+        ]
+      ]
+    },
+    {
+      "text": "___ shoes",
+      "answers": [
+        [
+          "Running",
+          "Running shoes"
+        ],
+        [
+          "Tennis",
+          "Tennis shoes"
+        ],
+        [
+          "Dress",
+          "Dress shoes"
+        ]
+      ]
+    },
+    {
+      "text": "___ pants",
+      "answers": [
+        [
+          "Sweat",
+          "Sweat pants"
+        ],
+        [
+          "Yoga",
+          "Yoga pants"
+        ],
+        [
+          "Cargo",
+          "Cargo pants"
+        ]
+      ]
+    },
+    {
+      "text": "___ jacket",
+      "answers": [
+        [
+          "Leather",
+          "Leather jacket"
+        ],
+        [
+          "Life",
+          "Life jacket"
+        ],
+        [
+          "Rain",
+          "Rain jacket"
+        ]
+      ]
+    },
+    {
+      "text": "___ bag",
+      "answers": [
+        [
+          "Hand",
+          "Hand bag"
+        ],
+        [
+          "Sleeping",
+          "Sleeping bag"
+        ],
+        [
+          "Tea",
+          "Tea bag"
+        ]
+      ]
+    },
+    {
+      "text": "___ clock",
+      "answers": [
+        [
+          "Alarm",
+          "Alarm clock"
+        ],
+        [
+          "Grandfather",
+          "Grandfather clock"
+        ],
+        [
+          "Cuckoo",
+          "Cuckoo clock"
+        ]
+      ]
+    },
+    {
+      "text": "___ bell",
+      "answers": [
+        [
+          "Door",
+          "Door bell"
+        ],
+        [
+          "Jingle",
+          "Jingle bell"
+        ],
+        [
+          "Cow",
+          "Cow bell"
+        ]
+      ]
+    },
+    {
+      "text": "___ tree",
+      "answers": [
+        [
+          "Christmas",
+          "Christmas tree"
+        ],
+        [
+          "Family",
+          "Family tree"
+        ],
+        [
+          "Palm",
+          "Palm tree"
+        ]
+      ]
+    },
+    {
+      "text": "___ flower",
+      "answers": [
+        [
+          "Sun",
+          "Sun flower"
+        ],
+        [
+          "Wall",
+          "Wall flower"
+        ],
+        [
+          "Wild",
+          "Wild flower"
+        ]
+      ]
+    },
+    {
+      "text": "___ pepper",
+      "answers": [
+        [
+          "Black",
+          "Black pepper"
+        ],
+        [
+          "Bell",
+          "Bell pepper"
+        ],
+        [
+          "Red",
+          "Red pepper"
+        ]
+      ]
+    },
+    {
+      "text": "___ potato",
+      "answers": [
+        [
+          "Sweet",
+          "Sweet potato"
+        ],
+        [
+          "Baked",
+          "Baked potato"
+        ],
+        [
+          "Couch",
+          "Couch potato"
+        ]
+      ]
+    },
+    {
+      "text": "___ corn",
+      "answers": [
+        [
+          "Pop",
+          "Pop corn"
+        ],
+        [
+          "Candy",
+          "Candy corn"
+        ],
+        [
+          "Sweet",
+          "Sweet corn"
+        ]
+      ]
+    },
+    {
+      "text": "___ toast",
+      "answers": [
+        [
+          "French",
+          "French toast"
+        ],
+        [
+          "Avocado",
+          "Avocado toast"
+        ],
+        [
+          "Cinnamon",
+          "Cinnamon toast"
+        ]
+      ]
+    },
+    {
+      "text": "___ berry",
+      "answers": [
+        [
+          "Blue",
+          "Blue berry"
+        ],
+        [
+          "Straw",
+          "Straw berry"
+        ],
+        [
+          "Rasp",
+          "Rasp berry"
+        ]
+      ]
+    },
+    {
+      "text": "___ bean",
+      "answers": [
+        [
+          "Jelly",
+          "Jelly bean"
+        ],
+        [
+          "Green",
+          "Green bean"
+        ],
+        [
+          "Coffee",
+          "Coffee bean"
+        ]
+      ]
+    },
+    {
+      "text": "___ roll",
+      "answers": [
+        [
+          "Cinnamon",
+          "Cinnamon roll"
+        ],
+        [
+          "Egg",
+          "Egg roll"
+        ],
+        [
+          "Sushi",
+          "Sushi roll"
+        ]
+      ]
+    },
+    {
+      "text": "___ ship",
+      "answers": [
+        [
+          "Cruise",
+          "Cruise ship"
+        ],
+        [
+          "Space",
+          "Space ship"
+        ],
+        [
+          "War",
+          "War ship"
+        ]
+      ]
+    },
+    {
+      "text": "___ boat",
+      "answers": [
+        [
+          "Speed",
+          "Speed boat"
+        ],
+        [
+          "Sail",
+          "Sail boat"
+        ],
+        [
+          "Row",
+          "Row boat"
+        ]
+      ]
+    },
+    {
+      "text": "___ train",
+      "answers": [
+        [
+          "Bullet",
+          "Bullet train"
+        ],
+        [
+          "Freight",
+          "Freight train"
+        ],
+        [
+          "Gravy",
+          "Gravy train"
+        ]
+      ]
+    },
+    {
+      "text": "___ truck",
+      "answers": [
+        [
+          "Fire",
+          "Fire truck"
+        ],
+        [
+          "Pickup",
+          "Pickup truck"
+        ],
+        [
+          "Monster",
+          "Monster truck"
+        ]
+      ]
+    },
+    {
+      "text": "___ car",
+      "answers": [
+        [
+          "Race",
+          "Race car"
+        ],
+        [
+          "Sports",
+          "Sports car"
+        ],
+        [
+          "Cable",
+          "Cable car"
+        ]
+      ]
+    },
+    {
+      "text": "___ bike",
+      "answers": [
+        [
+          "Dirt",
+          "Dirt bike"
+        ],
+        [
+          "Motor",
+          "Motor bike"
+        ],
+        [
+          "Mountain",
+          "Mountain bike"
+        ]
+      ]
+    },
+    {
+      "text": "___ jump",
+      "answers": [
+        [
+          "Bungee",
+          "Bungee jump"
+        ],
+        [
+          "Long",
+          "Long jump"
+        ],
+        [
+          "Ski",
+          "Ski jump"
+        ]
+      ]
+    },
+    {
+      "text": "___ game",
+      "answers": [
+        [
+          "Video",
+          "Video game"
+        ],
+        [
+          "Board",
+          "Board game"
+        ],
+        [
+          "Card",
+          "Card game"
+        ]
+      ]
+    },
+    {
+      "text": "___ show",
+      "answers": [
+        [
+          "Talk",
+          "Talk show"
+        ],
+        [
+          "Game",
+          "Game show"
+        ],
+        [
+          "Magic",
+          "Magic show"
+        ]
+      ]
+    },
+    {
+      "text": "___ story",
+      "answers": [
+        [
+          "Love",
+          "Love story"
+        ],
+        [
+          "Toy",
+          "Toy story"
+        ],
+        [
+          "Ghost",
+          "Ghost story"
+        ]
+      ]
+    },
+    {
+      "text": "___ song",
+      "answers": [
+        [
+          "Love",
+          "Love song"
+        ],
+        [
+          "Theme",
+          "Theme song"
+        ],
+        [
+          "Swan",
+          "Swan song"
+        ]
+      ]
+    },
+    {
+      "text": "___ night",
+      "answers": [
+        [
+          "Date",
+          "Date night"
+        ],
+        [
+          "Movie",
+          "Movie night"
+        ],
+        [
+          "Game",
+          "Game night"
+        ]
+      ]
+    },
+    {
+      "text": "___ time",
+      "answers": [
+        [
+          "Bed",
+          "Bed time"
+        ],
+        [
+          "Spring",
+          "Spring time"
+        ],
+        [
+          "Show",
+          "Show time"
+        ]
+      ]
+    },
+    {
+      "text": "___ break",
+      "answers": [
+        [
+          "Spring",
+          "Spring break"
+        ],
+        [
+          "Coffee",
+          "Coffee break"
+        ],
+        [
+          "Lunch",
+          "Lunch break"
+        ]
+      ]
+    },
+    {
+      "text": "___ lunch",
+      "answers": [
+        [
+          "School",
+          "School lunch"
+        ],
+        [
+          "Free",
+          "Free lunch"
+        ],
+        [
+          "Power",
+          "Power lunch"
+        ]
+      ]
+    },
+    {
+      "text": "___ dinner",
+      "answers": [
+        [
+          "TV",
+          "TV dinner"
+        ],
+        [
+          "Thanksgiving",
+          "Thanksgiving dinner"
+        ],
+        [
+          "Christmas",
+          "Christmas dinner"
+        ]
+      ]
+    },
+    {
+      "text": "___ movie",
+      "answers": [
+        [
+          "Horror",
+          "Horror movie"
+        ],
+        [
+          "Action",
+          "Action movie"
+        ],
+        [
+          "Disney",
+          "Disney movie"
+        ]
+      ]
+    },
+    {
+      "text": "___ music",
+      "answers": [
+        [
+          "Country",
+          "Country music"
+        ],
+        [
+          "Classical",
+          "Classical music"
+        ],
+        [
+          "Pop",
+          "Pop music"
+        ]
+      ]
+    },
+    {
+      "text": "___ band",
+      "answers": [
+        [
+          "Rock",
+          "Rock band"
+        ],
+        [
+          "Rubber",
+          "Rubber band"
+        ],
+        [
+          "Boy",
+          "Boy band"
+        ]
+      ]
+    },
+    {
+      "text": "___ guitar",
+      "answers": [
+        [
+          "Electric",
+          "Electric guitar"
+        ],
+        [
+          "Acoustic",
+          "Acoustic guitar"
+        ],
+        [
+          "Air",
+          "Air guitar"
+        ]
+      ]
+    },
+    {
+      "text": "___ money",
+      "answers": [
+        [
+          "Pocket",
+          "Pocket money"
+        ],
+        [
+          "Monopoly",
+          "Monopoly money"
+        ],
+        [
+          "Easy",
+          "Easy money"
+        ]
+      ]
+    },
+    {
+      "text": "___ test",
+      "answers": [
+        [
+          "Driving",
+          "Driving test"
+        ],
+        [
+          "Drug",
+          "Drug test"
+        ],
+        [
+          "Blood",
+          "Blood test"
+        ]
+      ]
+    },
+    {
+      "text": "___ paper",
+      "answers": [
+        [
+          "News",
+          "News paper"
+        ],
+        [
+          "Toilet",
+          "Toilet paper"
+        ],
+        [
+          "Wall",
+          "Wall paper"
+        ]
+      ]
+    },
+    {
+      "text": "___ dance",
+      "answers": [
+        [
+          "Line",
+          "Line dance"
+        ],
+        [
+          "Square",
+          "Square dance"
+        ],
+        [
+          "Belly",
+          "Belly dance"
+        ]
+      ]
+    },
+    {
+      "text": "___ wars",
+      "answers": [
+        [
+          "Star",
+          "Star wars"
+        ],
+        [
+          "Clone",
+          "Clone wars"
+        ],
+        [
+          "Culture",
+          "Culture wars"
+        ]
+      ]
+    },
+    {
+      "text": "___ world",
+      "answers": [
+        [
+          "Disney",
+          "Disney world"
+        ],
+        [
+          "Sea",
+          "Sea world"
+        ],
+        [
+          "Jurassic",
+          "Jurassic world"
         ]
       ]
     }

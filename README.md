@@ -102,7 +102,13 @@ Celebrities who join after the start play from the next question. After the game
 
 **Question bank:** `src/BuzzerGames.Core/Data/Match/match-game.json`. `names` are the family first names that fill `{name}` in each of the `questions`.
 Each of the `supers` has a blank (`text`) and `answers`: three lists, most popular first, each holding the accepted spellings. The computer only
-*suggests* which row an answer matches, by spelling; the emcee always decides. The starter blanks and rankings are guesses; replace them with your own.
+*suggests* which row an answer matches, by spelling; the emcee always decides. The Super Match blanks and rankings are my own modernized estimates, informed by the show's real ranked answers (see Credits). Replace any you disagree with.
+
+## Credits
+
+Match Game is owned by Fremantle; this is a private party game. The Super Match blanks draw on the transcribed episode data from
+[matchgame.info](https://matchgame.info) ([rebeccadrucker/match-game-data](https://github.com/rebeccadrucker/match-game-data)), licensed CC BY 4.0.
+The rankings in `match-game.json` were then modernized and edited by hand.
 
 ## Run it on your computer
 
