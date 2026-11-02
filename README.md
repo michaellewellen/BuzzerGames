@@ -3,7 +3,7 @@
 Making our favorite game shows playable, on phones, with a big screen in the middle of the room.
 
 Right now there are three games: **Jeopardy**, **Press Your Luck** and **Password Plus**. The site opens on a
-"pick a game" page, with Wheel of Fortune, Classic Concentration and The Price Is Right waiting in the wings.
+"pick a game" page, with Wheel of Fortune and Classic Concentration waiting in the wings.
 
 ## How a Jeopardy game works
 
@@ -76,26 +76,6 @@ is the `/board` address.
 **What makes a good password.** The clue-giver only ever sees the password in play, never the big word, so a clue that leaks the big word is legal (that's part of the fun). The one thing that matters is that a password is easy to *clue*: concrete and vivid with an obvious association. Abstract words (think, open, blow) have no single hook and make a miserable password. (The bonus round is different: the guesser knows the letter, so abstract words work there.)
 
 **Puzzles.** `src/BuzzerGames.Core/Data/Password/puzzles.json`: each entry has a `kind` (Person, Place or Thing), the `answer`, five `words` ordered from vague to obvious, and optional `alsoAccept`. Each game deals 12, avoiding the same kind twice in a row.
-
-## How a Price Is Right game works
-
-One TV, one emcee, and a whole studio audience (up to 200 phones).
-
-1. Put the game on the TV (`/price-is-right`, then Create). Tap **Turn on the announcer** on the TV once so the browser allows the voice.
-2. Everyone scans the QR code, types a name, picks a cartoon person, and joins the audience. The name field has an optional "how to say it" box for names the voice mangles. The emcee joins with "I'm the emcee".
-3. The emcee starts the show (needs 4 audience members). The voice calls four people down to Contestants' Row, then introduces an item, reads its description and ends with "could be yours, if the price is right!"
-4. Bidding goes one contestant at a time. Nobody may repeat a bid. Closest without going over wins; if everyone is over, the lowest bid becomes the ceiling and they bid again.
-5. The winner goes on stage, the other three stay, and one new person is called down. After the last round, everyone who never made it on stage gets a parting gift read out.
-6. The audience can cheer, boo, and shout higher/lower from their phones, and (if the emcee leaves it on) type short comments. The emcee can delete a comment, turn comments off, and repeat or hush the announcer.
-
-7. The winner plays a pricing game on stage. So far there is one: **Plinko**.
-
-**Plinko:** the contestant sees four small grocery items, each with a price tag that is wrong. For each, they tap Higher or Lower on their phone to say whether the real price is above or below the tag. Every right answer wins a chip, and they start with one free chip (so one to five). Each chip is lined up with a slider on the contestant's phone (the chip follows it live on the TV), then dropped. It bounces down 13 rows of pegs (seven rows of 8, six rows of 7) into one of nine slots paying $100, $500, $1,000, $0, $10,000, $0, $1,000, $500, $100. The bounces are random; dropping at the edges always pays $100, and the middle is the best plan (about $2,600 a chip on average). The big screen times each fall; the emcee phone has a "chip has landed" button, "answer / drop for them" buttons if a phone dies, and "Skip this pricing game". The emcee taps the last button (Next contestant) when Plinko is over.
-
-**Plinko items:** `src/BuzzerGames.Core/Data/Price/plinko-items.json` (name, emoji icon, price in `cents`). Keep them to a few dollars.
-
-**Item bank:** `src/BuzzerGames.Core/Data/Price/items.json` (name, description, price, emoji `icon`, optional `image`, optional `say`). Put photos in `src/BuzzerGames.Web/wwwroot/images/price/` and set `"image": "stereo.jpg"`. Items without a photo show their emoji.
-**Parting gifts:** `src/BuzzerGames.Core/Data/Price/parting-gifts.txt`, one per line.
 
 ## Run it on your computer
 
