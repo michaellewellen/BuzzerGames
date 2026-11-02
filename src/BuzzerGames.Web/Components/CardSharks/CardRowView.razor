@@ -1,0 +1,34 @@
+@* A team's row of cards: the cards turned over so far, then face-down cards up to the full length. *@
+
+<div class="cs-row @PasswordText.TeamClass(Team) @(Active ? "active" : "")">
+    <div class="cs-row-head">
+        <span class="cs-team">@Row.Name</span>
+        <span class="cs-games" aria-label="Games won">
+            @for (var g = 0; g < CardSharksGame.GamesToWin; g++)
+            {
+                <span class="cs-pip-game @(g < Row.GamesWon ? "won" : "")"></span>
+            }
+        </span>
+    </div>
+    <div class="cs-cards">
+        @for (var i = 0; i < Row.Length; i++)
+        {
+            var index = i;
+            if (index < Row.Cards.Count)
+            {
+                <PlayingCardView Card="Row.Cards[index]" Team="Team" Frozen="@(index == Row.Frozen)"
+                                 Failed="@(Row.Failed && index == Row.Cards.Count - 1)" Current="@(index == Row.Cards.Count - 1)" />
+            }
+            else
+            {
+                <PlayingCardView Card="null" Team="Team" />
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public RowInfo Row { get; set; } = default!;
+    [Parameter] public int Team { get; set; }
+    [Parameter] public bool Active { get; set; }
+}

@@ -1,5 +1,6 @@
 using BuzzerGames.Web;
 using BuzzerGames.Core.Jeopardy;
+using BuzzerGames.Core.CardSharks;
 using BuzzerGames.Core.Match;
 using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
@@ -39,6 +40,9 @@ builder.Services.AddPasswordPlus();
 
 // Match Game has its own question bank and its own set of running games.
 builder.Services.AddMatchGame();
+
+// Card Sharks has its own survey bank and its own set of running games.
+builder.Services.AddCardSharks();
 
 var app = builder.Build();
 

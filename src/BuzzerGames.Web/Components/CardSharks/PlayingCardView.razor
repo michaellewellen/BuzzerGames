@@ -1,0 +1,25 @@
+@* One playing card, face up (a Card) or face down (null). The back is red for Team A's deck and blue for Team B's, like the two decks on the show. *@
+
+@if (Card is { } c)
+{
+    <div class="cs-card face @(c.IsRed ? "red" : "black") @(Frozen ? "frozen" : "") @(Failed ? "failed" : "") @(Current ? "current" : "")">
+        <span class="cs-corner">@c.Label<small>@c.SuitSymbol</small></span>
+        <span class="cs-pip">@c.SuitSymbol</span>
+        @if (Frozen)
+        {
+            <span class="cs-ice" title="Frozen">❄</span>
+        }
+    </div>
+}
+else
+{
+    <div class="cs-card back @(Team == 0 ? "back-a" : "back-b")"></div>
+}
+
+@code {
+    [Parameter] public Card? Card { get; set; }
+    [Parameter] public int Team { get; set; }
+    [Parameter] public bool Frozen { get; set; }
+    [Parameter] public bool Failed { get; set; }
+    [Parameter] public bool Current { get; set; }
+}

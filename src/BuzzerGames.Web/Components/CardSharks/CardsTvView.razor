@@ -1,0 +1,62 @@
+@*
+    The big screen: the survey question, what the guessing team said and how the other team called it, the real answer once it is called,
+    and both teams' rows of cards. Face-down cards are really face down: the snapshot only lists cards that have been turned over.
+    The real survey answer is never drawn before the other team has called.
+*@
+
+<main class="tv cs-tv">
+    <header class="tv-top">
+        <span>CARD SHARKS · @Snapshot.Label.ToUpperInvariant()</span>
+        <span>Room @Snapshot.Code</span>
+    </header>
+
+    <section class="cs-stage">
+        @switch (Snapshot.Phase)
+        {
+            case CardPhase.GameOver:
+                <p class="mg-kicker">GAME OVER</p>
+                <p class="mg-headline @PasswordText.TeamClass(Snapshot.GameWinner)">@Snapshot.Message</p>
+                break;
+
+            case CardPhase.MatchOver:
+                <p class="mg-kicker">MATCH OVER</p>
+                <p class="mg-headline @PasswordText.TeamClass(Snapshot.MatchWinner)">@Snapshot.TeamName(Snapshot.MatchWinner) wins the match!</p>
+                <p class="mg-sub">@Snapshot.Message</p>
+                break;
+
+            default:
+                <p class="cs-question">@Snapshot.QuestionText</p>
+                <div class="cs-duel">
+                    @if (Snapshot.Guess is { } guess)
+                    {
+                        <div class="cs-duel-box @PasswordText.TeamClass(Snapshot.Guesser)">
+                            <span class="cs-duel-label">@Snapshot.TeamName(Snapshot.Guesser) guessed</span>
+                            <span class="cs-duel-num">@guess</span>
+                        </div>
+                        <div class="cs-duel-box @PasswordText.TeamClass(Snapshot.Caller)">
+                            <span class="cs-duel-label">@Snapshot.TeamName(Snapshot.Caller) says</span>
+                            <span class="cs-duel-num">@(Snapshot.CalledHigher is true ? "HIGHER ▲" : Snapshot.CalledHigher is false ? "LOWER ▼" : "…")</span>
+                        </div>
+                    }
+                    @if (Snapshot.AnswerShown)
+                    {
+                        <div class="cs-duel-box answer">
+                            <span class="cs-duel-label">The real answer</span>
+                            <span class="cs-duel-num">@Snapshot.Answer</span>
+                        </div>
+                    }
+                </div>
+                <p class="mg-guess">@Snapshot.Message</p>
+                break;
+        }
+    </section>
+
+    <section class="cs-rows">
+        <CardRowView Row="Snapshot.Rows[0]" Team="0" Active="@(Snapshot.Turn == 0)" />
+        <CardRowView Row="Snapshot.Rows[1]" Team="1" Active="@(Snapshot.Turn == 1)" />
+    </section>
+</main>
+
+@code {
+    [Parameter, EditorRequired] public CardSnapshot Snapshot { get; set; } = default!;
+}

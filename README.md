@@ -104,6 +104,19 @@ Celebrities who join after the start play from the next question. After the game
 Each of the `supers` has a blank (`text`) and `answers`: three lists, most popular first, each holding the accepted spellings. The computer only
 *suggests* which row an answer matches, by spelling; the emcee always decides. The Super Match blanks and rankings are my own modernized estimates, informed by the show's real ranked answers (see Credits). Replace any you disagree with.
 
+## How a Card Sharks game works
+
+One emcee runs everything from a phone; the two teams just play out loud. The TV shows the survey question and both rows of cards.
+
+1. The emcee reads a survey question ("We asked 100 married men..."); the answer is a number from 0 to 100, visible only on the emcee's phone.
+2. The guessing team says a number and the emcee types it in. The other team calls higher or lower. A right call wins control; a wrong call (or an exact hit) leaves control with the guesser. The guesser alternates each question.
+3. The team in control gets its base card turned over and may keep it or swap it once for the top card of its own 52-card deck (final). Then it calls higher or lower on each next card. A tie is a miss. Aces are high.
+4. After at least one right call, the team may freeze: its progress is locked and the turn ends. A miss removes every card turned since the last freeze, and the other team plays its row (base card turned, no swap, it may freeze and may win).
+5. Completing the row (7 cards in games one and two, 4 in the tiebreaker) wins the game. Four questions per game; the fourth is sudden death: the control winner decides who finishes, no freezing, finish or lose.
+6. First to two games wins the match.
+
+Survey questions live in `src/BuzzerGames.Core/Data/CardSharks/card-sharks.json`. The ones in there now are **placeholders**; swap in your family's real results.
+
 ## Credits
 
 Match Game is owned by Fremantle; this is a private party game. The Super Match blanks draw on the transcribed episode data from

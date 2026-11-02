@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
 using BuzzerGames.Core.Jeopardy;
 using BuzzerGames.Core.Match;
+using BuzzerGames.Core.CardSharks;
+using BuzzerGames.Web.Components.CardSharks;
 using BuzzerGames.Web.Components.Match;
 using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
@@ -92,6 +94,16 @@ static class Render
             return output.ToHtmlString();
         }).GetAwaiter().GetResult();
     }
+
+    // ---- Card Sharks ----
+
+    public static string CsTv(CardSnapshot s) => Html<CardsTvView>(new() { ["Snapshot"] = s });
+
+    public static string CsEmcee(SharksTable t) =>
+        Html<CardsEmceeView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee });
+
+    public static string CsLobby(CardSharksGame game, Seat seat, Guid token = default, bool boardMode = false) =>
+        Html<CardsLobbyView>(new() { ["Game"] = game, ["Snapshot"] = game.Snapshot(), ["Seat"] = seat, ["Token"] = token, ["BoardMode"] = boardMode });
 
     // ---- Match Game ----
 

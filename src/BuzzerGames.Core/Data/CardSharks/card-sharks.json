@@ -1,0 +1,30 @@
+// Card Sharks survey questions. Replace the PLACEHOLDER results below with your family's real survey results.
+//
+// text:    the question, read the way the show does ("We asked 100 people ..."). The answer is how many said yes, from 0 to 100.
+// answer:  the result. With fewer than 100 people surveyed, scale it to a percentage first (14 of 20 people is 70).
+//
+// The answers below are made up so the game can run. They are NOT real survey results.
+{
+  "questions": [
+    { "text": "We asked 100 married men: if your wife asks whether a dress makes her look fat, and you think it does, how many would tell her the truth?", "answer": 12 },
+    { "text": "We asked 100 people: how many have pretended to be asleep to get out of doing something?", "answer": 71 },
+    { "text": "We asked 100 people: how many have sent a text to the wrong person?", "answer": 83 },
+    { "text": "We asked 100 people: how many have eaten food that fell on the floor?", "answer": 68 },
+    { "text": "We asked 100 people: how many have laughed at a joke they didn't understand?", "answer": 88 },
+    { "text": "We asked 100 people: how many have waved back at someone who wasn't waving at them?", "answer": 57 },
+    { "text": "We asked 100 people: how many still have the box their phone came in?", "answer": 34 },
+    { "text": "We asked 100 people: how many have hidden an item from a family member so they wouldn't eat it?", "answer": 62 },
+    { "text": "We asked 100 people: how many sing in the car when they think nobody is looking?", "answer": 79 },
+    { "text": "We asked 100 people: how many have opened the fridge, looked, closed it, and opened it again hoping for something new?", "answer": 91 },
+    { "text": "We asked 100 people: how many have a drawer in their home full of random cords?", "answer": 86 },
+    { "text": "We asked 100 people: how many have gotten up from the couch and forgotten why?", "answer": 94 },
+    { "text": "We asked 100 people: how many have returned a gift they received?", "answer": 41 },
+    { "text": "We asked 100 people: how many snooze their alarm at least once every workday?", "answer": 66 },
+    { "text": "We asked 100 people: how many keep the Christmas lights up past January?", "answer": 23 },
+    { "text": "We asked 100 people: how many have fallen asleep during a movie they picked?", "answer": 58 },
+    { "text": "We asked 100 people: how many have ever re-gifted a present?", "answer": 52 },
+    { "text": "We asked 100 people: how many say they are a better driver than their spouse?", "answer": 74 },
+    { "text": "We asked 100 people: how many have taken a nap in the middle of a family gathering?", "answer": 47 },
+    { "text": "We asked 100 people: how many have eaten the leftovers they swore they'd save for later, in one sitting?", "answer": 73 }
+  ]
+}

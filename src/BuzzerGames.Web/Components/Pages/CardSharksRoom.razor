@@ -1,0 +1,119 @@
+@page "/card-sharks/{Code}"
+@page "/card-sharks/{Code}/board"
+@implements IDisposable
+@inject CardSharksRoomManager Rooms
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<PageTitle>Card Sharks · @Code.ToUpperInvariant()</PageTitle>
+
+@*
+    This one page is every screen in a Card Sharks game, with two web addresses like the other games:
+      /card-sharks/ABCD         for the emcee's phone.
+      /card-sharks/ABCD/board   for the big screen. It never joins; it only watches.
+    Only the emcee has a phone screen. The two teams play out loud.
+*@
+
+@if (_game is null)
+{
+    <main class="card center">
+        <h1>Game not found</h1>
+        <p>There's no game with the code <strong>@Code.ToUpperInvariant()</strong>. It may have ended, or the server may have restarted.</p>
+        <a class="btn" href="/card-sharks">Start or join a game</a>
+    </main>
+}
+else if (!_ready)
+{
+    <main class="card center"><p class="muted">Connecting…</p></main>
+}
+else if (_snapshot.Phase == CardPhase.Lobby)
+{
+    <CardsLobbyView Game="_game" Snapshot="_snapshot" Seat="_seat" Token="_token" BoardMode="_boardMode" Error="@_error" OnJoin="JoinAsync" />
+}
+else if (!_boardMode && _seat.Role == Role.Emcee)
+{
+    <CardsEmceeView Game="_game" Snapshot="_snapshot" Token="_token" />
+}
+else
+{
+    <CardsTvView Snapshot="_snapshot" />
+}
+
+@code {
+    [Parameter] public string Code { get; set; } = "";
+
+    private CardSharksGame? _game;
+    private CardSnapshot _snapshot = default!;
+    private Seat _seat = new(Role.Spectator);
+    private Guid _token;
+    private bool _ready;
+    private bool _boardMode;
+    private string? _error;
+
+    // Testing aid: .../ABCD?seat=2 gives that tab its own saved seat.
+    private string StorageKey
+    {
+        get
+        {
+            var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query);
+            var slot = query.TryGetValue("seat", out var v) ? v.ToString() : "";
+            return $"bg.sharks.{Code.ToUpperInvariant()}" + (slot.Length > 0 ? $".{slot}" : "");
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _boardMode = new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/')
+            .EndsWith("/board", StringComparison.OrdinalIgnoreCase);
+
+        _game = Rooms.Find(Code);
+        if (_game is null) return;
+
+        _snapshot = _game.Snapshot();
+        _game.Changed += OnGameChanged;
+
+        if (_boardMode) _ready = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _game is null || _boardMode) return;
+
+        var saved = await JS.InvokeAsync<string?>("bg.getItem", StorageKey);
+        if (Guid.TryParse(saved, out var token))
+        {
+            _token = token;
+            _seat = _game.GetSeat(token);
+        }
+
+        _ready = true;
+        StateHasChanged();
+    }
+
+    private void OnGameChanged() => _ = InvokeAsync(() =>
+    {
+        _snapshot = _game!.Snapshot();
+        if (_token != Guid.Empty) _seat = _game.GetSeat(_token);
+        StateHasChanged();
+    });
+
+    private async Task JoinAsync(string name)
+    {
+        _error = null;
+        var result = _game!.JoinEmcee(name);
+        if (!result.Ok)
+        {
+            _error = result.Error;
+            return;
+        }
+
+        _token = result.Token;
+        _seat = _game.GetSeat(_token);
+        await JS.InvokeVoidAsync("bg.setItem", StorageKey, _token.ToString());
+    }
+
+    public void Dispose()
+    {
+        if (_game is not null) _game.Changed -= OnGameChanged;
+    }
+}

@@ -1,0 +1,141 @@
+@*
+    The emcee's phone: the one screen that runs the whole game. The teams play out loud; the emcee types in the guess, taps the other team's
+    call, flips and judges every card, and moves things along. The emcee also sees the real survey answer before it is called, which nobody else does.
+*@
+
+<main class="phone emcee cs-emcee">
+    <header class="phone-header">
+        <span class="pill">Emcee</span>
+        <span class="phone-sub">@Snapshot.Label</span>
+    </header>
+
+    <div class="scores cs-mini-scores">
+        @for (var t = 0; t < 2; t++)
+        {
+            var team = t;
+            <div class="score @PasswordText.TeamClass(team) @(Snapshot.Turn == team ? "control" : "")">
+                <span class="score-name">@Snapshot.Rows[team].Name</span>
+                <span class="score-value">@Snapshot.Rows[team].GamesWon</span>
+                <span class="mg-matches-label">@(Snapshot.Rows[team].GamesWon == 1 ? "game" : "games")</span>
+            </div>
+        }
+    </div>
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case CardPhase.Guess:
+            <p class="mg-emcee-question">@Snapshot.QuestionText</p>
+            <p class="hint">The real answer: <strong>@Snapshot.Answer</strong> (only you can see this)</p>
+            <p class="hint"><strong>@Snapshot.TeamName(Snapshot.Guesser)</strong> says a number from 0 to 100. Type it in.</p>
+            <input class="text-input cs-number" type="number" inputmode="numeric" min="0" max="100" placeholder="0 to 100"
+                   @bind="_guess" @bind:event="oninput" @onkeydown="OnGuessKey" />
+            <button class="btn btn-start btn-wide" @onclick="TakeGuess">Lock in the guess</button>
+            break;
+
+        case CardPhase.Call:
+            <p class="mg-emcee-question">@Snapshot.QuestionText</p>
+            <p class="hint">The real answer: <strong>@Snapshot.Answer</strong> (only you can see this)</p>
+            <p class="winner">@Snapshot.TeamName(Snapshot.Guesser) guessed @Snapshot.Guess</p>
+            <p class="hint">What does <strong>@Snapshot.TeamName(Snapshot.Caller)</strong> say?</p>
+            <div class="judge-buttons">
+                <button class="btn btn-yes" @onclick="() => Act(Game.Call(Token, true))">▲ Higher</button>
+                <button class="btn btn-no" @onclick="() => Act(Game.Call(Token, false))">▼ Lower</button>
+            </div>
+            break;
+
+        case CardPhase.Verdict:
+            <p class="winner">The real answer: @Snapshot.Answer</p>
+            <p class="hint">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">Turn over the first card</button>
+            break;
+
+        case CardPhase.Offer:
+            <p class="winner">@Snapshot.TeamName(Snapshot.Turn)</p>
+            <CardRowView Row="Snapshot.Rows[Snapshot.Turn]" Team="Snapshot.Turn" Active="true" />
+            <p class="hint">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Keep(Token))">Keep it</button>
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.Change(Token))">Change it<small>The swap is final</small></button>
+            break;
+
+        case CardPhase.Play:
+            <p class="winner">@Snapshot.TeamName(Snapshot.Turn)</p>
+            <CardRowView Row="Snapshot.Rows[Snapshot.Turn]" Team="Snapshot.Turn" Active="true" />
+            <p class="hint">@Snapshot.Message</p>
+            <div class="judge-buttons">
+                <button class="btn btn-yes" @onclick="() => Act(Game.HigherLower(Token, true))">▲ Higher</button>
+                <button class="btn btn-no" @onclick="() => Act(Game.HigherLower(Token, false))">▼ Lower</button>
+            </div>
+            @if (Snapshot.SuddenDeath)
+            {
+                <p class="hint">Sudden death: no freezing.</p>
+            }
+            else
+            {
+                <button class="btn btn-quiet btn-wide" disabled="@(!Snapshot.CanFreeze)" @onclick="() => Act(Game.Freeze(Token))">
+                    ❄ Freeze here<small>@(Snapshot.CanFreeze ? "Locks in the cards so far and ends the turn" : "Get one right first")</small>
+                </button>
+            }
+            break;
+
+        case CardPhase.TurnOver:
+            <CardRowView Row="Snapshot.Rows[_lastTurn]" Team="_lastTurn" />
+            <p class="hint">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">Next</button>
+            break;
+
+        case CardPhase.SuddenPick:
+            <p class="winner">SUDDEN DEATH</p>
+            <p class="hint">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.ChooseFinisher(Token, true))">@Snapshot.TeamName(Snapshot.Control) finishes its own row</button>
+            <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.ChooseFinisher(Token, false))">@Snapshot.TeamName(1 - Snapshot.Control) must finish theirs</button>
+            break;
+
+        case CardPhase.GameOver:
+            <p class="winner">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">@(Snapshot.Rows.Any(r => r.GamesWon >= CardSharksGame.GamesToWin) ? "See the match result" : "On to the next game")</button>
+            break;
+
+        case CardPhase.MatchOver:
+            <p class="winner">@Snapshot.Message</p>
+            <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Restart(Token))">Play another match</button>
+            <a class="back-link" href="/">All games</a>
+            break;
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public CardSharksGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public CardSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+
+    private string? _error;
+    private int? _guess;
+    private CardPhase _lastPhase;
+    private int _lastQuestion;
+    private int _lastTurn;
+
+    // An error and a half-typed number only make sense for the screen they were made on.
+    protected override void OnParametersSet()
+    {
+        if (Snapshot.Turn >= 0) _lastTurn = Snapshot.Turn;
+        if (Snapshot.Phase == _lastPhase && Snapshot.QuestionNumber == _lastQuestion) return;
+        _lastPhase = Snapshot.Phase;
+        _lastQuestion = Snapshot.QuestionNumber;
+        _error = null;
+        if (Snapshot.Phase == CardPhase.Guess) _guess = null;
+    }
+
+    private void Act(Result r) => _error = r.Ok ? null : r.Error;
+
+    private void TakeGuess() => Act(_guess is { } g ? Game.TakeGuess(Token, g) : Result.Fail("Type the number first."));
+
+    private void OnGuessKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") TakeGuess();
+    }
+}

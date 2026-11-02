@@ -1,0 +1,128 @@
+@inject IJSRuntime JS
+
+@*
+    The lobby: only the emcee takes a seat, then names the teams and starts. The big screen (BoardMode) shows the QR code and never takes a seat.
+*@
+
+<main class="lobby cs-lobby @(BoardMode ? "board-mode" : "")">
+    <header class="lobby-header">
+        <h1 class="logo">CARD SHARKS</h1>
+        <p class="room-line">Room <span class="room-code">@Snapshot.Code</span></p>
+    </header>
+
+    <div class="lobby-grid">
+
+        <section class="card">
+            @if (BoardMode)
+            {
+                <h2>Who's the emcee?</h2>
+                <p>Scan the QR code with your phone and choose <strong>Join as Emcee</strong>. You run the whole game from your phone.</p>
+                <p class="muted">The two teams don't need phones.</p>
+            }
+            else if (Seat.Role == Role.Emcee)
+            {
+                <h2>You're the emcee</h2>
+                <p class="muted">Name the two teams, then start.</p>
+                <div class="mg-team-edit">
+                    <input class="text-input" maxlength="@CardSharksGame.NameMaxLength" @bind="_teamA" @bind:event="oninput" aria-label="Team A name" />
+                    <input class="text-input" maxlength="@CardSharksGame.NameMaxLength" @bind="_teamB" @bind:event="oninput" aria-label="Team B name" />
+                </div>
+                <button class="btn btn-start btn-wide" @onclick="StartGame">Start Game</button>
+            }
+            else if (Snapshot.EmceeName is not null)
+            {
+                <h2>The emcee is in</h2>
+                <p>@Snapshot.EmceeName is running this game. Waiting for them to start…</p>
+            }
+            else if (_joining)
+            {
+                <h2>Join as emcee</h2>
+                <input class="text-input" placeholder="Your name" maxlength="@CardSharksGame.NameMaxLength"
+                       @bind="_name" @bind:event="oninput" @onkeydown="OnKeyDown" />
+                <div class="button-row">
+                    <button class="btn" @onclick="ConfirmJoin">Join</button>
+                    <button class="btn btn-quiet" @onclick="() => _joining = false">Back</button>
+                </div>
+            }
+            else
+            {
+                <h2>Run the game</h2>
+                <button class="btn btn-wide" @onclick="() => _joining = true">Join as Emcee</button>
+            }
+
+            @if (Error is not null)
+            {
+                <p class="error">@Error</p>
+            }
+            @if (_error is not null)
+            {
+                <p class="error">@_error</p>
+            }
+        </section>
+
+        <section class="card">
+            <h2>At the table</h2>
+            <ul class="roster">
+                <li class="@(Snapshot.EmceeName is null ? "open" : "filled")">
+                    <span class="seat-label">Emcee</span>
+                    <span class="seat-name">@(Snapshot.EmceeName ?? "waiting…")</span>
+                </li>
+                <li class="filled team-a"><span class="seat-label">Team A</span><span class="seat-name">@Snapshot.TeamName(0)</span></li>
+                <li class="filled team-b"><span class="seat-label">Team B</span><span class="seat-name">@Snapshot.TeamName(1)</span></li>
+            </ul>
+        </section>
+
+        <section class="card qr-card">
+            <h2>Scan to join</h2>
+            <div id="qr-@Snapshot.Code" class="qr"></div>
+            <p class="join-url">@_joinUrl</p>
+        </section>
+
+    </div>
+</main>
+
+@code {
+    [Parameter, EditorRequired] public CardSharksGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public CardSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Seat Seat { get; set; }
+    [Parameter] public Guid Token { get; set; }
+    [Parameter] public bool BoardMode { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback<string> OnJoin { get; set; }
+
+    private bool _joining;
+    private string _name = "";
+    private string _joinUrl = "";
+    private string? _error;
+    private string? _teamA;
+    private string? _teamB;
+
+    protected override void OnParametersSet()
+    {
+        _teamA ??= Snapshot.TeamName(0);
+        _teamB ??= Snapshot.TeamName(1);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        _joinUrl = await JS.InvokeAsync<string>("bg.renderQr", $"qr-{Snapshot.Code}", $"/card-sharks/{Snapshot.Code}");
+        StateHasChanged();
+    }
+
+    private Task ConfirmJoin() => OnJoin.InvokeAsync(_name);
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await ConfirmJoin();
+    }
+
+    private void StartGame()
+    {
+        // Whatever is typed in the team boxes counts, saved or not.
+        var named = Game.SetTeamNames(Token, _teamA, _teamB);
+        if (!named.Ok) { _error = named.Error; return; }
+        var started = Game.Start(Token);
+        _error = started.Ok ? null : started.Error;
+    }
+}
