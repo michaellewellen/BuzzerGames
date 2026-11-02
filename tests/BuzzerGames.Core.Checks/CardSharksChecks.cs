@@ -402,16 +402,38 @@ static class CardSharksChecks
             Check.True(t.S.Bonus is null && t.S.Phase == CardPhase.Guess, "restart after the bonus");
         });
 
-        run("sharks Money Cards: losing everything ends it with nothing", () =>
+        run("sharks Money Cards: losing everything moves the killing card up and restarts with the next row's money", () =>
         {
-            var t = new SharksTable(SharksTable.Rising, "7S 9S 3S");
+            var t = new SharksTable(SharksTable.Rising, "7S 9S 3S 2S 5S 8S 4S");
             t.WinGame(0); Check.Ok(t.Game.Continue(t.Emcee));
             t.WinGame(0); Check.Ok(t.Game.Continue(t.Emcee));
             Check.Ok(t.Game.StartBonus(t.Emcee));
             Check.Ok(t.Game.BonusKeep(t.Emcee));
-            Check.Ok(t.Game.BonusPlay(t.Emcee, 200, false)); // 9 is higher: wrong
-            Check.Equal(CardPhase.BonusOver, t.S.Phase, "out of money");
-            Check.Equal(0, t.S.Bonus!.Winnings, "nothing won");
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 200, false)); // 9 is higher: wrong, broke
+            var b = t.S.Bonus!;
+            Check.Equal(CardPhase.BonusOffer, t.S.Phase, "not over: the next row begins");
+            Check.Equal(1, b.Row, "on the $400 row");
+            Check.Equal(400, b.Pot, "restarts with $400");
+            Check.Equal(9, b.Rows[1][0].Rank, "the card that sank them moved up");
+            Check.Ok(t.Game.BonusKeep(t.Emcee));
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 400, true));  // 3: wrong, broke again
+            b = t.S.Bonus!;
+            Check.Equal(2, b.Row, "on the Big Bet row");
+            Check.Equal(1000, b.Pot, "restarts with $1000");
+            Check.Equal(3, b.Rows[2][0].Rank, "the killing card moved up again");
+            Check.Ok(t.Game.BonusKeep(t.Emcee));
+            Check.Ok(t.Game.BonusPlay(t.Emcee, 1000, false)); // 2: right
+            Check.Equal(2000, t.S.Bonus!.Winnings, "bet it all and won");
+
+            // Going broke on the Big Bet row ends it with nothing.
+            var u = new SharksTable(SharksTable.Rising, "7S 9S 3S 2S 5S 8S 4S");
+            u.WinGame(0); u.Game.Continue(u.Emcee); u.WinGame(0); u.Game.Continue(u.Emcee);
+            u.Game.StartBonus(u.Emcee); u.Game.BonusKeep(u.Emcee);
+            u.Game.BonusPlay(u.Emcee, 200, false); u.Game.BonusKeep(u.Emcee);
+            u.Game.BonusPlay(u.Emcee, 400, true); u.Game.BonusKeep(u.Emcee);
+            Check.Ok(u.Game.BonusPlay(u.Emcee, 1000, true)); // 2 is lower: wrong
+            Check.Equal(CardPhase.BonusOver, u.S.Phase, "nothing left after the last row");
+            Check.Equal(0, u.S.Bonus!.Winnings, "no prize");
         });
 
         run("sharks Money Cards: random play always ends with a sane prize", () =>

@@ -349,24 +349,24 @@ public sealed class CardSharksGame
         _pot += right ? bet : -bet;
         var how = right ? $"The {next}! Right, you win ${bet}." : next.Rank == current.Rank ? $"The {next}, a tie, and a tie loses ${bet}." : $"The {next}. Wrong, you lose ${bet}.";
 
-        if (_pot <= 0)
-        {
-            FinishBonus($"{how} That's all of it. You leave with nothing.");
-            return Result.Success;
-        }
-        if (row.Count == 1 + BonusRowPlays[_bonusRow])
+        var broke = _pot <= 0;
+        if (broke || row.Count == 1 + BonusRowPlays[_bonusRow])
         {
             if (_bonusRow == 2)
             {
-                FinishBonus($"{how} {_teamNames[_matchWinner]} wins ${_pot}!");
+                FinishBonus(broke
+                    ? $"{how} That's all of it. {_teamNames[_matchWinner]} leaves with nothing."
+                    : $"{how} {_teamNames[_matchWinner]} wins ${_pot}!");
                 return Result.Success;
             }
             // The last card played moves up to start the next row, and the row's money is added.
+            // Going broke ends the row early: the card that sank you carries up and you start over with the next row's money.
             _bonusRow++;
-            _pot += BonusRowPrizes[_bonusRow];
+            _pot = Math.Max(_pot, 0) + BonusRowPrizes[_bonusRow];
             _bonusRows.Add([next]);
             _phase = CardPhase.BonusOffer;
-            _message = $"{how} Row cleared! ${BonusRowPrizes[_bonusRow]} added, you have ${_pot}. " + (_bonusRow == 2
+            _message = $"{how} " + (broke ? "You're out of money, but the card that sank you moves up! " : "Row cleared! ")
+                + $"${BonusRowPrizes[_bonusRow]} added, you have ${_pot}. " + (_bonusRow == 2
                 ? $"Now the Big Bet: at least ${MinBetNow()}. Your card is the {next}. Keep it or change it?"
                 : $"Your card is the {next}. Keep it or change it?");
             return Result.Success;

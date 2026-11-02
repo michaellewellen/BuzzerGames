@@ -115,7 +115,7 @@ One emcee runs everything from a phone; the two teams just play out loud. The TV
 5. Completing the row (7 cards in games one and two, 4 in the tiebreaker) wins the game. Four questions per game; the fourth is sudden death: the control winner decides who finishes, no freezing, finish or lose.
 6. First to two games wins the match.
 
-**Money Cards (the bonus round).** The match winners start with $200 and one 52-card deck. Bet at least $50 and call higher or lower on each card (a tie loses the bet). The bottom row is the base card plus 3 more; clearing it moves the last card up to start the $400 row (+$400), and clearing that moves its last card up to the Big Bet row (+$1,000), where one bet of at least half the money decides the prize. The base card of each row can be kept or changed once. Run out of money and the prize is $0.
+**Money Cards (the bonus round).** The match winners start with $200 and one 52-card deck. Bet at least $50 and call higher or lower on each card (a tie loses the bet). The bottom row is the base card plus 3 more; clearing it moves the last card up to start the $400 row (+$400), and clearing that moves its last card up to the Big Bet row (+$1,000), where one bet of at least half the money decides the prize. The base card of each row can be kept or changed once. Lose everything on a bet and the card that sank you moves up to the next row with that row's money ($400, then $1,000), so one bad bet doesn't end it. Only losing everything on the Big Bet leaves $0.
 
 Survey questions live in `src/BuzzerGames.Core/Data/CardSharks/card-sharks.json`. The ones in there now are **placeholders**; swap in your family's real results.
 
