@@ -593,6 +593,7 @@ PylChecks.Run(Run);
 PasswordChecks.Run(Run);
 MatchChecks.Run(Run);
 CardSharksChecks.Run(Run);
+FloorChecks.Run(Run);
 
 Console.WriteLine();
 Console.WriteLine($"{passed} passed, {failed} failed");

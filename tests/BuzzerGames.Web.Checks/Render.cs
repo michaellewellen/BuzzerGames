@@ -3,6 +3,9 @@ using BuzzerGames.Core.Jeopardy;
 using BuzzerGames.Core.Match;
 using BuzzerGames.Core.CardSharks;
 using BuzzerGames.Web.Components.CardSharks;
+using BuzzerGames.Core.Floor;
+using BuzzerGames.Web;
+using BuzzerGames.Web.Components.Floor;
 using BuzzerGames.Web.Components.Match;
 using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
@@ -104,6 +107,56 @@ static class Render
 
     public static string CsLobby(CardSharksGame game, Seat seat, Guid token = default, bool boardMode = false) =>
         Html<CardsLobbyView>(new() { ["Game"] = game, ["Snapshot"] = game.Snapshot(), ["Seat"] = seat, ["Token"] = token, ["BoardMode"] = boardMode });
+
+    // ---- The Floor ----
+
+    public static string FlTv(FloorSnapshot s) => Html<FloorTvView>(new() { ["Snapshot"] = s });
+
+    public static string FlEmcee(FloorTable t) =>
+        Html<FloorEmceeView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee });
+
+    public static string FlPlayer(FloorTable t, int i) =>
+        Html<FloorPlayerView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[i], ["PlayerId"] = (Guid?)t.Ids[i] });
+
+    public static string FlLobby(FloorGame game, Seat seat, Guid token = default, bool boardMode = false) =>
+        Html<FloorLobbyView>(new() { ["Game"] = game, ["Snapshot"] = game.Snapshot(), ["Seat"] = seat, ["Token"] = token, ["BoardMode"] = boardMode });
+
+    public static string FlMap(FloorSnapshot s) => Html<FloorMap>(new() { ["Snapshot"] = s });
+
+    /// <summary>The whole Floor room page, at the phone address or the big-screen /board address.</summary>
+    public static string FlRoom(FloorRoomManager rooms, string code, bool board)
+    {
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<IJSRuntime, NoJs>()
+            .AddSingleton(rooms)
+            .AddSingleton<NavigationManager>(new FakeNav($"http://localhost/the-floor/{code}" + (board ? "/board" : "")))
+            .BuildServiceProvider();
+        using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
+        return renderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await renderer.RenderComponentAsync<FloorRoom>(
+                ParameterView.FromDictionary(new Dictionary<string, object?> { ["Code"] = code }));
+            return output.ToHtmlString();
+        }).GetAwaiter().GetResult();
+    }
+
+    /// <summary>The topics page, with the given folder store and passcode rules.</summary>
+    public static string FlTopics(FolderFloorContent store, FloorAdminAccess access)
+    {
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<IJSRuntime, NoJs>()
+            .AddSingleton(store)
+            .AddSingleton(access)
+            .BuildServiceProvider();
+        using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
+        return renderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await renderer.RenderComponentAsync<FloorTopics>(ParameterView.Empty);
+            return output.ToHtmlString();
+        }).GetAwaiter().GetResult();
+    }
 
     // ---- Match Game ----
 

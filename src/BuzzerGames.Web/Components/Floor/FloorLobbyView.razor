@@ -1,0 +1,196 @@
+@inject IJSRuntime JS
+
+@*
+    The lobby. The big screen (BoardMode) shows the QR code and who has joined with what topic. A phone can join as a player (and pick a topic)
+    or as the emcee, who sets the options and builds the floor once everyone is in.
+*@
+
+<main class="lobby fl-lobby @(BoardMode ? "board-mode" : "")">
+    <header class="lobby-header">
+        <h1 class="logo">THE FLOOR</h1>
+        <p class="room-line">Room <span class="room-code">@Snapshot.Code</span></p>
+    </header>
+
+    <div class="lobby-grid">
+
+        <section class="card">
+            @if (BoardMode)
+            {
+                <h2>Scan to play</h2>
+                <p>Scan the QR code, enter your name and pick your <strong>expertise</strong>. Whoever runs the party joins as the emcee.</p>
+                <p class="muted">@Snapshot.Players.Count joined · @Snapshot.MinPlayers to @Snapshot.MaxPlayers players</p>
+            }
+            else if (Seat.Role == Role.Emcee)
+            {
+                <h2>You're the emcee</h2>
+                <p class="muted">When everyone has joined and picked a topic, build the floor.</p>
+
+                <label class="fl-option">
+                    <input type="checkbox" checked="@Snapshot.Inherit" @onchange="e => Act(Game.SetInherit(Token, (bool)e.Value!))" />
+                    <span><strong>Winner inherits topics</strong><small>Beat someone and you take their territory <em>and</em> their topics. Off: you only take the territory.</small></span>
+                </label>
+
+                <label class="fl-option">
+                    <span><strong>Seconds per player</strong></span>
+                    <select class="text-input fl-select" @onchange="e => Act(Game.SetDuelSeconds(Token, int.Parse(e.Value!.ToString()!)))">
+                        @foreach (var s in new[] { 20, 30, 45, 60, 90 })
+                        {
+                            <option value="@s" selected="@(s == Snapshot.DuelSeconds)">@s</option>
+                        }
+                    </select>
+                </label>
+
+                <button class="btn btn-start btn-wide" disabled="@(!CanBuild)" @onclick="() => Act(Game.Build(Token))">
+                    Build the floor<small>@BuildHint</small>
+                </button>
+                @if (Snapshot.DeadTopicCount > 0)
+                {
+                    <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.ClearUsedTopics(Token))">
+                        Make all topics eligible again<small>@Snapshot.DeadTopicCount used in earlier games</small>
+                    </button>
+                }
+            }
+            else if (Seat.Role == Role.Player && Me is not null)
+            {
+                <h2>You're in, @Me.Name</h2>
+                @if (Me.Topics.Count == 0)
+                {
+                    <p>Pick your expertise below. This is what you'll be challenged on.</p>
+                }
+                else
+                {
+                    <p>Your expertise: <strong>@Me.Topics[0]</strong></p>
+                    <p class="muted">Change your mind? Tap another topic. Waiting for the emcee to build the floor…</p>
+                }
+            }
+            else if (_mode == "player")
+            {
+                <h2>Join the game</h2>
+                <input class="text-input" placeholder="Your name" maxlength="@FloorGame.NameMaxLength"
+                       @bind="_name" @bind:event="oninput" @onkeydown="e => OnKey(e, false)" />
+                <div class="button-row">
+                    <button class="btn" @onclick="() => JoinAsync(false)">Join</button>
+                    <button class="btn btn-quiet" @onclick="() => _mode = null">Back</button>
+                </div>
+            }
+            else if (_mode == "emcee")
+            {
+                <h2>Join as emcee</h2>
+                <input class="text-input" placeholder="Your name" maxlength="@FloorGame.NameMaxLength"
+                       @bind="_name" @bind:event="oninput" @onkeydown="e => OnKey(e, true)" />
+                <div class="button-row">
+                    <button class="btn" @onclick="() => JoinAsync(true)">Join</button>
+                    <button class="btn btn-quiet" @onclick="() => _mode = null">Back</button>
+                </div>
+            }
+            else
+            {
+                <h2>Welcome</h2>
+                <button class="btn btn-start btn-wide" @onclick='() => _mode = "player"'>Join as a player</button>
+                @if (!Snapshot.EmceeJoined)
+                {
+                    <button class="btn btn-quiet btn-wide" @onclick='() => _mode = "emcee"'>I'm the emcee</button>
+                }
+            }
+
+            @if (Error is not null)
+            {
+                <p class="error">@Error</p>
+            }
+            @if (_error is not null)
+            {
+                <p class="error">@_error</p>
+            }
+        </section>
+
+        <section class="card">
+            <h2>On the floor (@Snapshot.Players.Count)</h2>
+            <ul class="roster fl-roster">
+                <li class="@(Snapshot.EmceeJoined ? "filled" : "open")">
+                    <span class="seat-label">Emcee</span>
+                    <span class="seat-name">@(Snapshot.EmceeName ?? "waiting…")</span>
+                </li>
+                @foreach (var p in Snapshot.Players)
+                {
+                    <li class="filled">
+                        <span class="seat-label">@p.Name</span>
+                        <span class="seat-name">@(p.HomeTopic ?? "choosing…")</span>
+                        @if (Seat.Role == Role.Emcee)
+                        {
+                            <span class="fl-row-buttons">
+                                @if (p.HomeTopic is null)
+                                {
+                                    <button class="btn btn-small" @onclick="() => Act(Game.AssignRandomTopic(Token, p.Id))">Random</button>
+                                }
+                                <button class="btn btn-small btn-quiet" @onclick="() => Act(Game.RemovePlayer(Token, p.Id))">Remove</button>
+                            </span>
+                        }
+                    </li>
+                }
+            </ul>
+        </section>
+
+        @if (BoardMode)
+        {
+            <section class="card qr-card">
+                <h2>Scan to join</h2>
+                <div id="qr-@Snapshot.Code" class="qr"></div>
+                <p class="join-url">@_joinUrl</p>
+            </section>
+        }
+    </div>
+
+    @if (!BoardMode && Seat.Role == Role.Player && Snapshot.Topics.Count > 0)
+    {
+        <section class="card">
+            <h2>Pick your expertise</h2>
+            <FloorTopicPicker Topics="Snapshot.Topics" Current="@Me?.HomeTopic" OnPick="PickAsync" />
+        </section>
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public FloorGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public FloorSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Seat Seat { get; set; }
+    [Parameter] public Guid Token { get; set; }
+    [Parameter] public bool BoardMode { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback<(string Name, bool Emcee)> OnJoin { get; set; }
+
+    private string? _mode;
+    private string _name = "";
+    private string _joinUrl = "";
+    private string? _error;
+
+    private FloorPlayerInfo? Me => Snapshot.Player(Seat.PlayerId);
+
+    private bool CanBuild => Snapshot.Players.Count >= Snapshot.MinPlayers && Snapshot.Players.All(p => p.HomeTopic is not null);
+
+    private string BuildHint =>
+        Snapshot.Players.Count < Snapshot.MinPlayers ? $"need at least {Snapshot.MinPlayers} players ({Snapshot.Players.Count} so far)"
+        : Snapshot.Players.Any(p => p.HomeTopic is null) ? $"waiting on {string.Join(", ", Snapshot.Players.Where(p => p.HomeTopic is null).Select(p => p.Name))}"
+        : $"{Snapshot.Players.Count} players";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || !BoardMode) return;
+        _joinUrl = await JS.InvokeAsync<string>("bg.renderQr", $"qr-{Snapshot.Code}", $"/the-floor/{Snapshot.Code}");
+        StateHasChanged();
+    }
+
+    private Task JoinAsync(bool emcee) => OnJoin.InvokeAsync((_name, emcee));
+
+    private async Task OnKey(KeyboardEventArgs e, bool emcee)
+    {
+        if (e.Key == "Enter") await JoinAsync(emcee);
+    }
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private Task PickAsync(string topic)
+    {
+        Act(Game.PickTopic(Token, topic));
+        return Task.CompletedTask;
+    }
+}

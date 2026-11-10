@@ -823,3 +823,139 @@ a.game-tile:hover { border-color: var(--gold); }
 .phone .cs-pot-num { font-size: 2.4rem; }
 .phone .cs-pot-label { font-size: .85rem; }
 .phone .cs-card.prize { font-size: .8rem; }
+
+/* ---------- The Floor ---------- */
+
+.btn-small { padding: .4rem .8rem; font-size: .9rem; }
+.fl-admin-link { display: block; margin-top: .5rem; font-size: .9rem; opacity: .7; }
+
+/* Lobby */
+.fl-option { display: flex; align-items: flex-start; gap: .8rem; margin: .8rem 0; cursor: pointer; }
+.fl-option input[type=checkbox] { width: 1.5rem; height: 1.5rem; margin-top: .2rem; flex: none; }
+.fl-option small { display: block; opacity: .75; font-weight: 400; }
+.fl-select { width: auto; margin: 0 0 0 auto; }
+.fl-roster li { flex-wrap: wrap; align-items: center; }
+.fl-roster .seat-name { opacity: .85; text-align: right; flex: 1; }
+.fl-row-buttons { display: flex; gap: .4rem; }
+.lobby.board-mode .fl-roster { font-size: 1.3rem; columns: 2; }
+
+/* Topic picker */
+.fl-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: .5rem; }
+.fl-pick { display: flex; flex-direction: column; gap: .15rem; padding: .7rem .6rem; border: 2px solid var(--edge); border-radius: .6rem; background: var(--blue-dark); color: var(--text); font-size: 1rem; font-weight: 700; cursor: pointer; text-align: left; }
+.fl-pick:disabled { opacity: .4; cursor: not-allowed; }
+.fl-pick.mine { border-color: var(--gold); background: #2a3500; }
+.fl-pick-note { font-size: .75rem; font-weight: 500; opacity: .85; }
+
+/* The floor map */
+.fl-map { flex: 1; min-height: 0; width: 100%; display: grid; gap: 0; padding: .6vw; }
+.fl-square {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3vh;
+    padding: .8vh .6vw;
+    border: .35vw solid #000;
+    text-align: center;
+    overflow: hidden;
+    color: #fff;
+}
+.fl-name { font-size: min(2.6vw, 5vh); font-weight: 900; line-height: 1.05; text-shadow: .1vw .1vw 0 #000; }
+.fl-topics { display: flex; flex-wrap: wrap; justify-content: center; gap: .2vw .6vw; }
+.fl-topic { font-size: min(1.5vw, 2.8vh); font-weight: 700; background: rgba(0, 0, 0, .35); padding: .1vh .6vw; border-radius: 2vw; }
+.fl-topic.dead { text-decoration: line-through; opacity: .5; }
+.fl-size { font-size: min(1.2vw, 2.2vh); opacity: .8; }
+.fl-map.compact .fl-name { font-size: min(1.8vw, 3.4vh); }
+.fl-square.challenger { box-shadow: 0 0 0 .5vw var(--gold) inset; }
+.fl-square.defender { box-shadow: 0 0 0 .5vw #ff4d4d inset; }
+.fl-square.candidate { animation: fl-pulse 1.1s ease-in-out infinite alternate; }
+.fl-square.loser { filter: brightness(.55) saturate(.4); }
+.fl-square.champion { box-shadow: 0 0 2vw .6vw var(--gold) inset; }
+.fl-square.taken { animation: fl-takeover 1.3s ease-out both; animation-delay: var(--fl-delay, 0s); }
+@keyframes fl-pulse { from { box-shadow: 0 0 0 .2vw rgba(255, 255, 255, .2) inset; } to { box-shadow: 0 0 0 .6vw #fff inset; } }
+@keyframes fl-takeover {
+    0%   { background: var(--fl-from); transform: scale(1); filter: brightness(1); }
+    35%  { background: var(--fl-from); transform: scale(1.12); filter: brightness(2); z-index: 2; }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* Big screen stages */
+.fl-tv { background: radial-gradient(ellipse at center, #1b2380 0%, #05082e 80%); }
+.fl-stage { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding: 1vh 1vw; }
+.fl-banner { font-size: min(3vw, 5.5vh); text-align: center; margin: .5vh 0; }
+.fl-banner-sub { display: block; font-size: min(2vw, 3.6vh); opacity: .85; color: var(--gold); }
+.fl-kicker { font-size: min(2vw, 3.6vh); letter-spacing: .3em; color: var(--gold); margin: 0; }
+.fl-champion { font-size: min(8vw, 14vh); font-weight: 900; margin: 0; color: var(--gold); text-shadow: .2vw .2vw 0 #000; }
+
+/* The duel */
+.fl-duel { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 3fr 1fr; gap: 1vw; padding: 1vh 1vw; align-items: stretch; }
+.fl-side { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 1vw; background: var(--fl-color, #333); opacity: .6; padding: 1vh .5vw; border: .4vw solid transparent; }
+.fl-side.active { opacity: 1; border-color: var(--gold); box-shadow: 0 0 2vw var(--gold); }
+.fl-side.out { filter: brightness(.5); }
+.fl-who { font-size: min(2.6vw, 5vh); font-weight: 900; margin: 0; word-break: break-word; }
+.fl-clock { font-size: min(9vw, 17vh); font-weight: 900; line-height: 1; margin: .5vh 0; font-variant-numeric: tabular-nums; }
+.fl-clock.low { color: #ff8a8a; }
+.fl-tally { font-size: min(1.6vw, 3vh); opacity: .85; margin: 0; }
+.fl-center { position: relative; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.fl-topic-label { font-size: min(2vw, 3.8vh); letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin: 0 0 .5vh; }
+.fl-prompt { position: relative; flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
+.fl-pic { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 1vw; background: #fff; }
+.fl-text { font-size: min(4.2vw, 8vh); font-weight: 800; text-align: center; padding: 0 2vw; margin: 0; }
+.fl-reveal { position: absolute; left: 0; right: 0; bottom: 2vh; margin: 0 auto; width: fit-content; max-width: 95%; padding: 1vh 2vw; font-size: min(5vw, 9vh); font-weight: 900; text-align: center; background: rgba(20, 130, 60, .95); border-radius: 1vw; box-shadow: 0 0 2vw #000; }
+.fl-paused { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; margin: 0; font-size: min(10vw, 18vh); font-weight: 900; background: rgba(0, 0, 0, .75); }
+.fl-preload { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.fl-preload img { width: 1px; height: 1px; }
+
+/* Time is up: the whole screen goes red. */
+.fl-tv.phase-timeup { animation: fl-red .45s ease-in-out infinite alternate; }
+.fl-tv.phase-timeup .fl-side { opacity: 1; }
+.fl-timeup { font-size: min(11vw, 20vh); font-weight: 900; margin: 0; text-shadow: .3vw .3vw 0 #000; }
+.fl-timeup-who { font-size: min(3vw, 5.5vh); margin: 0; text-align: center; }
+@keyframes fl-red { from { background: #a80000; } to { background: #ff1c1c; } }
+
+/* Emcee and player phones */
+.fl-judge-turn { font-size: 1.6rem; font-weight: 800; text-align: center; margin: 0 0 .4rem; }
+.fl-judge-clocks { display: flex; justify-content: space-around; gap: .5rem; margin-bottom: .5rem; }
+.fl-judge-clocks span { opacity: .6; }
+.fl-judge-clocks span.on { opacity: 1; font-weight: 800; color: var(--gold); }
+.fl-judge-clocks b { font-size: 1.6rem; margin-left: .3rem; font-variant-numeric: tabular-nums; }
+.fl-thumb { display: block; max-width: 100%; max-height: 14rem; margin: .4rem auto; border-radius: .5rem; background: #fff; }
+.fl-text-small { font-size: 1.2rem; text-align: center; font-weight: 700; }
+.fl-answer { font-size: 2rem; font-weight: 900; text-align: center; color: var(--gold); margin: .3rem 0; word-break: break-word; }
+.fl-alts, .fl-topic-note { text-align: center; font-size: .9rem; margin: .2rem 0; }
+.fl-judge .judge-buttons { display: flex; gap: .75rem; margin-top: .8rem; }
+.fl-judge .judge-buttons .btn { padding: 1.6rem 1rem; font-size: 1.6rem; }
+.fl-tools { margin-top: .8rem; }
+.fl-footer { text-align: center; margin-top: 1rem; }
+.fl-candidate small { display: block; font-weight: 500; opacity: .85; }
+.fl-mytopics { font-size: 1.3rem; font-weight: 800; margin: 0; color: var(--gold); }
+.fl-go { color: var(--good); }
+
+/* Topics page */
+.fl-admin { max-width: 72rem; margin: 0 auto; padding: 1.25rem; }
+.fl-admin-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 1rem; }
+.fl-admin-grid { display: grid; grid-template-columns: minmax(16rem, 1fr) 2fr; gap: 1.25rem; align-items: start; }
+@media (max-width: 52rem) { .fl-admin-grid { grid-template-columns: 1fr; } }
+.fl-topic-list { list-style: none; padding: 0; margin: 0 0 1rem; max-height: 60vh; overflow: auto; }
+.fl-topic-list li { border-bottom: 1px solid rgba(255, 255, 255, .12); }
+.fl-topic-list li.selected { background: rgba(255, 211, 90, .15); }
+.fl-topic-button { display: flex; flex-direction: column; width: 100%; text-align: left; padding: .6rem .4rem; background: transparent; border: 0; color: var(--text); cursor: pointer; font-size: 1rem; }
+.fl-topic-name { font-weight: 700; }
+.fl-topic-count { font-size: .85rem; opacity: .8; }
+.fl-topic-count.thin { color: #ff9a9a; opacity: 1; }
+.fl-topic-count.ok { color: #ffd35a; opacity: 1; }
+.fl-topic-count.good { color: #7be3a1; opacity: 1; }
+.fl-uploader { margin-bottom: 1rem; }
+.fl-drop { border: 3px dashed var(--edge); border-radius: .8rem; padding: 1.6rem 1rem; text-align: center; margin-bottom: .6rem; cursor: pointer; }
+.fl-drop.over, .fl-drop:focus { border-color: var(--gold); background: rgba(255, 211, 90, .08); outline: none; }
+.fl-pending { display: flex; flex-direction: column; gap: .6rem; margin: .8rem 0; }
+.fl-pending-item { display: flex; gap: .7rem; align-items: flex-start; background: var(--blue-dark); padding: .6rem; border-radius: .6rem; }
+.fl-pending-item.saved { opacity: .5; }
+.fl-pending-thumb { width: 8rem; max-height: 6rem; object-fit: contain; border-radius: .3rem; background: #fff; flex: none; }
+.fl-pending-fields { flex: 1; min-width: 0; }
+.fl-pending-fields .text-input { margin-bottom: .3rem; }
+.fl-pending-status { font-size: .9rem; }
+.fl-pending-status.good { color: var(--good); }
+.fl-pending-status.bad { color: #ff9a9a; }
+.fl-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .6rem; }
+.fl-gallery figure { margin: 0; text-align: center; background: var(--blue-dark); padding: .4rem; border-radius: .5rem; }
+.fl-gallery img { width: 100%; height: 6rem; object-fit: contain; background: #fff; border-radius: .3rem; }
+.fl-gallery figcaption { font-size: .85rem; margin: .3rem 0; word-break: break-word; }
+.fl-textarea { font-family: inherit; }

@@ -1,0 +1,171 @@
+@*
+    The emcee's phone. During a duel it shows the picture and its answer (only here, never on the TV) with big Correct and Pass buttons.
+    Between duels it walks through: pick the opponent (if the challenger is slow), start the duel, then take the territory.
+*@
+
+@{
+    var s = Snapshot;
+    var challenger = s.Player(s.ChallengerId);
+    var defender = s.Player(s.DefenderId);
+}
+
+<main class="phone emcee fl-emcee">
+    <header class="phone-header">
+        <span class="pill">Emcee</span>
+        <span class="phone-sub">Room @s.Code · @s.Alive left · @s.DuelsPlayed duels played</span>
+    </header>
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (s.Phase)
+    {
+        case FloorPhase.Choose:
+            <section class="card">
+                <h2>@challenger?.Name is challenging</h2>
+                <p class="muted">They pick on their own phone. If they're slow, you can pick for them. A challenger's topics are never used; the <em>defender's</em> are.</p>
+                <div class="button-column">
+                    @foreach (var id in s.Candidates)
+                    {
+                        var p = s.Player(id)!;
+                        <button class="btn btn-wide fl-candidate" @onclick="() => Act(Game.Challenge(Token, id))">
+                            @p.Name<small>@FloorUi.Topics(p.Topics) · @p.Squares square@(p.Squares == 1 ? "" : "s")</small>
+                        </button>
+                    }
+                </div>
+            </section>
+            break;
+
+        case FloorPhase.Repick:
+            <section class="card">
+                <h2>@s.Player(s.RepickPlayerId)?.Name needs a new topic</h2>
+                <p class="muted">Their pictures have run low. They're picking on their own phone, or you can assign one.</p>
+                <button class="btn btn-wide" @onclick="() => Act(Game.AssignRandomTopic(Token, s.RepickPlayerId!.Value))">Assign a random topic</button>
+                <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.ChangeOpponent(Token))" disabled="@s.FinalDuel">Pick a different opponent instead</button>
+            </section>
+            break;
+
+        case FloorPhase.Ready:
+            <section class="card">
+                <h2>@challenger?.Name vs @defender?.Name</h2>
+                @if (s.FinalDuel)
+                {
+                    <p class="big-message">FINAL DUEL</p>
+                }
+                <p>Topic@(defender?.Topics.Count > 1 ? "s" : ""): <strong>@FloorUi.Topics(defender?.Topics ?? [])</strong></p>
+                <p class="muted">@challenger?.Name goes first. @s.DuelSeconds seconds each.</p>
+                <button class="btn btn-start btn-wide" @onclick="() => Act(Game.StartDuel(Token))">Start the duel</button>
+                @if (!s.FinalDuel)
+                {
+                    <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.ChangeOpponent(Token))">Pick a different opponent</button>
+                }
+            </section>
+            break;
+
+        case FloorPhase.Duel:
+            var d = s.Duel!;
+            var active = s.Player(d.ActiveId)!;
+            <section class="card fl-judge">
+                <p class="fl-judge-turn">@active.Name is up</p>
+                <div class="fl-judge-clocks">
+                    <span class="@(d.ActiveId == d.ChallengerId ? "on" : "")">@s.Player(d.ChallengerId)?.Name <b class="fl-clock" data-fl-key="@s.Version" data-fl-ms="@d.ChallengerMs" data-fl-run="@(d.Running && d.ActiveId == d.ChallengerId ? "1" : "0")">@FloorUi.Seconds(d.ChallengerMs)</b></span>
+                    <span class="@(d.ActiveId == d.DefenderId ? "on" : "")">@s.Player(d.DefenderId)?.Name <b class="fl-clock" data-fl-key="@s.Version" data-fl-ms="@d.DefenderMs" data-fl-run="@(d.Running && d.ActiveId == d.DefenderId ? "1" : "0")">@FloorUi.Seconds(d.DefenderMs)</b></span>
+                </div>
+
+                @if (d.ImageKey is not null)
+                {
+                    <img @key="d.ImageKey" class="fl-thumb" src="@FloorUi.ImageUrl(d.ImageKey)" alt="" />
+                }
+                else if (d.PromptText is not null)
+                {
+                    <p class="fl-text-small">@d.PromptText</p>
+                }
+                <p class="fl-answer">@d.Answer</p>
+                @if (d.Alternates.Count > 0)
+                {
+                    <p class="muted fl-alts">Also accept: @string.Join(", ", d.Alternates)</p>
+                }
+                <p class="muted fl-topic-note">@d.Topic · @d.PromptsLeft pictures left</p>
+
+                <div class="judge-buttons">
+                    <button class="btn btn-yes" disabled="@(d.RevealAnswer || d.Paused)" @onclick="() => Act(Game.Correct(Token))">Correct</button>
+                    <button class="btn btn-no" disabled="@(d.RevealAnswer || d.Paused)" @onclick="() => Act(Game.Pass(Token))">Pass</button>
+                </div>
+                <div class="button-row fl-tools">
+                    <button class="btn btn-quiet" disabled="@(!d.CanUndo)" @onclick="() => Act(Game.UndoLast(Token))">Undo</button>
+                    @if (d.Paused)
+                    {
+                        <button class="btn btn-start" @onclick="() => Act(Game.Resume(Token))">Resume</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-quiet" disabled="@d.RevealAnswer" @onclick="() => Act(Game.Pause(Token))">Pause</button>
+                    }
+                </div>
+            </section>
+            break;
+
+        case FloorPhase.TimeUp:
+            <section class="card">
+                <h2>@(s.EndReason == FloorEndReason.OutOfPrompts ? "Out of pictures" : "Time's up")</h2>
+                <p><strong>@s.Player(s.LoserId)?.Name</strong> loses@(s.EndReason == FloorEndReason.OutOfPrompts ? " (less time left)" : "").</p>
+                <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">Take the territory</button>
+            </section>
+            break;
+
+        case FloorPhase.Takeover:
+            <section class="card">
+                <h2>@s.Player(s.Takeover!.WinnerId)?.Name takes the territory</h2>
+                <p class="muted">Let the TV finish the animation, then move on.</p>
+                <button class="btn btn-start btn-wide" @onclick="() => Act(Game.Continue(Token))">
+                    @(s.Alive <= 1 ? "Crown the winner" : "Next challenge")
+                </button>
+            </section>
+            break;
+
+        case FloorPhase.GameOver:
+            <section class="card center">
+                <h2>@s.Player(s.WinnerId)?.Name owns the floor!</h2>
+                <button class="btn btn-start btn-wide" @onclick="() => Act(Game.BackToLobby(Token))">Play again<small>everyone picks a new topic</small></button>
+            </section>
+            break;
+    }
+
+    @if (s.Phase != FloorPhase.GameOver)
+    {
+        <section class="fl-footer">
+            @if (!s.Inherit) { <p class="muted">Inheritance is off.</p> }
+            @if (_confirmEnd)
+            {
+                <p class="error">End this game and go back to the lobby?</p>
+                <div class="button-row">
+                    <button class="btn btn-no" @onclick="EndGame">Yes, end it</button>
+                    <button class="btn btn-quiet" @onclick="() => _confirmEnd = false">Keep playing</button>
+                </div>
+            }
+            else
+            {
+                <button class="btn btn-quiet btn-small" @onclick="() => _confirmEnd = true">End game…</button>
+            }
+        </section>
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public FloorGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public FloorSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public Guid Token { get; set; }
+
+    private string? _error;
+    private bool _confirmEnd;
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private void EndGame()
+    {
+        _confirmEnd = false;
+        Act(Game.BackToLobby(Token));
+    }
+}

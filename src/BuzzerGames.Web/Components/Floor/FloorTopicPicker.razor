@@ -1,0 +1,35 @@
+@*
+    Every topic a player could pick, as big buttons. Taken and used-up topics are shown but can't be tapped, so players can see why.
+*@
+
+<div class="fl-picker">
+    @foreach (var topic in Topics)
+    {
+        var mine = string.Equals(topic.Name, Current, StringComparison.OrdinalIgnoreCase);
+        <button class="fl-pick @(mine ? "mine" : "")" disabled="@(!topic.Available && !mine)" @onclick="() => OnPick.InvokeAsync(topic.Name)">
+            <span class="fl-pick-name">@topic.Name</span>
+            @if (mine)
+            {
+                <span class="fl-pick-note">your pick</span>
+            }
+            else if (topic.TakenBy is not null)
+            {
+                <span class="fl-pick-note">@topic.TakenBy has it</span>
+            }
+            else if (topic.Dead)
+            {
+                <span class="fl-pick-note">used in an earlier game</span>
+            }
+        </button>
+    }
+    @if (Topics.Count == 0)
+    {
+        <p class="muted">No topics are ready yet. Add some on the topics page.</p>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<FloorTopicChoice> Topics { get; set; } = default!;
+    [Parameter] public string? Current { get; set; }
+    [Parameter] public EventCallback<string> OnPick { get; set; }
+}

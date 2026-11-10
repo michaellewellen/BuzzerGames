@@ -1,0 +1,140 @@
+@*
+    The big screen. It shows the floor between duels, and during a duel the two players, their clocks, and the picture.
+    It NEVER shows the answer, except for the few seconds after a pass (RevealAnswer), when the whole room is meant to see it.
+    Pictures coming up next are loaded invisibly ahead of time, so there is no wait when the emcee taps Correct.
+*@
+
+@{
+    var s = Snapshot;
+    var challenger = s.Player(s.ChallengerId);
+    var defender = s.Player(s.DefenderId);
+}
+
+<main class="tv fl-tv phase-@s.Phase.ToString().ToLowerInvariant() @(s.Duel is { Paused: true } ? "paused" : "")">
+    <header class="tv-top">
+        <span>THE FLOOR@(s.FinalDuel ? " · FINAL DUEL" : "") · @s.Alive LEFT</span>
+        <span>Room @s.Code</span>
+    </header>
+
+    @switch (s.Phase)
+    {
+        case FloorPhase.Choose:
+            <section class="fl-stage">
+                <p class="fl-banner"><strong>@challenger?.Name</strong> is choosing an opponent</p>
+                <FloorMap Snapshot="s" />
+            </section>
+            break;
+
+        case FloorPhase.Repick:
+            <section class="fl-stage">
+                <p class="fl-banner"><strong>@s.Player(s.RepickPlayerId)?.Name</strong> has run out of pictures and is picking a new topic…</p>
+                <FloorMap Snapshot="s" />
+            </section>
+            break;
+
+        case FloorPhase.Ready:
+            <section class="fl-stage">
+                <p class="fl-banner">
+                    <strong>@challenger?.Name</strong> challenges <strong>@defender?.Name</strong>
+                    <span class="fl-banner-sub">in @FloorUi.Topics(defender?.Topics ?? [])</span>
+                </p>
+                <FloorMap Snapshot="s" />
+            </section>
+            break;
+
+        case FloorPhase.Duel:
+        case FloorPhase.TimeUp:
+            @DuelScreen()
+            break;
+
+        case FloorPhase.Takeover:
+            <section class="fl-stage">
+                <p class="fl-banner">
+                    <strong>@s.Player(s.Takeover!.WinnerId)?.Name</strong> takes <strong>@s.Player(s.Takeover.LoserId)?.Name</strong>'s territory
+                    @if (s.Takeover.TopicsGained.Count > 0)
+                    {
+                        <span class="fl-banner-sub">and now also knows @FloorUi.Topics(s.Takeover.TopicsGained)</span>
+                    }
+                </p>
+                <FloorMap Snapshot="s" />
+            </section>
+            break;
+
+        case FloorPhase.GameOver:
+            <section class="fl-stage">
+                <p class="fl-kicker">THE FLOOR IS YOURS</p>
+                <p class="fl-champion">@s.Player(s.WinnerId)?.Name</p>
+                <FloorMap Snapshot="s" />
+            </section>
+            break;
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public FloorSnapshot Snapshot { get; set; } = default!;
+
+    private RenderFragment DuelScreen() => __builder =>
+    {
+        var s = Snapshot;
+        var d = s.Duel!;
+        var timeUp = s.Phase == FloorPhase.TimeUp;
+        var c = s.Player(d.ChallengerId)!;
+        var df = s.Player(d.DefenderId)!;
+
+        <section class="fl-duel">
+            <div class="fl-side @(d.ActiveId == c.Id && !timeUp ? "active" : "") @(s.LoserId == c.Id ? "out" : "")" style="--fl-color: @FloorUi.Color(s, c.Id)">
+                <p class="fl-who">@c.Name</p>
+                <p class="fl-clock" data-fl-key="@s.Version" data-fl-ms="@d.ChallengerMs" data-fl-run="@(d.Running && d.ActiveId == c.Id ? "1" : "0")">@FloorUi.Seconds(d.ChallengerMs)</p>
+                <p class="fl-tally">@d.ChallengerCorrect right</p>
+            </div>
+
+            <div class="fl-center">
+                @if (timeUp)
+                {
+                    <p class="fl-timeup">TIME'S UP</p>
+                    <p class="fl-timeup-who">
+                        @(s.EndReason == FloorEndReason.OutOfPrompts
+                            ? $"Out of pictures! {s.Player(s.LoserId)?.Name} had less time left."
+                            : $"{s.Player(s.LoserId)?.Name} ran out of time")
+                    </p>
+                }
+                else
+                {
+                    <p class="fl-topic-label">@d.Topic</p>
+                    <div class="fl-prompt">
+                        @if (d.ImageKey is not null)
+                        {
+                            <img @key="d.ImageKey" class="fl-pic" src="@FloorUi.ImageUrl(d.ImageKey)" alt="" />
+                        }
+                        else if (d.PromptText is not null)
+                        {
+                            <p class="fl-text">@d.PromptText</p>
+                        }
+                        @if (d.RevealAnswer)
+                        {
+                            <p class="fl-reveal">@d.Answer</p>
+                        }
+                    </div>
+                    @if (d.Paused)
+                    {
+                        <p class="fl-paused">PAUSED</p>
+                    }
+                }
+            </div>
+
+            <div class="fl-side @(d.ActiveId == df.Id && !timeUp ? "active" : "") @(s.LoserId == df.Id ? "out" : "")" style="--fl-color: @FloorUi.Color(s, df.Id)">
+                <p class="fl-who">@df.Name</p>
+                <p class="fl-clock" data-fl-key="@s.Version" data-fl-ms="@d.DefenderMs" data-fl-run="@(d.Running && d.ActiveId == df.Id ? "1" : "0")">@FloorUi.Seconds(d.DefenderMs)</p>
+                <p class="fl-tally">@d.DefenderCorrect right</p>
+            </div>
+        </section>
+
+        @* Loaded off-screen so the next pictures are already in the browser when they're needed. *@
+        <div class="fl-preload" aria-hidden="true">
+            @foreach (var key in d.Upcoming)
+            {
+                <img @key="key" src="@FloorUi.ImageUrl(key)" alt="" />
+            }
+        </div>
+    };
+}

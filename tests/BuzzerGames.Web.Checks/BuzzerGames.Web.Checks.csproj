@@ -24,6 +24,7 @@
     <Compile Include="..\BuzzerGames.Core.Checks\PasswordChecks.cs" Link="PasswordChecks.cs" />
     <Compile Include="..\BuzzerGames.Core.Checks\MatchChecks.cs" Link="MatchChecks.cs" />
     <Compile Include="..\BuzzerGames.Core.Checks\CardSharksChecks.cs" Link="CardSharksChecks.cs" />
+    <Compile Include="..\BuzzerGames.Core.Checks\FloorChecks.cs" Link="FloorChecks.cs" />
   </ItemGroup>
 
 </Project>

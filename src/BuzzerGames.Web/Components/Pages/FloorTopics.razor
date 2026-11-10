@@ -1,0 +1,240 @@
+@page "/the-floor/topics"
+@implements IAsyncDisposable
+@inject FolderFloorContent Store
+@inject FloorAdminAccess Access
+@inject IJSRuntime JS
+
+<PageTitle>The Floor · Topics</PageTitle>
+
+@*
+    Where topics and pictures are made. Pictures are named by their answer: type the answer, and the picture is saved as e.g. golden-retriever.jpg.
+    Locked behind FLOOR_ADMIN_PASSCODE on Railway. The upload box itself is built by floor.js (paste a screen clip with Ctrl+V, or drop files).
+*@
+
+<main class="fl-admin">
+    <header class="fl-admin-head">
+        <h1>The Floor · Topics</h1>
+        <a href="/the-floor">Back to the game</a>
+    </header>
+
+    @if (Access.Problem is not null)
+    {
+        <section class="card"><p class="error">@Access.Problem</p></section>
+    }
+    else if (!_unlocked)
+    {
+        <section class="card">
+            <h2>Passcode</h2>
+            <input class="text-input" type="password" placeholder="Passcode" @bind="_pass" @bind:event="oninput" @onkeydown="OnPassKey" />
+            <button class="btn" @onclick="Unlock">Unlock</button>
+            @if (_passError is not null) { <p class="error">@_passError</p> }
+        </section>
+    }
+    else
+    {
+        <div class="fl-admin-grid">
+            <section class="card">
+                <h2>Topics (@_topics.Count)</h2>
+                <p class="muted">A topic needs at least @Store.MinPrompts pictures before players can pick it. Each duel uses about 40, so aim for 100 or more.</p>
+                <ul class="fl-topic-list">
+                    @foreach (var t in _topics)
+                    {
+                        <li class="@(string.Equals(t.Name, _selected, StringComparison.OrdinalIgnoreCase) ? "selected" : "")">
+                            <button class="fl-topic-button" @onclick="() => SelectAsync(t.Name)">
+                                <span class="fl-topic-name">@t.Name</span>
+                                <span class="fl-topic-count @Health(t)">@t.Total@(t.Texts > 0 && t.Images > 0 ? $" ({t.Images} pictures)" : t.Texts > 0 ? " text" : "") · ≈@(t.Total / 40) duels@(t.Used ? " · used" : "")</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+                <div class="button-row">
+                    <input class="text-input" placeholder="New topic name" maxlength="40" @bind="_newTopic" @bind:event="oninput" @onkeydown="OnNewKey" />
+                    <button class="btn" @onclick="CreateTopic">Add</button>
+                </div>
+                @if (_message is not null) { <p class="@(_messageIsError ? "error" : "hint")">@_message</p> }
+            </section>
+
+            <section class="card">
+                @if (_selected is null)
+                {
+                    <h2>Pick a topic</h2>
+                    <p class="muted">Choose one on the left to add pictures, or create a new one.</p>
+                }
+                else
+                {
+                    <h2>@_selected</h2>
+                    <div @key="_selected" id="fl-uploader" class="fl-uploader"></div>
+
+                    <h3>Pictures (@_images.Count)</h3>
+                    <div class="fl-gallery">
+                        @foreach (var img in _images)
+                        {
+                            <figure @key="img.Key">
+                                <img src="@FloorUi.ImageUrl(img.Key)" alt="@img.Answer" loading="lazy" />
+                                <figcaption>@img.Answer</figcaption>
+                                <button class="btn btn-small btn-quiet" @onclick="() => DeleteImage(img.File)">Delete</button>
+                            </figure>
+                        }
+                    </div>
+
+                    <h3>Text prompts</h3>
+                    <p class="muted">One per line: <code>clue | answer | other accepted answers separated by ;</code></p>
+                    <textarea class="text-input fl-textarea" rows="5" placeholder="Capital of France | Paris" @bind="_textLines" @bind:event="oninput"></textarea>
+                    <button class="btn" @onclick="AddText">Add text prompts</button>
+
+                    <hr />
+                    @if (_confirmDelete)
+                    {
+                        <p class="error">Delete "@_selected" and every picture in it?</p>
+                        <div class="button-row">
+                            <button class="btn btn-no" @onclick="DeleteTopic">Yes, delete it</button>
+                            <button class="btn btn-quiet" @onclick="() => _confirmDelete = false">Cancel</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <button class="btn btn-quiet btn-small" @onclick="() => _confirmDelete = true">Delete this topic…</button>
+                    }
+                }
+            </section>
+        </div>
+    }
+</main>
+
+@code {
+    private bool _unlocked;
+    private string _pass = "";
+    private string? _passError;
+    private List<FloorTopicInfo> _topics = [];
+    private IReadOnlyList<FloorImageInfo> _images = [];
+    private string? _selected;
+    private string _newTopic = "";
+    private string _textLines = "";
+    private string? _message;
+    private bool _messageIsError;
+    private bool _confirmDelete;
+    private bool _needMount;
+    private DotNetObjectReference<FloorTopics>? _self;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Access.Problem is null)
+        {
+            // Remember the passcode in this browser so it isn't retyped every visit.
+            var saved = await JS.InvokeAsync<string?>("bg.getItem", "bg.floor.pass");
+            if (Access.IsAllowed(saved))
+            {
+                _pass = saved ?? "";
+                _unlocked = true;
+                Reload();
+                StateHasChanged();
+            }
+        }
+
+        if (_needMount && _selected is not null)
+        {
+            _needMount = false;
+            _self ??= DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("floorAdmin.mount", "fl-uploader", _selected, _pass, _self);
+        }
+    }
+
+    private async Task Unlock()
+    {
+        if (!Access.IsAllowed(_pass))
+        {
+            _passError = "That isn't the passcode.";
+            return;
+        }
+        _passError = null;
+        _unlocked = true;
+        await JS.InvokeVoidAsync("bg.setItem", "bg.floor.pass", _pass);
+        Reload();
+    }
+
+    private async Task OnPassKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Unlock();
+    }
+
+    private void Reload()
+    {
+        _topics = Store.ListTopics().ToList();
+        _images = _selected is null ? [] : Store.ListImages(_selected);
+    }
+
+    private async Task SelectAsync(string name)
+    {
+        _selected = name;
+        _confirmDelete = false;
+        _message = null;
+        _needMount = true;
+        Reload();
+        await Task.CompletedTask;
+    }
+
+    /// <summary>Called by floor.js after it saves pictures, so the list and counts refresh.</summary>
+    [JSInvokable]
+    public Task OnUploaded()
+    {
+        return InvokeAsync(() =>
+        {
+            Reload();
+            StateHasChanged();
+        });
+    }
+
+    private void Say(string text, bool error = false)
+    {
+        _message = text;
+        _messageIsError = error;
+    }
+
+    private async Task CreateTopic()
+    {
+        var result = Store.CreateTopic(_newTopic);
+        if (!result.Ok) { Say(result.Error!, true); return; }
+        _newTopic = "";
+        Say($"Created {result.File}.");
+        await SelectAsync(result.File!);
+    }
+
+    private async Task OnNewKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await CreateTopic();
+    }
+
+    private void DeleteImage(string file)
+    {
+        var result = Store.DeleteImage(_selected!, file);
+        Say(result.Ok ? "Picture deleted." : result.Error!, !result.Ok);
+        Reload();
+    }
+
+    private void AddText()
+    {
+        var (result, added, skipped) = Store.AddTextPrompts(_selected!, _textLines);
+        if (!result.Ok) { Say(result.Error!, true); return; }
+        _textLines = "";
+        Say($"Added {added} prompt{(added == 1 ? "" : "s")}" + (skipped > 0 ? $" ({skipped} lines skipped: they need a clue and an answer)." : "."));
+        Reload();
+    }
+
+    private async Task DeleteTopic()
+    {
+        var result = Store.DeleteTopic(_selected!);
+        _confirmDelete = false;
+        Say(result.Ok ? $"Deleted {_selected}." : result.Error!, !result.Ok);
+        _selected = null;
+        Reload();
+        await Task.CompletedTask;
+    }
+
+    private string Health(FloorTopicInfo t) => t.Total < Store.MinPrompts ? "thin" : t.Total < 100 ? "ok" : "good";
+
+    public async ValueTask DisposeAsync()
+    {
+        try { await JS.InvokeVoidAsync("floorAdmin.unmount"); } catch { /* the page is going away; nothing to clean up */ }
+        _self?.Dispose();
+    }
+}

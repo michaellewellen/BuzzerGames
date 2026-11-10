@@ -2,7 +2,7 @@
 
 Making our favorite game shows playable, on phones, with a big screen in the middle of the room.
 
-Right now there are four games: **Jeopardy**, **Press Your Luck**, **Password Plus** and **Match Game**. The site opens on a
+Right now there are six games: **Jeopardy**, **Press Your Luck**, **Password Plus**, **Match Game**, **Card Sharks** and **The Floor**. The site opens on a
 "pick a game" page, with Wheel of Fortune and Classic Concentration waiting in the wings.
 
 ## How a Jeopardy game works
@@ -119,6 +119,48 @@ One emcee runs everything from a phone; the two teams just play out loud. The TV
 
 Survey questions live in `src/BuzzerGames.Core/Data/CardSharks/card-sharks.json`. The ones in there now are **placeholders**; swap in your family's real results.
 
+## How a Floor game works
+
+Create it on the TV at `/the-floor`. Everyone scans the QR code; one person joins as the **emcee**, everyone else joins as a **player**.
+
+- **Pick an expertise.** Each player picks one topic (Dog Breeds, Acronyms, Movie Posters...). A topic can be held by one player at a time.
+- **Build the floor.** The emcee taps **Build the floor** (4 to 20 players). Each player gets one square, packed into as close to a block as possible
+  (a ragged top row is fine). Each territory shows the player's name and **all** their topics.
+- **First challenge.** The first challenger is chosen completely at random. A challenger may only challenge a **neighbor** (a square sharing an edge).
+- **The duel.** Both players are quizzed on the **defender's** topics. The challenger goes first. Each player has their own clock (45 seconds by default);
+  only one runs at a time. The picture is on the TV, the answer is on the emcee's phone only. The emcee taps **Correct** (the clock passes to the other
+  player and a new picture comes up) or **Pass** (the answer shows to the room for 3 seconds with the clock still running, then a new picture).
+  Run out of time and the whole TV goes red. Undo takes back the last Correct or Pass, and Pause stops the clocks.
+- **The takeover.** The winner takes the loser's territory, and (unless the emcee switched **Winner inherits topics** off) the loser's topics too.
+  A defender with several topics is asked a mix, their own topic a little more often. The winner challenges next.
+- **The final duel.** With two players left there is no choosing: the player holding more of the floor defends.
+- **Running out of pictures.** A picture is never shown twice in a game. If a defender's topics have run low they must pick a new topic before they can be
+  challenged (or the emcee assigns a random one). If a duel runs out of pictures mid-way, whoever has more time left wins.
+- **Topics get used up.** A topic picked in one game can't be picked in the next until the emcee taps **Make all topics eligible again** in the lobby.
+
+### Topics and pictures
+
+Open `/the-floor/topics` (there is a link at the bottom of the Floor start page). Make a topic, then paste screen clips straight in
+(**Win+Shift+S**, then **Ctrl+V**), type the answer, and press Enter. Or drop in many files at once; the answer is guessed from the file name.
+Pictures are shrunk to about 900 pixels in your browser before they are uploaded.
+
+- A picture's **file name is its answer**: `golden-retriever.jpg` is shown to the emcee as "Golden Retriever". `_2` or ` (2)` on the end is ignored.
+  Anything a file name can't spell (a colon, say) is kept in an `answers.txt` beside the pictures.
+- A topic can also hold **text prompts** (`prompts.txt`, one per line: `clue | answer | other accepted answers separated by ;`).
+- A topic needs at least 20 pictures before players can pick it (`FLOOR_MIN_PROMPTS` changes this). A duel uses roughly 35 to 50 pictures,
+  and a topic that keeps winning gets quizzed again, so **aim for 100 or more per topic**. The topics page shows a rough "duels" estimate.
+- Three small text topics ship inside the program (Acronyms, Finish the Book Title, Name the Movie from the Quote) so there is something to play on day one.
+
+### Railway setup for The Floor
+
+Pictures and the list of used-up topics live in a folder, so on Railway they need a **Volume**:
+
+1. Service → **Volumes** → add a volume mounted at `/data`.
+2. Service → **Variables**: `FLOOR_DATA_DIR` = `/data`, and `FLOOR_ADMIN_PASSCODE` = a passcode of your choosing (the topics page is locked without it).
+3. Redeploys keep everything in `/data`. Without the volume the pictures vanish on every deploy.
+
+On your own computer neither variable is needed: pictures go in a `floor-data` folder (ignored by git) and the topics page opens without a passcode.
+
 ## Credits
 
 Match Game is owned by Fremantle; this is a private party game. The Super Match blanks draw on the transcribed episode data from
@@ -178,6 +220,8 @@ src/BuzzerGames.Core/          The game itself: plain C#, no web code
   Password/                      the Password Plus engine, puzzle dealing, room manager
   Data/Password/                 the puzzle bank (puzzles.json) and the bonus words (bonus-words.txt)
   Match/                         the Match Game engine, question dealing, room manager
+  Floor/                         The Floor: engine (FloorGame), floor shape, topic folder store, room manager
+  Data/Floor/                    the built-in text topics (acronyms, book titles, movie quotes)
   Data/Match/                    the question bank: names, questions, Super Match blanks (match-game.json)
 
 src/BuzzerGames.Web/           The website
@@ -190,6 +234,9 @@ src/BuzzerGames.Web/           The website
   Components/Match/              the Match Game screens (TV desks and Super board, emcee, celebrity phone, lobby)
   wwwroot/app.css, js/bg.js      styling, and the small JavaScript bits (saved seat, QR code)
   wwwroot/js/pyl.js              the flashing Big Board and its sounds
+  Components/Floor/              the Floor screens (TV, emcee, player, lobby, the floor map, topic picker)
+  FloorServices.cs               Floor setup: the data folder, the topics passcode, the picture and upload addresses
+  wwwroot/js/floor.js            the Floor clocks and the picture uploader
 
 tests/                         Checks that play real games and verify the rules and the screens
 Dockerfile                     How Railway builds and runs it

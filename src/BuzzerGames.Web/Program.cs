@@ -1,6 +1,7 @@
 using BuzzerGames.Web;
 using BuzzerGames.Core.Jeopardy;
 using BuzzerGames.Core.CardSharks;
+using BuzzerGames.Core.Floor;
 using BuzzerGames.Core.Match;
 using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
@@ -44,6 +45,9 @@ builder.Services.AddMatchGame();
 // Card Sharks has its own survey bank and its own set of running games.
 builder.Services.AddCardSharks();
 
+// The Floor keeps its topics and pictures in a folder (the Railway Volume), so it needs more setup than the others.
+builder.Services.AddFloor();
+
 var app = builder.Build();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
@@ -57,6 +61,8 @@ app.MapStaticAssets();
 
 // Railway (or you, in a browser) can hit this to check the app is alive.
 app.MapGet("/healthz", () => Results.Ok("ok"));
+
+app.MapFloor();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

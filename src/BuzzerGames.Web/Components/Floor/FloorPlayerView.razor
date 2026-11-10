@@ -1,0 +1,122 @@
+@*
+    A player's phone. Most of the time it just says what's happening and what to do; the pictures are only ever on the big screen.
+    Two moments matter: choosing a neighbor to challenge, and picking a new topic when theirs has run out of pictures.
+*@
+
+@{
+    var s = Snapshot;
+    var me = s.Player(PlayerId);
+}
+
+<main class="phone player fl-player">
+    @if (me is null)
+    {
+        <p class="big-message">Hmm, we lost your seat.</p>
+    }
+    else
+    {
+        <header class="phone-header">
+            <span class="pill" style="background: @FloorUi.Color(s, me.Id); color: #fff">@me.Name</span>
+            <span class="phone-sub">@(me.Alive ? $"{me.Squares} square{(me.Squares == 1 ? "" : "s")}" : "out")</span>
+        </header>
+
+        @if (_error is not null)
+        {
+            <p class="error">@_error</p>
+        }
+
+        <section class="card">
+            <p class="muted">Your topics</p>
+            <p class="fl-mytopics">@FloorUi.Topics(me.Topics)</p>
+        </section>
+
+        @switch (s.Phase)
+        {
+            case FloorPhase.Choose when s.ChallengerId == me.Id:
+                <p class="big-message">Your move!</p>
+                <p class="hint">Pick a neighbor to challenge. You'll be asked about <em>their</em> topics.</p>
+                <div class="button-column">
+                    @foreach (var id in s.Candidates)
+                    {
+                        var p = s.Player(id)!;
+                        <button class="btn fl-candidate" @onclick="() => Act(Game.Challenge(Token, id))">
+                            @p.Name<small>@FloorUi.Topics(p.Topics)</small>
+                        </button>
+                    }
+                </div>
+                break;
+
+            case FloorPhase.Choose:
+                <p class="big-message">@s.Player(s.ChallengerId)?.Name is choosing</p>
+                <p class="hint">@(s.Candidates.Contains(me.Id) ? "You're next to them. You could be challenged!" : "Watch the big screen.")</p>
+                break;
+
+            case FloorPhase.Repick when s.RepickPlayerId == me.Id:
+                <p class="big-message">Pick a new topic</p>
+                <p class="hint">Your pictures have run low. Choose another expertise; you keep what you have.</p>
+                <FloorTopicPicker Topics="s.Topics" OnPick="PickAsync" />
+                break;
+
+            case FloorPhase.Repick:
+                <p class="big-message">@s.Player(s.RepickPlayerId)?.Name is picking a new topic</p>
+                break;
+
+            case FloorPhase.Ready:
+                <p class="big-message">@(s.ChallengerId == me.Id || s.DefenderId == me.Id ? "Get ready!" : "Duel coming up")</p>
+                <p class="hint">@s.Player(s.ChallengerId)?.Name vs @s.Player(s.DefenderId)?.Name</p>
+                break;
+
+            case FloorPhase.Duel:
+                var d = s.Duel!;
+                @if (d.ActiveId == me.Id)
+                {
+                    <p class="big-message fl-go">You're up!</p>
+                    <p class="hint">Look at the big screen and say the answer out loud.</p>
+                }
+                else if (d.ChallengerId == me.Id || d.DefenderId == me.Id)
+                {
+                    <p class="big-message">Wait for your turn…</p>
+                }
+                else
+                {
+                    <p class="big-message">Duel in progress</p>
+                    <p class="hint">@s.Player(d.ChallengerId)?.Name vs @s.Player(d.DefenderId)?.Name. Watch the big screen.</p>
+                }
+                break;
+
+            case FloorPhase.TimeUp:
+                <p class="big-message">@(s.LoserId == me.Id ? "Time's up for you!" : "Time's up!")</p>
+                break;
+
+            case FloorPhase.Takeover:
+                <p class="big-message">@s.Player(s.Takeover!.WinnerId)?.Name takes over</p>
+                break;
+
+            case FloorPhase.GameOver:
+                <p class="big-message">@(s.WinnerId == me.Id ? "You own the floor!" : $"{s.Player(s.WinnerId)?.Name} owns the floor")</p>
+                break;
+        }
+
+        @if (!me.Alive && s.Phase != FloorPhase.GameOver)
+        {
+            <p class="hint">You've been taken over. Cheer on the survivors!</p>
+        }
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public FloorGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public FloorSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public Guid Token { get; set; }
+    [Parameter] public Guid? PlayerId { get; set; }
+
+    private string? _error;
+
+    private void Act(Result result) => _error = result.Ok ? null : result.Error;
+
+    private Task PickAsync(string topic)
+    {
+        Act(Game.PickTopic(Token, topic));
+        return Task.CompletedTask;
+    }
+}

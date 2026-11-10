@@ -1,0 +1,61 @@
+@*
+    The floor: one square per player at the start, merging into bigger territories as players win. A territory's name and ALL its topics
+    are written on one square of it (the first). Borders are drawn only between different owners, so a territory reads as one piece.
+    Squares being taken over this moment get a flip animation, staggered so the territory falls one square at a time.
+*@
+
+<div class="fl-map @(Compact ? "compact" : "")" style="grid-template-columns: repeat(@Snapshot.Cols, 1fr); grid-template-rows: repeat(@Snapshot.Rows, 1fr);">
+    @foreach (var q in Snapshot.Squares)
+    {
+        var owner = Snapshot.Player(q.OwnerId)!;
+        var label = ReferenceEquals(q, Anchor(q.OwnerId));
+        var order = Snapshot.Takeover?.Cells.ToList().IndexOf(q.Index) ?? -1;
+        <div @key="q.Index"
+             class="fl-square @Classes(q, order)"
+             style="grid-row: @(q.Row + 1); grid-column: @(q.Col + 1); background: @FloorUi.Color(Snapshot, q.OwnerId); @Borders(q) @(order >= 0 ? $"--fl-delay: {order * 0.35 + 0.4:0.##}s; --fl-from: {FloorUi.Color(Snapshot, Snapshot.Takeover!.LoserId)};" : "")">
+            @if (label)
+            {
+                <span class="fl-name">@owner.Name</span>
+                <span class="fl-topics">
+                    @foreach (var topic in owner.Topics)
+                    {
+                        <span class="fl-topic @(owner.DeadTopics.Contains(topic) ? "dead" : "")">@topic</span>
+                    }
+                </span>
+                @if (owner.Squares > 1)
+                {
+                    <span class="fl-size">@owner.Squares squares</span>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public FloorSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public bool Compact { get; set; }
+
+    private FloorSquare? Anchor(Guid ownerId) => Snapshot.Squares.FirstOrDefault(s => s.OwnerId == ownerId);
+
+    private Guid? OwnerAt(int row, int col) => Snapshot.Squares.FirstOrDefault(s => s.Row == row && s.Col == col)?.OwnerId;
+
+    private string Classes(FloorSquare q, int order)
+    {
+        var classes = new List<string>();
+        if (q.OwnerId == Snapshot.ChallengerId) classes.Add("challenger");
+        if (q.OwnerId == Snapshot.DefenderId) classes.Add("defender");
+        if (Snapshot.Phase == FloorPhase.Choose && Snapshot.Candidates.Contains(q.OwnerId)) classes.Add("candidate");
+        if (Snapshot.Phase == FloorPhase.TimeUp && q.OwnerId == Snapshot.LoserId) classes.Add("loser");
+        if (order >= 0) classes.Add("taken");
+        if (Snapshot.Phase == FloorPhase.GameOver && q.OwnerId == Snapshot.WinnerId) classes.Add("champion");
+        return string.Join(' ', classes);
+    }
+
+    // Draw a border only on the sides that face a different owner (or the edge of the floor).
+    private string Borders(FloorSquare q)
+    {
+        string Side(string name, int row, int col) =>
+            OwnerAt(row, col) == q.OwnerId ? $"border-{name}-color: transparent;" : $"border-{name}-color: #000;";
+        return Side("top", q.Row - 1, q.Col) + Side("bottom", q.Row + 1, q.Col) + Side("left", q.Row, q.Col - 1) + Side("right", q.Row, q.Col + 1);
+    }
+}

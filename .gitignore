@@ -16,3 +16,6 @@ Thumbs.db
 # Local secrets (we have none yet, but this keeps them out if we add some)
 appsettings.Local.json
 .env
+
+# The Floor: pictures and topics made on your own computer
+floor-data/

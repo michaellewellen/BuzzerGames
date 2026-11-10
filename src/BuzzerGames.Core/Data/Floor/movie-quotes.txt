@@ -1,0 +1,66 @@
+# Topic: Name the Movie from the Quote
+# Format: clue | answer | other accepted answers
+May the Force be with you. | Star Wars
+There's no place like home. | The Wizard of Oz
+I'll be back. | The Terminator
+E.T. phone home. | E.T. the Extra-Terrestrial | ET
+Houston, we have a problem. | Apollo 13
+You can't handle the truth! | A Few Good Men
+Here's looking at you, kid. | Casablanca
+Life is like a box of chocolates. | Forrest Gump
+To infinity and beyond! | Toy Story
+Just keep swimming. | Finding Nemo
+I see dead people. | The Sixth Sense
+You're gonna need a bigger boat. | Jaws
+Show me the money! | Jerry Maguire
+I'm the king of the world! | Titanic
+Hakuna Matata. | The Lion King
+Let it go. | Frozen
+Inconceivable! | The Princess Bride
+As you wish. | The Princess Bride
+My name is Inigo Montoya. | The Princess Bride
+Great Scott! | Back to the Future
+Roads? Where we're going, we don't need roads. | Back to the Future
+Nobody puts Baby in a corner. | Dirty Dancing
+Keep your friends close, but your enemies closer. | The Godfather II | The Godfather Part II
+I'm going to make him an offer he can't refuse. | The Godfather
+Go ahead, make my day. | Sudden Impact | Dirty Harry
+Yippee-ki-yay. | Die Hard
+Elementary, my dear Watson. | Sherlock Holmes
+There's no crying in baseball! | A League of Their Own
+Is this the real life? Is this just fantasy? | Bohemian Rhapsody
+You had me at hello. | Jerry Maguire
+Why so serious? | The Dark Knight
+I am your father. | The Empire Strikes Back | Star Wars
+Do. Or do not. There is no try. | The Empire Strikes Back | Star Wars
+These aren't the droids you're looking for. | Star Wars
+I feel the need, the need for speed. | Top Gun
+Fasten your seatbelts. It's going to be a bumpy night. | All About Eve
+I'm walking here! | Midnight Cowboy
+Toto, I've a feeling we're not in Kansas anymore. | The Wizard of Oz
+We're off to see the wizard. | The Wizard of Oz
+Mama always said life was like a box of chocolates. | Forrest Gump
+Run, Forrest, run! | Forrest Gump
+Ogres are like onions. | Shrek
+Fish are friends, not food. | Finding Nemo
+Ohana means family. | Lilo & Stitch | Lilo and Stitch
+It's alive! It's alive! | Frankenstein
+You shall not pass! | The Lord of the Rings | The Fellowship of the Ring
+My precious. | The Lord of the Rings | The Two Towers
+Wax on, wax off. | The Karate Kid
+Bond. James Bond. | Dr. No | James Bond
+Rosebud. | Citizen Kane
+I'm just a girl, standing in front of a boy. | Notting Hill
+Nobody's perfect. | Some Like It Hot
+After all, tomorrow is another day. | Gone with the Wind
+Stella! | A Streetcar Named Desire
+Soylent Green is people! | Soylent Green
+The name's Bond. | James Bond
+What we've got here is failure to communicate. | Cool Hand Luke
+Look at me. I'm the captain now. | Captain Phillips
+There's no place like Hogwarts. | Harry Potter
+Mischief managed. | Harry Potter
+I solemnly swear that I am up to no good. | Harry Potter
+Always. | Harry Potter and the Deathly Hallows
+It's showtime! | Beetlejuice
+Hello, my name is Inigo Montoya. | The Princess Bride

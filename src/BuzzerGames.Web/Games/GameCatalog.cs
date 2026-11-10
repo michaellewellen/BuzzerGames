@@ -16,6 +16,7 @@ public static class GameCatalog
         new("Password Plus", "/password-plus", "One-word clues, two teams, five secret words, one big word.", IsPlayable: true),
         new("Match Game", "/match-game", "Fill in the blank like a celebrity panel. Match them, then go for the Super Match.", IsPlayable: true),
         new("Card Sharks", "/card-sharks", "Higher or lower: a survey duel for control, then race across your row of cards.", IsPlayable: true),
+        new("The Floor", "/the-floor", "Win the floor one picture duel at a time: name it before your clock runs out and take their territory.", IsPlayable: true),
         new("Wheel of Fortune", "/wheel-of-fortune", "Spin, solve, and buy a vowel.", IsPlayable: false),
         new("Classic Concentration", "/classic-concentration", "Match the prizes to reveal the rebus.", IsPlayable: false),
     ];

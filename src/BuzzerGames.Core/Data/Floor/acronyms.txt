@@ -1,0 +1,67 @@
+# Topic: Acronyms
+# Format: clue | answer | other accepted answers
+# Starter set. Text only, so there is something to play before any pictures exist.
+NASA | National Aeronautics and Space Administration
+FBI | Federal Bureau of Investigation
+CIA | Central Intelligence Agency
+NASDAQ | National Association of Securities Dealers Automated Quotations
+SCUBA | Self-Contained Underwater Breathing Apparatus
+RADAR | Radio Detection and Ranging
+LASER | Light Amplification by Stimulated Emission of Radiation
+SONAR | Sound Navigation and Ranging
+UNICEF | United Nations International Children's Emergency Fund | United Nations Children's Fund
+NATO | North Atlantic Treaty Organization
+OPEC | Organization of the Petroleum Exporting Countries
+UNESCO | United Nations Educational, Scientific and Cultural Organization
+FIFA | Federation Internationale de Football Association | International Federation of Association Football
+NASCAR | National Association for Stock Car Auto Racing
+NBA | National Basketball Association
+NFL | National Football League
+MLB | Major League Baseball
+NHL | National Hockey League
+PGA | Professional Golfers' Association
+NCAA | National Collegiate Athletic Association
+YMCA | Young Men's Christian Association
+AARP | American Association of Retired Persons
+NAACP | National Association for the Advancement of Colored People
+ACLU | American Civil Liberties Union
+FDA | Food and Drug Administration
+EPA | Environmental Protection Agency
+IRS | Internal Revenue Service
+USPS | United States Postal Service
+FEMA | Federal Emergency Management Agency
+TSA | Transportation Security Administration
+DMV | Department of Motor Vehicles
+GPS | Global Positioning System
+USB | Universal Serial Bus
+HTML | HyperText Markup Language
+URL | Uniform Resource Locator
+PDF | Portable Document Format
+JPEG | Joint Photographic Experts Group
+GIF | Graphics Interchange Format
+RAM | Random Access Memory
+ROM | Read-Only Memory
+CPU | Central Processing Unit
+LCD | Liquid Crystal Display
+LED | Light-Emitting Diode
+DVD | Digital Versatile Disc | Digital Video Disc
+CD | Compact Disc
+WiFi | Wireless Fidelity
+SUV | Sport Utility Vehicle
+ATM | Automated Teller Machine
+PIN | Personal Identification Number
+ASAP | As Soon As Possible
+RSVP | Repondez s'il vous plait | Please reply
+DIY | Do It Yourself
+FAQ | Frequently Asked Questions
+ETA | Estimated Time of Arrival
+VIP | Very Important Person
+CEO | Chief Executive Officer
+MVP | Most Valuable Player
+PTA | Parent-Teacher Association
+UFO | Unidentified Flying Object
+ZIP code | Zone Improvement Plan
+PBS | Public Broadcasting Service
+BYU | Brigham Young University
+UCLA | University of California, Los Angeles
+MIT | Massachusetts Institute of Technology
