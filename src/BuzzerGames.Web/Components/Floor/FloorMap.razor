@@ -8,24 +8,26 @@
     @foreach (var q in Snapshot.Squares)
     {
         var owner = Snapshot.Player(q.OwnerId)!;
-        var label = ReferenceEquals(q, Anchor(q.OwnerId));
         var order = Snapshot.Takeover?.Cells.ToList().IndexOf(q.Index) ?? -1;
         <div @key="q.Index"
              class="fl-square @Classes(q, order)"
-             style="grid-row: @(q.Row + 1); grid-column: @(q.Col + 1); background: @FloorUi.Color(Snapshot, q.OwnerId); @Borders(q) @(order >= 0 ? $"--fl-delay: {order * 0.35 + 0.4:0.##}s; --fl-from: {FloorUi.Color(Snapshot, Snapshot.Takeover!.LoserId)};" : "")">
-            @if (label)
-            {
-                <span class="fl-name">@owner.Name</span>
-                <span class="fl-topics">
-                    @foreach (var topic in owner.Topics)
-                    {
-                        <span class="fl-topic @(owner.DeadTopics.Contains(topic) ? "dead" : "")">@topic</span>
-                    }
-                </span>
-                @if (owner.Squares > 1)
+             style="grid-row: @(q.Row + 1); grid-column: @(q.Col + 1); background: @FloorUi.Color(Snapshot, q.OwnerId); @Borders(q) @(order >= 0 ? $"--fl-delay: {F(order * 0.35 + 0.4)}s; --fl-from: {FloorUi.Color(Snapshot, Snapshot.Takeover!.LoserId)};" : "")"></div>
+    }
+
+    @* One label per territory, centered over the whole territory and bigger the more squares it has. *@
+    @foreach (var label in Labels())
+    {
+        <div @key="label.Owner.Id" class="fl-label" style="@label.Position --fl-k: @F(label.Scale);">
+            <span class="fl-name">@label.Owner.Name</span>
+            <span class="fl-topics">
+                @foreach (var topic in label.Owner.Topics)
                 {
-                    <span class="fl-size">@owner.Squares squares</span>
+                    <span class="fl-topic @(label.Owner.DeadTopics.Contains(topic) ? "dead" : "")">@topic</span>
                 }
+            </span>
+            @if (label.Owner.Squares > 1)
+            {
+                <span class="fl-size">@label.Owner.Squares squares</span>
             }
         </div>
     }
@@ -35,7 +37,45 @@
     [Parameter, EditorRequired] public FloorSnapshot Snapshot { get; set; } = default!;
     [Parameter] public bool Compact { get; set; }
 
-    private FloorSquare? Anchor(Guid ownerId) => Snapshot.Squares.FirstOrDefault(s => s.OwnerId == ownerId);
+    private sealed record TerritoryLabel(FloorPlayerInfo Owner, string Position, double Scale);
+
+    private static string F(double value) => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// Where each territory's name goes. A rectangular territory gets one label spanning all of it. An odd shape (an L, say) can't be
+    /// spanned without covering someone else's squares, so its label sits on the square nearest its middle, a little smaller.
+    /// </summary>
+    private IEnumerable<TerritoryLabel> Labels()
+    {
+        foreach (var owner in Snapshot.Players)
+        {
+            var cells = Snapshot.Squares.Where(q => q.OwnerId == owner.Id).ToList();
+            if (cells.Count == 0) continue;
+
+            var r1 = cells.Min(q => q.Row); var r2 = cells.Max(q => q.Row);
+            var c1 = cells.Min(q => q.Col); var c2 = cells.Max(q => q.Col);
+            if (cells.Count == (r2 - r1 + 1) * (c2 - c1 + 1))
+            {
+                var scale = Math.Min(2.2, Math.Sqrt(cells.Count));
+                yield return new TerritoryLabel(owner, $"grid-row: {r1 + 1} / {r2 + 2}; grid-column: {c1 + 1} / {c2 + 2};", scale);
+            }
+            else
+            {
+                var midRow = cells.Average(q => q.Row);
+                var midCol = cells.Average(q => q.Col);
+                var at = cells.OrderBy(q => Math.Pow(q.Row - midRow, 2) + Math.Pow(q.Col - midCol, 2)).First();
+                yield return new TerritoryLabel(owner, $"grid-row: {at.Row + 1}; grid-column: {at.Col + 1};", Math.Min(1.4, 1 + 0.1 * (cells.Count - 1)));
+            }
+        }
+    }
+
+    // Edges between a player's own squares are invisible; edges facing anyone else (or the edge of the floor) are black, or glow when
+    // that player is in the duel or has won. Drawing the highlight as a border, not per-square, gives one outline around the territory.
+    private string OuterColor(Guid ownerId) =>
+        ownerId == Snapshot.WinnerId && Snapshot.Phase == FloorPhase.GameOver ? "#ffd35a"
+        : ownerId == Snapshot.ChallengerId ? "#ffd35a"
+        : ownerId == Snapshot.DefenderId ? "#ff4d4d"
+        : "#000";
 
     private Guid? OwnerAt(int row, int col) => Snapshot.Squares.FirstOrDefault(s => s.Row == row && s.Col == col)?.OwnerId;
 
@@ -55,7 +95,7 @@
     private string Borders(FloorSquare q)
     {
         string Side(string name, int row, int col) =>
-            OwnerAt(row, col) == q.OwnerId ? $"border-{name}-color: transparent;" : $"border-{name}-color: #000;";
+            OwnerAt(row, col) == q.OwnerId ? $"border-{name}-color: transparent;" : $"border-{name}-color: {OuterColor(q.OwnerId)};";
         return Side("top", q.Row - 1, q.Col) + Side("bottom", q.Row + 1, q.Col) + Side("left", q.Row, q.Col - 1) + Side("right", q.Row, q.Col + 1);
     }
 }

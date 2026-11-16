@@ -127,6 +127,28 @@ static class FloorWebChecks
             Check.True(Regex.Matches(html, "fl-square [^\"]*taken").Count == after.Takeover!.Cells.Count, "the taken squares are animated");
         });
 
+        run("floor map: each territory has one label, a winner's rectangle gets one label across it, and highlights outline the whole territory", () =>
+        {
+            var t = TextTable(4, seed: 2);
+            Check.Equal(4, Regex.Matches(Render.FlMap(t.S), "class=\"fl-label\"").Count, "one label per player at the start");
+            t.StartDuel();
+            var winner = t.S.Duel!.ChallengerId;
+            t.ChallengerWinsDuel();
+            Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Ok(t.Game.Continue(t.Emcee));
+            var s = t.S;
+            var html = Render.FlMap(s);
+            Check.Equal(3, Regex.Matches(html, "class=\"fl-label\"").Count, "one label per living territory, not per square");
+            var w = s.Player(winner)!;
+            Check.Equal(2, w.Squares, "winner holds two squares");
+            // Two squares side by side or stacked are a rectangle: the label spans both (a "a / b" range in one direction).
+            Check.True(Regex.IsMatch(html, "class=\"fl-label\" style=\"[^\"]*grid-(row|column): \\d+ / \\d+"), "a rectangle's label spans its squares");
+            Check.True(Render.Has(html, "--fl-k: 1.41"), "bigger text for a bigger territory");
+            // The challenger's gold outline is drawn only on edges facing others, so the winner's inner edge is transparent.
+            Check.True(Render.Has(html, "border-top-color: transparent;") || Render.Has(html, "border-left-color: transparent;"), "no line between a territory's own squares");
+            Check.True(!Render.Has(html, "box-shadow"), "no per-square highlight boxes");
+        });
+
         run("floor TV: during a duel it shows the picture and clocks but never the answer", () =>
         {
             var t = ImageTable();
