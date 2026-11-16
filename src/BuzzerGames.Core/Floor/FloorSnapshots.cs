@@ -87,7 +87,9 @@ public sealed record FloorSnapshot(
     Guid? WinnerId,
     int DuelsPlayed,
     int MinPlayers,
-    int MaxPlayers)
+    int MaxPlayers,
+    bool CanPass = false,
+    Guid? PassedFromId = null)
 {
     public int Alive => Players.Count(p => p.Alive);
 

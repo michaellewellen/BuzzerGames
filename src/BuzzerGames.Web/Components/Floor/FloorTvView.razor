@@ -20,7 +20,16 @@
     {
         case FloorPhase.Choose:
             <section class="fl-stage">
-                <p class="fl-banner"><strong>@challenger?.Name</strong> is choosing an opponent</p>
+                @if (s.PassedFromId is not null)
+                {
+                    <p class="fl-banner">
+                        <strong>@s.Player(s.PassedFromId)?.Name</strong> passed. <strong>@challenger?.Name</strong> was picked at random to challenge
+                    </p>
+                }
+                else
+                {
+                    <p class="fl-banner"><strong>@challenger?.Name</strong> is choosing an opponent</p>
+                }
                 <FloorMap Snapshot="s" />
             </section>
             break;
@@ -34,10 +43,20 @@
 
         case FloorPhase.Ready:
             <section class="fl-stage">
-                <p class="fl-banner">
-                    <strong>@challenger?.Name</strong> challenges <strong>@defender?.Name</strong>
-                    <span class="fl-banner-sub">in @FloorUi.Topics(defender?.Topics ?? [])</span>
-                </p>
+                @if (s.FinalDuel)
+                {
+                    <p class="fl-banner">
+                        <strong>FINAL DUEL</strong>: <strong>@challenger?.Name</strong> vs <strong>@defender?.Name</strong>
+                        <span class="fl-banner-sub">every topic in the game is in play</span>
+                    </p>
+                }
+                else
+                {
+                    <p class="fl-banner">
+                        <strong>@challenger?.Name</strong> challenges <strong>@defender?.Name</strong>
+                        <span class="fl-banner-sub">in @FloorUi.Topics(defender?.Topics ?? [])</span>
+                    </p>
+                }
                 <FloorMap Snapshot="s" />
             </section>
             break;

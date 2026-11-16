@@ -74,7 +74,7 @@
     private string OuterColor(Guid ownerId) =>
         ownerId == Snapshot.WinnerId && Snapshot.Phase == FloorPhase.GameOver ? "#ffd35a"
         : ownerId == Snapshot.ChallengerId ? "#ffd35a"
-        : ownerId == Snapshot.DefenderId ? "#ff4d4d"
+        : ownerId == Snapshot.DefenderId ? (Snapshot.FinalDuel ? "#ffd35a" : "#ff4d4d")   // the final duel has no sides
         : "#000";
 
     private Guid? OwnerAt(int row, int col) => Snapshot.Squares.FirstOrDefault(s => s.Row == row && s.Col == col)?.OwnerId;

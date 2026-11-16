@@ -54,6 +54,8 @@ public sealed class FloorGame : IDisposable
     private Player? _defender;
     private Player? _repickPlayer;
     private bool _finalDuel;
+    private bool _turnPassed;        // this challenger got the turn because the player before them passed
+    private Guid? _passedFrom;       // who passed it, for the big screen
     private int _duelsPlayed;
 
     // Prompts still unused in this game, per topic. The last one in each list is drawn next.
@@ -272,6 +274,24 @@ public sealed class FloorGame : IDisposable
         return Result.Success;
     });
 
+    /// <summary>
+    /// The challenger would rather not challenge anyone. The turn goes to another living player picked at random, who must then challenge
+    /// (a turn that was itself passed to you can't be passed on again).
+    /// </summary>
+    public Result PassTurn(Guid token) => Run(() =>
+    {
+        if (_phase != FloorPhase.Choose) return Result.Fail("Nobody is choosing an opponent right now.");
+        if (!IsEmcee(token) && _challenger?.Token != token) return Result.Fail("It isn't your turn.");
+        if (_turnPassed) return Result.Fail("This turn was already passed to you, so you have to challenge someone.");
+
+        var others = _players.Where(p => p.Alive && p != _challenger).ToList();
+        if (others.Count == 0) return Result.Fail("There's nobody to pass to.");
+        _passedFrom = _challenger!.Id;
+        _challenger = others[_rng.Next(others.Count)];
+        _turnPassed = true;
+        return Result.Success;
+    });
+
     // ---------------------------------------------------------------------------------------
     // The duel
     // ---------------------------------------------------------------------------------------
@@ -481,7 +501,7 @@ public sealed class FloorGame : IDisposable
                     RevealMs: reveal ? (int)Math.Max(0, (_revealUntil!.Value - now).TotalMilliseconds) : 0,
                     Upcoming: inDuel ? _queue.Where(q => q.ImageKey is not null).Select(q => q.ImageKey!).Take(LookAhead).ToList() : [],
                     CanUndo: inDuel && _undo is not null,
-                    PromptsLeft: PromptsLeft(_defender) + _queue.Count + (_current is null ? 0 : 1));
+                    PromptsLeft: (_finalDuel ? _pools.Values.Sum(p => p.Count) : PromptsLeft(_defender)) + _queue.Count + (_current is null ? 0 : 1));
             }
 
             return new FloorSnapshot(
@@ -502,7 +522,9 @@ public sealed class FloorGame : IDisposable
                 Takeover: _phase == FloorPhase.Takeover ? _takeover : null,
                 WinnerId: _phase == FloorPhase.GameOver ? _winner?.Id : null,
                 DuelsPlayed: _duelsPlayed,
-                MinPlayers: MinPlayers, MaxPlayers: MaxPlayers);
+                MinPlayers: MinPlayers, MaxPlayers: MaxPlayers,
+                CanPass: _phase == FloorPhase.Choose && !_turnPassed,
+                PassedFromId: _phase is FloorPhase.Choose or FloorPhase.Ready or FloorPhase.Repick ? _passedFrom : null);
         }
     }
 
@@ -676,6 +698,8 @@ public sealed class FloorGame : IDisposable
         _defender = null;
         _repickPlayer = null;
         _finalDuel = false;
+        _turnPassed = false;
+        _passedFrom = null;
         _takeover = null;
         _loser = null;
         _endReason = null;
@@ -683,19 +707,13 @@ public sealed class FloorGame : IDisposable
         var alive = _players.Where(p => p.Alive).ToList();
         if (alive.Count == 2)
         {
-            // Two left: no choosing, just one last duel in the topics of whoever holds more of the floor.
+            // Two left: no choosing and no sides. It is one last duel in every topic of the game, and who starts is left to chance.
             var other = alive.First(p => p != challenger);
-            if (_owner.Count(o => o == challenger) > _owner.Count(o => o == other))
-            {
-                _defender = challenger;
-                _challenger = other;
-            }
-            else
-            {
-                _defender = other;
-            }
+            var swap = _rng.Next(2) == 0;
+            _challenger = swap ? other : challenger;
+            _defender = swap ? challenger : other;
             _finalDuel = true;
-            AfterDefenderChosen();
+            _phase = FloorPhase.Ready;
             return;
         }
         _phase = FloorPhase.Choose;
@@ -787,6 +805,8 @@ public sealed class FloorGame : IDisposable
         _revealUntil = null;
         _paused = false;
         _finalDuel = false;
+        _turnPassed = false;
+        _passedFrom = null;
         _duelsPlayed = 0;
         _phase = FloorPhase.Lobby;
     }
@@ -807,11 +827,15 @@ public sealed class FloorGame : IDisposable
     private FloorPrompt? Draw()
     {
         if (_defender is null) return null;
-        var live = _defender.Topics.Where(t => PoolCount(t) > 0).ToList();
+
+        // The final duel has no defender, so every topic used anywhere in this game is in play, equally likely.
+        var live = _finalDuel
+            ? _pools.Where(kv => kv.Value.Count > 0).Select(kv => kv.Key).ToList()
+            : _defender.Topics.Where(t => PoolCount(t) > 0).ToList();
         if (live.Count == 0) return null;
 
-        // The defender's own topic counts a little more than the ones they won.
-        double Weight(string t) => t == _defender.Topics[0] ? HomeTopicWeight : 1.0;
+        // Otherwise the defender's own topic counts a little more than the ones they won.
+        double Weight(string t) => !_finalDuel && t == _defender.Topics[0] ? HomeTopicWeight : 1.0;
         var roll = _rng.NextDouble() * live.Sum(Weight);
         var chosen = live[^1];
         foreach (var t in live)

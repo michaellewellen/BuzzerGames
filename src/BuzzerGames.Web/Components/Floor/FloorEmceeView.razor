@@ -25,6 +25,10 @@
         case FloorPhase.Choose:
             <section class="card">
                 <h2>@challenger?.Name is challenging</h2>
+                @if (s.PassedFromId is not null)
+                {
+                    <p class="muted">@s.Player(s.PassedFromId)?.Name passed the turn, so @challenger?.Name was picked at random and has to challenge someone.</p>
+                }
                 <p class="muted">They pick on their own phone. If they're slow, you can pick for them. A challenger's topics are never used; the <em>defender's</em> are.</p>
                 <div class="button-column">
                     @foreach (var id in s.Candidates)
@@ -35,6 +39,12 @@
                         </button>
                     }
                 </div>
+                @if (s.CanPass)
+                {
+                    <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.PassTurn(Token))">
+                        @challenger?.Name passes<small>another player is picked at random to challenge</small>
+                    </button>
+                }
             </section>
             break;
 
@@ -54,8 +64,15 @@
                 {
                     <p class="big-message">FINAL DUEL</p>
                 }
-                <p>Topic@(defender?.Topics.Count > 1 ? "s" : ""): <strong>@FloorUi.Topics(defender?.Topics ?? [])</strong></p>
-                <p class="muted">@challenger?.Name goes first. @s.DuelSeconds seconds each.</p>
+                @if (s.FinalDuel)
+                {
+                    <p>Topics: <strong>every topic in the game</strong></p>
+                }
+                else
+                {
+                    <p>Topic@(defender?.Topics.Count > 1 ? "s" : ""): <strong>@FloorUi.Topics(defender?.Topics ?? [])</strong></p>
+                }
+                <p class="muted">@challenger?.Name goes first@(s.FinalDuel ? " (picked at random)" : ""). @s.DuelSeconds seconds each.</p>
                 <button class="btn btn-start btn-wide" @onclick="() => Act(Game.StartDuel(Token))">Start the duel</button>
                 @if (!s.FinalDuel)
                 {

@@ -132,8 +132,9 @@ Create it on the TV at `/the-floor`. Everyone scans the QR code; one person join
   player and a new picture comes up) or **Pass** (the answer shows to the room for 3 seconds with the clock still running, then a new picture).
   Run out of time and the whole TV goes red. Undo takes back the last Correct or Pass, and Pause stops the clocks.
 - **The takeover.** The winner takes the loser's territory, and (unless the emcee switched **Winner inherits topics** off) the loser's topics too.
-  A defender with several topics is asked a mix, their own topic a little more often. The winner challenges next.
-- **The final duel.** With two players left there is no choosing: the player holding more of the floor defends.
+  A defender with several topics is asked a mix, their own topic a little more often. The winner challenges next, or can **pass**:
+  another living player is then picked at random and has to challenge (a turn that was passed to you can't be passed on).
+- **The final duel.** With two players left there is no choosing and no sides. Who starts is random, and every topic used anywhere in the game is in play.
 - **Running out of pictures.** A picture is never shown twice in a game. If a defender's topics have run low they must pick a new topic before they can be
   challenged (or the emcee assigns a random one). If a duel runs out of pictures mid-way, whoever has more time left wins.
 - **Topics get used up.** A topic picked in one game can't be picked in the next until the emcee taps **Make all topics eligible again** in the lobby.

@@ -189,6 +189,26 @@ static class FloorWebChecks
             Check.True(!Regex.IsMatch(tv, "<img[^>]+class=\"fl-pic\""), "no picture once time is up");
         });
 
+        run("floor screens: passing the turn is offered once, announced on the TV, and the final duel says every topic is in play", () =>
+        {
+            var t = TextTable(6, seed: 4);
+            var first = t.S.ChallengerId!.Value;
+            Check.True(Render.Has(Render.FlEmcee(t), "passes") && Render.Has(Render.FlPlayer(t, t.Ids.IndexOf(first)), "Pass"), "the emcee and the challenger can pass");
+            Check.Ok(t.Game.PassTurn(t.Emcee));
+            var tv = Render.FlTv(t.S);
+            Check.True(Render.Has(tv, "passed") && Render.Has(tv, "picked at random"), "the TV says who passed and who was picked");
+            Check.True(!Render.Has(Render.FlEmcee(t), "passes<"), "the pass button is gone once the turn was passed");
+
+            var f = TextTable(4, seed: 5);
+            for (var round = 0; round < 2; round++)
+            {
+                f.StartDuel(); f.ChallengerWinsDuel();
+                Check.Ok(f.Game.Continue(f.Emcee)); Check.Ok(f.Game.Continue(f.Emcee));
+            }
+            Check.True(Render.Has(Render.FlTv(f.S), "every topic in the game is in play"), "the TV announces it");
+            Check.True(Render.Has(Render.FlEmcee(f), "every topic in the game"), "and so does the emcee phone");
+        });
+
         run("floor TV: paused duels say so, and the final duel is announced", () =>
         {
             var t = TextTable(4, seed: 5);

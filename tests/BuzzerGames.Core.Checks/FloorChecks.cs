@@ -568,40 +568,43 @@ static class FloorChecks
 
         run("inherited topics mix into the questions, home topic a little more often", () =>
         {
-            // Give one defender three topics by chaining wins, then count where the pictures come from.
-            var t = new FloorTable(5, seed: 11, promptsEach: 400);
-            t.StartDuel();
-            var champ = t.S.Duel!.ChallengerId;
-            t.ChallengerWinsDuel();
-            Check.Ok(t.Game.Continue(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
-            t.StartDuel(); t.ChallengerWinsDuel();
-            Check.Ok(t.Game.Continue(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
-            var me = t.S.Players.Single(p => p.Id == champ);
-            Check.Equal(3, me.Topics.Count, "three topics");
-
-            // Make the champion the defender of a duel in the final stretch: win once more, then the last two play with the bigger as defender.
-            t.StartDuel(); t.ChallengerWinsDuel();
-            Check.Ok(t.Game.Continue(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
-            Check.True(t.S.FinalDuel, "two left");
-            Check.Equal(champ, t.S.DefenderId!.Value, "the bigger player defends the final duel");
-            Check.Ok(t.Game.StartDuel(t.Emcee));
-            var counts = new Dictionary<string, int>();
-            for (var i = 0; i < 300; i++)
+            // A multi-topic player only defends when a pass hands someone else the turn. Hunt for that situation across seeds.
+            var found = 0;
+            for (var seed = 1; seed <= 60 && found < 3; seed++)
             {
-                var topic = t.S.Duel!.Topic;
-                counts[topic] = counts.GetValueOrDefault(topic) + 1;
-                t.Now = t.Now.AddMilliseconds(5);
-                if (t.Game.Correct(t.Emcee).Ok == false) break;
-                if (t.S.Phase != FloorPhase.Duel) break;
+                var t = new FloorTable(6, seed: seed, promptsEach: 400);
+                t.StartDuel();
+                var champ = t.S.Duel!.ChallengerId;
+                t.ChallengerWinsDuel();
+                Check.Ok(t.Game.Continue(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
+                t.StartDuel(); t.ChallengerWinsDuel();
+                Check.Ok(t.Game.Continue(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
+                Check.Equal(3, t.S.Player(champ)!.Topics.Count, "three topics");
+
+                Check.Ok(t.Game.PassTurn(t.Emcee));
+                var s2 = t.S;
+                if (s2.ChallengerId == champ || !t.Game.Challenge(t.Emcee, champ).Ok) continue;   // not next to the champion this time
+                found++;
+                Check.Ok(t.Game.StartDuel(t.Emcee));
+                var counts = new Dictionary<string, int>();
+                for (var i = 0; i < 300 && t.S.Phase == FloorPhase.Duel; i++)
+                {
+                    counts[t.S.Duel!.Topic] = counts.GetValueOrDefault(t.S.Duel.Topic) + 1;
+                    t.Now = t.Now.AddMilliseconds(5);
+                    t.Game.Correct(t.Emcee);
+                }
+                var topics = t.S.Player(champ)!.Topics;
+                Check.True(counts.Count == 3, $"all three topics show up ({counts.Count})");
+                Check.True(counts[topics[0]] > counts[topics[1]] && counts[topics[0]] > counts[topics[2]],
+                    $"home topic leads: {string.Join(", ", counts.Select(kv => kv.Key + "=" + kv.Value))}");
             }
-            var champ4 = t.S.Players.Single(p => p.Id == champ);
-            Check.True(counts.Count >= 3, $"all topics show up ({counts.Count})");
-            Check.True(counts[champ4.Topics[0]] > counts[champ4.Topics[1]], $"home topic leads: {string.Join(", ", counts.Select(kv => kv.Key + "=" + kv.Value))}");
+            Check.True(found >= 1, "found a seed where the champion defends");
         });
 
-        run("final duel: with two left there is no choosing, and the bigger floor defends", () =>
+        run("final duel: with two left there is no choosing and no sides, and every topic of the game is in play", () =>
         {
             var t = new FloorTable(4, seed: 5);
+            Check.Ok(t.Game.SetInherit(t.Emcee, false));   // finalists keep only their own topic, so "all topics" shows
             for (var round = 0; round < 2; round++)
             {
                 t.StartDuel();
@@ -614,16 +617,78 @@ static class FloorChecks
             Check.Equal(FloorPhase.Ready, s.Phase, "straight to the duel");
             Check.True(s.FinalDuel, "marked as final");
             Check.Fails(t.Game.ChangeOpponent(t.Emcee), "no changing the final duel");
-            var defenderSquares = s.Player(s.DefenderId)!.Squares;
-            var challengerSquares = s.Player(s.ChallengerId)!.Squares;
-            Check.True(defenderSquares >= challengerSquares, "the bigger floor defends");
+            Check.Fails(t.Game.PassTurn(t.Emcee), "no passing the final duel");
+            Check.True(s.Players.Where(p => p.Alive).All(p => p.Topics.Count == 1), "no topics inherited");
+
             Check.Ok(t.Game.StartDuel(t.Emcee));
-            t.ChallengerWinsDuel();
+            var counts = new Dictionary<string, int>();
+            for (var i = 0; i < 160 && t.S.Phase == FloorPhase.Duel; i++)
+            {
+                counts[t.S.Duel!.Topic] = counts.GetValueOrDefault(t.S.Duel.Topic) + 1;
+                t.Now = t.Now.AddMilliseconds(5);
+                t.Game.Correct(t.Emcee);
+            }
+            Check.True(counts.Count >= 3, $"the final draws from topics beyond the finalists' own ({counts.Count} topics)");
+
+            // Finish it: the clock of whoever is up runs out.
+            t.Advance(t.S.Duel!.ChallengerMs + t.S.Duel.DefenderMs + 5);
+            Check.Equal(FloorPhase.TimeUp, t.S.Phase, "time up");
             Check.Ok(t.Game.Continue(t.Emcee));
             Check.Ok(t.Game.Continue(t.Emcee));
             s = t.S;
             Check.Equal(FloorPhase.GameOver, s.Phase, "game over");
             Check.Equal(4, s.Player(s.WinnerId)!.Squares, "the winner owns everything");
+        });
+
+        run("final duel: either finalist can end up first, so neither side is favoured", () =>
+        {
+            var starters = new HashSet<bool>();
+            for (var seed = 1; seed <= 40; seed++)
+            {
+                var t = new FloorTable(4, seed: seed);
+                for (var round = 0; round < 2; round++)
+                {
+                    t.StartDuel(); t.ChallengerWinsDuel();
+                    Check.Ok(t.Game.Continue(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
+                }
+                var s = t.S;
+                var bigger = s.Players.Where(p => p.Alive).OrderByDescending(p => p.Squares).First().Id;
+                starters.Add(s.ChallengerId == bigger);
+            }
+            Check.Equal(2, starters.Count, "the bigger floor sometimes starts and sometimes doesn't");
+        });
+
+        run("passing the turn: a random other player takes over, and must challenge", () =>
+        {
+            var chosen = new HashSet<Guid>();
+            for (var seed = 1; seed <= 40; seed++)
+            {
+                var t = new FloorTable(8, seed: seed);
+                var s = t.S;
+                var first = s.ChallengerId!.Value;
+                Check.True(s.CanPass, "the first challenger may pass");
+                Check.Fails(t.Game.PassTurn(t.Tokens.First(tok => t.Game.GetSeat(tok).PlayerId != first)), "someone else can't pass for them");
+                Check.Ok(t.Game.PassTurn(t.Tokens[t.Ids.IndexOf(first)]));
+                s = t.S;
+                Check.True(s.ChallengerId != first && s.Player(s.ChallengerId)!.Alive, "a different living player");
+                Check.Equal(first, s.PassedFromId!.Value, "the big screen is told who passed");
+                Check.True(!s.CanPass, "a passed turn can't be passed again");
+                Check.Fails(t.Game.PassTurn(t.Emcee), "not even by the emcee");
+                chosen.Add(s.ChallengerId!.Value);
+                Check.Ok(t.Game.Challenge(t.Emcee, s.Candidates[0]));
+                Check.Fails(t.Game.PassTurn(t.Emcee), "no passing once a challenge is made");
+            }
+            Check.True(chosen.Count >= 6, $"the pick really is random ({chosen.Count} different players)");
+        });
+
+        run("passing the turn: the next turn after a duel can be passed again", () =>
+        {
+            var t = new FloorTable(6, seed: 3);
+            Check.Ok(t.Game.PassTurn(t.Emcee));
+            t.StartDuel(); t.ChallengerWinsDuel();
+            Check.Ok(t.Game.Continue(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
+            Check.True(t.S.CanPass && t.S.PassedFromId is null, "the winner starts a fresh turn");
+            Check.Ok(t.Game.PassTurn(t.Emcee));
         });
 
         run("change opponent: back out before the duel and pick someone else", () =>
@@ -682,6 +747,7 @@ static class FloorChecks
                     switch (s.Phase)
                     {
                         case FloorPhase.Choose:
+                            if (s.CanPass && rng.Next(4) == 0) { Check.Ok(t.Game.PassTurn(t.Emcee)); break; }
                             Check.Ok(t.Game.Challenge(rng.Next(2) == 0 ? t.Emcee : t.Tokens[t.Ids.IndexOf(s.ChallengerId!.Value)], s.Candidates[rng.Next(s.Candidates.Count)]));
                             break;
                         case FloorPhase.Repick:

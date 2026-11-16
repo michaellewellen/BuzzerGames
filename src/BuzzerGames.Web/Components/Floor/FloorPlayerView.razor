@@ -34,6 +34,10 @@
         {
             case FloorPhase.Choose when s.ChallengerId == me.Id:
                 <p class="big-message">Your move!</p>
+                @if (s.PassedFromId is not null)
+                {
+                    <p class="hint">@s.Player(s.PassedFromId)?.Name passed, so it's your turn to challenge.</p>
+                }
                 <p class="hint">Pick a neighbor to challenge. You'll be asked about <em>their</em> topics.</p>
                 <div class="button-column">
                     @foreach (var id in s.Candidates)
@@ -44,6 +48,12 @@
                         </button>
                     }
                 </div>
+                @if (s.CanPass)
+                {
+                    <button class="btn btn-quiet btn-wide" @onclick="() => Act(Game.PassTurn(Token))">
+                        Pass<small>someone else is picked at random to challenge</small>
+                    </button>
+                }
                 break;
 
             case FloorPhase.Choose:
