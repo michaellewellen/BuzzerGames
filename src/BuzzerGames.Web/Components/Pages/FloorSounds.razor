@@ -1,0 +1,36 @@
+@page "/the-floor/sounds"
+
+<PageTitle>The Floor · Sounds</PageTitle>
+
+@* A place to hear every sound without playing a game. The buttons are plain HTML; floor.js listens for data-fl-play. *@
+
+<main class="card center fl-sounds">
+    <h1>The Floor · Sounds</h1>
+    <p class="muted">The big screen plays these during a game. Tap any to hear it (turn your volume up first).</p>
+    <div class="button-column">
+        @foreach (var (name, label, arg) in Items)
+        {
+            <button class="btn btn-wide" data-fl-play="@name" data-fl-arg="@arg">@label</button>
+        }
+    </div>
+    <a class="back-link" href="/the-floor">Back to the game</a>
+</main>
+
+@code {
+    private static readonly (string Name, string Label, int Arg)[] Items =
+    [
+        ("correct", "Correct answer", 0),
+        ("pass", "Pass", 0),
+        ("tick", "Clock tick: 10 seconds left", 10),
+        ("tick", "Clock tick: 3 seconds left", 3),
+        ("tick", "Clock tick: 1 second left", 1),
+        ("timeup", "Time's up", 0),
+        ("start", "Duel starts", 0),
+        ("clash", "Challenge made", 0),
+        ("final", "Final duel", 0),
+        ("whoosh", "Turn passed", 0),
+        ("takeover", "Takeover: 1 square", 1),
+        ("takeover", "Takeover: 4 squares", 4),
+        ("fanfare", "Winner", 0),
+    ];
+}

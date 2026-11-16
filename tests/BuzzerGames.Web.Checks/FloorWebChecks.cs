@@ -1,3 +1,4 @@
+using BuzzerGames.Web.Components.Floor;
 using System.Text.RegularExpressions;
 using BuzzerGames.Core.Floor;
 using BuzzerGames.Core.Jeopardy;
@@ -175,6 +176,21 @@ static class FloorWebChecks
             Check.True(Render.Shows(Render.FlTv(t.S), d.Answer), "after a pass the answer is shown to the room");
             t.Advance(3000);
             Check.True(!Render.Shows(Render.FlTv(t.S), d.Answer), "and it goes away");
+        });
+
+        run("floor TV: has a sound button, and sounds are chosen from what changed", () =>
+        {
+            var t = ImageTable();
+            Check.True(Render.Has(Render.FlTv(t.S), "data-fl-sound-toggle"), "sound button on the TV");
+            Check.True(!Render.Has(Render.FlEmcee(t), "data-fl-sound-toggle"), "not on the emcee's phone");
+            var lobby = t.S;
+            Check.True(!FloorTvView.Sounds(null, lobby).Any(), "a freshly loaded TV is quiet");
+            t.StartDuel();
+            var duel = t.S;
+            Check.True(FloorTvView.Sounds(lobby, duel).Any(x => x.Name == "start" || x.Name == "clash"), "starting a duel makes a sound");
+            Check.Ok(t.Game.Pass(t.Emcee));
+            Check.True(FloorTvView.Sounds(duel, t.S).Any(x => x.Name == "pass"), "a pass has a sound");
+            Check.True(!FloorTvView.Sounds(t.S, t.S).Any(), "no change, no sound");
         });
 
         run("floor TV: time up goes red and names the loser", () =>

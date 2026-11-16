@@ -4,6 +4,8 @@
     Pictures coming up next are loaded invisibly ahead of time, so there is no wait when the emcee taps Correct.
 *@
 
+@inject IJSRuntime JS
+
 @{
     var s = Snapshot;
     var challenger = s.Player(s.ChallengerId);
@@ -13,7 +15,10 @@
 <main class="tv fl-tv phase-@s.Phase.ToString().ToLowerInvariant() @(s.Duel is { Paused: true } ? "paused" : "")">
     <header class="tv-top">
         <span>THE FLOOR@(s.FinalDuel ? " · FINAL DUEL" : "") · @s.Alive LEFT</span>
-        <span>Room @s.Code</span>
+        <span class="fl-top-right">
+            <button class="fl-sound" data-fl-sound-toggle><span class="off">🔇 Tap for sound</span><span class="on">🔊 Sound on</span></button>
+            Room @s.Code
+        </span>
     </header>
 
     @switch (s.Phase)
@@ -91,6 +96,73 @@
 
 @code {
     [Parameter, EditorRequired] public FloorSnapshot Snapshot { get; set; } = default!;
+
+    private FloorSnapshot? _previous;
+
+    // Sound effects are cues for the browser: compare what's on screen now with what was there a moment ago and say what just happened.
+    // (Only the big screen makes sound. The clock ticks in the last ten seconds are made by floor.js, which owns the clocks.)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var before = _previous;
+        _previous = Snapshot;
+        foreach (var (name, arg) in Sounds(before, Snapshot))
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("floorSound.play", name, arg);
+            }
+            catch (Exception ex) when (ex is JSDisconnectedException or InvalidOperationException or TaskCanceledException)
+            {
+                return;   // the screen went away; nobody is listening
+            }
+        }
+    }
+
+    /// <summary>The sounds for what changed between two pictures of the game. Nothing plays on the first picture (a reloaded TV stays quiet).</summary>
+    public static IEnumerable<(string Name, object? Arg)> Sounds(FloorSnapshot? before, FloorSnapshot now)
+    {
+        if (before is null || before.Version == now.Version) yield break;
+
+        if (before.Phase != now.Phase)
+        {
+            switch (now.Phase)
+            {
+                case FloorPhase.Ready when before.Phase is FloorPhase.Choose or FloorPhase.Repick or FloorPhase.Takeover:
+                    yield return (now.FinalDuel ? "final" : "clash", null);
+                    break;
+                case FloorPhase.Duel:
+                    yield return ("start", null);
+                    break;
+                case FloorPhase.TimeUp:
+                    yield return ("timeup", null);
+                    break;
+                case FloorPhase.Takeover:
+                    yield return ("takeover", now.Takeover?.Cells.Count ?? 1);
+                    break;
+                case FloorPhase.GameOver:
+                    yield return ("fanfare", null);
+                    break;
+                case FloorPhase.Choose when now.PassedFromId is not null:
+                    yield return ("whoosh", null);
+                    break;
+            }
+            yield break;
+        }
+
+        if (now.Phase == FloorPhase.Choose && now.PassedFromId is not null && before.PassedFromId != now.PassedFromId)
+        {
+            yield return ("whoosh", null);
+            yield break;
+        }
+
+        if (now.Phase == FloorPhase.Duel && before.Duel is { } was && now.Duel is { } is_)
+        {
+            if (is_.ChallengerCorrect + is_.DefenderCorrect > was.ChallengerCorrect + was.DefenderCorrect)
+                yield return ("correct", null);
+            else if (!was.RevealAnswer && is_.RevealAnswer)
+                yield return ("pass", null);
+        }
+    }
 
     private RenderFragment DuelScreen() => __builder =>
     {

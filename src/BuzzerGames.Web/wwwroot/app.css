@@ -960,3 +960,12 @@ a.game-tile:hover { border-color: var(--gold); }
 .fl-gallery img { width: 100%; height: 6rem; object-fit: contain; background: #fff; border-radius: .3rem; }
 .fl-gallery figcaption { font-size: .85rem; margin: .3rem 0; word-break: break-word; }
 .fl-textarea { font-family: inherit; }
+
+/* Sound button on the big screen */
+.fl-top-right { display: inline-flex; align-items: center; gap: 1.5vw; }
+.fl-sound { font-size: min(1.3vw, 2.4vh); padding: .3vh 1vw; border-radius: 2vw; border: 1px solid rgba(255, 255, 255, .5); background: rgba(0, 0, 0, .35); color: #fff; cursor: pointer; }
+.fl-sound .on { display: none; }
+html[data-fl-sound="1"] .fl-sound .on { display: inline; }
+html[data-fl-sound="1"] .fl-sound .off { display: none; }
+html:not([data-fl-sound="1"]) .fl-sound { animation: fl-nudge 1.6s ease-in-out infinite alternate; }
+@keyframes fl-nudge { from { box-shadow: 0 0 0 0 rgba(255, 211, 90, 0); } to { box-shadow: 0 0 1.2vw .2vw rgba(255, 211, 90, .8); } }

@@ -152,6 +152,10 @@ Pictures are shrunk to about 900 pixels in your browser before they are uploaded
   and a topic that keeps winning gets quizzed again, so **aim for 100 or more per topic**. The topics page shows a rough "duels" estimate.
 - Three small text topics ship inside the program (Acronyms, Finish the Book Title, Name the Movie from the Quote) so there is something to play on day one.
 
+### Sound on The Floor
+
+Every sound is generated in the browser (Web Audio), so there are no audio files to host. Only the TV plays sound. Chrome blocks audio until someone interacts with the page, so tap **Tap for sound** in the TV's top bar once (the first click or key press on the TV also turns it on). The choice is remembered. Hear every effect without a game at `/the-floor/sounds`.
+
 ### Railway setup for The Floor
 
 Pictures and the list of used-up topics live in a folder, so on Railway they need a **Volume**:
