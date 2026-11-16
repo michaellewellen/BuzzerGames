@@ -1,0 +1,43 @@
+{
+  // A small starter bank so there is something to play before you add your own on the puzzles page.
+  // A "/" inside a puzzle forces a line break on the board. The real puzzles live in the data folder's wheel/puzzles.json.
+  "regular": [
+    { "category": "Phrase", "text": "A PIECE OF CAKE" },
+    { "category": "Phrase", "text": "BREAK THE ICE" },
+    { "category": "Phrase", "text": "BETTER LATE THAN NEVER" },
+    { "category": "Phrase", "text": "THE EARLY BIRD CATCHES THE WORM" },
+    { "category": "Phrase", "text": "ACTIONS SPEAK LOUDER THAN WORDS" },
+    { "category": "Phrase", "text": "WHEN IN ROME DO AS THE ROMANS DO" },
+    { "category": "Thing", "text": "A BRAND NEW BICYCLE" },
+    { "category": "Thing", "text": "FRESH FALLEN SNOW" },
+    { "category": "Place", "text": "THE GRAND CANYON" },
+    { "category": "Place", "text": "A QUIET LAKE CABIN" },
+    { "category": "Event", "text": "A SURPRISE BIRTHDAY PARTY" },
+    { "category": "Event", "text": "FIREWORKS ON THE FOURTH OF JULY" },
+    { "category": "Occupation", "text": "ELEMENTARY SCHOOL TEACHER" },
+    { "category": "Around the House", "text": "A COZY FIREPLACE" },
+    { "category": "Food", "text": "HOMEMADE APPLE PIE" },
+    { "category": "Food", "text": "CHOCOLATE CHIP COOKIES" },
+    { "category": "Fun & Games", "text": "A GAME OF CHARADES" },
+    { "category": "Landmark", "text": "THE EIFFEL TOWER" },
+    { "category": "Fictional Character", "text": "SHERLOCK HOLMES" },
+    { "category": "Title", "text": "THE WIZARD OF OZ" }
+  ],
+  "quick": [
+    { "theme": "Things With Wheels", "texts": ["SHOPPING CART", "ROLLER SKATES", "FERRIS WHEEL"] },
+    { "theme": "In the Garden", "texts": ["WATERING CAN", "GARDEN HOSE", "WHEELBARROW"] },
+    { "theme": "Weather", "texts": ["THUNDERSTORM", "FREEZING RAIN", "HEAVY FOG"] },
+    { "theme": "Sea Creatures", "texts": ["GIANT SQUID", "SEA TURTLE", "BLUE WHALE"] }
+  ],
+  "bonus": [
+    { "category": "Place", "text": "NIAGARA FALLS" },
+    { "category": "Place", "text": "MOUNT RUSHMORE" },
+    { "category": "Place", "text": "GOLDEN GATE BRIDGE" },
+    { "category": "Thing", "text": "BEACH UMBRELLA" },
+    { "category": "Thing", "text": "SLEEPING BAG" },
+    { "category": "Thing", "text": "POCKET WATCH" },
+    { "category": "Occupation", "text": "FIREFIGHTER" },
+    { "category": "Occupation", "text": "AIR TRAFFIC CONTROLLER" },
+    { "category": "Occupation", "text": "LIBRARIAN" }
+  ]
+}

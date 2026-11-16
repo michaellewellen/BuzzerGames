@@ -1,0 +1,258 @@
+@page "/wheel-of-fortune/puzzles"
+@inject FolderWheelContent Store
+@inject FloorAdminAccess Access
+@inject IJSRuntime JS
+
+<PageTitle>Wheel of Fortune · Puzzles</PageTitle>
+
+@*
+    Where Wheel of Fortune's puzzles are added and removed. Every puzzle is checked against the real board as you type, so a puzzle that
+    can't be shown never gets saved. Locked behind FLOOR_ADMIN_PASSCODE on Railway, the same passcode as The Floor's topics page.
+*@
+
+<main class="fl-admin">
+    <header class="fl-admin-head">
+        <h1>Wheel of Fortune · Puzzles</h1>
+        <a href="/">All games</a>
+    </header>
+
+    @if (Access.Problem is not null)
+    {
+        <section class="card"><p class="error">@Access.Problem</p></section>
+    }
+    else if (!_unlocked)
+    {
+        <section class="card">
+            <h2>Passcode</h2>
+            <input class="text-input" type="password" placeholder="Passcode" @bind="_pass" @bind:event="oninput" @onkeydown="OnPassKey" />
+            <button class="btn" @onclick="Unlock">Unlock</button>
+            @if (_passError is not null) { <p class="error">@_passError</p> }
+        </section>
+    }
+    else
+    {
+        var counts = Store.Counts();
+        <div class="fl-admin-grid">
+            <section class="card">
+                <h2>The bank</h2>
+                <p>
+                    <strong>@counts.Regular</strong> regular (@counts.RegularUnused fresh)<br />
+                    <strong>@counts.Quick</strong> quick rounds (@counts.QuickUnused fresh)<br />
+                    <strong>@counts.Bonus</strong> bonus puzzles in @counts.BonusCategories categories (@counts.BonusUnused fresh)
+                </p>
+                <p class="muted">
+                    A game plays 6 regular puzzles and 2 quick rounds, and offers 3 bonus topics, using fresh puzzles first.
+                    @(counts.Regular < WheelRules.RegularPuzzles ? "You need at least " + WheelRules.RegularPuzzles + " regular puzzles before a game can start." : "")
+                    @(counts.BonusCategories < 3 ? "The bonus round needs puzzles in at least 3 different categories." : "")
+                </p>
+                <button class="btn btn-quiet btn-small" @onclick="ClearUsed">Make every puzzle fresh again</button>
+            </section>
+
+            <section class="card">
+                <h2>Add a puzzle</h2>
+                <div class="wf-tabs">
+                    <button class="btn btn-small @(_kind == "regular" ? "active" : "")" @onclick='() => PickKind("regular")'>Regular</button>
+                    <button class="btn btn-small @(_kind == "quick" ? "active" : "")" @onclick='() => PickKind("quick")'>Quick round</button>
+                    <button class="btn btn-small @(_kind == "bonus" ? "active" : "")" @onclick='() => PickKind("bonus")'>Bonus</button>
+                </div>
+
+                <input class="text-input" placeholder="@(_kind == "quick" ? "Theme (they all have this in common)" : _kind == "bonus" ? "Category (Person, Place, Thing...)" : "Category")" maxlength="@WheelContentRules.CategoryMax"
+                       @bind="_category" @bind:event="oninput" />
+
+                @if (_kind == "quick")
+                {
+                    @for (var i = 0; i < 3; i++)
+                    {
+                        var n = i;
+                        <input class="text-input" placeholder="@($"Puzzle {n + 1}")" @bind="_quick[n]" @bind:event="oninput" @onkeydown="OnAddKey" />
+                        <WheelBoardPreview Text="@_quick[n]" />
+                    }
+                }
+                else
+                {
+                    <input class="text-input" placeholder="The puzzle (use / to force a line break)" @bind="_text" @bind:event="oninput" @onkeydown="OnAddKey" />
+                    <WheelBoardPreview Text="@_text" />
+                }
+
+                <button class="btn" @onclick="Add">Add</button>
+                @if (_message is not null) { <p class="@(_messageIsError ? "error" : "hint")">@_message</p> }
+                @foreach (var warning in _warnings) { <p class="error">@warning</p> }
+            </section>
+        </div>
+
+        <section class="card">
+            <h2>What's in the bank</h2>
+            <div class="wf-tabs">
+                <button class="btn btn-small @(_tab == "regular" ? "active" : "")" @onclick='() => _tab = "regular"'>Regular (@counts.Regular)</button>
+                <button class="btn btn-small @(_tab == "quick" ? "active" : "")" @onclick='() => _tab = "quick"'>Quick rounds (@counts.Quick)</button>
+                <button class="btn btn-small @(_tab == "bonus" ? "active" : "")" @onclick='() => _tab = "bonus"'>Bonus (@counts.Bonus)</button>
+            </div>
+            <table class="wf-table">
+                @if (_tab == "quick")
+                {
+                    @foreach (var q in Store.Quick().Reverse().Take(MaxRows))
+                    {
+                        <tr class="@(Store.IsUsed(q.Id) ? "wf-used" : "")">
+                            <td>@q.Theme</td>
+                            <td class="wf-text">@string.Join("  ·  ", q.Texts)</td>
+                            <td>@(Store.IsUsed(q.Id) ? "used" : "")</td>
+                            <td><button class="btn btn-quiet btn-small" @onclick="() => Delete(q.Id)">Delete</button></td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    @foreach (var p in (_tab == "bonus" ? Store.Bonus() : Store.Regular()).Reverse().Take(MaxRows))
+                    {
+                        <tr class="@(Store.IsUsed(p.Id) ? "wf-used" : "")">
+                            <td>@p.Category</td>
+                            <td class="wf-text">@p.Text</td>
+                            <td>@(Store.IsUsed(p.Id) ? "used" : "")</td>
+                            <td><button class="btn btn-quiet btn-small" @onclick="() => Delete(p.Id)">Delete</button></td>
+                        </tr>
+                    }
+                }
+            </table>
+            <p class="muted">Newest first, up to @MaxRows shown.</p>
+        </section>
+
+        <section class="card">
+            <h2>Paste a lot at once</h2>
+            <p class="muted">
+                One per line. Regular and bonus: <code>category | puzzle</code>. Quick rounds: <code>theme | puzzle | puzzle | puzzle</code>.
+                A line starting with <code># regular</code>, <code># quick</code> or <code># bonus</code> switches kinds (it starts as regular).
+                Lines with problems are listed below; the good ones are still added.
+            </p>
+            <textarea class="text-input fl-textarea" rows="8" placeholder="# regular&#10;Phrase | A PIECE OF CAKE&#10;# quick&#10;Things With Wheels | SHOPPING CART | ROLLER SKATES | FERRIS WHEEL&#10;# bonus&#10;Place | NIAGARA FALLS" @bind="_paste" @bind:event="oninput"></textarea>
+            <button class="btn" @onclick="Import">Import</button>
+            @if (_report is not null)
+            {
+                <div class="wf-report">
+                    <p class="hint">
+                        Added @_report.Added@(_report.Duplicates > 0 ? $", skipped {_report.Duplicates} already in the bank" : "")@(_report.Problems.Count > 0 ? $", {_report.Problems.Count} need fixing" : "").
+                    </p>
+                    @if (_report.Problems.Count > 0)
+                    {
+                        <ul>@foreach (var problem in _report.Problems) { <li class="error">@problem</li> }</ul>
+                    }
+                    @if (_report.Warnings.Count > 0)
+                    {
+                        <ul>@foreach (var warning in _report.Warnings) { <li>@warning</li> }</ul>
+                    }
+                </div>
+            }
+        </section>
+    }
+</main>
+
+@code {
+    private const int MaxRows = 200;
+
+    private bool _unlocked;
+    private string _pass = "";
+    private string? _passError;
+    private string _tab = "regular";
+    private string _kind = "regular";
+    private string _category = "";
+    private string _text = "";
+    private readonly string[] _quick = ["", "", ""];
+    private string? _message;
+    private bool _messageIsError;
+    private IReadOnlyList<string> _warnings = [];
+    private string _paste = "";
+    private WheelImportReport? _report;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Access.Problem is null)
+        {
+            // The same remembered passcode as The Floor's topics page, so one unlock covers both.
+            var saved = await JS.InvokeAsync<string?>("bg.getItem", "bg.floor.pass");
+            if (Access.IsAllowed(saved))
+            {
+                _pass = saved ?? "";
+                _unlocked = true;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task Unlock()
+    {
+        if (!Access.IsAllowed(_pass))
+        {
+            _passError = "That isn't the passcode.";
+            return;
+        }
+        _passError = null;
+        _unlocked = true;
+        await JS.InvokeVoidAsync("bg.setItem", "bg.floor.pass", _pass);
+    }
+
+    private async Task OnPassKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Unlock();
+    }
+
+    private void PickKind(string kind)
+    {
+        _kind = kind;
+        _tab = kind;
+        _message = null;
+        _warnings = [];
+    }
+
+    private void Say(string text, bool error = false)
+    {
+        _message = text;
+        _messageIsError = error;
+    }
+
+    private void Add()
+    {
+        var result = _kind switch
+        {
+            "quick" => Store.AddQuick(_category, _quick),
+            "bonus" => Store.AddBonus(_category, _text),
+            _ => Store.AddRegular(_category, _text)
+        };
+
+        if (!result.Ok)
+        {
+            _warnings = [];
+            Say(result.Error!, true);
+            return;
+        }
+
+        _warnings = result.Warnings ?? [];
+        Say("Added.");
+        // Keep the category so a run of puzzles in one category is quick to enter.
+        _text = "";
+        for (var i = 0; i < _quick.Length; i++) _quick[i] = "";
+    }
+
+    private void OnAddKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") Add();
+    }
+
+    private void Delete(string id)
+    {
+        var result = Store.Delete(id);
+        Say(result.Ok ? "Deleted." : result.Error!, !result.Ok);
+        _warnings = [];
+    }
+
+    private void ClearUsed()
+    {
+        Store.ClearUsed();
+        Say("Every puzzle is fresh again.");
+        _warnings = [];
+    }
+
+    private void Import()
+    {
+        _report = Store.Import(_paste);
+        if (_report.Problems.Count == 0) _paste = "";
+    }
+}

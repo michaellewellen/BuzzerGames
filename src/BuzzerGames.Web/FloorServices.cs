@@ -5,7 +5,7 @@ using BuzzerGames.Core.Floor;
 
 namespace BuzzerGames.Web;
 
-/// <summary>Who may use the topics page. Set FLOOR_ADMIN_PASSCODE on Railway; without one the page only opens when running on your own computer.</summary>
+/// <summary>Who may use the admin pages (The Floor's topics, Wheel of Fortune's puzzles). Set FLOOR_ADMIN_PASSCODE on Railway; without one the pages only open when running on your own computer.</summary>
 public sealed class FloorAdminAccess(string? passcode, bool isDevelopment)
 {
     public bool Configured => !string.IsNullOrEmpty(passcode);
@@ -20,7 +20,7 @@ public sealed class FloorAdminAccess(string? passcode, bool isDevelopment)
 
     public string? Problem => Configured || isDevelopment
         ? null
-        : "The topics page is locked. Set the FLOOR_ADMIN_PASSCODE variable on Railway, then redeploy.";
+        : "The admin pages are locked. Set the FLOOR_ADMIN_PASSCODE variable on Railway, then redeploy.";
 
     private static byte[] Hash(string s) => SHA256.HashData(Encoding.UTF8.GetBytes(s));
 }

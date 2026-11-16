@@ -969,3 +969,19 @@ html[data-fl-sound="1"] .fl-sound .on { display: inline; }
 html[data-fl-sound="1"] .fl-sound .off { display: none; }
 html:not([data-fl-sound="1"]) .fl-sound { animation: fl-nudge 1.6s ease-in-out infinite alternate; }
 @keyframes fl-nudge { from { box-shadow: 0 0 0 0 rgba(255, 211, 90, 0); } to { box-shadow: 0 0 1.2vw .2vw rgba(255, 211, 90, .8); } }
+
+/* Wheel of Fortune: the puzzles page's board preview (the same 12 / 14 / 14 / 12 layout the TV uses) */
+.wf-board { display: grid; gap: 2px; padding: 6px; background: #0b3d2e; border-radius: .5rem; max-width: 26rem; margin: .4rem 0; }
+.wf-row { display: grid; grid-template-columns: repeat(14, 1fr); gap: 2px; }
+.wf-tile { aspect-ratio: 3 / 4; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .8rem; border-radius: 2px; }
+.wf-none { background: transparent; }
+.wf-blank { background: #1f8a4c; }
+.wf-letter { background: #fff; color: #111; }
+.wf-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.wf-table td { padding: .3rem .4rem; border-bottom: 1px solid rgba(255, 255, 255, .12); vertical-align: middle; }
+.wf-table td.wf-text { font-weight: 600; word-break: break-word; }
+.wf-used { opacity: .55; }
+.wf-tabs { display: flex; gap: .4rem; margin: .5rem 0; flex-wrap: wrap; }
+.wf-tabs .btn.active { outline: 2px solid var(--good); }
+.wf-report { margin-top: .6rem; }
+.wf-report li { margin: .15rem 0; }

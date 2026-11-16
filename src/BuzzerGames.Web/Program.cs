@@ -48,6 +48,9 @@ builder.Services.AddCardSharks();
 // The Floor keeps its topics and pictures in a folder (the Railway Volume), so it needs more setup than the others.
 builder.Services.AddFloor();
 
+// Wheel of Fortune keeps its puzzles in the same data folder as The Floor (a wheel/ sub-folder) and uses the same admin passcode.
+builder.Services.AddWheel();
+
 var app = builder.Build();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);

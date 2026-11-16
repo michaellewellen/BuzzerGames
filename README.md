@@ -166,6 +166,27 @@ Pictures and the list of used-up topics live in a folder, so on Railway they nee
 
 On your own computer neither variable is needed: pictures go in a `floor-data` folder (ignored by git) and the topics page opens without a passcode.
 
+## Wheel of Fortune (in progress)
+
+Step one is built: the rules engine and the puzzle bank. The TV board, wheel and phones come next, so the game isn't on the pick-a-game list yet.
+
+**Rules as built.** Three players, six regular puzzles (puzzle n starts with player (n-1) % 3). The wheel has 24 wedges of 15 degrees: 21 cash wedges ($500 to $5,000), one Bankrupt, one Lose a Turn, and one wedge split into three 5-degree slices (Bankrupt, $1,000,000, Bankrupt). Landing on the Million slice pays $1,500 a letter and holds the wedge. Consonants pay the wedge value per letter, vowels cost $250 from the round bank (charged even on a miss), a wrong letter passes the turn, Bankrupt wipes the round bank (and returns a held Million wedge to the wheel). Only the puzzle solver banks the round money. The emcee types each letter, confirms it (typos happen), and judges solves. Undo is available all game.
+
+**Spin.** Each player's phone has a 0 to 1000 power slider. The wheel travels 0.5 to 1.75 turns, and a power of exactly 400 is the sweet spot (one full turn, back to the same wedge). The landing is worked out on the server before the wheel moves, so the animation can never disagree with the result.
+
+**Puzzles.** Open `/wheel-of-fortune/puzzles` (same `FLOOR_ADMIN_PASSCODE` and data folder as The Floor, so there is no new Railway setup). Add puzzles one at a time with a live board preview, or paste many in the import box:
+
+```
+# regular
+Phrase | THE EARLY BIRD CATCHES THE WORM
+# quick
+Things in a Kitchen | WOODEN SPOON | CAST IRON PAN | OVEN MITT
+# bonus
+Place | NIAGARA FALLS
+```
+
+Regular lines are `category | puzzle`, quick sets are `theme | puzzle 1 | puzzle 2 | puzzle 3`. Use `/` inside a puzzle to force a line break. Puzzles are stored in `wheel/puzzles.json` in the data folder; a handful of starters are added on first run. A puzzle must fit the 12/14/14/12 board.
+
 ## Credits
 
 Match Game is owned by Fremantle; this is a private party game. The Super Match blanks draw on the transcribed episode data from
@@ -239,6 +260,8 @@ src/BuzzerGames.Web/           The website
   Components/Match/              the Match Game screens (TV desks and Super board, emcee, celebrity phone, lobby)
   wwwroot/app.css, js/bg.js      styling, and the small JavaScript bits (saved seat, QR code)
   wwwroot/js/pyl.js              the flashing Big Board and its sounds
+  Wheel/                         Wheel of Fortune: engine, wheel layout and spin physics, board layout, puzzle store
+  Data/Wheel/                    the starter puzzles (wheel-starter.json)
   Components/Floor/              the Floor screens (TV, emcee, player, lobby, the floor map, topic picker)
   FloorServices.cs               Floor setup: the data folder, the topics passcode, the picture and upload addresses
   wwwroot/js/floor.js            the Floor clocks and the picture uploader

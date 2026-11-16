@@ -1,0 +1,44 @@
+@*
+    The puzzle board as the TV will draw it: green for an unused tile, white for a tile with a letter, nothing in the two corner
+    columns of the short rows. It uses the same WheelBoard layout code as the game, so what you see here is what the players get.
+*@
+
+<div class="wf-board" aria-label="Board preview">
+    @for (var r = 0; r < WheelBoard.Rows; r++)
+    {
+        <div class="wf-row">
+            @for (var c = 0; c < WheelBoard.Columns; c++)
+            {
+                var inRow = c >= WheelBoard.RowOffsets[r] && c < WheelBoard.RowOffsets[r] + WheelBoard.RowWidths[r];
+                var tile = TileAt(r, c);
+                <span class="@(!inRow ? "wf-tile wf-none" : tile is null ? "wf-tile wf-blank" : "wf-tile wf-letter")">@(tile?.Letter)</span>
+            }
+        </div>
+    }
+</div>
+@if (_error is not null)
+{
+    <p class="error">@_error</p>
+}
+else if (_layout is not null)
+{
+    <p class="muted">@_layout.Lines.Count line@(_layout.Lines.Count == 1 ? "" : "s"): @string.Join("  /  ", _layout.Lines)</p>
+}
+
+@code {
+    [Parameter] public string? Text { get; set; }
+
+    private BoardLayout? _layout;
+    private string? _error;
+
+    protected override void OnParametersSet()
+    {
+        _layout = null;
+        _error = null;
+        if (string.IsNullOrWhiteSpace(Text)) return;
+        if (WheelBoard.TryLayout(Text, out var layout, out var error)) _layout = layout;
+        else _error = error;
+    }
+
+    private BoardTile? TileAt(int row, int column) => _layout?.Tiles.FirstOrDefault(t => t.Row == row && t.Column == column);
+}

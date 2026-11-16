@@ -6,6 +6,8 @@ using BuzzerGames.Web.Components.CardSharks;
 using BuzzerGames.Core.Floor;
 using BuzzerGames.Web;
 using BuzzerGames.Web.Components.Floor;
+using BuzzerGames.Web.Components.Wheel;
+using BuzzerGames.Core.Wheel;
 using BuzzerGames.Web.Components.Match;
 using BuzzerGames.Core.Password;
 using BuzzerGames.Core.PressYourLuck;
@@ -157,6 +159,28 @@ static class Render
             return output.ToHtmlString();
         }).GetAwaiter().GetResult();
     }
+
+    // ---- Wheel of Fortune ----
+
+    /// <summary>The puzzles page, with the given store and passcode rules. (A static render never runs the browser-side unlock, so this is what a stranger sees.)</summary>
+    public static string WfPuzzles(FolderWheelContent store, FloorAdminAccess access)
+    {
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<IJSRuntime, NoJs>()
+            .AddSingleton(store)
+            .AddSingleton(access)
+            .BuildServiceProvider();
+        using var renderer = new HtmlRenderer(services, services.GetRequiredService<ILoggerFactory>());
+        return renderer.Dispatcher.InvokeAsync(async () =>
+        {
+            var output = await renderer.RenderComponentAsync<WheelPuzzles>(ParameterView.Empty);
+            return output.ToHtmlString();
+        }).GetAwaiter().GetResult();
+    }
+
+    /// <summary>The board preview on the puzzles page.</summary>
+    public static string WfPreview(string? text) => Html<WheelBoardPreview>(new() { ["Text"] = text });
 
     // ---- Match Game ----
 
