@@ -187,6 +187,14 @@ Place | NIAGARA FALLS
 
 Regular lines are `category | puzzle`, quick sets are `theme | puzzle 1 | puzzle 2 | puzzle 3`. Use `/` inside a puzzle to force a line break. Puzzles are stored in `wheel/puzzles.json` in the data folder; a handful of starters are added on first run. A puzzle must fit the 12/14/14/12 board.
 
+**Getting lots of puzzles.** `tools/scrape_wheel_compendium.py` (Python 3, nothing to install) reads the Buy a Vowel Boards Puzzle Compendium and writes a `wheel-import.txt` in the importer format. Regular rounds (including prize puzzles) become regular puzzles, each Triple Toss-Up becomes a quick set, and the Bonus Round puzzles become bonus puzzles. It skips puzzles that can't fit the board, duplicates, alcohol/coffee puzzles and word-play bonus categories. Run it on your own computer (it pauses between requests and caches pages), then paste the file into the import box:
+
+```
+python tools/scrape_wheel_compendium.py --seasons 30-44
+```
+
+`--help` lists the options (`--regular`, `--quick`, `--bonus` cap how many are written; `--list-categories` shows the bonus categories).
+
 ## Credits
 
 Match Game is owned by Fremantle; this is a private party game. The Super Match blanks draw on the transcribed episode data from
