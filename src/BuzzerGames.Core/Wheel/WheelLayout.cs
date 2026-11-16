@@ -62,6 +62,23 @@ public sealed class WheelLayout
         return _slices[^1];
     }
 
+    /// <summary>
+    /// The wheel after someone picks up the Million Dollar Wedge: the whole Bankrupt / Million / Bankrupt wedge becomes one plain 15-degree
+    /// Bankrupt, and its two inner pegs disappear. Returns this same layout when the wheel has no Million slice.
+    /// </summary>
+    public WheelLayout WithMillionCollected()
+    {
+        if (!_slices.Any(s => s.Kind == SliceKind.Million)) return this;
+        var million = _slices.First(s => s.Kind == SliceKind.Million);
+        var rebuilt = new List<WheelSlice>();
+        foreach (var slice in _slices)
+        {
+            if (slice.Wedge != million.Wedge) rebuilt.Add(slice);
+            else if (slice.Kind == SliceKind.Million) rebuilt.Add(new WheelSlice(slice.Wedge, slice.Start - WheelRules.WedgeDegrees / 3, slice.End + WheelRules.WedgeDegrees / 3, SliceKind.Bankrupt, 0));
+        }
+        return new WheelLayout(rebuilt.ToArray());
+    }
+
     public static double Normalize(double degrees)
     {
         var a = degrees % 360.0;

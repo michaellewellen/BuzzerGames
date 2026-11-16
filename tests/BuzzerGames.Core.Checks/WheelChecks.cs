@@ -707,31 +707,27 @@ static class WheelChecks
             Check.Equal(WheelPhase.Turn, table.S.Phase, "phase");
         });
 
-        run("million dollar wedge: landing takes it and pays $1,500 a letter; it can't be taken twice; Bankrupt loses it and puts it back", () =>
+        run("million dollar wedge: landing picks it up and pays $1,500 a letter; the wedge becomes a full Bankrupt; Bankrupt loses it for good", () =>
         {
             var table = new WheelTable(["BETTER LATE THAN NEVER", "X", "X", "X", "X", "X"]);
             var landed = table.SpinTo(x => x.Kind == SliceKind.Million);
             Check.Equal(SliceKind.Million, landed.Kind, "landed on the Million slice");
             Check.True(table.S.Players[0].HoldsMillion, "Red holds the wedge");
             Check.Equal(WheelPhase.Consonant, table.S.Phase, "and still calls a consonant");
+            Check.True(!table.S.Slices.Any(x => x.Kind == SliceKind.Million), "the Million slice is gone from the wheel");
+            Check.Equal(24, table.S.Slices.Count, "24 slices now, one per wedge");
+            Check.Equal(2, table.S.Slices.Count(x => x.Kind == SliceKind.Bankrupt), "two Bankrupt wedges: the original and the old Million wedge");
+            Check.True(table.S.Slices.All(x => Math.Abs(x.Width - 15) < 1e-9), "every slice is 15 degrees");
             Check.Ok(table.Game.StageLetter(table.Emcee, 'T'));
             Check.Ok(table.Game.ConfirmLetter(table.Emcee));
             Check.Equal(4 * 1500, table.Bank(0), "$1,500 for each of four T's");
-            Check.Ok(table.Game.FinishReveal());
-
-            table.SpinTo(x => x.Kind == SliceKind.Million);
-            Check.True(table.S.Players[0].HoldsMillion && !table.S.Players[1].HoldsMillion, "Red still holds it, nobody else does");
-            Check.Equal(WheelPhase.Consonant, table.S.Phase, "a second landing is just $1,500");
-            Check.Ok(table.Game.StageLetter(table.Emcee, 'H'));
-            Check.Ok(table.Game.ConfirmLetter(table.Emcee));
             Check.Ok(table.Game.FinishReveal());
 
             table.SpinTo(x => x.Kind == SliceKind.Bankrupt);
             Check.True(!table.S.Players.Any(p => p.HoldsMillion), "Bankrupt takes the wedge");
             Check.True(table.S.Message!.Contains("Million Dollar Wedge"), "the message says so");
             Check.Equal(1, table.S.Active, "Yellow is up");
-            table.SpinTo(x => x.Kind == SliceKind.Million);
-            Check.True(table.S.Players[1].HoldsMillion, "the wedge is back on the wheel for Yellow to take");
+            Check.True(!table.S.Slices.Any(x => x.Kind == SliceKind.Million), "it does not go back on the wheel");
         });
 
         run("solving: right shows the whole board at once, banks the round's money for the solver only, and starts the next puzzle with the next player", () =>

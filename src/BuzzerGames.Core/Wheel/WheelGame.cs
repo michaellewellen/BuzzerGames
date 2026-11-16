@@ -209,16 +209,11 @@ public sealed class WheelGame
             case SliceKind.Million:
                 _s.SpinValue = landed.Value;
                 _s.Phase = WheelPhase.Consonant;
-                if (_s.MillionAvailable)
-                {
-                    _s.MillionAvailable = false;
-                    _s.MillionHolder = _s.Active;
-                    _s.Message = $"{name} landed on the MILLION DOLLAR WEDGE and takes it! ${landed.Value:N0} a letter. Call a consonant.";
-                }
-                else
-                {
-                    _s.Message = $"{name} landed on ${landed.Value:N0}. Call a consonant.";
-                }
+                // Picking it up is permanent for this puzzle: the wedge turns into a plain Bankrupt and never comes back.
+                _s.MillionAvailable = false;
+                _s.MillionHolder = _s.Active;
+                _s.Wheel = _s.Wheel!.WithMillionCollected();
+                _s.Message = $"{name} picked up the MILLION DOLLAR WEDGE! ${landed.Value:N0} a letter. Call a consonant.";
                 break;
 
             case SliceKind.Bankrupt:
@@ -226,8 +221,7 @@ public sealed class WheelGame
                 _s.RoundBank[_s.Active] = 0;
                 if (lostMillion)
                 {
-                    _s.MillionHolder = -1;
-                    _s.MillionAvailable = true;
+                    _s.MillionHolder = -1; // gone for good: the wedge is already a plain Bankrupt on the wheel
                 }
                 PassTurn();
                 _s.Phase = WheelPhase.Turn;
