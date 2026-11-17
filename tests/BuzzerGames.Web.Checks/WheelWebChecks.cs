@@ -132,14 +132,15 @@ static class WheelWebChecks
             Check.Equal(2, Render.Count(after, "wf-slice wf-bankrupt"), "two plain Bankrupt wedges");
         });
 
-        run("player phone: the slider only for the player up, never for the others, and no hint where the sweet spot is", () =>
+        run("player phone: the spin pad only for the player up, with no number and no slider anywhere", () =>
         {
             var t = new WheelTable();
             var up = Render.WfPlayer(t, 0);
-            Check.True(Render.Has(up, "type=\"range\"") && Render.Has(up, "SPIN"), "the player up gets a slider and SPIN");
+            Check.True(Render.Has(up, "id=\"wf-pad\""), "the player up gets the spin pad");
+            Check.True(!Render.Has(up, "type=\"range\"") && !Render.Has(up, "wf-power") && !Render.Has(up, "+10") && !Render.Has(up, "−10"), "no slider, no readout, no nudge buttons");
             Check.True(!Render.Has(up, "400") && !Render.Has(up.ToLowerInvariant(), "sweet"), "nothing gives the sweet spot away");
             var waiting = Render.WfPlayer(t, 1);
-            Check.True(!Render.Has(waiting, "type=\"range\"") && !Render.Has(waiting, "SPIN"), "the others only wait");
+            Check.True(!Render.Has(waiting, "id=\"wf-pad\""), "the others only wait");
             Check.True(Render.Has(waiting, "Ann"), "and see who is up");
         });
 

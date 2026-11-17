@@ -1,7 +1,9 @@
+@implements IDisposable
+
 @*
-    A player's phone: their name and money, and, on their turn, the power slider and the SPIN button. Everything else (letters, vowels,
-    solving) is said out loud and run by the emcee. The slider shows its number on purpose: one setting returns the wheel to the same
-    wedge, and finding it is the trick.
+    A player's phone: their name and money, the letters used, and, on their turn, the spin pad: swirl a finger round the circle and let go.
+    How fast the finger was going decides how hard the wheel spins (see wheelpad.js). Nothing on screen shows the strength: one particular
+    speed returns the wheel to the same wedge, and finding it is the trick. Everything else is said out loud and run by the emcee.
 *@
 
 @if (Me is null)
@@ -35,21 +37,18 @@ else
 
         @if (MyTurn && Snapshot.Phase == WheelPhase.Turn)
         {
-            <section class="wf-spin">
-                <div class="wf-power-read">@_power</div>
-                <input type="range" class="wf-power" min="0" max="@WheelRules.PowerMax" step="1" @bind="_power" @bind:event="oninput" aria-label="Spin power" />
-                <div class="wf-nudge">
-                    <button class="btn btn-quiet" @onclick="() => Nudge(-10)">−10</button>
-                    <button class="btn btn-quiet" @onclick="() => Nudge(-1)">−1</button>
-                    <button class="btn btn-quiet" @onclick="() => Nudge(1)">+1</button>
-                    <button class="btn btn-quiet" @onclick="() => Nudge(10)">+10</button>
-                </div>
-                <button class="btn btn-start btn-wide wf-spin-button" disabled="@(!Snapshot.CanSpin)" @onclick="DoSpin">SPIN</button>
-                @if (!Snapshot.CanSpin)
-                {
-                    <p class="muted">No consonants are left. Ask the emcee about a vowel or solving.</p>
-                }
-            </section>
+            @if (Snapshot.CanSpin)
+            {
+                <section class="wf-spin">
+                    <p class="wf-swirl-hint">Swirl the wheel with your finger, then let go. A faster swirl spins the big wheel farther.</p>
+                    <div id="wf-pad" class="wf-pad" aria-label="Spin pad"><div class="wf-pad-disc"><span class="wf-pad-mark"></span></div></div>
+                    <p id="wf-pad-msg" class="wf-pad-msg"></p>
+                </section>
+            }
+            else
+            {
+                <p class="muted">No consonants are left. Ask the emcee about a vowel or solving.</p>
+            }
         }
 
         @if (_error is not null)
@@ -70,11 +69,14 @@ else
     [Parameter] public Guid Token { get; set; }
     [Parameter] public Guid PlayerId { get; set; }
 
-    private int _power = 500;
     private string? _error;
+    private DotNetObjectReference<WheelPlayerView>? _self;
 
     private WheelPlayerInfo? Me => Snapshot.Players.FirstOrDefault(p => p.Id == PlayerId);
     private bool MyTurn => Me is not null && Snapshot.Active >= 0 && Snapshot.Players[Snapshot.Active].Id == PlayerId;
+    private bool PadShowing => MyTurn && Snapshot.Phase == WheelPhase.Turn && Snapshot.CanSpin;
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
 
     private string Status
     {
@@ -86,7 +88,7 @@ else
             if (MyTurn)
                 return Snapshot.Phase switch
                 {
-                    WheelPhase.Turn => "Your turn. Set your power and spin, or tell the emcee you want a vowel or to solve.",
+                    WheelPhase.Turn => "Your turn. Spin, or tell the emcee you want a vowel or to solve.",
                     WheelPhase.Spinning => "Spinning…",
                     WheelPhase.Consonant => "Call a consonant out loud.",
                     WheelPhase.Vowel => "Call a vowel out loud.",
@@ -99,11 +101,23 @@ else
         }
     }
 
-    private void Nudge(int by) => _power = Math.Clamp(_power + by, 0, WheelRules.PowerMax);
-
-    private void DoSpin()
+    // The pad is a new element each time the turn comes round, so it is hooked up after every render (a pad already hooked up is left alone).
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var result = Game.Spin(Token, _power);
-        _error = result.Ok ? null : result.Error;
+        if (!PadShowing) return;
+        _self ??= DotNetObjectReference.Create(this);
+        try { await JS.InvokeVoidAsync("wheelpad.attach", "wf-pad", _self); }
+        catch (JSDisconnectedException) { }
     }
+
+    /// <summary>Called by the pad when a finger lets go. <paramref name="power"/> is 0 to 1000, worked out from how fast the swirl was.</summary>
+    [JSInvokable]
+    public Task Swirled(int power) => InvokeAsync(() =>
+    {
+        var result = Game.Spin(Token, Math.Clamp(power, 0, WheelRules.PowerMax));
+        _error = result.Ok ? null : result.Error;
+        StateHasChanged();
+    });
+
+    public void Dispose() => _self?.Dispose();
 }
