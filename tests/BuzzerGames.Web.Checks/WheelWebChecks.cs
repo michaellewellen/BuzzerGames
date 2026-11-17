@@ -121,7 +121,10 @@ static class WheelWebChecks
             Check.Equal(72, Render.Count(disc, "wf-peg"), "72 pegs: three per wedge");
             Check.Equal(3, Render.Count(disc, "wf-flap wf-flap-"), "three clickers");
             Check.True(Render.Has(disc, "wf-flap-red") && Render.Has(disc, "wf-flap-yellow") && Render.Has(disc, "wf-flap-blue"), "in the three colors");
-            Check.True(Render.Has(disc, "$1,000,000"), "the Million slice is labeled");
+            // The labels are stacked: one <text> per character, so "$1,000,000" is no longer one run of text.
+            Check.Equal(22, Render.Count(disc, ">$</text>"), "a $ starts each of the 21 cash stacks and the Million slice's stack");
+            Check.Equal(1, Render.Count(disc, ">K</text>"), "BANKRUPT is stacked letter by letter (its K appears once, on the one whole Bankrupt wedge)");
+            Check.True(Render.Has(disc, ">L</text>") && Render.Has(disc, ">U</text>"), "LOSE A TURN is stacked too");
             Check.Equal(1, Render.Count(disc, "wf-flap-red active"), "the first player's clicker is the active one");
 
             t.SpinTo(x => x.Kind == SliceKind.Million);

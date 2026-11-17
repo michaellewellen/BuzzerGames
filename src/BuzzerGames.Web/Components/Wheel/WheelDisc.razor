@@ -78,21 +78,53 @@
         _ => "wf-slice wf-cash-" + CashColors[s.Wedge % CashColors.Length]
     };
 
-    // The label reads along the spoke, from near the hub outward. Narrow slices (the Million slice is 5 degrees) get small print.
+    // The label is stacked, one character under another, the way the show prints it: the first character is out by the rim and the
+    // stack runs in toward the hub, every character upright with its top pointing out along the spoke (so a wedge at the top of the wheel
+    // reads like a column of normal text). The type shrinks to fit the stack and the wedge's width.
+    private const double StackOuter = 298;   // where the first character's top edge sits (the pegs are at 322)
+    private const double StackInner = 86;    // the hub is 70
+    private const double LinePitch = 0.95;   // line height as a share of the type size
+
+    // Punctuation and word gaps take less room than a letter, so "$1,000,000" doesn't spread out.
+    private static double Weight(char c) => c switch { ' ' => 0.5, ',' or '.' => 0.55, '$' => 1.0, _ => 1.0 };
+
     private RenderFragment Text(WheelSlice s) => builder =>
     {
+        if (s.Kind == SliceKind.Bankrupt && s.End - s.Start < 10) return;   // the thin Bankrupt slices beside the Million slice stay plain black
+
         var width = s.End - s.Start;
-        var size = width < 10 ? 13 : s.Kind is SliceKind.Bankrupt or SliceKind.LoseATurn ? 27 : 33;
-        var inner = s.Kind switch { SliceKind.Cash => 175, SliceKind.Million => 105, SliceKind.Bankrupt when width < 10 => 0, _ => 120 };
-        if (s.Kind == SliceKind.Bankrupt && width < 10) return;   // the thin Bankrupt slices beside the Million slice stay plain black
         var text = s.Kind == SliceKind.Million ? "$1,000,000" : s.Label.ToUpperInvariant();
+        var chars = text.ToCharArray();
+        var weight = chars.Sum(Weight);
+
+        // Biggest type that fits both ways: the stack has to fit between rim and hub, and a character has to fit across the wedge.
+        var byLength = (StackOuter - StackInner) / (weight * LinePitch);
+        var byWidth = width < 10 ? 14 : 62;
+        var size = Math.Min(Math.Min(byLength, byWidth), s.Kind == SliceKind.Cash ? 50 : 40);
+
+        var cls = "wf-slice-text " + (s.Kind == SliceKind.Cash ? "wf-text-cash" : "wf-text-" + s.Kind.ToString().ToLowerInvariant());
         var seq = 0;
-        builder.OpenElement(seq++, "text");
-        builder.AddAttribute(seq++, "transform", $"rotate({Num(s.Start + width / 2)}) translate(0 {Num(-inner)}) rotate(-90)");
-        builder.AddAttribute(seq++, "class", "wf-slice-text " + (s.Kind == SliceKind.Cash ? "wf-text-cash" : "wf-text-" + s.Kind.ToString().ToLowerInvariant()));
-        builder.AddAttribute(seq++, "font-size", size);
-        builder.AddAttribute(seq++, "dominant-baseline", "central");
-        builder.AddContent(seq++, text);
+        builder.OpenElement(seq++, "g");
+        builder.AddAttribute(seq++, "transform", $"rotate({Num(s.Start + width / 2)})");
+
+        var y = StackOuter;
+        foreach (var c in chars)
+        {
+            var step = size * LinePitch * Weight(c);
+            if (c != ' ')
+            {
+                builder.OpenElement(seq++, "text");
+                builder.AddAttribute(seq++, "x", "0");
+                builder.AddAttribute(seq++, "y", Num(-(y - step / 2)));
+                builder.AddAttribute(seq++, "class", cls);
+                builder.AddAttribute(seq++, "font-size", Num(size));
+                builder.AddAttribute(seq++, "text-anchor", "middle");
+                builder.AddAttribute(seq++, "dominant-baseline", "central");
+                builder.AddContent(seq++, c.ToString());
+                builder.CloseElement();
+            }
+            y -= step;
+        }
         builder.CloseElement();
     };
 }

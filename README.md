@@ -288,3 +288,9 @@ Dockerfile                     How Railway builds and runs it
 - Swap the dummy questions for a real dataset (the engine only knows about `IGameDataSource`).
 - Postgres, to remember which games have been played so none repeat.
 - The next game show.
+
+### The wheel's lettering
+
+Wedge labels are stacked one character under another (like the show) and use the font named by `--wf-wheel-font` in `wwwroot/app.css`. It
+asks for **Oldgate Lane Outline** first and falls back to the board font (Oswald) if the font file isn't there. To use it, put the file at
+`src/BuzzerGames.Web/wwwroot/fonts/OldgateLaneOutline.ttf` (that exact name). Check the font's license before publishing the repo.
