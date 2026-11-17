@@ -78,52 +78,94 @@
         _ => "wf-slice wf-cash-" + CashColors[s.Wedge % CashColors.Length]
     };
 
-    // The label is stacked, one character under another, the way the show prints it: the first character is out by the rim and the
-    // stack runs in toward the hub, every character upright with its top pointing out along the spoke (so a wedge at the top of the wheel
-    // reads like a column of normal text). The type shrinks to fit the stack and the wedge's width.
-    private const double StackOuter = 298;   // where the first character's top edge sits (the pegs are at 322)
+    // Labels are stacked the way the show prints them. Every line is upright with its top pointing out along the spoke, so a wedge at the top
+    // of the wheel reads like a column of normal text, and the first line sits out by the rim with the rest running in toward the hub.
+    //   Cash:         one character per line, all the same size ($ 3 5 0 0).
+    //   Bankrupt:     one letter per line, each a little smaller than the one before because the wedge narrows toward the hub.
+    //   Million:      "ONE" on the first line, then M I L L I O N one letter per line, narrowing the same way (it is a 5-degree slice).
+    //   Lose a Turn:  one word per line (LOSE / A / TURN), never bigger than the line above.
+    private const double StackOuter = 298;   // where the first line's top edge sits (the pegs are at 322)
     private const double StackInner = 86;    // the hub is 70
     private const double LinePitch = 0.95;   // line height as a share of the type size
 
-    // Punctuation and word gaps take less room than a letter, so "$1,000,000" doesn't spread out.
-    private static double Weight(char c) => c switch { ' ' => 0.5, ',' or '.' => 0.55, '$' => 1.0, _ => 1.0 };
+    private readonly record struct StackLine(string Text, double Y, double Size);
+
+    // Punctuation takes less room than a letter, so "$1,000,000" doesn't spread out.
+    private static double Weight(char c) => c switch { ',' or '.' => 0.55, _ => 1.0 };
+
+    /// <summary>Cash: one character per line, one size that fits the stack and the wedge.</summary>
+    private static List<StackLine> EvenStack(string text, double width)
+    {
+        var weight = text.Sum(Weight);
+        var size = Math.Min(Math.Min((StackOuter - StackInner) / (weight * LinePitch), 50), width < 10 ? 14 : 62);
+        var lines = new List<StackLine>();
+        var y = StackOuter;
+        foreach (var c in text)
+        {
+            var step = size * LinePitch * Weight(c);
+            lines.Add(new StackLine(c.ToString(), y - step / 2, size));
+            y -= step;
+        }
+        return lines;
+    }
+
+    /// <summary>
+    /// Lines that follow the wedge's taper: each line's type is sized to the wedge's width where it sits, so the label fills the wedge and
+    /// gets smaller toward the hub. <paramref name="units"/> is how wide a line is, in type sizes. The biggest fill that still fits between
+    /// the rim and the hub is used. With <paramref name="neverGrow"/> a line is never bigger than the one above it.
+    /// </summary>
+    private static List<StackLine> TaperedStack(IReadOnlyList<string> texts, IReadOnlyList<double> units, double widthDegrees, bool neverGrow)
+    {
+        var halfWidth = Math.Sin(Rad(widthDegrees / 2));   // wedge width at radius r is 2 * r * halfWidth
+        for (var fill = 0.9; fill > 0.05; fill -= 0.01)
+        {
+            var lines = new List<StackLine>();
+            var y = StackOuter;
+            var previous = double.MaxValue;
+            for (var i = 0; i < texts.Count; i++)
+            {
+                var size = 20.0;
+                for (var pass = 0; pass < 3; pass++)   // the width depends on where the line ends up, which depends on its size
+                    size = Math.Min(fill * 2 * (y - size * LinePitch / 2) * halfWidth / units[i], 60);
+                if (neverGrow) size = Math.Min(size, previous);
+                previous = size;
+                var step = size * LinePitch;
+                lines.Add(new StackLine(texts[i], y - step / 2, size));
+                y -= step;
+            }
+            if (y >= StackInner) return lines;
+        }
+        return [];
+    }
 
     private RenderFragment Text(WheelSlice s) => builder =>
     {
-        if (s.Kind == SliceKind.Bankrupt && s.End - s.Start < 10) return;   // the thin Bankrupt slices beside the Million slice stay plain black
-
         var width = s.End - s.Start;
-        var text = s.Kind == SliceKind.Million ? "$1,000,000" : s.Label.ToUpperInvariant();
-        var chars = text.ToCharArray();
-        var weight = chars.Sum(Weight);
+        if (s.Kind == SliceKind.Bankrupt && width < 10) return;   // the thin Bankrupt slices beside the Million slice stay plain black
 
-        // Biggest type that fits both ways: the stack has to fit between rim and hub, and a character has to fit across the wedge.
-        var byLength = (StackOuter - StackInner) / (weight * LinePitch);
-        var byWidth = width < 10 ? 14 : 62;
-        var size = Math.Min(Math.Min(byLength, byWidth), s.Kind == SliceKind.Cash ? 50 : 40);
+        List<StackLine> lines = s.Kind switch
+        {
+            SliceKind.Bankrupt => TaperedStack("BANKRUPT".Select(c => c.ToString()).ToList(), Enumerable.Repeat(0.7, 8).ToList(), width, neverGrow: false),
+            SliceKind.Million => TaperedStack(["ONE", .. "MILLION".Select(c => c.ToString())], [2.2, .. Enumerable.Repeat(1.0, 7)], width, neverGrow: false),
+            SliceKind.LoseATurn => TaperedStack(["LOSE", "A", "TURN"], [2.5, 0.7, 2.5], width, neverGrow: true),
+            _ => EvenStack(s.Label.ToUpperInvariant(), width)
+        };
 
         var cls = "wf-slice-text " + (s.Kind == SliceKind.Cash ? "wf-text-cash" : "wf-text-" + s.Kind.ToString().ToLowerInvariant());
         var seq = 0;
         builder.OpenElement(seq++, "g");
         builder.AddAttribute(seq++, "transform", $"rotate({Num(s.Start + width / 2)})");
-
-        var y = StackOuter;
-        foreach (var c in chars)
+        foreach (var line in lines)
         {
-            var step = size * LinePitch * Weight(c);
-            if (c != ' ')
-            {
-                builder.OpenElement(seq++, "text");
-                builder.AddAttribute(seq++, "x", "0");
-                builder.AddAttribute(seq++, "y", Num(-(y - step / 2)));
-                builder.AddAttribute(seq++, "class", cls);
-                builder.AddAttribute(seq++, "font-size", Num(size));
-                builder.AddAttribute(seq++, "text-anchor", "middle");
-                builder.AddAttribute(seq++, "dominant-baseline", "central");
-                builder.AddContent(seq++, c.ToString());
-                builder.CloseElement();
-            }
-            y -= step;
+            builder.OpenElement(seq++, "text");
+            builder.AddAttribute(seq++, "x", "0");
+            builder.AddAttribute(seq++, "y", Num(-line.Y));
+            builder.AddAttribute(seq++, "class", cls);
+            builder.AddAttribute(seq++, "font-size", Num(line.Size));
+            builder.AddAttribute(seq++, "text-anchor", "middle");
+            builder.AddAttribute(seq++, "dominant-baseline", "central");
+            builder.AddContent(seq++, line.Text);
+            builder.CloseElement();
         }
         builder.CloseElement();
     };
