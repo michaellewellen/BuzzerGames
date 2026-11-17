@@ -988,8 +988,10 @@ html:not([data-fl-sound="1"]) .fl-sound { animation: fl-nudge 1.6s ease-in-out i
 
 /* ===== Wheel of Fortune: lobby seats, phones, the TV, the board and the wheel ===== */
 @font-face { font-family: "Oswald"; font-weight: 600; font-style: normal; font-display: swap; src: url("/fonts/oswald-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Oldgate Lane Outline"; font-weight: 400 700; font-style: normal; font-display: swap; src: url("/fonts/OldgateLaneOutline.ttf") format("truetype"); }
 @font-face { font-family: "Oswald"; font-weight: 700; font-style: normal; font-display: swap; src: url("/fonts/oswald-latin-700-normal.woff2") format("woff2"); }
 :root {
+    --wf-wheel-font: "Oldgate Lane Outline", var(--wf-font);   /* the wheel's own lettering; falls back to the board font until the font file is added */
     --wf-font: "Oswald", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;   /* the board, the wheel and the scores; change this one line to try another font */
     --wf-red: #d62828; --wf-yellow: #f4c20d; --wf-blue: #1d5fd6; --wf-green: #1f8a4c; --wf-felt: #0b3d2e;
 }
@@ -1076,7 +1078,7 @@ body.wf-sound-on .wf-sound { display: none; }
 .wf-cash-purple { fill: #7b2cbf; } .wf-cash-green { fill: #2a9d4b; } .wf-cash-pink { fill: #e5489c; }
 .wf-bankrupt { fill: #050505; } .wf-lose { fill: #f2f2f2; } .wf-million { fill: #ffd35a; }
 .wf-peg { fill: #f6f6f6; stroke: #444; stroke-width: 1; }
-.wf-slice-text { font-family: var(--wf-font); font-weight: 700; fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: 3px; }
+.wf-slice-text { font-family: var(--wf-wheel-font); font-weight: 700; fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: 3px; }
 .wf-text-bankrupt { fill: #fff; stroke: none; } .wf-text-loseaturn { fill: #111; stroke: none; } .wf-text-million { fill: #111; stroke: none; }
 .wf-flap polygon { fill: #fff; stroke: #111; stroke-width: 3; }
 .wf-flap-red polygon { fill: var(--wf-red); } .wf-flap-yellow polygon { fill: var(--wf-yellow); } .wf-flap-blue polygon { fill: var(--wf-blue); }
