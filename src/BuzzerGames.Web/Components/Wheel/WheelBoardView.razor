@@ -1,6 +1,6 @@
 @*
     The puzzle board on the big screen: green for tiles not in use, white for a letter not yet found, blue (and a ding) for the tiles that
-    just matched, then the letters appear. While the room page plays a reveal, Shown says how many of the blue tiles have turned into their
+    just matched (one at a time, each with a ding), then the letters appear one by one. While the room page plays a reveal, Shown says how many of the blue tiles have turned into their
     letter so far; once the game has revealed them they come in as plain letters. Hidden tiles carry no letter, so nothing can leak.
 *@
 
@@ -26,8 +26,9 @@
                 }
                 else if (tile.State == TileState.Lit)
                 {
-                    var turned = LitIndex(tile) < Shown;
-                    <span class="wf-t @(turned ? "wf-letter wf-show wf-turn" : "wf-lit")">@(turned ? RevealLetter : null)</span>
+                    var index = LitIndex(tile);
+                    var turned = index < Shown;
+                    <span class="wf-t @(turned ? "wf-letter wf-show wf-turn" : index < LitShown ? "wf-lit" : "wf-letter")">@(turned ? RevealLetter : null)</span>
                 }
                 else
                 {
@@ -42,6 +43,9 @@
     [Parameter, EditorRequired] public IReadOnlyList<BoardTileInfo> Tiles { get; set; } = [];
     [Parameter] public char? RevealLetter { get; set; }
     [Parameter] public int Shown { get; set; }
+
+    /// <summary>How many of the matched tiles have turned blue so far (the rest still look like plain tiles). Everything lit shows at once by default.</summary>
+    [Parameter] public int LitShown { get; set; } = int.MaxValue;
 
     private BoardTileInfo? TileAt(int row, int column) => Tiles.FirstOrDefault(t => t.Row == row && t.Column == column);
 

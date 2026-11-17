@@ -35,8 +35,8 @@ public readonly record struct WedgeSpec(WedgeType Type, int Value = 0)
 }
 
 /// <summary>
-/// The wheel's rim: 24 wedges, each 15 degrees wide, one of them split into three 5-degree slices. Pegs (the things that click) sit on
-/// every boundary between slices. A layout never changes once built, so it is safe to share.
+/// The wheel's rim: 24 wedges, each 15 degrees wide, one of them split into three 5-degree slices. Pegs (the things that click) sit at
+/// every 5 degrees. A layout never changes once built, so it is safe to share.
 /// </summary>
 public sealed class WheelLayout
 {
@@ -45,12 +45,15 @@ public sealed class WheelLayout
     private WheelLayout(WheelSlice[] slices)
     {
         _slices = slices;
-        Pegs = slices.Select(s => s.Start).ToList();
+        Pegs = PegAngles;
     }
 
     public IReadOnlyList<WheelSlice> Slices => _slices;
 
-    /// <summary>The angle of every peg, in order. 24 wedges plus the two extra boundaries inside the Million trio: 26.</summary>
+    /// <summary>The angle of every peg, in order: one at every 5 degrees, so 72. They don't depend on the slices (a picked-up Million wedge leaves them all in place).</summary>
+    public static IReadOnlyList<double> PegAngles { get; } =
+        Enumerable.Range(0, (int)Math.Round(360 / WheelRules.PegDegrees)).Select(i => i * WheelRules.PegDegrees).ToList();
+
     public IReadOnlyList<double> Pegs { get; }
 
     /// <summary>The slice at a given angle on the wheel. Any angle works; it wraps around.</summary>
@@ -64,7 +67,7 @@ public sealed class WheelLayout
 
     /// <summary>
     /// The wheel after someone picks up the Million Dollar Wedge: the whole Bankrupt / Million / Bankrupt wedge becomes one plain 15-degree
-    /// Bankrupt, and its two inner pegs disappear. Returns this same layout when the wheel has no Million slice.
+    /// Bankrupt. The pegs stay where they are. Returns this same layout when the wheel has no Million slice.
     /// </summary>
     public WheelLayout WithMillionCollected()
     {

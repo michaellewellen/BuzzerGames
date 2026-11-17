@@ -97,7 +97,7 @@ static class WheelWebChecks
             Check.Ok(t.Game.StageLetter(t.Emcee, 'T'));
             Check.Ok(t.Game.ConfirmLetter(t.Emcee));
             Check.Equal(WheelPhase.Reveal, t.S.Phase, "revealing");
-            var html = Render.WfTv(t);
+            var html = Render.WfTv(t, watching: true);   // a spectator sees every lit tile at once; the TV itself brings them up one by one
             Check.Equal(4, Render.Count(html, "wf-lit"), "the four T's are lit");
             Check.Equal(0, Render.Count(html, "wf-show"), "and they show no letter yet");
             Check.Equal('T', t.S.RevealLetter, "the snapshot says which letter is coming");
@@ -118,7 +118,7 @@ static class WheelWebChecks
             var t = new WheelTable();
             var disc = Render.WfDisc(t.S);
             Check.Equal(26, Render.Count(disc, "class=\"wf-slice "), "26 slices: 23 whole wedges plus the three-way wedge");
-            Check.Equal(26, Render.Count(disc, "wf-peg"), "26 pegs");
+            Check.Equal(72, Render.Count(disc, "wf-peg"), "72 pegs: three per wedge");
             Check.Equal(3, Render.Count(disc, "wf-flap wf-flap-"), "three clickers");
             Check.True(Render.Has(disc, "wf-flap-red") && Render.Has(disc, "wf-flap-yellow") && Render.Has(disc, "wf-flap-blue"), "in the three colors");
             Check.True(Render.Has(disc, "$1,000,000"), "the Million slice is labeled");
@@ -127,7 +127,7 @@ static class WheelWebChecks
             t.SpinTo(x => x.Kind == SliceKind.Million);
             var after = Render.WfDisc(t.S);
             Check.Equal(24, Render.Count(after, "class=\"wf-slice "), "24 slices once the wedge is picked up");
-            Check.Equal(24, Render.Count(after, "wf-peg"), "24 pegs");
+            Check.Equal(72, Render.Count(after, "wf-peg"), "the pegs stay at every 5 degrees");
             Check.True(!Render.Has(after, "$1,000,000"), "no Million slice any more");
             Check.Equal(2, Render.Count(after, "wf-slice wf-bankrupt"), "two plain Bankrupt wedges");
         });
@@ -175,6 +175,38 @@ static class WheelWebChecks
         {
             var tile = BuzzerGames.Web.Games.GameCatalog.All.Single(g => g.Name == "Wheel of Fortune");
             Check.True(tile.IsPlayable && tile.Url == "/wheel-of-fortune", "the tile points at /wheel-of-fortune");
+        });
+
+        run("TV shows only the puzzle, the category and the money; the used-letter board lives on the phones", () =>
+        {
+            var t = new WheelTable(["BREAK THE ICE", "X", "X", "X", "X", "X"]);
+            t.Call('K');
+            var tv = Render.WfTv(t);
+            Check.True(!Render.Has(tv, "wf-letterboard") && !Render.Has(tv, "Puzzle 1 of") && !Render.Has(tv, "wf-tv-message"), "no letter board, puzzle counter or message on the TV");
+            Check.True(!Render.Has(tv, "is up") && !Render.Has(tv, "spin, buy a vowel"), "no turn text on the TV");
+            Check.True(Render.Has(tv, "wf-category") && Render.Count(tv, "wf-score wf-") == 3, "category and three scores");
+
+            var player = Render.WfPlayer(t, 1);
+            Check.True(Render.Has(player, "wf-letterboard"), "a player's phone has the letter board");
+            Check.Equal(1, Render.Count(player, "wf-ltr used"), "with the one called letter struck out");
+            Check.True(Render.Has(player, t.S.Category), "and the category");
+            Check.True(Render.Has(Render.WfEmcee(t), "wf-letterboard"), "the emcee sees it while waiting for a spin");
+        });
+
+        run("board: matched tiles turn blue one at a time, then into letters one at a time", () =>
+        {
+            var t = new WheelTable(["BETTER LATE THAN NEVER", "X", "X", "X", "X", "X"]);
+            t.SpinToCash();
+            Check.Ok(t.Game.StageLetter(t.Emcee, 'T'));
+            Check.Ok(t.Game.ConfirmLetter(t.Emcee));
+            string Board(int lit, int shown) => Render.Html<BuzzerGames.Web.Components.Wheel.WheelBoardView>(new() { ["Tiles"] = t.S.Board, ["RevealLetter"] = t.S.RevealLetter, ["Shown"] = shown, ["LitShown"] = lit });
+            Check.Equal(0, Render.Count(Board(0, 0), "wf-lit"), "none blue to start");
+            Check.Equal(2, Render.Count(Board(2, 0), "wf-lit"), "two blue after two dings");
+            Check.Equal(4, Render.Count(Board(4, 0), "wf-lit"), "all four blue");
+            var mid = Board(4, 2);
+            Check.Equal(2, Render.Count(mid, "wf-turn"), "two have turned into letters");
+            Check.Equal(2, Render.Count(mid, "wf-lit"), "two are still blue");
+            Check.Equal(4, Render.Count(Board(4, 4), "wf-show"), "all four letters showing");
         });
     }
 }

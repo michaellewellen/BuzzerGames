@@ -15,9 +15,9 @@
             <path d="@Wedge(slice, 0, 322)" class="@SliceClass(slice)" />
             @Text(slice)
         }
-        @foreach (var slice in Slices)
+        @foreach (var peg in WheelLayout.PegAngles)
         {
-            <circle cx="@Num(322 * Math.Sin(Rad(slice.Start)))" cy="@Num(-322 * Math.Cos(Rad(slice.Start)))" r="5" class="wf-peg" />
+            <circle cx="@Num(322 * Math.Sin(Rad(peg)))" cy="@Num(-322 * Math.Cos(Rad(peg)))" r="4.5" class="wf-peg" />
         }
     </g>
     <circle r="322" class="wf-rim-line" />

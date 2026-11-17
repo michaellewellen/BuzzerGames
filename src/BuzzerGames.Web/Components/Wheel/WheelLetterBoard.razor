@@ -1,0 +1,16 @@
+@*
+    The letters already called, for the phones (the TV doesn't show this). Called letters are struck out.
+*@
+
+<div class="wf-letterboard" aria-label="Letters called">
+    @foreach (var c in Alphabet)
+    {
+        <span class="wf-ltr @(Called.Contains(c) ? "used" : "")">@c</span>
+    }
+</div>
+
+@code {
+    private static readonly char[] Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+
+    [Parameter] public string Called { get; set; } = "";
+}

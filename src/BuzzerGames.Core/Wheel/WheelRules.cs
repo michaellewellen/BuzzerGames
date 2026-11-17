@@ -20,6 +20,9 @@ public static class WheelRules
     public const int Wedges = 24;
     public const double WedgeDegrees = 360.0 / Wedges;
 
+    /// <summary>Pegs (the things that click) sit at every 5 degree mark, so every 15 degree wedge gives three clicks and the 5 degree Million slice gives one.</summary>
+    public const double PegDegrees = 5;
+
     /// <summary>
     /// The 21 cash wedges, in no particular order (the layout shuffles them). Most are under $1,500; there is one $3,500 and one $5,000.
     /// With the two Bankrupt wedges (one of them the Bankrupt / Million / Bankrupt trio) and Lose a Turn, that makes 24.

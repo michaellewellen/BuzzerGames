@@ -27,6 +27,12 @@ else
 
         <p class="wf-phone-status">@Status</p>
 
+        @if (Snapshot.Phase != WheelPhase.GameOver)
+        {
+            <div class="wf-phone-category">@Snapshot.Category</div>
+            <WheelLetterBoard Called="@Snapshot.CalledLetters" />
+        }
+
         @if (MyTurn && Snapshot.Phase == WheelPhase.Turn)
         {
             <section class="wf-spin">

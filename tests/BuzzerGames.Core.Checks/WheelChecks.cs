@@ -99,7 +99,8 @@ static class WheelChecks
             Check.Equal(0.0, wheel.Slices[0].Start, "starts at the top");
             Check.Equal(360.0, wheel.Slices[^1].End, "ends at the top");
             for (var i = 1; i < wheel.Slices.Count; i++) Check.True(Math.Abs(wheel.Slices[i].Start - wheel.Slices[i - 1].End) < 1e-9, "slices touch with no gaps");
-            Check.Equal(26, wheel.Pegs.Count, "a peg on every boundary: 24 wedges plus 2 inside the trio");
+            Check.Equal(72, wheel.Pegs.Count, "a peg at every 5 degrees: three per wedge");
+            Check.True(wheel.Pegs.Select((p, i) => Math.Abs(p - 5.0 * i) < 1e-9).All(x => x), "evenly spaced");
         });
 
         run("wheel: cash values are the agreed set (mostly under $1,500, one $3,500, one $5,000) and the shuffle keeps its rules (500 wheels)", () =>
@@ -233,10 +234,12 @@ static class WheelChecks
                 var plan = WheelPhysics.Plan(wheel, start, clicker, Dice.Next(0, 1001), 0);
 
                 var changes = 0;
-                var previous = wheel.SliceAt(clicker - start);
+                // A click is the clicker moving from one 5 degree gap between pegs into the next.
+                int Gap(double a) => (int)Math.Floor(WheelLayout.Normalize(clicker - a) / WheelRules.PegDegrees);
+                var previous = Gap(start);
                 for (var angle = start + 0.02; angle <= plan.EndAngle; angle += 0.02)
                 {
-                    var now = wheel.SliceAt(clicker - angle);
+                    var now = Gap(angle);
                     if (now != previous) changes++;
                     previous = now;
                 }
@@ -251,7 +254,7 @@ static class WheelChecks
             var wheel = WheelLayout.Create(new Random(2));
             var clicker = WheelRules.ClickerAngles[0];
             var plan = WheelPhysics.Plan(wheel, clicker - wheel.Slices[4].Mid, clicker, WheelPhysics.SweetSpotPower, 0);
-            Check.Equal(26, plan.PegClickSeconds.Count, "26 pegs, 26 clicks");
+            Check.Equal(72, plan.PegClickSeconds.Count, "72 pegs, 72 clicks");
             var gaps = plan.PegClickSeconds.Zip(plan.PegClickSeconds.Skip(1), (a, b) => b - a).ToList();
             Check.True(gaps[^1] > gaps[0] * 3, "the last click is much slower than the first");
             // The pegs are not evenly spaced (the Million trio has two extra), so single gaps wobble; the trend is what matters.

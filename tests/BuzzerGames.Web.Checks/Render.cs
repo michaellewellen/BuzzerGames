@@ -32,7 +32,7 @@ static class Render
         .AddSingleton<IJSRuntime, NoJs>()
         .BuildServiceProvider();
 
-    private static string Html<T>(Dictionary<string, object?> parameters) where T : IComponent
+    public static string Html<T>(Dictionary<string, object?> parameters) where T : IComponent
     {
         using var renderer = new HtmlRenderer(Services, Services.GetRequiredService<ILoggerFactory>());
         return renderer.Dispatcher.InvokeAsync(async () =>

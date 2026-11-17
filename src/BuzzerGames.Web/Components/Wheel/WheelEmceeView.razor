@@ -39,6 +39,7 @@
     @switch (Snapshot.Phase)
     {
         case WheelPhase.Turn:
+            <WheelLetterBoard Called="@Snapshot.CalledLetters" />
             <div class="wf-actions">
                 <div class="wf-spin-for">
                     <input type="range" min="0" max="@WheelRules.PowerMax" @bind="_power" @bind:event="oninput" aria-label="Spin power" />
@@ -144,7 +145,7 @@
         _watchdog = null;
         if (key is null) return;
 
-        var wait = Snapshot.Phase == WheelPhase.Spinning ? (Snapshot.Spin?.DurationSeconds ?? 5) + 8 : 10 + 1.0 * Snapshot.Board.Count(t => t.State == TileState.Lit);
+        var wait = Snapshot.Phase == WheelPhase.Spinning ? (Snapshot.Spin?.DurationSeconds ?? 5) + 8 : 12 + 1.4 * Snapshot.Board.Count(t => t.State == TileState.Lit);
         var cts = _watchdog = new CancellationTokenSource();
         _ = WatchAsync(Snapshot.Phase, wait, cts.Token);
     }

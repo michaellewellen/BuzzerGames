@@ -170,8 +170,8 @@ On your own computer neither variable is needed: pictures go in a `floor-data` f
 
 Create it on the TV at `/wheel-of-fortune`. The emcee and three players scan the QR code: the players take Red, Yellow and Blue in the order they join, and the emcee taps **Start Game**. Six regular puzzles are played (quick rounds and the bonus round are still to come).
 
-- **The TV** shows the board, the category, the letters used and everyone's money. When someone spins, the wheel fills the screen in a tilted view, then swings in close on that player's clicker. Matching letters light blue with a ding, then turn into the letters one by one. Tap **Tap for sound** once on the TV (the first click also does it).
-- **Players' phones** have a 0 to 1000 power slider and a SPIN button on their turn. Everything else is said out loud.
+- **The TV** shows only the puzzle, the category and everyone's money (the letters used, whose turn it is and what happened are on the phones). When someone spins, the wheel fills the screen in a tilted view, then swings in close on that player's clicker. Matching tiles turn blue one at a time with a ding each, then turn into the letters one at a time. The wheel has a peg every 5 degrees, so every wedge clicks three times. Tap **Tap for sound** once on the TV (the first click also does it).
+- **Players' phones** have the category, the letters used so far, and on their turn a 0 to 1000 power slider and a SPIN button. Everything else is said out loud.
 - **The emcee's phone** shows the secret answer. They tap the letter the player says, see **Confirm K**, then confirm (so a typo can't cost anyone a turn), buy a vowel for a player, mark a solve **Correct** or **Incorrect**, skip a puzzle, and **Undo** any step.
 - If the TV page is closed, the emcee's phone finishes the spin and the reveal itself a few seconds late, so the game never gets stuck.
 

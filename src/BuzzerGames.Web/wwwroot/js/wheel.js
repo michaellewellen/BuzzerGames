@@ -41,6 +41,7 @@ window.wheel = (function () {
   var sounds = {
     click: function () { tone(1500, 0, 0.03, 'square', 0.07, 700); },
     tick: function () { tone(1250, 0, 0.09, 'triangle', 0.18); },
+    bell: function () { tone(1046, 0, 0.8, 'sine', 0.22); tone(1568, 0, 0.6, 'sine', 0.1); },
     ding: function () { tone(1318, 0, 0.9, 'sine', 0.25); tone(1976, 0, 0.9, 'sine', 0.12); },
     land: function () { tone(660, 0, 0.18, 'triangle', 0.18); },
     buzz: function () { tone(150, 0, 0.55, 'sawtooth', 0.22, 110); },
@@ -83,8 +84,8 @@ window.wheel = (function () {
     },
 
     // Plays one spin: from start to end degrees over duration seconds, fast then slowing (ease-out cubic, the same curve the game uses).
-    // Whenever a peg passes a clicker, that clicker flicks, and the active one clicks.
-    spin: function (id, start, end, duration, clickerAngle, sliceStarts, clickerAngles, active) {
+    // pegAngles is every peg's angle on the wheel (one every 5 degrees). Whenever a peg passes a clicker, that clicker flicks, and the active one clicks.
+    spin: function (id, start, end, duration, clickerAngle, pegAngles, clickerAngles, active) {
       return new Promise(function (resolve) {
         var tries = 0;
         (function go() {
@@ -92,14 +93,14 @@ window.wheel = (function () {
           if (!el) { if (tries++ < 50) return setTimeout(go, 20); return resolve(); }
           el._spinning = true;
           var t0 = performance.now();
-          var last = clickerAngles.map(function (c) { return sliceIndex(sliceStarts, norm(c - start)); });
+          var last = clickerAngles.map(function (c) { return sliceIndex(pegAngles, norm(c - start)); });
           function frame(now) {
             var u = Math.min(1, (now - t0) / 1000 / duration);
             var p = 1 - Math.pow(1 - u, 3);
             var theta = start + (end - start) * p;
             el.setAttribute('transform', 'rotate(' + theta + ')');
             for (var k = 0; k < clickerAngles.length; k++) {
-              var idx = sliceIndex(sliceStarts, norm(clickerAngles[k] - theta));
+              var idx = sliceIndex(pegAngles, norm(clickerAngles[k] - theta));
               if (idx !== last[k]) {
                 last[k] = idx;
                 flick(k);

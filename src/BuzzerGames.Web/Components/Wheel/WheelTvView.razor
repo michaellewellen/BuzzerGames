@@ -2,7 +2,8 @@
 @inject IJSRuntime JS
 
 @*
-    The big screen. The board, the category, the letters used so far and the three players' money. When someone spins, the wheel fills the
+    The big screen: just the puzzle, the category and the three players' money. Everything else (letters used, whose turn, what was said)
+    is on the phones. When someone spins, the wheel fills the
     screen in a tilted "spin" camera, then swings in close on the clicker of the player who spun, shows what it landed on, and the game moves on.
     When letters match, the tiles light blue with a ding and then turn into the letter one by one. This page is also what tells the game the wheel
     has stopped (FinishSpin) and the reveal is done (FinishReveal); the emcee's phone steps in if the TV isn't there.
@@ -10,28 +11,15 @@
 *@
 
 <div class="wf-tv @(Snapshot.Phase == WheelPhase.GameOver ? "wf-over" : "")">
-    <header class="wf-tv-top">
-        <span class="wf-tv-title">WHEEL OF FORTUNE</span>
-        <span class="wf-tv-puzzle">Puzzle @Snapshot.PuzzleNumber of @Snapshot.PuzzleCount</span>
-        @if (!Watching)
-        {
-            <button class="wf-sound" onclick="wheel.enableSound()">Tap for sound</button>
-        }
-    </header>
+    @if (!Watching)
+    {
+        <button class="wf-sound" onclick="wheel.enableSound()">Tap for sound</button>
+    }
 
     <section class="wf-tv-board">
-        <WheelBoardView Tiles="Snapshot.Board" RevealLetter="Snapshot.RevealLetter" Shown="_shown" />
+        <WheelBoardView Tiles="Snapshot.Board" RevealLetter="Snapshot.RevealLetter" Shown="_shown" LitShown="@(Watching ? int.MaxValue : _lit)" />
         <div class="wf-category">@Snapshot.Category</div>
     </section>
-
-    <div class="wf-alphabet" aria-label="Letters called">
-        @foreach (var c in Alphabet)
-        {
-            <span class="wf-ltr @(Snapshot.CalledLetters.Contains(c) ? "used" : "")">@c</span>
-        }
-    </div>
-
-    <p class="wf-tv-message">@Snapshot.Message</p>
 
     <section class="wf-scores">
         @for (var i = 0; i < Snapshot.Players.Count; i++)
@@ -56,8 +44,6 @@
 </div>
 
 @code {
-    private static readonly char[] Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
-
     [Parameter, EditorRequired] public WheelGame Game { get; set; } = default!;
     [Parameter, EditorRequired] public WheelSnapshot Snapshot { get; set; } = default!;
     [Parameter] public bool Watching { get; set; }
@@ -65,7 +51,8 @@
     private string _cam = "none";
     private bool _showLanded;
     private string LandedText = "";
-    private int _shown;
+    private int _shown;   // how many of the matched tiles have turned into their letter
+    private int _lit;     // how many of the matched tiles have turned blue so far
     private bool _disposed;
 
     private string? _spinKey;
@@ -91,7 +78,7 @@
             if (key != _spinKey)
             {
                 _spinKey = key;
-                _ = RunSpinAsync(plan, Snapshot.Slices.Select(s => s.Start).ToArray());
+                _ = RunSpinAsync(plan, WheelLayout.PegAngles.ToArray());
             }
         }
         else if (Snapshot.Phase == WheelPhase.Reveal)
@@ -103,9 +90,10 @@
                 _ = RunRevealAsync(Snapshot.Board.Count(t => t.State == TileState.Lit));
             }
         }
-        else if (Snapshot.Phase != WheelPhase.Reveal)
+        else
         {
             _shown = 0;
+            _lit = 0;
         }
 
         // Sounds for what just happened, once per change.
@@ -122,7 +110,7 @@
         }
     }
 
-    private async Task RunSpinAsync(SpinPlan plan, double[] sliceStarts)
+    private async Task RunSpinAsync(SpinPlan plan, double[] pegAngles)
     {
         try
         {
@@ -133,7 +121,7 @@
 
             // The browser's spin() finishes when the wheel stops, but if the browser can't play it we still wait out the same time.
             var clock = System.Diagnostics.Stopwatch.StartNew();
-            await Js("wheel.spin", "wf-rotor", plan.StartAngle, plan.SettledAngle, plan.DurationSeconds, plan.ClickerAngle, sliceStarts, WheelRules.ClickerAngles.ToArray(), Snapshot.Active);
+            await Js("wheel.spin", "wf-rotor", plan.StartAngle, plan.SettledAngle, plan.DurationSeconds, plan.ClickerAngle, pegAngles, WheelRules.ClickerAngles.ToArray(), Snapshot.Active);
             var rest = plan.DurationSeconds + 0.25 - clock.Elapsed.TotalSeconds;
             if (rest > 0) await Task.Delay(TimeSpan.FromSeconds(rest));
 
@@ -157,20 +145,29 @@
         }
     }
 
+    // Bing, bing, bing as each matching tile turns blue, a beat, then bing, bing, bing as each one turns into its letter.
     private async Task RunRevealAsync(int count)
     {
         try
         {
             _shown = 0;
+            _lit = 0;
             await InvokeAsync(StateHasChanged);
-            await Sound("ding");
-            await Task.Delay(1200);
+            await Task.Delay(400);
+            for (var i = 1; i <= count && !_disposed; i++)
+            {
+                _lit = i;
+                await InvokeAsync(StateHasChanged);
+                await Sound("ding");
+                await Task.Delay(550);
+            }
+            await Task.Delay(700);
             for (var i = 1; i <= count && !_disposed; i++)
             {
                 _shown = i;
                 await InvokeAsync(StateHasChanged);
-                await Sound("tick");
-                await Task.Delay(600);
+                await Sound("bell");
+                await Task.Delay(650);
             }
             await Task.Delay(500);
         }
