@@ -121,22 +121,37 @@ public sealed class WheelLayout
     }
 
     /// <summary>
-    /// A shuffled wheel: the 21 cash wedges, a Bankrupt, a Lose a Turn and the Bankrupt / Million / Bankrupt trio. The shuffle is redone until
-    /// no two non-cash wedges touch, no two equal values touch, and the two biggest values ($3,500 and $5,000) aren't neighbors.
+    /// A shuffled wheel. The non-cash wedges are placed the way the real wheel has them: the lone Bankrupt sits exactly opposite the
+    /// Bankrupt / Million / Bankrupt wedge (180 degrees apart), and Lose a Turn sits a quarter turn (90 degrees) from both. Where that
+    /// whole arrangement sits on the wheel is random. The 21 cash wedges are then shuffled into the other places until no two equal
+    /// values touch and the two biggest values ($3,500 and $5,000) aren't neighbors.
     /// </summary>
     public static WheelLayout Create(Random rng)
     {
-        var wedges = WheelRules.CashValues.Select(WedgeSpec.Cash).ToList();
-        wedges.Add(WedgeSpec.Bankrupt);
-        wedges.Add(WedgeSpec.LoseATurn);
-        wedges.Add(WedgeSpec.MillionTrio);
+        const int half = WheelRules.Wedges / 2;
+        const int quarter = WheelRules.Wedges / 4;
+
+        var trio = rng.Next(WheelRules.Wedges);
+        var bankrupt = (trio + half) % WheelRules.Wedges;
+        var lose = (trio + (rng.Next(2) == 0 ? quarter : WheelRules.Wedges - quarter)) % WheelRules.Wedges;
+
+        var cash = WheelRules.CashValues.ToList();
+        var wedges = new WedgeSpec[WheelRules.Wedges];
 
         for (var attempt = 0; attempt < 10_000; attempt++)
         {
-            for (var i = wedges.Count - 1; i > 0; i--)
+            for (var i = cash.Count - 1; i > 0; i--)
             {
                 var j = rng.Next(i + 1);
-                (wedges[i], wedges[j]) = (wedges[j], wedges[i]);
+                (cash[i], cash[j]) = (cash[j], cash[i]);
+            }
+            var next = 0;
+            for (var i = 0; i < wedges.Length; i++)
+            {
+                wedges[i] = i == trio ? WedgeSpec.MillionTrio
+                    : i == bankrupt ? WedgeSpec.Bankrupt
+                    : i == lose ? WedgeSpec.LoseATurn
+                    : WedgeSpec.Cash(cash[next++]);
             }
             if (Acceptable(wedges)) return FromWedges(wedges);
         }

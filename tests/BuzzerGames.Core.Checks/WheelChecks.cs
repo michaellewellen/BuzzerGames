@@ -103,6 +103,24 @@ static class WheelChecks
             Check.True(wheel.Pegs.Select((p, i) => Math.Abs(p - 5.0 * i) < 1e-9).All(x => x), "evenly spaced");
         });
 
+        run("wheel: the Bankrupt is opposite the trio, Lose a Turn is a quarter turn from both, and the spot moves around (500 wheels)", () =>
+        {
+            var trioSpots = new HashSet<int>();
+            for (var seed = 0; seed < 500; seed++)
+            {
+                var wheel = WheelLayout.Create(new Random(seed));
+                var trio = wheel.Slices.Single(s => s.Kind == SliceKind.Million).Wedge;
+                var lone = wheel.Slices.Single(s => s.Kind == SliceKind.Bankrupt && wheel.Slices.Count(x => x.Wedge == s.Wedge) == 1).Wedge;
+                var lose = wheel.Slices.Single(s => s.Kind == SliceKind.LoseATurn).Wedge;
+                int Apart(int a, int b) { var d = Math.Abs(a - b) % 24; return Math.Min(d, 24 - d); }
+                Check.Equal(12, Apart(trio, lone), "Bankrupt is 180 degrees from the trio");
+                Check.Equal(6, Apart(lose, trio), "Lose a Turn is 90 degrees from the trio");
+                Check.Equal(6, Apart(lose, lone), "and 90 degrees from the Bankrupt");
+                trioSpots.Add(trio);
+            }
+            Check.True(trioSpots.Count > 12, "the whole arrangement lands in many different places, not always the same one");
+        });
+
         run("wheel: cash values are the agreed set (mostly under $1,500, one $3,500, one $5,000) and the shuffle keeps its rules (500 wheels)", () =>
         {
             Check.Equal(21, WheelRules.CashValues.Count, "21 cash wedges");
