@@ -1,0 +1,122 @@
+function getBy(cell,att,attName)
+{
+    var cellArray = new Array();
+    var aa = document.getElementsByTagName(cell);
+    for(a=0; a<aa.length; a++)
+    {
+        if(att == 'class')
+        {
+            if(aa[a].className == attName)
+            {
+                cellArray[cellArray.length] = aa[a];
+            }
+        }
+        else if(att == 'title')
+        {
+            if(aa[a].title == attName)
+            {
+                cellArray[cellArray.length] = aa[a];
+            }
+        }
+        else if(att == 'name')
+        {
+            if(aa[a].name == attName)
+            {
+                cellArray[cellArray.length] = aa[a];
+            }
+        }
+        else if(att == 'href')
+        {
+            if(aa[a].href.match(attName))
+            {
+                cellArray[cellArray.length] = aa[a];
+            }
+        }
+    }
+    return cellArray;   
+}
+
+
+function resize_posted_images()
+{
+    var posts = getBy('div','class','message');
+    
+    var imgW = proboards.plugin.get('image_resize').settings.posted_image_width;
+    var imgH = proboards.plugin.get('image_resize').settings.posted_image_height;
+    if(imgH == '')
+    {
+        imgH = 10000;
+    }
+    
+    var nW = proboards.plugin.get('image_resize').settings.new_window;
+    
+    
+    for(p=0; p<posts.length; p++)
+    {
+        var imgs = posts[p].getElementsByTagName('img');
+        for(i=imgs.length-1; i>-1; i--)
+        {
+            if((imgs[i].width > imgW || imgs[i].height > imgH) && imgs[i].className != 'resizeIgnore')
+            {
+                var oWidth = imgs[i].width;
+                var imgDiv = document.createElement('div');
+                with(imgDiv){className = 'imgresized'; style.textAlign = 'center'; style.fontSize = '10px'; style.width = imgW+'px';}
+                var shrunk = parseInt((100/imgs[i].width*imgW)*10);
+                shrunk = (1000-shrunk)/10;
+                var nH = (imgs[i].height/100)*(100-shrunk);
+                
+                if(imgH != '' && nH > imgH)
+                {
+                    var shrunk = parseInt((100/imgs[i].height*imgH)*10);
+                	shrunk = (1000-shrunk)/10;
+                    imgDiv.style.width = (oWidth/100)*(100-shrunk)+'px';
+                    var imgLink = document.createElement('a');
+                	imgLink.href = imgs[i].src;
+                	if(nW == 'y')
+                	{
+                    	imgLink.target = '_blank';
+                	}
+                	imgLink.innerHTML = 'This image has been reduced by '+shrunk+'%. Click to view full size.<br>';
+                	imgLink.innerHTML += '<img src="'+imgs[i].src+'" style="height: '+imgH+'px;" border="0">';
+                }
+                else
+                {
+                	var imgLink = document.createElement('a');
+                	imgLink.href = imgs[i].src;
+                	if(nW == 'y')
+                	{
+                    	imgLink.target = '_blank';
+                	}
+                	imgLink.innerHTML = 'This image has been reduced by '+shrunk+'%. Click to view full size.<br>';
+                	imgLink.innerHTML += '<img src="'+imgs[i].src+'" style="width: '+imgW+'px;" border="0">';
+                }
+                
+                
+                imgDiv.appendChild(imgLink);
+                
+                imgs[i].parentNode.replaceChild(imgDiv,imgs[i]);
+            }
+        }
+            
+    }
+    return;
+}
+
+
+if(proboards.data('route').name.match(/(thread|recent_posts)/) || document.location.href.match(/thread\/\d/))
+{
+    if(window.addEventListener)
+    {
+        window.addEventListener('load', resize_posted_images, false);
+    }
+    else if(window.attachEvent)
+    {
+        window.attachEvent('onload', resize_posted_images);
+    }
+    
+    proboards.on('pageChange', function() { resize_posted_images() });
+}
+
+
+
+

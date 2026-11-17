@@ -1,0 +1,23 @@
+/* function to add IP button wherever it finds an IP submenu */
+function addProxyTest() {
+    $('.controls').each(function (index, element) {
+        let Marker = $(element),IP_Mayo = Marker.find('.searchIP') ,sandwich
+        /* Button text from settings if entered, else use IP address  */       
+        let IPtext = IP_Mayo.find('>a').text().replace('IP ', ''), Btext = pb.plugin.get('proxy_test').settings.btext || IPtext;
+        if (IP_Mayo.length > 0) {
+            sandwich = $('<a></a>', {
+                "class": "button",
+                "target": "_blank",
+                "title": "ipqualityscore.com",
+                "href": "https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/",
+                "role": "button"
+            }).append(Btext);
+            sandwich[0].href += IPtext;
+            Marker.find("#options-container, .post-options.button").after(sandwich);
+        }
+    })
+}
+/* run on document ready */
+$(addProxyTest);
+/* Listen for Proboards changes (e.g. page change, post delete, etc.) and rerun the function to handle any new content */
+pb.events.on('afterSearch', addProxyTest)           

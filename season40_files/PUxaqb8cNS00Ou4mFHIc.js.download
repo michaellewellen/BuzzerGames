@@ -1,0 +1,99 @@
+$(document).ready(function() {
+    var d = new Date();
+	var now = d.getTime();
+    
+    if(proboards.data('route').name == 'thread') {
+        var limit = choose_message();
+        
+        if(limit !== 0) {
+            display_message(limit);
+            
+            if(parseInt(limit.disable_replies)) {
+                proboards.on('afterSearch', function() {
+                    disable_replies();
+                });
+            }
+        }
+    }
+    
+    // Show the given limit/message
+    function display_message(limit) {
+        var container = '<div class="container zombie_thread"><div class="title-bar"><h2>' + limit.title + '</h2></div><div class="content">' + limit.message + '</div></div>';
+        
+        $('#content').before(container);
+        
+        var title = $('.container.zombie_thread .title-bar');
+        var body  = $('.container.zombie_thread .content');
+        $(body).css('padding', '10px');
+        
+        if(typeof limit.title_bar_background_color != 'undefined') {
+            $(title).css('background-color', '#' + limit.title_bar_background_color);
+        }
+        if(typeof limit.title_bar_background_image != 'undefined' && limit.title_bar_background_image != '') {
+            $(title).css('background-image', 'url(' + limit.title_bar_background_image + ')');
+        }
+        if(typeof limit.title_bar_text_color != 'undefined') {
+            $(title).children('h2').css('color', '#' + limit.title_bar_text_color);
+        }
+        
+        if(typeof limit.border_color != 'undefined') {
+           $(body).css('border-color', '#' + limit.border_color);
+        }
+        if(typeof limit.background_color != 'undefined') {
+           $(body).css('background-color', '#' + limit.background_color);
+        }
+        if(typeof limit.text_color != 'undefined') {
+           $(body).css('color', '#' + limit.text_color);
+        }
+        
+        if(parseInt(limit.disable_replies)) {
+        	disable_replies();
+        }
+    }
+    
+    
+    // Disable reply options
+    function disable_replies() {
+        $('.reply-button, .quote-button, .edit-button, .quick-reply').remove();
+    }
+    
+    
+    // Figure out which limit/message to show
+    function choose_message() {
+        // Determine last post's timestamp
+        var last_time = 1000 * proboards.data('page').thread.last_post_time;
+        
+        // Determine highest limit that applies to this post
+        var limits = proboards.plugin.get('zombie_thread_prevention').settings.limits;
+        var lowest_fitting_limit = 0;
+        var lowest_timestamp = now;
+        for (var i = 0; i < limits.length; i++) {
+            if (!check_board(limits[i])) continue;
+            
+            var limit_timestamp = get_limit_time(limits[i].days);
+            
+            if(limit_timestamp > last_time && limit_timestamp < lowest_timestamp) {
+                lowest_fitting_limit = limits[i];
+                lowest_timestamp = get_limit_time(limits[i].days);
+            }
+        }
+        
+        return lowest_fitting_limit;
+    }
+    
+    
+    // Get the timestamp for a number of days in the past
+    function get_limit_time(days) {
+        return now - (days * 86400000);
+    }
+    
+    
+    // Check if we should be running operations on this board
+    function check_board(limit) {
+        if (!limit.boards || !limit.boards.length) {
+            return true;
+        }
+        
+        return ($.inArray(proboards.data('page').board.id.toString(), limit.boards) > -1);
+    }
+});

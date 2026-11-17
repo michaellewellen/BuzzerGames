@@ -1,0 +1,168 @@
+$(function(){
+	(function(){
+
+		return {
+		
+			date: {},
+			
+			age: "",
+			
+			image: "",
+			
+			text: "{years} Year{years_plural}, {months} Month{months_plural}, and {days} Day{days_plural}",
+			
+			title: "Forum Age",
+			
+			show_in_title: false,
+			
+			use_element: false,
+			
+			main_page_only: false,
+			
+			route: "",
+						
+			init: function(){
+				this.setup();
+				
+				if(!this.main_page_only || (this.main_page_only && this.route == "home")){
+					if(this.has_date()){
+						this.workout_age();
+						this.display_age();
+					}
+				}
+			},
+			
+			setup: function(){
+				this.route = (proboards.data && proboards.data("route") && proboards.data("route").name)? proboards.data("route").name : "";
+				
+				var plugin = proboards.plugin.get("pixeldepth_forum_age");
+				
+				if(plugin){
+					var images = (plugin.images)? plugin.images : false;
+					
+					if(images){
+						this.image = plugin.images.agestat;
+					}
+					
+					var settings = (plugin.settings)? plugin.settings : false;
+					
+					if(settings){
+						this.use_element = (settings.use_element && settings.use_element == "1")? true : false;
+						
+						this.date.day = settings.day;
+						this.date.month = settings.month;
+						this.date.year = settings.year;
+						
+						if(settings.icon && settings.icon.length){
+							this.image = settings.icon;
+						}
+						
+						if(settings.text && settings.text.length){
+							this.text = settings.text;
+						}
+						
+						if(settings.title && settings.title.length){
+							this.title = settings.title;
+						}
+						
+						if(settings.show_in_title == "1"){
+							this.show_in_title = true;
+						}
+						
+						this.main_page_only = (settings.main_page_only && settings.main_page_only == "1")? true : this.main_page_only;
+					}
+								
+				}
+			},
+			
+			has_date: function(){
+				if(this.date.day && this.date.month && this.date.year){
+					return true;
+				}
+				
+				return false;
+			},
+			
+			workout_age: function(){
+				var now = new Date(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate());
+				var then = new Date(this.date.year, this.date.month, this.date.day);
+				var diff = (now.getTime() - then.getTime());
+
+				var years = (now.getFullYear() - then.getFullYear());
+				var months = (now.getMonth() - then.getMonth());
+				var days = (now.getDate() - then.getDate());
+
+				var days_in_month = [31, ((now.getFullYear() % 4)? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+				var date_obj = {};
+
+				while(true){
+					date_obj = {};
+					date_obj.years = years;
+					date_obj.years_plural = (years != 1)? "s" : ""
+
+					if(months < 0){
+						years -= 1; 
+						months += 12;
+						continue;
+					}
+
+					date_obj.months = months || "0";
+					date_obj.months_plural = (months != 1)? "s" : "";
+
+					if(days < 0){
+						months -= 1; 
+						days += days_in_month[((11 + now.getMonth()) % 12)]; 
+						continue;
+					}
+
+					date_obj.days = days || "0";
+					date_obj.days_plural = (days != 1)? "s" : "";
+					break;
+				}
+			
+				date_obj.years = date_obj.years || "0";
+				
+				var the_age = this.text;
+				
+				while(this.text.match(/\{(\w+)\}/i)){
+					var rep = (date_obj[RegExp.$1])? date_obj[RegExp.$1] : "";
+					
+					this.text = this.text.replace("{" + RegExp.$1 + "}", rep);
+				}
+				
+				this.age = this.text;
+			},
+			
+			display_age: function(){
+				if(this.use_element){
+					$(".forum-age").text(this.title + ": " + this.age);
+				} else if(this.show_in_title){
+					var title = $(".container.stats div.title-bar");
+					
+					title.append("<h2 style='float: right'>" + this.title + ": " + this.age + "</h2><br style='clear: both' />");
+				} else {
+					var table = $(".container.stats div.content > table:last");
+					var last = table.find("tr.last");
+					var clone = last.clone().removeClass("last");
+					
+					clone.find("td.icon img").attr({
+						src: this.image,
+						title: "Forum Age",
+						alt: "Forum Age"
+					});
+					
+					if(clone.find("> td").length == 2){
+						clone.find("> td:last").remove();
+						clone.find("> td").attr("colspan", "2");
+					}
+					
+					clone.find("td.info table").empty().append("<tr><th>" + this.title + "</th></tr><tr><td>" + this.age + "</td></tr>");
+					
+					table.append(clone);
+				}
+			}
+			
+		};
+		
+	})().init();
+});

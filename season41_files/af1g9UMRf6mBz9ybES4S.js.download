@@ -1,0 +1,10 @@
+$(document).ready(function(){
+    if(proboards.data('route').name=="edit_user_privacy"){
+        if($('.radio input').eq(2).attr('checked')!="checked" && proboards.data('user').is_staff==0){
+         $('.description').eq(1).hide();
+          $('.description').eq(1).prev().hide();
+        $('.radio').eq(1).nextUntil(':not(br)').remove();
+        $('.radio').eq(1).hide();
+        }
+    }    
+ });

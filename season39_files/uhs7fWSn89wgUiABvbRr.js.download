@@ -1,0 +1,81 @@
+var isIE = document.all;
+var mouseX = 0;
+var mouseY = 0;
+
+function getMouseXY(e)
+{ 
+  if (!e) e = window.event;
+  if (e)
+  { 
+  	mouseX = isIE ? (e.clientX + document.body.scrollLeft) : e.pageX;
+  	mouseY = isIE ? (e.clientY + document.body.scrollTop) : e.pageY;
+  }
+}
+
+document.onmousemove = getMouseXY;
+
+function getSelectionHtml() {
+    var html = "";
+    if (typeof window.getSelection != "undefined") {
+        var sel = window.getSelection();
+        if (sel.rangeCount) {
+            var container = document.createElement("div");
+            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                container.appendChild(sel.getRangeAt(i).cloneContents());
+            }
+            html = container.innerHTML;
+        }
+    } else if (typeof document.selection != "undefined") {
+        if (document.selection.type == "Text") {
+            html = document.selection.createRange().htmlText;
+        }
+    }
+    return html;
+}
+			
+			getSelectionHtml.mouseup = function(){
+				var htmlSelection = getSelectionHtml();
+                
+                var quoteText = htmlSelection.replace(/>/g, "]");
+				var quoteText = quoteText.replace(/</g, "[");
+				if ($('.unblocked .content:hover').length != 0) {
+                    
+                	if (htmlSelection != '') {		
+                        						
+                    	$(".quick-quote-div").css( {position:"absolute", top:mouseY, left:mouseX});
+                    	$(".quick-quote-div").css("display", "inline");
+						var messageIDnum = $('.post:hover').attr('id');
+                                var messageIDsliced = messageIDnum.substr(messageIDnum.lastIndexOf("-")+1);
+                                var messageAuthor = $('.post:hover').find('.user-link').attr('title');
+                                var messageTimestamp = $('.post:hover').find('abbr:first').attr('data-timestamp');
+                        		messageTimestamp = messageTimestamp.substring(0, messageTimestamp.length - 3);
+                                var messageNew = '[quote author="'+ messageAuthor + '" source="/post/' + messageIDsliced + '/thread" timestamp="' + messageTimestamp + '"]' + quoteText + '[/quote]'
+                        
+                        setTimeout(function() {
+                    	if ($('.quick-quote-div:hover').length == 0) {
+                    	$('.quick-quote-div').css("display", "none");
+                        htmlSelection = ''
+                        quoteText = '' 
+                		}
+                    	},2500)
+                        
+                            $('.quick-quote-button').click(function() {
+                                if (quoteText != '') { 
+                            	var existingVal = $('.quick-reply textarea').val();
+								$('.quick-reply textarea').val(existingVal + messageNew + "\n");
+                                htmlSelection = ''
+                                quoteText = ''
+                                }
+                            });
+                        
+                }
+                }
+			}
+			
+			$(document).ready(function(){
+                
+				$(document).bind("mouseup", getSelectionHtml.mouseup);
+                 
+			});
+						
+		

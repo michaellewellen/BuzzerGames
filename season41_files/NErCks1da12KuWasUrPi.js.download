@@ -1,0 +1,72 @@
+//  Tournament Brackets - Bracket Setup
+//  by Wormopolis - www.wormocodes.com
+//  plugin v2.1.0
+
+function setupTBstuff() {
+    var pluginSettings=proboards.plugin._plugins["tournament_brackets"].settings;
+    var writeSettings=pluginSettings._permissions_wormo_bracketdata.write;
+    var currUserRank=proboards.data('user').rank.id;
+    var currUserGroups=proboards.data('user').group_ids;
+    var usePerms=pb.plugin.get('tournament_brackets').settings.use_key_permissions_to_show_tab;
+    var postOwner=(proboards.data('route').name.match(/new_/) || proboards.data('page').post.created_by==proboards.data('user').id);
+    var permGranted=false;
+    permGranted=(writeSettings.level=='0');
+    permGranted= (permGranted || (writeSettings.level=='1' && !proboards.data('is_current_user_guest')));
+    permGranted= (permGranted || (writeSettings.level=='2' && proboards.data('user').is_staff)); 
+    permGranted= (permGranted || (parseInt(currUserRank)>=parseInt(writeSettings.include_rank)));
+    permGranted= (permGranted || (writeSettings.include_owner && postOwner));
+    if (currUserGroups) {
+        for (gg=0; gg<currUserGroups.length; gg++) permGranted= (permGranted || (jQuery.inArray(''+currUserGroups[gg],writeSettings.include_groups)>-1));
+        for (gg=0; gg<currUserGroups.length; gg++) permGranted= (permGranted && (jQuery.inArray(''+currUserGroups[gg],writeSettings.exclude_groups)<0));
+    }
+    if (!usePerms || permGranted) {    
+        var setupTBdiv='<center><font size="4">Tournament Brackets Menu</font><br><br><div><center>Current Brackets</center><b>none</b><ul id="previousBrackets"></ul></div><br><br><fieldset id="TBfield" style="border:#000000 1px solid; width:400px">Entries:  <select id="TBentries" class="ui-selectMenu-box" style="float:none; padding:0">'+
+            '<option value="2">2</option><option value="4">4</option><option value="8">8</option><option value="16">16</option><option value="32">32</option><option value="64">64</option><option value="128">128</option><option value="256">256</option></select>'+
+            '<br><br>Sides:  <span id="TBsides"><input type="radio" name="TBsides" value="0" checked="true">Single  <input type="radio" name="TBsides" value="1">Double</span><br>'+
+            '<br></fieldset></center>';
+        var TBdiv = $('<div id="TBdiv" class="ui-wysiwyg"><div id="TBmenu" class="editors">'+setupTBdiv+'</div><div id="TBdata" class="editors"></div></div>');
+        TBdiv.insertBefore('ul.wysiwyg-tabs').children().hide();
+        if (proboards.data('route').name.match(/edit_(post|thread)/)) {
+            var TBpost_id=proboards.data('page').post.id;
+            if (TBpost_id) updateCurrentBrackets(TBpost_id);
+        }
+        
+        $('fieldset#TBfield').append($('<input type="button" value="Create New">').bind('click',function(){
+            var entrychoice= $('#TBentries').val();
+            var sideschoice= $('#TBsides input:checked').val();
+            $('#TBdata').html(tableGrid(entrychoice,sideschoice,2));
+            TBbuttonSetup();
+            
+            $('#TBmenu').slideUp(); $('#TBdata').slideDown();
+        }));
+        var original=$('form div.submit input.decoy[type="button"], form.form_post_edit div.submit input[type="submit"], form.form_thread_edit div.submit input[type="submit"], form.form_post_new div.submit input[type="submit"], form.form_thread_new div.submit input[type="submit"]');
+        var decoy=$('<input class="decoy" type="button" value="'+original.first().attr('value')+'">');
+        original.hide();
+        decoy.bind('click',function(){
+            if ($('#TBmenu #previousBrackets li').length>0) {
+                $(document).ajaxSend(function(event, request, settings){
+                    if(settings.url == "/plugin/key/set/" && $.browser.webkit) settings.async = false;
+                });  //THANK YOU ETON FOR THE HELP!
+                
+                var keydata='';
+                $('div.editor.bbcode-editor textarea').val($('div.editor.bbcode-editor textarea').val()+String.fromCharCode(7));
+                $('#TBmenu #previousBrackets li').each(function(){
+                    keydata+='['+ $(this).children().first().val()+ ']';
+                });
+                if (proboards.data('page').post && proboards.data('page').post.id) {
+                    var TBpost_id=proboards.data('page').post.id;
+                    pb.plugin.key('wormo_bracketdata').set({object_id:TBpost_id,value:keydata,success:function(){original.trigger('click');}});
+                } else {
+                    proboards.plugin.key('wormo_bracketdata').set_on('thread_new',keydata);
+                    proboards.plugin.key('wormo_bracketdata').set_on('post_new',keydata);
+                    original.first().trigger('click');
+                }           
+            } else {
+                original.first().trigger('click');
+            }
+        });
+        original.first().before(decoy);
+        $('ul.wysiwyg-tabs').append($('<li id="menu-item-TB"><a href="javascript:void(0);" onclick="$(\'.wysiwyg-tabs li\').removeClass(\'ui-active\'); $(\'#menu-item-TB\').addClass(\'ui-active\'); $(\'.ui-wysiwyg .editors\').hide(); $(\'#TBdiv\').children().first().show(); $(\'#menu-item-visual,#menu-item-bbcode\').bind(\'click\',function(){$(\'.ui-wysiwyg .editors\').show(); $(\'#TBdiv .editors\').hide();}); cleanupUBBC(); return false;">Tournament Brackets</a></li>'));
+    }
+}    
+    

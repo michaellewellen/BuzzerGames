@@ -1,0 +1,681 @@
+//Proboards V5 Controls Manager (Basic Version)
+
+(function () {
+	var _version = '0.9.8';
+	function groupCheck(allowedGroupsArray,group_id){
+		if( !allowedGroupsArray || !$.isArray(allowedGroupsArray) || "undefined" == typeof allowedGroupsArray[0] ) return true;
+		group_id = group_id || proboards.data("user").group_ids || [0];
+		for(var a = 0, b = []; a < group_id.length; a ++ ){
+			if( $.inArrayLoose( group_id[a],allowedGroupsArray) == -1 ){
+				b.push("0");
+			}else{
+				b.push("1");
+			}
+		}
+		return b.join("").replace(/0+/g,"").length != 0;
+	}
+	
+	function boardCheck(allowedBoardsArray,board_id){
+		if( !allowedBoardsArray || !$.isArray(allowedBoardsArray) || "undefined" == typeof allowedBoardsArray[0] ) return true;
+		board_id = board_id || proboards.data("page") && proboards.data("page").board ? proboards.data("page").board.id : 0;
+		return $.inArrayLoose( board_id, allowedBoardsArray ) > -1
+	}
+	
+	/* returns an array of indices for a button within the multidimensional controlsGroup array given the button's id */
+	function button_indexOf(cg/*controlGroups*/, id) {
+		var a,
+		b,
+		c
+		for (a = 0; a < cg.length; a++) {
+			for (b = 0; b < cg[a].length; b++) {
+				for (c = 0; c < cg[a][b].length; c++) {
+					if (cg[a][b][c] == id)
+						return [a, b, c]
+				}
+			}
+		}
+		return null
+	}
+	
+	/*
+	adds a button to the controlGroups array, controls object and registers an image to be used 
+	(returns button id which may not necessarily be the requested id if there was a conflict) 
+	*/
+	function registerButton(editorData, btnData) {
+		if (!editorData || !editorData.controlGroups)
+			return;
+		if (!$.isArray(btnData))
+			btnData = plugin_this.settings.custom_buttons;
+		var editorName = editorData.name.toLowerCase();
+		if (btnData.length) {
+			for (var custom_buttons = btnData, y = 0, tagID; y < custom_buttons.length; y++) {
+				var custom_button = custom_buttons[y];
+				if ("string" != typeof custom_button.image)
+					return;
+				var custom_button_image = custom_button.image.replace(/(^|\|)\s+/, "$1").split("|");
+				if (!proboards.is_valid_image_url(custom_button_image[0])) {
+					return; //ignore invalid button URLS
+				}
+
+				tagID = custom_button.tag
+					if(custom_button.button_id){
+						tagID = custom_button.button_id
+					//generate a unique id if tag name isn't sufficient
+					}else if (((tagID in wysiwyg_this.controls) || (tagID in editorData.controls)/* || (tagID in window.wysiwyg_buttons)*/)) {
+						tagID = $.unique_id(tagID);
+					}
+					//if no button assigned to quick reply or if on full reply page but changes to the editor (bbcode or preview) has not been allowed then bail
+					if ((!isFullReply && editorData.controlGroups.join("").replace(/,/g, '')) || (isFullReply && $.inArray(editorName, plugin_this.settings.apply_custom_full_reply) > -1)) {
+						//check if button has been restricted to select groups or boards and test if current user or board is part of that list
+						if (!groupCheck(custom_button.groups) || !boardCheck(custom_button.boards)) {
+							return;
+						}
+
+						editorData.controls[tagID] = {
+							title : custom_button.title || ("Insert " + (custom_button.name || custom_button.tag)),
+							tag : custom_button.tag
+						}
+						//create new button in controls array and control group object if doesn't already exist
+						if (("," + editorData.controlGroups.join(",") + ",").indexOf("," + (custom_button.id || tagID) + ",") == -1) {
+							//add the button to a group
+							//calculate which group or create new group if value missing or out of bounds
+							//using building ==> floor ==> apartment analogy to keep track
+							var building = 1;
+							var floor = editorData.controlGroups[building].length; //how many floors in building
+							
+							if ($.isNumeric(custom_button.index) && custom_button.index > 0) {
+								//calculate which building and which floor based on the desired apartment number
+								building = custom_button.index <= editorData.controlGroups[0].length ? 0 : 1;
+								floor = parseInt(custom_button.index) - building * editorData.controlGroups[0].length;
+							}
+							if (floor > editorData.controlGroups[building].length){
+								//add a new floor if asking for one higher than the building currently has
+								floor = editorData.controlGroups[building].push([]);
+							}
+							//put our new resident in the apartment
+							editorData.controlGroups[building][floor - 1].push(tagID); //console.log(custom_button.name,tagID,[building,floor])
+						} else {
+							//target an existing button (neighbor)
+							var x_button = button_indexOf(editorData.controlGroups, custom_button.id)
+							if (x_button) { //console.log(custom_button.name,tagID,x_button)
+								//in this instance where we're replacing a button and the index field is not empty
+								//then it takes on a secondary role of allowing an insertBefore (-1)
+								//or an insertAfter (1) or the default action of replace (not 1 or -1)
+								if (Math.abs(custom_button.index) == 1) {
+									editorData.controlGroups[x_button[0]][x_button[1]].splice(x_button[2] + ((custom_button.index == -1) ? 0 : 1), 0, tagID);
+								} else {
+									editorData.controlGroups[x_button[0]][x_button[1]][x_button[2]] = tagID;
+								}
+							}
+						}
+
+						//and add new button image to button pool (plain js object)
+						window.wysiwyg_buttons[tagID] = custom_button_image[0];
+						if ("string" == typeof custom_button_image[1] && custom_button_image[0] != custom_button_image[1] && proboards.is_valid_image_url(custom_button_image[1])) {
+							window.wysiwyg_buttons[tagID + "-active"] = custom_button_image[1];
+						}
+
+						//create custom click handler function
+						var func = editorData.commands[tagID] = (function (custom_button){
+							if(custom_button.api && "function" == typeof custom_button.click){
+								return custom_button.click;
+							}else return function(editor, ui, value) {
+							function addtag(values) {
+								var attr,
+								val,
+								pragmas = {};
+								//allow fine tuning by an "insert" callback before processing
+								if("function" == typeof custom_button.insert){
+									try{ 
+										//if function returns false then abort! abort! abort! (must be false not just evals to false)
+										if(custom_button.insert.call(this,values) === false)return;
+									}catch(r){}
+								}
+								//supported so far: "noendtag", "content"
+								for (attr in values.attrs) {
+									if (/^pragma_(.+)$/.test(attr)) {
+										pragmas[RegExp.$1] = values.attrs[attr];
+										delete values.attrs[attr];
+									}
+								}
+
+								//special attribute "noendtag" forces no ending tag
+								/* "noendtag" is legacy only, all newer attribute directives use the "pragma_" prefix [e.g. "pragma_noendtag"] */
+								if (("noendtag" in values.attrs) || pragmas.noendtag) {
+									delete values.attrs.noendtag;
+									var output = '[' + values.tag + " " + ($.map(values.attrs, function (i, e) {
+												return e + '="' + values.attrs[e] + '"';
+											})) + "]";
+                                    output = output.replace(/\s+\]$/,"]");
+									editor.replaceSelection(editor.name == "Visual" ? editor.document.createTextNode(output) : output);
+								} else
+									editor.surroundSelection(editor.name == "Visual" ? $("<" + values.tag + ">" + (pragmas.content || "") + "</" + values.tag + ">").attr(values.attrs).get(0) : values.tag, $.isEmptyObject(values.attrs) ? false : values.attrs, true, pragmas.content);
+							}
+							
+							function array2HashPair(v) {
+								var obj = {};
+								$.each(v, function (i, e) {
+									i % 2 == 0 ? obj[e] = null : obj[v[i - 1]] = e;
+								})
+								return obj
+							}
+							function array2Options(v) {
+								var obj = [];
+								for (var a = v.length; --a > -1; ) {
+									if ($.isArray(v[a])) {
+										obj = obj.concat(v.splice(a, 1));
+									}
+								}
+								return obj;
+							}
+
+							//and add the needed data as expandos
+							//var custom_button = arguments.callee.custom_button,
+							var attribute_title;
+							if ((custom_button.attributes = custom_button.attributes || "noatrb")) { //attributes now optional
+								custom_button.attributes = custom_button.attributes.replace(/\\\|/g,"&#"+"124;").replace(/\\\=/g,"&#"+"61;")
+								for (var promptATRB = [], atrb = custom_button.attributes.split("|"), xx = 0, control_attrs = editorData.controls[tagID].attrs = {}, atrb_parts; xx < atrb.length; xx++) {
+									atrb_parts = $.trim(atrb[xx]).split("=");
+									if (atrb_parts.length == 1) {
+										continue;
+									} //no equal sign then ignore attribute
+									atrb_parts[0] = atrb_parts[0].replace(/&#{1}124;/g, "|").replace(/&#{1}61;/g,"=")
+									atrb_parts[1] = atrb_parts[1].replace(/&#{1}124;/g, "|").replace(/&#{1}61;/g,"=");
+									//allow definable field titles by using parentheses immediately following attribute (or style property) name
+									//example: "href(Article URL)=" would ask for "Article URL" instead of "href" in the prompt presented to user
+									attribute_title = atrb_parts[0] = atrb_parts[0].split(/\(/);
+									atrb_parts[0] = atrb_parts[0][0];
+									attribute_title = attribute_title[1] ? attribute_title[1].replace(/\)\s*$/, '') : null;
+									if (atrb_parts[0].toLowerCase().indexOf("style") == 0) {
+										control_attrs.style = control_attrs.style || "";
+										//propertyval followed by ":;" will invoke a prompt
+										control_attrs.style += atrb_parts[0].split(":")[1] + ":" + atrb_parts[1] + ";";
+										if (/\:;$/.test(control_attrs.style))
+											promptATRB.push({
+												title : attribute_title || atrb_parts[0].split(":")[1] + " style",
+												name : "css_" + atrb_parts[0].split(":")[1],
+												input : true,
+												type : 'text',
+												size : 20,
+												required : true
+											})
+									} else {
+										control_attrs[atrb_parts[0]] = atrb_parts[1] || "";
+										/* if (control_attrs[atrb_parts[0]] == "")
+											promptATRB.push({
+												title : attribute_title || atrb_parts[0],
+												name : atrb_parts[0],
+												input : true,
+												type : 'text',
+												size : 20,
+												required : true
+											}) */
+									}
+									if ((control_attrs.style && /\:;$/.test(control_attrs.style)) || control_attrs[atrb_parts[0]] == "") {
+										promptATRB.push({
+											title : control_attrs.style ? (attribute_title || atrb_parts[0].split(":")[1] + " style") : (attribute_title || atrb_parts[0]),
+											name : control_attrs.style ? "css_" + atrb_parts[0].split(":")[1] : atrb_parts[0],
+											input : true,
+											type : 'text',
+											size : 20,
+											required : true
+										})
+									} else if (/^\s*\[\s*".+\]\s*$/.test(atrb_parts[1])) {
+										//value is an array used to specify alternate input forms
+										try {
+											var opts = $.parseJSON('{"opts":' + atrb_parts[1] + '}').opts,
+											j = {};
+											//first element in array declares type of input desired
+											if ("string" == typeof opts[0]) {
+												switch (opts.shift().toLowerCase()) {
+												case "textarea":
+													j.input = true;
+													j.type = 'textarea';
+													if (control_attrs.style)
+														control_attrs.style = css.prop + ":;";
+													break;
+												case "text":
+												case "input":
+													j.input = true;
+													j.type = 'text';
+													if (control_attrs.style)
+														control_attrs.style = css.prop + ":;";
+													break;
+												case "select":
+													j.select = true;
+													j.options = array2Options(opts); // opts = [];
+													j.value = j.options[0];
+													if (control_attrs.style)
+														control_attrs.style = css.prop + ":;";
+													break;
+												case "selectmenu":
+													j.selectMenu = true;
+													j.options = array2Options(opts); // opts = [];
+													j.value = j.options[0];
+													if (control_attrs.style)
+														control_attrs.style = css.prop + ":;";
+													break;
+												default:
+													throw "Error: unknown input type " + atrb_parts[1];
+												}
+												promptATRB.push($.extend({
+														title : control_attrs.style ? (attribute_title || atrb_parts[0].split(":")[1] + " style") : (attribute_title || atrb_parts[0]),
+														name : control_attrs.style ? "css_" + atrb_parts[0].split(":")[1] : atrb_parts[0],
+														size : 20,
+														required : true
+													}, j, array2HashPair(opts)))
+											} else {}
+										} catch (err) {
+											promptATRB.push({
+												title : atrb_parts[0],
+												name : atrb_parts[0],
+												input : true,
+												type : 'text',
+												size : 20,
+												extraInfo : '<span class="error">' + err.message + '</span>'
+											})
+										}
+									}
+								}
+								if (promptATRB.length) {
+									this._prompt({
+										title : custom_button.title || ('Insert ' + (custom_button.name || custom_button.tag)),
+										fields : promptATRB,
+										callback : function (values) {
+											var obj = {
+												tag : custom_button.tag
+											},
+											a;
+											obj.attrs = $.extend(control_attrs, values)
+												for (a in obj.attrs) {
+													if (/^css_/.test(a)) {
+														obj.attrs.style = obj.attrs.style.replace(a.substr(4) + ":;", a.substr(4) + ":" + obj.attrs[a] + ";");
+														delete obj.attrs[a];
+													}
+												}
+												"function" == typeof custom_button.addtag ? custom_button.addtag(obj) : addtag(obj)
+										},
+										ieWidth : 425
+									});
+								} else {
+									"function" == typeof custom_button.addtag 
+									? custom_button.addtag({
+										tag : custom_button.tag,
+										attrs : control_attrs
+									}) 
+									: addtag({
+										tag : custom_button.tag,
+										attrs : control_attrs
+									})
+								}
+							}
+						};
+						})(custom_button)
+						//func.custom_button = custom_button;
+					}
+			}
+			return tagID;
+		}
+	}
+	if (/(conversation|thread|_posts?|_messages?)$/.test(proboards.dataHash.route.name)) {
+		var plugin_this = proboards.plugin.get('eton_quick_reply_bbbutton'),
+		isFullReply,
+		wysiwyg_this,
+		bbEditor,
+		protohooks = {},
+		api = {
+			buttons	:	[],
+			enabled	:	plugin_this.settings.enable_api
+		},
+		editors = ["bbcode"]
+		function editEditor() {
+			if (window.wysiwyg_buttons && localStorage) {
+				//save button images if available for use on pages where not available
+				localStorage["wysiwyg_buttons"] = JSON.stringify(window.wysiwyg_buttons);
+			}
+			window.wysiwyg_buttons = window.wysiwyg_buttons || (localStorage && localStorage['wysiwyg_buttons'] && $.parseJSON(localStorage['wysiwyg_buttons'])) || {
+				"underline" : "//images.proboards.com/v5/images/bbcode/underline.png",
+				"createLink" : "//images.proboards.com/v5/images/bbcode/link.png",
+				"italic" : "//images.proboards.com/v5/images/bbcode/italic.png",
+				"justifyFull" : "//images.proboards.com/v5/images/bbcode/justify-full.png",
+				"insertHorizontalRule" : "//images.proboards.com/v5/images/bbcode/horizontal-rule.png",
+				"insertVideo" : "//images.proboards.com/v5/images/bbcode/movie.png",
+				"justifyCenter-active" : "//images.proboards.com/v5/images/bbcode/justify-center-active.png",
+				"italic-active" : "//images.proboards.com/v5/images/bbcode/italic-active.png",
+				"justifyRight-active" : "//images.proboards.com/v5/images/bbcode/justify-right-active.png",
+				"bold-active" : "//images.proboards.com/v5/images/bbcode/bold-active.png",
+				"strikethrough" : "//images.proboards.com/v5/images/bbcode/strikethrough.png",
+				"justifyLeft" : "//images.proboards.com/v5/images/bbcode/justify-left.png",
+				"justifyFull-active" : "//images.proboards.com/v5/images/bbcode/justify-full-active.png",
+				"subscript-active" : "//images.proboards.com/v5/images/bbcode/subscript-active.png",
+				"underline-active" : "//images.proboards.com/v5/images/bbcode/underline-active.png",
+				"createEmail" : "//images.proboards.com/v5/images/bbcode/email.png",
+				"foreColor" : "//images.proboards.com/v5/images/bbcode/color.png",
+				"insertCode" : "//images.proboards.com/v5/images/bbcode/code.png",
+				"insertQuote" : "//images.proboards.com/v5/images/bbcode/quote.png",
+				"justifyRight" : "//images.proboards.com/v5/images/bbcode/justify-right.png",
+				"insertTable" : "//images.proboards.com/v5/images/bbcode/table.png",
+				"bold" : "//images.proboards.com/v5/images/bbcode/bold.png",
+				"justifyCenter" : "//images.proboards.com/v5/images/bbcode/justify-center.png",
+				"subscript" : "//images.proboards.com/v5/images/bbcode/subscript.png",
+				"insertSmiley" : "//images.proboards.com/v5/images/bbcode/smiley.png",
+				"strikethrough-active" : "//images.proboards.com/v5/images/bbcode/strikethrough-active.png",
+				"superscript" : "//images.proboards.com/v5/images/bbcode/superscript.png",
+				"removeFormat" : "//images.proboards.com/v5/images/bbcode/remove-format.png",
+				"insertUserLink" : "//images.proboards.com/v5/images/bbcode/membersearch.png",
+				"superscript-active" : "//images.proboards.com/v5/images/bbcode/superscript-active.png",
+				"insertImage" : "//images.proboards.com/v5/images/bbcode/image.png",
+				"justifyLeft-active" : "//images.proboards.com/v5/images/bbcode/justify-left-active.png",
+				"insertUnorderedList" : "//images.proboards.com/v5/images/bbcode/list.png",
+				"insertEmbed" : "//images.proboards.com/v5/bbcode/embed.png"
+			}
+
+			//are smiles disabled? If disabled it will return the name of its click handler ("insertSmiley")
+			var nosmiles = (plugin_this.settings.nosmiles || 0)
+			plugin_this.settings.nosmiles = nosmiles != 0 ? [nosmiles] : []
+
+				$.each(wysiwyg_this.editors, function (editorName, editorData) {
+					if (!nosmiles) {
+						//create smileys and pull any updated ones from shoutbox if available
+						if (!wysiwyg_this.options.smiles) {
+							wysiwyg_this.options.smiles = proboards.shoutbox && proboards.shoutbox.smiles ? proboards.shoutbox.smiles : [":)", "/images/smiley/smiley.png", ":P", "/images/smiley/tongue.png", ":|", "/images/smiley/plain.png", ":'(", "/images/smiley/cry.png", ">:(", "/images/smiley/angry.png", ":D", "/images/smiley/grin.png", ":(", "/images/smiley/sad.png", "::)", "/images/smiley/eyesroll.png", ";)", "/images/smiley/wink.png", "8-)", "/images/smiley/cool.png", ";-|", "/images/smiley/squint.png", "???", "/images/smiley/huh.png", ":o", "/images/smiley/shocked.png", "(rofl)", "/images/smiley/rofl.png", "x_x", "/images/smiley/dead.png", "8D", "/images/smiley/insane.png", "(puke)", "/images/smiley/sick.png", ":))", "/images/smiley/cheesy.png", "O_o", "/images/smiley/browraise.png", ">:D", "/images/smiley/superangry.png", ":-X", "/images/smiley/lipssealed.png", ":-*", "/images/smiley/kiss.png", "8-|", "/images/smiley/nerd.png", "B-|", "/images/smiley/notamused.png", ":-/", "/images/smiley/undecided.png", "(atrb_partsz)", "/images/smiley/asleep.png", ":-[", "/images/smiley/embarrassed.png", ":-S", "/images/smiley/wavey.png", "P-)", "/images/smiley/pirate.png", "(:))", "/images/smiley/ninja.png"]
+								wysiwyg_this.options.formId = $(wysiwyg_this.controlsContainer).closest('form').attr('id');
+							wysiwyg_this.options.varName = "message";
+							if (!$("#" + wysiwyg_this.options.formId + "_message_nosmiles_input").length) {
+								wysiwyg_this.$nosmiles = $('<input type="hidden">').attr({
+										id : wysiwyg_this.options.formId + "_message_nosmiles_input",
+										disabled : "disabled"
+									}).appendTo('body');
+							}
+						}
+					}
+					//if all embeds are removed then remove the button automatically as well if not already
+					//set it up as an array so if there are future changes to the list by Proboards they can easily be added/removed
+					var embeds = ["facebook", "twitter", "gplus", "linkedin", "pinterest", "vine", "lastfm", "spotify", "instagram", "indiegogo", "kickstarter"]
+					if(plugin_this.settings.embeds.length == embeds.length && $.inArray('insertEmbed', plugin_this.settings.ignore_buttons) == -1){
+						plugin_this.settings.ignore_buttons.push('insertEmbed');
+					}
+
+					//remove disabled buttons and selectors from the editors' button pool
+					// each settings array ("selectors", "ignore_buttons", "nosmiles") will contain the name of the any disabled button's clickhandler (ID)
+					$.each(["selectors", "ignore_buttons", "nosmiles"], function (index, value) {
+						for (var x = (plugin_this.settings[value] || []), y = 0; y < x.length; y++) {
+							excludes_loop :
+							for (var a = (isFullReply && $.inArray(editorName, plugin_this.settings.apply_to_full_reply) == -1) ? [] : editorData.controlGroups, b = 0, c, d; b < a.length; b++)
+								for (c = 0; c < a[b].length; c++) {
+									if ((d = $.inArray(x[y], a[b][c])) > -1) {
+										a[b][c].splice(d, 1);
+										break excludes_loop;
+									}
+								}
+
+						}
+						return true;
+					})
+
+					//Add custom buttons
+					$.each(plugin_this.settings.custom_buttons, function(bi,bd){
+						bd.button_id = registerButton(editorData,[bd]);
+					})
+					d = $("." + editorName + "-editor", wysiwyg_this.controlsContainer);
+
+				})
+
+		}
+		protohooks['form'] = {
+			"_create" : $.ui.form.prototype._create
+		};
+		$.ui.form.prototype._create = function () {
+			protohooks.form._create.apply(this, arguments);
+			
+			if (this.element.hasClass('form_post_quick_reply')) {
+				isFullReply = !1;
+				wysiwyg_this = $.extend({}, $.ui.wysiwyg.prototype);
+				//build bbcode editor object
+				bbEditor = wysiwyg_this.editors.bbcode = $.extend({}, wysiwyg_this._bbcodeEditor, {
+						built : true
+					});
+				bbEditor.textarea = bbEditor.editable = bbEditor.bindable = bbEditor.resizable = $('.form_post_quick_reply textarea[name="message"]').get(0);
+				$.extend(bbEditor.controls, wysiwyg_this.controls);
+				wysiwyg_this.currentEditorName = "bbcode";
+				$.extend(wysiwyg_this, {
+					controlsContainer : $('<div class="controls ui-helper-clearfix"></div>').insertBefore(bbEditor.editable).wrap('<div class="ui-wysiwyg" ></div>'),
+					options : {
+						defaultEditor : "bbcode",
+						defaultFormat : "bbocde"
+					}
+				});
+
+				//allow overflow on quick reply container for font/size menus
+				$(bbEditor.editable).closest('.content.cap-bottom').css("overflow", "visible")
+				//add api buttons into the mix so they can be built when WYSIWYG inits.
+				if(api.buttons.length){
+					$.each(api.buttons, function(i,e){plugin_this.settings.custom_buttons.push(/*$.extend({},this)*/ this)})
+					
+				}
+				editEditor();
+				wysiwyg_this._buildControls.call(
+					wysiwyg_this,
+					"bbcode", //editorName,
+					wysiwyg_this.editors.bbcode.controls, //editorData.controls,
+					wysiwyg_this.editors.bbcode.controlGroups //editorData.controlGroups
+				)
+				$.each(api.buttons, function(i,e){
+					e.buttons = $('.button-'+e.button_id, wysiwyg_this.controlsContainer);
+					if("function" == typeof e.create){
+						try{ e.create.call(wysiwyg_this,e);}catch(err){}
+					}
+				})
+				delete api.buttons; //flag that says buttons have been built so must build manually if there are subsequent api calls
+			}
+		}
+		protohooks.wysiwyg = {
+			"_create" : $.ui.wysiwyg.prototype._create,
+			"_getInsertEmbedMenu"	: $.ui.wysiwyg.prototype._getInsertEmbedMenu
+		}
+		$.ui.wysiwyg.prototype._create = function () {
+
+			wysiwyg_this = this;
+			isFullReply = !0;
+			editors = this.options.editors;
+			//temporarily set the editor prototypes as built editors so we can modify them
+			wysiwyg_this.editors.bbcode = wysiwyg_this._bbcodeEditor;
+			wysiwyg_this.editors.visual = wysiwyg_this._visualEditor;
+			if(api.buttons.length){
+				$.each(api.buttons, function(i,e){plugin_this.settings.custom_buttons.push($.extend({},this))})
+				//delete api.buttons;
+			}
+			editEditor();
+			//remove temporary editors so they can properly be built by the WYSIWYG
+			wysiwyg_this.editors = {}
+			protohooks.wysiwyg._create.apply(this, arguments);
+			$.each(api.buttons, function(i,e){
+				e.buttons = $('.button-'+e.button_d, wysiwyg_this.controlsContainer);
+				if("function" == typeof e.create){
+					try{ e.create.call(wysiwyg_this,e);}catch(err){}
+				}
+			})
+			delete api.buttons; //flag that says buttons have been built so must build manually if there are subsequent api calls
+		}
+		$.ui.wysiwyg.prototype._getInsertEmbedMenu = function(){
+			var embed = protohooks.wysiwyg._getInsertEmbedMenu.apply(this, arguments);
+			if(plugin_this.settings.embeds.length){
+				if(!isFullReply || plugin_this.settings.apply_to_full_reply){
+					$.each(plugin_this.settings.embeds, function(i, embedID){
+						embed.menu.find("."+embedID).hide();
+					})
+				}
+			}
+			return embed;
+		}
+		//export an api
+		function addButton( tag,image,opts){
+			if("string" != typeof tag || !/^\w+$/.test(tag)){ 
+				return console.log("Error: Bad tag while adding custom WYSIWYG editor button"),false;
+			}
+			if("string" != typeof image || !proboards.is_valid_image_url(image)){
+				return console.log("Error: Bad image url while adding custom WYSIWYG editor button"),false;
+			}
+			opts = opts || {};
+			
+			//don't allow outside calls to replace any buttons, either insert after or insert before
+			if('id' in opts && opts.index != 1) opts.index = -1;		
+			
+			var btnData = $.extend({
+				tag		: 	tag,
+				image	:	image,
+				api		:	true
+			},
+			(opts || {})
+			)
+				
+			//if there's a create callback function then save it for later
+			if("function" == typeof opts.create){
+				btnData.create = opts.create;
+			}
+			
+			if(opts.editor){
+				if("string" == typeof  opts.editor){ opts.editor = [opts.editor]; }
+				btnData.apply_to_editor = opts.editor;
+			}else{
+				btnData.apply_to_editor = ["visual", "bbcode", "quick"]
+			}
+			
+			//if buttons have already been built by WYSIWYG then we need to add them manually
+			if("undefined" == typeof api.buttons){
+				btnData.wysiwyg_loaded = true;
+				$.each(wysiwyg_this.editors, function(name,editor){
+					//if an editor is specified then check that we're in one that is listed
+					//NOTE: unlike plugin settings, for api calls, if no editors are defined just means ALL editors are OK
+					if(btnData.apply_to_editor && $.inArray(name, btnData.apply_to_editor) == -1){ 
+						return true; //skip to next editor
+					}
+					btnData.button_id = registerButton(editor,[btnData]);
+					var button_position = button_indexOf(editor.controlGroups, btnData.button_id);
+					if(button_position){
+						var button_group = $('.' + name + '-editor')
+							.find('>div:eq(' + button_position[0] + ')');
+						if(button_group.find('>ul:eq(' + button_position[1] + ')').length == 0){
+							button_group.append('<ul></ul>');
+							button_position[1] = button_group.find('>ul').length -1;
+						}
+						button_group = button_group.find('>ul:eq(' + button_position[1] + ')');
+						var button = $('<li></li>').addClass('button')
+							.addClass('button-' + btnData.button_id)
+							.attr('title', btnData.title || ('Insert '+(btnData.name||btnData.tag)))
+							.data('control',btnData.button_id)
+							.append('<img alt=" " class="inactive" src="' + btnData.image + '">')
+							.click(function (e){ wysiwyg_this.execCommand($(this).data("control"))})
+						if( $('>li', button_group).length - 1 >= button_position[2]){
+							$('>li:eq(' + button_position[2] + ')', button_group).before(button);
+						}else{
+							button_group.append(button);
+						}
+						if("undefined" == typeof btnData.buttons){
+							btnData.buttons = button;
+						}else{
+							btnData.buttons = btnData.buttons.add(button);
+						}
+					}
+				})
+				if(btnData.create){
+					btnData.create.call(wysiwyg_this,btnData)
+				}
+			}else{
+				api.buttons.push(btnData)
+			}
+			return btnData.button_id || true;
+		}
+		setTimeout(function(){
+			window.eton = window.eton || {};
+			var features = { 
+				"title"				:	true,		//allows users to see the specified text in a tooltip when hovering over the button
+				"index"				:	true,		//chooses into which group of buttons to drop this new button
+				"groups"			:	true,		//allows limiting this button to be seen only by groups listed in the array (numeric group id expected in the array)
+				"boards"			:	true,		//allows limiting this button to be seen only in boards listed in the array (numeric board id expected in the array)
+				"id"				:	true,		//allows your button to target a specific button to increase placement precision (before or after). This overrides index and uses it to determine placement: 1 == after and -1 == before
+				"attributes"		:	true,		//allows adding attributes to your tag with the option to prompt the user for values to fill those attributes if any values for those attributes are left blank
+				"editor"			:	true,		//specifies to which editor(s) this button will attach (left undefined and all editors are assumed)
+				"create"			:	true,		//specifies a callback function that will receive a parameter that references the created button.
+				"addtag"			:	true,		//specifies a function to replace the default function provided by the plugin to add tags to the editor(s) and receives the unmodified attributes (returned by WYSIWYG) which is passed as a hash map param
+				"insert"			:	true,		//specifies a function that gets called before a tag is inserted allowing modifications to the final attributes which is passed as a hash map param
+				"pragma_noendtag"	:	true,		//allows a bbcode tag to have no closing tag
+				"pragma_content"	:	true,		//specifies text (including additional bbcode) to place inside this tag
+				"protocol_relative"	:	true,		//button image urls no longer need the "http:" or "https:" part to be considered valid image urls (to avoid mixed content secuity warnings)
+				"attributes_alias"	:	true,		//allows providing alternate text to show instead of the attribute name in a prompt by placing the desired text in parentheses immediately following the attribute name.
+				"attributes_inputs"	:	true		//allows specifying the type of input field to show when prompting the user (http://support.proboards.com/post/5248008)
+			}
+			
+			window.eton.wysiwyg = {
+				addButton	: function(tag,image,opts){ 
+					if(!api.enabled) return false;
+					return addButton.call(wysiwyg_this, tag, image, opts);
+				},
+				hasFeature	: function (feature_name){
+					if(!api.enabled) return false;
+					//feature_name can be a string or an array of strings if checking multiple features
+					if("string" == typeof feature_name){ 
+						feature_name = $.trim(feature_name);
+						if(/\s/.test(feature_name)){
+							//a space separated list of features to check
+							feature_name = feature_name.split(/\s+/);
+						}else{
+							feature_name = [feature_name];
+						}
+					}else if (!$.isArray(feature_name)){
+						return false;
+					}
+					var available = [];
+					$.each(feature_name, function(i,e){
+						available.push(features[$.trim(''+e)] === true ? "1" : "0");
+					})
+					/* one feature failing causes all to fail */
+					return  !/0/.test(available.join(""))
+				},
+				"plugin": {
+					"version"			: _version,
+					"name"				: "Quick Reply BBcode Buttons",
+					"name_internal"		: "Proboards V5 Controls Manager (Basic Version)",
+					"id"				: "eton_quick_reply_bbbutton"
+				}
+			}
+		},0)
+	}
+})()
+
+/* CHANGELOG
+Dec 26, 2014 (v0.9.8):
+- fixed typo regarding the new insert emebed Button
+- added ability to remove specific social embeds from the new embed button's menu
+Dec 20, 2014 (v0.9.7):
+- added embed button to fire tab so it can be removed by placing a check next to it
+Dec 20, 2014 (v0.9.6):
+- adds support for the new insert embed button
+- added option to turn off API-created buttons (for diagnostic purposes)
+Dec 11, 2014 (v0.9.5):
+- expanded available input types when showing the user a prompt (imported from advanced version)
+- checked for [" instead of just [ at start of attribs to avoid confusing expanded inputs with bbcode entered in pragma_content
+- allow for the casual occurence of = and | in the attributes field using a double backslash for escaping
+- fixed (once again) 1-based array being treated as 0-based array resulting in incorrect button index interpretation (">=" should be ">")
+- switched to $.unique_id since tacking on a timestamp was sometimes not sufficient
+Dec 09, 2014 (v0.9.4):
+- added "create", "addtag" and "insert" callbacks for API
+- added feature detect (option) to API so API callers are able to distinguish between basic and advanced plugins
+- fixed a bug that broke attribute aliases
+- fixed a bug that ignored titles set on the button by an API and instead used name or tag
+Dec 01, 2014 (v0.9.3):
+- updated api to manually add a button rather than issue an error when buttons have already been created by WYSIWYG
+- removed capability for an api call to remove a button (defaults to insert before instead), only buttons created in the plugin can do that
+- added ability for api to choose an editor by adding an editor name to the options in the call (e.g. "visual" would add button only to preview tab)
+Nov 29, 2014 (v0.9.2):
+- added support for restricting custom made buttons to only appear for specific groups or only in specific boards
+- added support for protocol agnostic button image urls
+- added a rudimentary api with an addButton method for use by other plugins and codes (window.eton.wysiwyg.addButton)
+Aug 25, 2014 (v0.9.1):
+- pragma_noendtag now outputs bbcode on preview tab because jquery or browser will automatically add an ending tag (must switch to bbcode then back to convert)
+Jan 17, 2014 (v0.9.0):
+- made attributes field optional
+- added ID field to support replacing existing buttons
+- added support for pragma_noendtag attribute
+- added support for pragma_content attribute (i.e. the "insert code here" seen in code tags)
+*/

@@ -1,0 +1,67 @@
+//check key
+var rulesstorage = yootil.storage.persistent.get('lionrule');
+var rules = proboards.plugin.key('rulesystem').get();
+
+function lionRuleSystem_confirm() {
+    var d = confirm("Before posting you must agree to the rules.");
+    if (d == true) {
+        window.location = "/page/rules"
+    } else {
+        if (yootil.user.logged_in()) {
+            alert("You have been logged out.");
+            window.location = "/logout"
+        } else if (!yootil.user.logged_in()) {
+            alert("You have been redirected to the home page.");
+            window.location = "/home"
+        }
+    }
+}
+
+function lionRuleSystem_keycheck() {
+    if (yootil.user.logged_in()) {
+        if (rules != "accepted") {
+            if(rulesstorage == "Accept") {
+				proboards.plugin.key('rulesystem').set('accepted');
+            } else {
+                lionRuleSystem_confirm();
+            }
+                
+        }
+    }
+    if (!yootil.user.logged_in()) {
+        if (rulesstorage != "Accept") {
+			lionRuleSystem_confirm();
+        }
+    }
+}
+
+//Check Key Before Posting
+$(document).ready(function () {
+    if (yootil.location.check.thread() || yootil.location.check.search_results()) {
+        if (yootil.user.logged_in()) {
+            if (rules != "accepted") {
+                if(rulesstorage == "Accept") {
+					proboards.plugin.key('rulesystem').set('accepted');
+            	} else {
+                	$('input[name=post]').prop('disabled', true).hide();
+                	$('textarea[name=message]').attr("disabled", "disabled").val('Please agree to rules before posting!').after('<a href="/page/rules" class="button">Read Rules!</a>');
+                }
+            }
+        }
+        if (!yootil.user.logged_in()) {
+            if (rulesstorage != "Accept") {
+                $('input[name=post]').prop('disabled', true).hide();
+                $('textarea[name=message]').attr("disabled", "disabled").val('Please agree to rules before posting!').after('<a href="/page/rules" class="button">Read Rules!</a>');
+            }
+        }
+    }
+    if (yootil.location.check.posting()) {
+        lionRuleSystem_keycheck();
+    }
+    //Update Key after reading rules
+    if (location.href.match(/\/lionrules/) && document.referrer.match(/page\/rules/)) {
+        proboards.plugin.key('rulesystem').set('accepted');
+        yootil.storage.persistent.set("lionrule", "Accept");
+        alert('Thank you for agreeing to the rules. You may now post on the forum.');
+    }
+});

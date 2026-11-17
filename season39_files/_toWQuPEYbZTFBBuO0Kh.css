@@ -1,0 +1,8 @@
+.TBtourneyOuterTable {border: #000000 2px solid;  margin:1px; width:99%}
+.TBtourneyTableTitle {font-weight: bold; font-size:18px;}
+.TBtourneyTable {background-color: #DDDDDD; width: 100% !important; border-collapse:separate; padding-bottom:5px;}
+.TBtourneyTableEntry {border-bottom: #000000 1px solid; text-align:center; height:20px; padding:0px !important}
+.TBbuffercol {width:10px !important; padding:0px !important}
+.TBbuffercol.extend {border-bottom: #000000 1px solid;}
+.TBsidewall {border-left: #000000 1px solid;}
+#previousBrackets li {padding-top:3px; padding-bottom:3px; font-weight:bold}

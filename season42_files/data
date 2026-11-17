@@ -1,0 +1,11 @@
+ window.htLocationData = {
+    "country": "united states",
+    "region": "UT",
+    "metro_area": "770",
+    "ja3": "f0faafcb55c3078d14f6d144b385a4de",
+    "ja4": "t13d1517h2_8daaf6152771_cb7bf5808d99",
+    "proxy_type": "edu",
+    "proxy_description": "?",
+    "utc_offset": "-700",
+    "asn": "210"
+  }

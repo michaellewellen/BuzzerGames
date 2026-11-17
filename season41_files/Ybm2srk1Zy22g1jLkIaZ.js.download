@@ -1,0 +1,180 @@
+function getBy(cell,att,attName)
+{
+    var cellArray = new Array();
+    var aa = document.getElementsByTagName(cell);
+    for(a=0; a<aa.length; a++)
+    {
+        if(att == 'class')
+        {
+            if(aa[a].className == attName)
+            {
+                cellArray[cellArray.length] = aa[a];
+            }
+        }
+        else if(att == 'title')
+        {
+            if(aa[a].title == attName)
+            {
+                cellArray[cellArray.length] = aa[a];
+            }
+        }
+        else if(att == 'name')
+        {
+            if(aa[a].name == attName)
+            {
+                cellArray[cellArray.length] = aa[a];
+            }
+        }
+        else if(att == 'href')
+        {
+            if(aa[a].href.match(attName))
+            {
+                cellArray[cellArray.length] = aa[a];
+            }
+        }
+    }
+    return cellArray;   
+}
+
+var target = pb.plugin.get('disable_editing_after_a_set_ti').settings.placement;
+
+
+function checkEditButton(thisButton)
+{
+    var timeNow = parseInt(new Date().getTime());
+    var pID = parseInt(thisButton.href.split('post/')[1]);
+    pID = document.getElementById('post-'+pID);
+    var postingTime = pID.getElementsByTagName('div');
+    for(p=postingTime.length-1; p>-1; p--)
+    {
+        if(postingTime[p].className.match(/(edited_by|info)/))
+        {
+            postingTime = parseInt(postingTime[p].innerHTML.split('data-timestamp="')[1]);
+            break;
+        }
+    }
+    postingTime = timeNow-postingTime;
+    
+    if(postingTime > allowedTime && DeleteorEdit.match(/B|E/))
+    {
+        proboards.alert('Sorry, time up!');
+        thisButton.style.display = 'none';
+    }
+    return;
+}
+
+
+function checkDeleteTime(thisButton)
+{
+    var timeNow = parseInt(new Date().getTime());
+    var pID = parseInt(thisButton.href.split('post/')[1]);
+    var pIDCell = document.getElementById('post-'+pID);
+    var postingTime = pIDCell.getElementsByTagName('div');
+    for(p=postingTime.length-1; p>-1; p--)
+    {
+        if(postingTime[p].className.match(/(edited_by|info)/))
+        {
+            postingTime = parseInt(postingTime[p].innerHTML.split('data-timestamp="')[1]);
+            break;
+        }
+    }
+    postingTime = timeNow-postingTime;
+    
+    if(postingTime > allowedTime && DeleteorEdit.match(/B|D/))
+    {
+        getBy('li','class',pID+'-deletePost')[0].style.display = 'none';
+    }
+    return;
+}
+
+
+function checkPostTime(thisPost,cs,at,un)
+{
+    var currentTime = cs;
+    var allowedTime = at;
+    var pNumber = parseInt(thisPost.href.split(/\/post\//)[1]);
+    var post = document.getElementById('post-'+pNumber);
+    var mini = post.getElementsByTagName('td')[1];
+    if(mini.getElementsByTagName('a').length > 0)
+    {
+    	var poster = mini.getElementsByTagName('a')[0].href.split('/user/')[1];
+    	var pTime = mini.parentNode.getElementsByTagName('span');
+        
+        
+        var pTime = post.getElementsByTagName('div');
+    	for(p=pTime.length-1; p>-1; p--)
+    	{
+        	if(pTime[p].className.match(/(edited_by|info)/))
+        	{
+            	pTime = parseInt(pTime[p].innerHTML.split('data-timestamp="')[1]);
+            	break;
+        	}
+    	}
+        
+        var pT = pTime;
+        pTime = currentTime-pTime;
+        
+        if(removeOne == 'E')
+        {
+            thisPost.style.display = 'none';
+        }
+        else if(removeOne == 'D')
+        {
+            getBy('li','class',pNumber+'-deletePost')[0].style.display = 'none';
+        }
+    
+        if(poster == un && pTime > allowedTime)
+        {
+            if(DeleteorEdit.match(/(B|E)/))
+            {
+                thisPost.style.display = 'none';
+            }
+            if(DeleteorEdit.match(/(B|D)/))
+            {
+                getBy('li','class',pNumber+'-deletePost')[0].style.display = 'none';
+            }
+        } 
+        else
+        {
+            thisPost.onmouseover = function(){checkEditButton(thisPost);}
+            document.getElementById('post-'+pNumber+'-options').onmouseover = function(){checkDeleteTime(thisPost);}
+        }
+	}
+    return;
+}
+
+function runTimeCode(cell)
+{
+    var editButton = getBy('a','class','button edit-button');
+    
+    var uNumber = document.getElementById('navigation-menu').getElementsByTagName('a');
+    
+    for(u=0; u<uNumber.length; u++)
+    {
+        if(uNumber[u].href.match(/\/user\/\d/))
+        {
+            uNumber = uNumber[u].href.split('user/')[1];
+            break;
+        }
+    }
+    
+    var currentTime = parseInt(new Date().getTime());
+    for(e=0; e<editButton.length; e++)
+    {
+        checkPostTime(editButton[e],currentTime,allowedTime,uNumber);
+    } 
+    
+    return;
+}
+
+
+function DEST()
+{
+    var lp = getBy('td','class','left-panel');
+    for(l=0; l<lp.length; l++)
+    {
+        runTimeCode();
+    }
+    
+    return;
+}

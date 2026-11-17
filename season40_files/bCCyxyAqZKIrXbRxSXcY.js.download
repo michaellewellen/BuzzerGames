@@ -1,0 +1,94 @@
+var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+var user_profile_routes = ["user","show_user_activity","show_user_following", "show_user_friends","show_user_groups","show_user_notifications", "show_user_gift" ];
+
+$(document).ready(function(){
+    
+	if(pb.data('route').name == "thread"){
+        
+        var current_month_and_day = get_current_date();
+        var mini_profile_birthday_objects = $('.mini-profile').find('.display-birth');
+        
+        add_cake_image_to_all_mini_profiles(mini_profile_birthday_objects, current_month_and_day);
+        
+        pb.events.on('pageChange', function(){
+            
+            var current_month_and_day = get_current_date();
+            var mini_profile_birthday_objects = $('.mini-profile').find('.display-birth');
+            
+            add_cake_image_to_all_mini_profiles(mini_profile_birthday_objects, current_month_and_day);
+
+        });    
+    }
+    
+    if(in_user_profile()){
+        
+    	var current_month_and_day = get_current_date();
+        var users_birthday = $('.display-birth').text();
+        
+        if(is_today_birthday(current_month_and_day, users_birthday)){
+
+            add_cake_image_html_to_user_profile();
+        
+        }
+    }
+});
+
+function in_user_profile(){
+    
+	if($.inArray(pb.data('route').name, user_profile_routes) != -1)
+        return true;
+    return false;
+}
+
+function get_current_date (){
+	//return the current date in this format "September 17"
+    var current_date = new Date();
+    var current_day = current_date.getDate();
+    var current_month = months[current_date.getMonth()];
+    var current_month_and_day = current_month + " " + current_day; 
+    
+    return current_month_and_day;
+
+}
+
+function is_today_birthday(current_date, birth_day){
+	//both dates are in the format "September 17"
+     return current_date == birth_day;
+}
+
+
+function add_cake_image_to_all_mini_profiles(birthdays, current_date){
+    
+	for (i = 0; i < birthdays.length; i++){
+    	var birthday = birthdays[i].innerHTML.split(",")[0];
+    	
+        if (is_today_birthday(current_date, birthday)){
+            var birthday_mp = $($('.mini-profile').find('.display-birth')[i]);
+            add_cake_image_html_to_mini_profile(birthday_mp);
+        }
+    
+    }
+
+}
+
+function add_cake_image_html_to_mini_profile(birthday_mp){
+    
+	var cake_image = pb.plugin.get('cake_day').settings.birthday_image;
+    var user_link = $(birthday_mp).closest('.mini-profile').find('.user-link')[0].getAttribute('href');
+    var cake_html = "<div class = 'birthday-div'><a href = '" + user_link +"'><img src= '" + cake_image + "' " + "class = 'birthday-image'></a></div>";
+    var birthday_tip_html = pb.plugin.get('cake_day').settings.birthday_message;
+    
+    $(birthday_mp).closest('.mini-profile').addClass('mp-birthday');
+    $(birthday_mp).closest('.mini-profile').append(cake_html);
+    $(birthday_mp).closest('.mini-profile').find('.birthday-div').tipTip({ content: birthday_tip_html, defaultPosition: 'right', delay: 0 });
+}
+
+function add_cake_image_html_to_user_profile(){
+    var cake_image = pb.plugin.get('cake_day').settings.birthday_image;
+    var cake_html = " <img src = '" + cake_image + "' " + "class = 'birthday-image'>";
+    var birthday_tip_html = pb.plugin.get('cake_day').settings.birthday_message;
+    
+	$('span.big_username').append(cake_html);
+    $('span.big_username').tipTip({ content: birthday_tip_html, defaultPosition: 'right', delay: 0 });
+
+}

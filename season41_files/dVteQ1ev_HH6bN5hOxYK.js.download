@@ -1,0 +1,267 @@
+//  Tournament Brackets
+//  by Wormopolis - www.wormocodes.com
+//  plugin v2.1.6
+
+function tableGrid(entries, sides, mode, bracketid, data) {
+    //entries = number of outer slots, base 2
+    //sides = one sided (0) or 2 sided (1)
+    //mode = display (0), modify (1), create(2)
+    //bracketid = when modifying, saves the entry number from the menu list
+    //data = fill entries with values
+    
+    //each outer slot is spaced 2 apart so that next tier fits between
+    //total table rows = (entries)*2-1   (2e=3rows, 4e=7rows, etc...)
+    //total table columns = (Math.log(entries)/Math.log(2))*2+1+(2 border)   (2e=3cols, 4e=5cols, 8e=7cols)
+    if (sides==0) {
+        var totalrows=parseInt((entries)*2 -1);
+        var totalcols=parseInt((Math.log(entries)/Math.log(2))+1); //2=2, 4=3, 8=4, 16=5
+    } else {
+        var totalrows=parseInt(entries)-1;
+        var totalcols=parseInt((Math.log(entries)/Math.log(2))*2+1); //2=3, 4=5, 8=7, 16=9
+    } 
+    if (data) {
+        var datasplit=data.split('|');
+        if (datasplit.length>1) {
+            data=datasplit[2];
+        }
+        var dataConstruction=data.replace('[[','').replace(']]','').split('=');
+        var TBtitle=dataConstruction[0];
+        var TBtableTiers=dataConstruction[1].split('+');
+        var TBtierData=new Array();
+        for (tt=0;tt<TBtableTiers.length; tt++) {
+            TBtierData[tt]=TBtableTiers[tt].replace('{','').replace('}','').split(',');
+        }
+    }
+    var TBtableTitle=(mode==2 ? 'Title:<input id="TBtableTitle" size="80">' : (data ? (mode==1 ? '<input size="80" id="TBtableTitle" value="' + TBtitle + '">' : TBtitle) : ''));
+    var rawtable='<table title="Tournament Bracket" class="TBtourneyOuterTable"><tr><td class="TBtourneyTableTitle" style="height:20px;"  align="center">'+
+        TBtableTitle + '<input id="TBsavemodify" type="hidden" value="'+bracketid+'"><input type="hidden" id="TBsaveentries" value="'+ entries +'"><input type="hidden" id="TBsavesides" value="'+ sides +
+        '"></td></tr><tr><td><div'+(mode==0 && proboards.plugin.get('tournament_brackets').settings.collapse_initially ? ' style="display:none"' : '')+'><table class="TBtourneyTable' +(mode==1 ? ' modify' : '')+ '">';
+    var tierplace=new Array(totalcols);
+    for (tt=0; tt<totalcols; tt++) tierplace[tt]=0;
+    if (sides==0) {
+        for (rr=0; rr<totalrows; rr++) {
+            rawtable+='<tr><td class="TBbuffercol"></td>';
+            for (cc=0;cc<totalcols;cc++) {
+                var check= (rr%(Math.pow(2,cc+1))-(Math.pow(2,cc)-1)==0), check2=false, check3=false;
+                var prevtierlastrow= (cc>0 && ((parseInt(rr/(Math.pow(2,cc-1)))-parseInt(rr/(Math.pow(2,cc))))%2==1));
+                var putitinthere='';
+                var closestEntry=parseInt((Math.round(rr/(Math.pow(2,cc)))-1)/2);
+                if (mode==0 && cc>0 && TBtierData[cc][closestEntry]=='' && pb.plugin.get('tournament_brackets').settings.blank_out_empty_entries) check3=true;
+                if (check) {
+                    //if (mode==0 && cc>0 && TBtierData[cc-1][tierplace[cc]*2]=='' && TBtierData[cc-1][tierplace[cc]*2-1]=='') check3=true;
+                    if (data && mode!=2) {
+                        putitinthere=TBtierData[cc][tierplace[cc]]; tierplace[cc]++;
+                    } 
+                    if (mode>0) putitinthere='<input style="width:90%" value="' + putitinthere + '">';
+                }
+                if (check && putitinthere=='' && mode==0 && proboards.plugin.get('tournament_brackets').settings.blank_out_empty_entries) check2=true;
+                if (mode==0) {
+                    var allowImages=pb.plugin.get('tournament_brackets').settings.allow_images_in_entries;
+                    putitinthere=putitinthere.replace(/\[img\](.*?)\[\/img\]/gi,(allowImages ? '<img class="TBimages" style="max-height:'+pb.plugin.get('tournament_brackets').settings.max_image_height+'px; max-width:'+pb.plugin.get('tournament_brackets').settings.max_image_width+'px" src="$1"/>' : ''));
+                    putitinthere=putitinthere.replace(/\[br\]/gi,'<br>');
+                }
+                rawtable+='<td class="'+ (check ? 'tier' + cc + (!check2 ? ' TBtourneyTableEntry' : '') : '') +  ((prevtierlastrow && !check3) ? ' TBsidewall"' : '"') +'>'+ putitinthere +'</td><td class="TBbuffercol'+ ((check && cc<totalcols-1 && !check2) ? ' extend' : '') + '"></td>';
+            }
+            rawtable+='</tr>';
+        }
+    } else {
+        for (rr=0; rr<totalrows; rr++) {
+            rawtable+='<tr><td class="TBbuffercol"></td>';
+            var winnerspot_row=Math.floor((totalrows-1)/2)+(totalrows==1?1:0)-1;
+            var winnerspot_col=Math.ceil(totalcols/2)-1;
+            for (cc=0;cc<totalcols;cc++) { 
+                var check= (rr%(Math.pow(2,cc+1))-(Math.pow(2,cc)-1)==0 || rr%(Math.pow(2,(totalcols-cc)))-(Math.pow(2,(totalcols-cc-1))-1)==0), check2=false, check3=(cc==Math.ceil(totalcols/2) || cc==Math.floor(totalcols/2));
+                var prevtierlastrow= (cc>0 && ((parseInt(rr/(Math.pow(2,cc-1)))-parseInt(rr/(Math.pow(2,cc))))%2==1) || ((parseInt(rr/(Math.pow(2,(totalcols-cc)-1)))-parseInt(rr/(Math.pow(2,(totalcols-cc)))))%2==1));
+                var putitinthere='';  
+                        var keeptrack=(Math.floor(totalcols/2)-Math.abs(Math.floor(totalcols/2)-cc));
+                var closestEntry=parseInt((Math.round(rr/(Math.pow(2,cc)))-1)/2);
+                //if (mode==0 && cc>0 && TBtierData[cc][closestEntry]=='' && pb.plugin.get('tournament_brackets').settings.blank_out_empty_entries) check3=true;
+                if (check || (rr==winnerspot_row && cc==winnerspot_col)) {
+                    //if (mode==0 && cc>0 && TBtierData[cc-1][tierplace[cc]*2]=='' && TBtierData[cc-1][tierplace[cc]*2+1]=='') check3=true;
+                    if (data && mode!=2) {
+                        putitinthere=TBtierData[keeptrack][tierplace[keeptrack]]; tierplace[keeptrack]++;
+                    } 
+                    if (mode>0) putitinthere='<input style="width:90%" value="' + putitinthere + '">';
+                } 
+                if (check && putitinthere=='' && mode==0 && proboards.plugin.get('tournament_brackets').settings.blank_out_empty_entries) check2=true;
+                rawtable+='<td class="'+ (check ? 'tier' + (Math.floor(totalcols/2)-Math.abs(Math.floor(totalcols/2)-cc)) + (!check2 ? ' TBtourneyTableEntry' : '') : ((rr==winnerspot_row && cc==winnerspot_col) ? 'tier'+Math.floor(totalcols/2)+ (!check2 ? ' TBtourneyTableEntry' : ''):'')) +  ((prevtierlastrow && !check3) ? ' TBsidewall"' : '"') +'>'+putitinthere +'</td><td class="TBbuffercol'+ ((check && cc<totalcols-1 && !check2) ? ' extend' : '') + '"></td>';
+            }
+            rawtable+='</tr>';
+        }
+    }
+    var buttonstuff='';
+    if (mode==0) {  //display - make a collapse/expand button
+        if (proboards.plugin.get('tournament_brackets').settings.allow_collapseexpand)  {
+            buttonstuff='<input type="button" value="'+(proboards.plugin.get('tournament_brackets').settings.collapse_initially ? 'Expand' : 'Collapse')+'" class="TBdisplayButton">';
+        }
+    } else if (mode==1) {  //modify - make a modify and cancel button
+         buttonstuff='<input type="button" value="Modify" id="TBmodifyButton"><input type="button" value="Cancel" id="TBcancelButton">';
+    } else {  // create - make a save and cancel button
+         buttonstuff='<input type="button" value="Save" id="TBsaveButton"><input type="button" value="Cancel" id="TBcancelButton">';
+    }
+    rawtable+='</table></div></td></tr><tr><td style="height:20px;" align="right">' + buttonstuff + '</td></tr></table><br>';
+    return rawtable;
+}
+
+    function TBbuttonSetup() {
+        $('#TBcancelButton').bind('click',function(){
+            $('#TBdata').prev().slideDown(); $('#TBdata').slideUp();  
+        });
+        $('.TBdisplayButton').bind('click',function(){
+            $(this).parent().parent().prev().children().first().children().first().animate({
+                opacity:'toggle', height:'toggle', width:'toggle'
+            }, 1000);
+            $(this).val($(this).val()=='Collapse'?'Expand':'Collapse');
+        });
+        $('#TBsaveButton').bind('click',function(){
+            var currentries=$('#TBsaveentries').val();
+            var currsides=$('#TBsavesides').val();
+            var currtitle=$('#TBtableTitle').val();            
+            var tiercount=parseInt((Math.log(currentries)/Math.log(2))+1);
+            var tierdata='';
+            for (tt=0; tt<tiercount; tt++) {
+                tierdata+='{';
+                $('div.editors table.TBtourneyTable td.tier'+tt).each(function(){
+                    tierdata+=$(this).find('input').val() + ($(this).is($('div.editors table.TBtourneyTable td.tier'+tt+':last')) ? '' : ',');
+                });
+                tierdata+='}' + (tt<tiercount-1 ? '+' : '');
+            }
+            var postBrackets=$('#TBmenu #previousBrackets li').length;
+            $('#TBmenu #previousBrackets').prev().hide();
+            $('#TBmenu #previousBrackets').append($('<li id="'+postBrackets+'"><input type="hidden" value="'+(''+currentries+'|'+currsides+'|'+currtitle+'='+tierdata)+'"><b>'+currtitle+
+                                                                     ' </b><input type="button" value="modify" onclick="var tempdata=this.parentNode.firstChild.value.split(\'|\'); tmp_entries=tempdata[0]; tmp_sides=tempdata[1]; tmp_data=tempdata[2]; tmp_bracketid=this.parentNode.id; $(\'#TBdata\').html(tableGrid(tmp_entries,tmp_sides,1,tmp_bracketid, tmp_data)); TBbuttonSetup(); $(\'#TBdata\').prev().slideUp(); $(\'#TBdata\').slideDown();">'+
+                                                                     '<input type="button" value="remove" onclick="var conf=confirm(\'Are you sure?\'); if(conf){var pblist=this.parentNode.parentNode; pblist.removeChild(this.parentNode); if(pblist.childNodes.length==0) pblist.previousSibling.style.display=\'\'; $(\'#previousBrackets li\').each(function(i){$(this).attr(\'id\',i);});}"></li>'));
+            $('#TBdata').prev().slideDown(); $('#TBdata').slideUp();  
+        });
+        $('#TBmodifyButton').bind('click',function(){
+            var currentries=$('#TBsaveentries').val();
+            var currsides=$('#TBsavesides').val();
+            var currtitle=$('#TBtableTitle').val();     
+            var currbracketid=$('#TBsavemodify').val();                 
+            var tiercount=parseInt((Math.log(currentries)/Math.log(2))+1);
+            var tierdata='';
+            for (tt=0; tt<tiercount; tt++) {
+                tierdata+='{';
+                $('table.TBtourneyTable.modify td.tier'+tt).each(function(){
+                    tierdata+=$(this).find('input').val() + ($(this).is($('table.TBtourneyTable.modify td.tier'+tt+':last')) ? '' : ',');
+                });
+                tierdata+='}' + (tt<tiercount-1 ? '+' : '');
+            }
+            $('#TBmenu #previousBrackets li#'+currbracketid+'').children().first().val((''+currentries+'|'+currsides+'|'+currtitle+'='+tierdata));
+            $('#TBmenu #previousBrackets li#'+currbracketid+'').find('b').first().text(currtitle);
+            $('#TBdata').prev().slideDown(); $('#TBdata').slideUp();              
+        });
+        
+    }
+
+    function updateCurrentBrackets(postid){
+        //stored as string [bracket][bracket]
+        //bracket stored as [entries|sides|data]
+        //data stored as title={tier1}+{tier2}+...+{tier}
+        //tier stored as value1,value2,...,valueN
+        
+        var currentBrackets=proboards.plugin.key('wormo_bracketdata').get(postid);
+        if (currentBrackets) {
+            $('#TBmenu #previousBrackets').prev().hide();
+            var postBrackets=0;
+            currentBrackets=currentBrackets.replace(/\[(\/?)img\]/gi,'(=$1img=)');
+            while (currentBrackets) {
+                var TBextract=currentBrackets.match(/\[(.*?)\}\]/i);
+                var tempEntries=TBextract[1].split('|')[0];
+                var tempSides=TBextract[1].split('|')[1];
+                var tempData=TBextract[1].split('|')[2].replace(/\(\=(\/?)img\=\)/gi,'[$1img]');
+                var tempTitle=tempData.split('=')[0];
+                $('#TBmenu #previousBrackets').append($('<li id="'+(postBrackets++)+'"><input type="hidden" value="'+(''+tempEntries+'|'+tempSides+'|'+tempData+'}')+'"><b>'+tempTitle+
+                                                        ' </b><input type="button" value="modify" onclick="var tempdata=this.parentNode.firstChild.value.split(\'|\'); tmp_entries=tempdata[0]; tmp_sides=tempdata[1]; tmp_data=tempdata[2]; tmp_bracketid=this.parentNode.id; $(\'#TBdata\').html(tableGrid(tmp_entries,tmp_sides,1,tmp_bracketid, tmp_data)); TBbuttonSetup(); $(\'#TBdata\').prev().slideUp(); $(\'#TBdata\').slideDown();">'+
+                                                        '<input type="button" value="remove" onclick="var conf=confirm(\'Are you sure?\'); if(conf){var pblist=this.parentNode.parentNode; pblist.removeChild(this.parentNode); if(pblist.childNodes.length==0) pblist.previousSibling.style.display=\'\'; $(\'#previousBrackets li\').each(function(i){$(this).attr(\'id\',i);});}"></li>'));
+                currentBrackets=currentBrackets.replace(/\[(.*?)\}\]/i,'');                
+            }
+        }
+        var legacyBrackets=$('div.editor.ui-helper-clearfix textarea').val();
+        var TBtestMatch=legacyBrackets.match(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/i);
+        if (TBtestMatch) {
+            var postBrackets =0;
+            while (legacyBrackets.match(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/i)) {
+                var tempExtract=RegExp.$1.split('=');
+                var tempEntries=tempExtract[1].split('}+{')[0].split(',').length;
+                var tempSides=0;
+                var tempTitle=tempExtract[0];
+                var tempData=tempTitle+'='+tempExtract[1];
+                $('#TBmenu #previousBrackets').append($('<li id="'+(postBrackets++)+'"><input type="hidden" value="'+(''+tempEntries+'|'+tempSides+'|'+tempData)+'"><b>'+tempTitle+
+                                                        ' </b><input type="button" value="modify" onclick="var tempdata=this.parentNode.firstChild.value.split(\'|\'); tmp_entries=tempdata[0]; tmp_sides=tempdata[1]; tmp_data=tempdata[2]; tmp_bracketid=this.parentNode.id; $(\'#TBdata\').html(tableGrid(tmp_entries,tmp_sides,1,tmp_bracketid, tmp_data)); TBbuttonSetup(); $(\'#TBdata\').prev().slideUp(); $(\'#TBdata\').slideDown();">'+
+                                                        '<input type="button" value="remove" onclick="var conf=confirm(\'Are you sure?\'); if(conf){var pblist=this.parentNode.parentNode; pblist.removeChild(this.parentNode); $(\'#previousBrackets li\').each(function(i){$(this).attr(\'id\',i);});}"></li>'));
+                legacyBrackets=legacyBrackets.replace(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/i,'');
+            }
+            legacyBrackets=$('div.editor.ui-helper-clearfix textarea').val().replace(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/gi,'');
+            $('div.editor.ui-helper-clearfix textarea').val(legacyBrackets);
+        }
+    }
+
+function cleanupUBBC(){
+    var legacyBrackets=$('div.editor.bbcode-editor textarea').val();
+    //var legacyBrackets=proboards.data('visualHtml');
+    var TBtestMatch=legacyBrackets.match(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/i);
+    if (TBtestMatch) {
+        legacyBrackets=$('div.editor.bbcode-editor textarea').val().replace(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/gi,'');
+        $('div.editor.bbcode-editor textarea').val(legacyBrackets);
+        //var Vtest=proboards.data('visualHtml');
+        //proboards.data('visualHtml')=legacyBrackets.replace(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/gi,'');            
+        //$('li#menu-item-bbcode a').click();
+        //$('li#menu-item-TB a').click();        
+    }
+}
+
+function displayBrackets() {
+    $('tr.post').each(function(){
+        var TBpost_id=$(this).attr('id').split('-')[1];
+        var currentBrackets=proboards.plugin.key('wormo_bracketdata').get(TBpost_id);
+        if (currentBrackets) {
+            var postBrackets =0;
+            currentBrackets=currentBrackets.replace(/\[br\]/gi,'(=br=)').replace(/\[(\/?)img\]/gi,'(=$1img=)');
+            while (currentBrackets) {
+                var TBextract=currentBrackets.match(/\[(.*?)\]/);
+                var tempEntries=TBextract[1].split('|')[0];
+                var tempSides=TBextract[1].split('|')[1];
+                var tempData=TBextract[1].split('|')[2].replace(/\(\=(\/?)img\=\)/gi,'[$1img]').replace(/\(\=br\=\)/gi,'[br]');
+                var tempTitle=tempData.split('=')[0];
+                var nwdv=$('<div align="center" id="'+TBpost_id+'_'+postBrackets+'">').html(tableGrid(tempEntries,tempSides,0,(postBrackets++),tempData));
+                $(this).find('td.content div.message').append(nwdv);
+                currentBrackets=currentBrackets.replace(/\[(.*?)\]/,'');                
+            }
+        }
+        var legacyBrackets=$(this).find('td.content div.message').html();
+        var TBtestMatch=legacyBrackets.match(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/i);
+        if (TBtestMatch) {
+            var postBrackets =0;
+            while (legacyBrackets.match(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/i)) {
+                var tempExtract=RegExp.$1.split('=');
+                var tempEntries=tempExtract[1].split('}+{')[0].split(',').length;
+                var tempSides=0;
+                var tempTitle=tempExtract[0];
+                var tempData=tempTitle+'='+tempExtract[1];
+                var nwdv=$('<div id="'+TBpost_id+'_'+(postBrackets)+'">').html(tableGrid(tempEntries,tempSides,0,(postBrackets++),tempData));
+                $(this).find('td.content div.message').append(nwdv);
+                legacyBrackets=legacyBrackets.replace(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/i,'');
+            }
+            legacyBrackets=$(this).find('td.content div.message').html().replace(/\[Tourney:\[\[(.*?)\]\]\/Tourney\]/gi,'');
+            $(this).find('td.content div.message').html(legacyBrackets);
+        }
+    });
+    TBbuttonSetup();
+    var TBicon=pb.plugin.get('tournament_brackets').settings.thread_icon;
+    if (TBicon) {
+        $('tr.item.thread').each(function(){
+            var thread_id=$(this).attr('id').split('-')[1];
+            var first_post=proboards.data('proboards.thread')[thread_id].first_post_id;
+            var TBcheck=pb.plugin.key('wormo_bracketdata').get(first_post);
+            if (TBcheck)  $(this).find('td.main.clickable span.control-icons').prepend($('<img src="'+TBicon+'">'));
+        });
+    }
+}
+
+$(document).ready(function(){
+    displayBrackets();
+    proboards.on('pageChange',displayBrackets);
+    
+});
+       

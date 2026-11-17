@@ -1,0 +1,133 @@
+function update_threadblock_key(subit)
+{
+    var block_mems = new Array();
+    
+    var blocked = $('.thread_block');
+    
+    for(b=0; b<blocked.length; b++)
+    {
+        if($(blocked[b]).attr('checked') == 'checked')
+        {
+            block_mems.push($(blocked[b]).attr('id').split('block')[1]);
+            
+        }
+    }
+    
+    pb.plugin.key('threadblock').set({ value: block_mems,
+                                        success: function() {
+                                            $(subit).click();
+                                        },
+                                        fail: function(error) {
+                                            // error.code will contain an error code id:
+                                            // 1 = value is too big
+                                            // 2 = server did not respond / general error
+                                            // 3 = this user does not have permission to change this key
+                                            // 4 = Invalid data received by the server
+                                            // error.reason will contain a friendly response from the server corresponding to the error code
+                                        }
+                                       });
+    return;
+}
+
+
+$(document).ready(function(){
+    if(proboards.data('route').name == 'edit_user_privacy')
+    {
+        $('body').one('click',$('#undefined'),function()
+                                {
+                                    $('#undefined').click(function(){
+                                        var memid = $('.block_list_options:last').parent().find($('.name>a')).attr('class');
+                                        memid = parseInt(memid.split('k user-')[1]);
+                                        var span = $('<span></span>').attr('id','block_thread');
+                                        var input = $('<input>').addClass('thread_block').attr({'type':'checkbox' ,'id':'block'+memid});
+                                        var label = $('<label></label>').html('Block this member\'s threads.');
+                                        
+                                        $(span).append(input,label);
+                                        
+                                        $('.block_list_options:last').append(span);
+                                    });
+                                }
+                               );
+        
+        var subBut = $("[id$='submit_button']");
+        var newSub = $('<input>').attr({'type':'button', 'value':'Save Privacy Settings'}).click(function(){update_threadblock_key(subBut);});
+        
+        $(subBut).parent().append(newSub);
+        $(subBut).css('display','none');
+		
+		$(window).load(function(){
+			var uList = $('.user-search-0-selection>li');
+			var key = pb.plugin.key('threadblock').get();
+			if(key == undefined)
+			{
+				key = '';
+			}
+    
+			for(u=0; u<uList.length; u++)
+			{
+				var memid = $(uList[u]).attr('class');
+				memid = parseInt(memid.split('tem-')[1]);
+				var span = $('<span></span>').attr('id','block_thread');
+				var input = $('<input>').addClass('thread_block').attr({'type':'checkbox' ,'id':'block'+memid});
+				for(k=0; k<key.length; k++)
+				{
+					if(key[k] == memid)
+					{
+						$(input).attr('checked','checked');
+						break;
+					}
+				}
+        
+				var label = $('<label></label>').html('Block this member\'s threads.');
+        
+				$(span).append(input,label);
+        
+				$(uList[u]).find('.block_list_options').append(span);
+			}
+		});
+    }
+    
+    strip_threads();
+});
+
+
+
+
+
+function strip_threads()
+{
+    if(document.location.href.match(/\/(board\/\d|threads\/recent|search\/results)/))
+    {
+        var key = pb.plugin.key('threadblock').get();
+		
+		if(key == undefined)
+		{
+			return;
+		}
+        
+        var threads = $('.created-by>a');
+        
+        for(th=0; th<threads.length; th++)
+        {
+            var poster = $(threads[th]).attr('href').split(/user\//)[1];
+            for(k=0; k<key.length; k++)
+            {
+                if(poster == key[k])
+                {
+                    var td = $('<td></td>').attr({'colspan':'7', 'align':'center'}).html('The creator of this thread is on your block list.').addClass('blocked');
+                    $(threads[th]).parent().parent().html('').append(td);
+                    break;
+                }
+            }
+        }
+    }
+    
+    return;
+}
+
+
+
+
+
+
+proboards.on('pageChange', function() { strip_threads(); });

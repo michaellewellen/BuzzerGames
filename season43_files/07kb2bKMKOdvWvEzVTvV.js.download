@@ -1,0 +1,75 @@
+// Sticky Thread Divider by @AaronGoff
+
+var sticky_thread_divider = (function() {
+	return {
+		init: function() {
+            var plugin = proboards.plugin.get('sticky_thread_divider');
+			var settings = (plugin)? plugin.settings : false;
+			var location = proboards.dataHash.route.name;
+
+			if (/(board?)$/.test(location)) {
+			// clean up code later
+                var isNumber = /^\d+$/;
+				var announcementHeight,
+                    stickyHeight,
+                    announcementDividerColor,
+                    stickyDividerColor,
+                    announcementDividerImage = '',
+                    stickyDividerImage = '';
+ 
+                // Announcement divider height
+                if (isNumber.test(settings.announcement_height)) {
+                    announcementHeight = settings.announcement_height;
+                } else {
+                    announcementHeight = '9';   
+                }
+                
+                // Sticky divider height
+                if (isNumber.test(settings.sticky_height)) {
+                    stickyHeight = settings.sticky_height;
+                } else {
+                    stickyHeight = '9';   
+                }
+
+                // Announcement divider color
+                if (settings.announcement_divider_color) {
+	                announcementDividerColor = '#' + settings.announcement_divider_color;
+    			} else {
+                    announcementDividerColor = $('div.control-bar').css('backgroundColor'); // default announcement divider color
+                }
+                
+                // Sticky divider color
+                if (settings.sticky_divider_color) {
+	                stickyDividerColor = '#' + settings.sticky_divider_color;
+    			} else {
+                    stickyDividerColor = $('div.control-bar').css('backgroundColor'); // same as announcement divider
+                }
+                
+                // Announcement divider image
+                if (settings.announcement_divider_image) {
+					announcementDividerImage = settings.announcement_divider_image;
+                }
+                
+                // Sticky divider image
+                if (settings.sticky_divider_image) {
+					stickyDividerImage = settings.sticky_divider_image;
+                }
+                
+                var columns = $('tr.thread:first').children('td').length; // count columns
+    
+                // Remove announcement divider; create new stylized element
+ 	            $('tr.announcement').removeClass('last');
+    			if (settings.remove_divider != 1) {
+                	$('tr.announcement:last').after('<tr><td colspan="' + columns + '" style="border-right: none; padding: 0; height: ' + announcementHeight + 'px; background-color: ' + announcementDividerColor + '; background-image: url(' + announcementDividerImage + '); background-repeat: repeat-x; background-position: top left;"></td></tr>');                   
+                }
+                
+                // Create sticky divider element
+                $('tr.sticky:last').after('<tr><td colspan="' + columns + '" style="border-right: none; padding: 0; height: ' + stickyHeight + 'px; background-color: ' + stickyDividerColor + '; background-image: url(' + stickyDividerImage + '); background-repeat: repeat-x; background-position: top left;""></td></tr>');
+       		}
+        }
+	};
+})();
+
+$(function() {
+	sticky_thread_divider.init();
+});

@@ -1,0 +1,220 @@
+/*
+Post Options Dropout v0.0.6
+Last Updated: 11:46 PM Dec 11, 2013
+ */
+$(function () {
+	//if(!proboards.data("proboards.post") && !proboards.data("proboards.message")) return
+	if (!$('.options_menu').length)
+		return;
+	function getAutoformByField(autoformArray, byField, value, multiple, returnThisFieldOnly) {
+		var entries = []
+		for (a = 0; a < autoformArray.length; a++) {
+			if (byField in autoformArray[a]) {
+				if (("undefined" == typeof value) || ("undefined" != autoformArray[a][byField] && ($.isArray(autoformArray[a][byField]) ? ($.inArrayLoose(value, autoformArray[a][byField])) : (value == autoformArray[a][byField]))))
+					entries.push(returnThisFieldOnly ? autoformArray[a][returnThisFieldOnly] : autoformArray[a]);
+			}
+		}
+		return (multiple ? entries : entries[0]);
+	}
+	var pluginID = "post_options_dropout",
+	plugin = proboards.plugin.get(pluginID),
+	settings = proboards.plugin.get(pluginID).settings,
+	self = function () {
+		$('.options_menu').each(function (i, e) {
+			var menu = $(this),
+			type = e.className.match(/(post|message)-\d/) ? RegExp.$1 : menu.hasClass('posting-options-list')
+				if (!type)
+					return true; //continue
+				var pid = menu.idFromClass(type),
+			post = pid ? $('#' + type + '-' + pid) : menu.closest('.item,.wysiwyg-area');
+			//add submenu classes to uniquely identify (e.g two "delete post" menu items)
+			$('li.ui-menu-has-sub-menu', this).each(function (i, l) {
+				var sm = $.trim(l.className.replace(/ui-menu-has-sub-menu/, "").replace(/\b\d+-/g, ''))
+					$('li', l).each(function () {
+						$(this).attr("data-sub-menu", $.trim(($(this).attr("data-sub-menu") || '') + " " + sm));
+					})
+			})
+			//convert options to their advanced equivalents
+			$.each(settings.options, function (i, menu_id) {
+				//if advanced autoEntry exists then it takes precedence so continue
+				if (getAutoformByField(settings.advanced, "menu_id", menu_id, true).length)
+					return true;
+				settings.advanced.push({
+					"menu_id" : menu_id,
+					"location" : settings.position == "top" ? ".content-head" : ".foot",
+					"wrapper" : '<span class="utility-links" style="float:' + settings.alignment + '" />',
+					"keep" : settings.keep == "keep",
+					"moreclasses" : (settings.position == "top" ? " button" : ""),
+					"relocation_method" : "appendTo"
+				})
+			})
+
+			//process selected menu items
+			$.each(settings.advanced, function (i, autoEntry) {
+				//selector can start with a route name to force running only on specific pages (@routename is inclusive and !routename is exclusive)
+				//e.g "@quote_post .foo .bar" would apply the selector .foo .bar when replying with a quote
+				var loc = autoEntry.location;
+				if (loc && /^(@|!)(\w+)\s/.test(loc)) {
+					if (RegExp.$1 == "@" && proboards.data('route').name != RegExp.$2) {
+						return true; //skip this page
+					} else if (RegExp.$1 == "!" && RegExp.$2 == proboards.data('route').name) {
+						return true; //skip this page
+					}
+					loc = $.trim(loc.substr(RegExp.$1.length + RegExp.$2.length))
+				}
+				var util = $(loc, post);
+				if (!util.length) {
+					if (window.console && "function" == typeof console.log) {
+						console.log(autoEntry.menu_id + ': "' + autoEntry.location + '" selector not found')
+					}
+					return true;
+				}
+				var menuQualifier = /(([.#\[])(.+))$/.test(autoEntry.menu_id) ? RegExp.$1 : "", menu_id = autoEntry.menu_id;
+				if (menuQualifier) {
+					menu_id = autoEntry.menu_id.split(menuQualifier)[0];
+				}else menuQualifier = ':not([data-sub-menu])'
+				menuItems = $("." + (menu_id == 'labels' || menu_id == 'searchIP' || !pid ? "" : pid + "-") + menu_id + menuQualifier, post).find("a").eq(0);
+				menuItems.each(function (i, e) {
+					var $link = $(e);
+					if ($link.hasClass('dropout'))
+						return true;
+					$link.addClass('dropout')
+					if ($link.parent('.ui-menu-has-sub-menu').length) { //sub-menus get moved intact
+						if (!autoEntry.keep)
+							$link.parent('li').addClass('hide')
+							var button = $('<div class="posting-options button relocated-sub-menu" />')[autoEntry.relocation_method ? autoEntry.relocation_method : "append"](util).addClass(autoEntry.moreclasses || "").attr("style", autoEntry.inline_style || ""),
+							sublinks = $('>ul', $link.parent()),
+							subs = sublinks.clone(false, false).removeClass('ui-menu ui-select-menu').addClass('options_menu')
+								.removeClass('ui-menu ui-selectMenu')
+								.attr("style", "display:none;") //also clears any previous inline CSS
+								.appendTo(util);
+						subs.selectMenu($.extend(true, {}, menu.data('selectMenu').options, {
+								container : button,
+								status : autoEntry.caption || $link.html(),
+								statusClick : function () {
+									var li = $link.parent(),
+									t = li.hasClass("hide")
+										li.removeClass("hide")
+										$link.click();
+									t && li.addClass("hide")
+								},
+								beforeShow : (function () {
+									button.addClass("open-menu");
+									var b = subs,
+									c = proboards.postPageManager,
+									g = pid
+										$("li.label", b).each(function () {
+											var e = $(this);
+											var f = e.hasClass("label-add");
+											var g = e.data("id");
+											if (c.labels[g]) {
+												if (f) {
+													e.hide()
+												} else {
+													e.show()
+												}
+											} else {
+												if (f) {
+													e.show()
+												} else {
+													e.hide()
+												}
+											}
+										});
+									if (c.applied_effects) {
+										if (c.applied_effects.bookmark == 1) {
+											$(this).menu("showOption", "unbookmark");
+											$(this).menu("hideOption", "bookmark")
+										} else {
+											$(this).menu("showOption", "bookmark");
+											$(this).menu("hideOption", "unbookmark")
+										}
+										if (c.applied_effects.lock == 1) {
+											$(this).menu("showOption", "unlock");
+											$(this).menu("hideOption", "lock")
+										} else {
+											$(this).menu("showOption", "lock");
+											$(this).menu("hideOption", "unlock")
+										}
+										if (c.applied_effects.sticky == 1) {
+											$(this).menu("showOption", "unsticky");
+											$(this).menu("hideOption", "sticky")
+										} else {
+											$(this).menu("showOption", "sticky");
+											$(this).menu("hideOption", "unsticky")
+										}
+										if (c.applied_effects.announcement == 1) {
+											$(this).menu("showOption", "unannounce");
+											$(this).menu("hideOption", "announce")
+										} else {
+											$(this).menu("showOption", "announce");
+											$(this).menu("hideOption", "unannounce")
+										}
+										if (c.applied_effects.falling == 1) {
+											$(this).menu("showOption", "disable_falling");
+											$(this).menu("hideOption", "enable_falling")
+										} else {
+											$(this).menu("showOption", "enable_falling");
+											$(this).menu("hideOption", "disable_falling")
+										}
+									}
+									if ($(".post-" + g + "-checkbox input.ui-manager-checkbox").attr("checked")) {
+										$(this).menu("hideOption", g + "-selectPost");
+										$(this).menu("showOption", g + "-deselectPost")
+									} else {
+										$(this).menu("showOption", g + "-selectPost");
+										$(this).menu("hideOption", g + "-deselectPost")
+									}
+									if (!proboards.data("ips")) {
+										proboards.data("ips", [])
+									}
+									var o;
+									for (o in proboards.data("ips")) {
+										$(".ip-" + o).removeClass("banable");
+										$(".ip-" + o).addClass("banned")
+									}
+									if (window.location.pathname.split("/")[1] == "search") {
+										$(this).menu("hideOption", g + "-moveAllAbove");
+										$(this).menu("hideOption", g + "-moveAllBelow")
+									}
+								}),
+								onClose : function () {
+									button.removeClass("open-menu")
+								}
+							}))
+						sublinks.find("a").addClass('dropout');
+						autoEntry.wrapper && button.wrap(autoEntry.wrapper)
+						return true;
+
+					} else {
+						var entryLink = $('<a href="' + ($link.text() == "Link to Post" ? '/post/' + pid + '/thread' : "#") + '" onclick="return false;" class="relocated-menu">' + (autoEntry.caption || $link.html()) + '</a>')
+							.on('click', function () {
+								var hide = $link.parent().hasClass('hide');
+								if (hide)
+									$link.parent().removeClass('hide')
+									$link.click();
+								if (hide)
+									$link.parent().addClass('hide')
+							})
+							[autoEntry.relocation_method ? autoEntry.relocation_method : "appendTo"](util)
+							.addClass(autoEntry.moreclasses || "")
+							.attr("style", autoEntry.inline_style);
+						autoEntry.wrapper && entryLink.wrap(autoEntry.wrapper)
+					}
+					if (!autoEntry.keep)
+						$(e).parent('li').addClass('hide')
+				})
+			})
+			$('.utility-links', post).last().prevAll('.utility-links').find('a:not([class|="button"]').unwrap().appendTo($('.utility-links', post))
+			if (settings.separator)
+				$('.relocated-menu:not(:last-of-type)', post).filter(':not(.button)').after(settings.separator)
+		})
+	}
+	$('.ui-autosearch').on('autosearchaftersearch.postoptionsdropout', self);
+	self()
+})
+/*
+	-12/11/13(v0.6) 
+		-fixed double "deletePost" when moderator menu version enabled (line 76)
+		-added menu_id var to preserve autoform (line 72)
+*/

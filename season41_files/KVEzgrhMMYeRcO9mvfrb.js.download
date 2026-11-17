@@ -1,0 +1,108 @@
+/*!
+ * VSpoiler v1.0.0 - WYSIWYG Editor Support for Spoilers
+ *
+ * Author: Virgil Sovereign
+ * Plugin: VSpoiler
+ * Namespaces: $V, $V.Spyl
+ * Code may be freely modified and distributed so long as this header remains intact. Absolutely
+ * no warranties provided. Use at your own risk.
+ *
+ * Last Modified: February 2013
+ */
+
+var $V = $V || {};
+
+$V.Spyl = {
+	oSet : proboards.plugin.get('vspoiler').settings,
+	oImg : proboards.plugin.get('vspoiler').images,
+
+	prompt : function( fx ) {
+		this._prompt( { title: $V.Spyl.sTT,
+			fields: [{ title: 'Spoiler Text', name: 'text', input: true, type: 'textarea', value: '',
+				rows: 10, cols: 50, required: true }],
+			callback: fx,
+			ieWidth: 400 } );
+	},
+
+	insbb : function( oUI ) {
+		var eTx = oUI.textarea,
+			iSS = eTx.selectionStart,
+			isS1 = typeof iSS !== 'undefined';
+
+		if( isS1 ? (iSS == eTx.selectionEnd) : (!oUI.range || !oUI.range.boundingWidth) )
+			$V.Spyl.prompt.call( this, function( o ) {
+				oUI.replaceSelection( '[spoiler]' + o.text + '[/spoiler]' );
+				if( isS1 )
+					eTx.selectionStart = eTx.selectionEnd;
+				else {
+					oUI.range.collapse( false );
+					oUI.range.select();
+				}
+			} );
+		else {
+			oUI.surroundSelection( 'spoiler', {} );
+			if( isS1 )
+				eTx.selectionStart = eTx.selectionEnd;
+			else {
+				oUI.range.collapse( false );
+				oUI.range.move( 'character', 10 );
+			}
+		}
+	},
+
+	insvis : function( oUI ) {
+		var e = oUI.document.createElement( 'div' );
+		if( !oUI.range )
+			oUI.range = oUI.getRange();
+
+		e.setAttribute( 'class', 'spoiler' );
+        e.setAttribute( 'id', 'spoiler' + Math.floor( 1e7 * Math.random() ) );
+		if( typeof oUI.range.collapsed !== 'undefined' ? oUI.range.collapsed : !oUI.range.boundingWidth )
+			$V.Spyl.prompt.call( this, function( o ) {
+				e.innerHTML = o.text;
+				oUI.replaceSelection( e );
+			} );
+		else oUI.surroundSelection( e );
+	},
+
+	imgres : function( s )
+		{ return s ? ($V.Spyl.oImg[s] || s) : s; },
+
+	hook : function() {
+		var o = jQuery.ui.wysiwyg.prototype,
+			oBB = o['_bbcodeEditor'],
+			oVis = o['_visualEditor'],
+			fxC = o['_create'],
+			fxBC = o['_buildControls'],
+			sID = 'insertSpoiler';
+
+		o['_create'] = function() {
+			fxC.call( this );
+			$(oVis.document).find('head').append( $('#VEditorSpoilStyle') );
+		};
+		o['_buildControls'] = function( a0_, a1_, a2_ ) {
+			window['wysiwyg_buttons'][sID] = $V.Spyl.sEdUrl;
+			fxBC.call( this, a0_, a1_, a2_ );
+		};
+		$([oBB,oVis]).each( function( i_ ) {
+			this['controls'][sID] = { title: $V.Spyl.sTT };
+			this['controlGroups'][1][1].push( sID );
+			this['commands'][sID] = i_ ? $V.Spyl.insvis : $V.Spyl.insbb;
+		});
+	},
+
+	init : function() {
+		$V.Spyl.sEdUrl = $V.Spyl.imgres( $V.Spyl.oSet['edurl'] ) || $V.Spyl.oImg['insert'];
+		$V.Spyl.sTT = $V.Spyl.oSet['edtext'].replace( /[<>"]/g, '' ) || 'Insert Spoiler';
+		$V.Spyl.hook();
+
+		$('.spoiler_header').remove();
+        $(document).click( function( eEvt ) {
+            var $E;
+            if( $E = $(eEvt.target).closest('.spoiler') )
+				$E.toggleClass( 'no-spoils' );
+        } );
+		$('.spoiler').css( 'display', 'block' ).addClass( 'no-spoils' ).
+			each( function() { $(this).contents().wrapAll( '<div />' ); } );
+	}
+};

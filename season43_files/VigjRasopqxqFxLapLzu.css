@@ -1,0 +1,28 @@
+.display-birth{
+	display:none;
+}
+
+.mini-profile .birthday-div{
+	position: absolute;
+    top: 4px;
+    right: 2px;
+    z-index: 5;
+}
+
+.mini-profile.mp-birthday { position: relative; }
+.mini-profile.mp-birthday .user-link {
+	display: inline-block;
+	max-width: 135px;
+}
+
+.mini-profile.mp-birthday .birthday-div {
+	position: absolute;
+	top: 4px;
+	right: 2px;
+	z-index: 5;
+}
+
+img.birthday-image {
+    max-width: 50px;
+    max-height: 50px;
+}

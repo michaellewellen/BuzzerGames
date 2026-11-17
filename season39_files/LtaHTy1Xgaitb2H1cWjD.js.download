@@ -1,0 +1,39 @@
+$(document).ready(function() {
+    var route_name = proboards.data('route').name;
+    if(route_name == 'thread' || route_name == 'recent_posts' || route_name == 'search_results' || route_name == 'all_recent_posts' || route_name == 'posts_by_ip' || route_name == 'permalink') {
+        var board = proboards.data('page').board;
+        
+        if(typeof board == "undefined" || check_board(board.id)) {
+            check_time_interval();
+            proboards.on('afterSearch', function() {
+                check_time_interval();
+            });
+        }
+	}
+    
+    function check_time_interval() {
+        $('.item.post').each(function() {
+            var edit = $(this).find('.edited_by');
+            if(edit.length) {
+                var edit_time = edit.find('abbr.time').data('timestamp');
+                var post_time = $(this).find('.date abbr.time').data('timestamp');
+                var edit_difference = edit_time - post_time
+                
+                if(((edit_time - post_time) / 60000) <= proboards.plugin.get('hide_recent_edits').settings.time_interval) {
+                    edit.remove();
+                }
+            }
+        });
+    }
+    
+    // Check if we should be running operations on this board
+    function check_board(id) {
+        var boards = proboards.plugin.get('hide_recent_edits').settings.boards;
+        
+        if (!boards || !boards.length) {
+            return true;
+        }
+        
+        return ($.inArray(id.toString(), boards) > -1);
+    }
+});

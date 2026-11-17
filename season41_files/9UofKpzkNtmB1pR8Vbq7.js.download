@@ -1,0 +1,8 @@
+<!--
+/* Hide Shoutbox from Non-Staff - By Son Of Exodia AKA ®i©hie */
+
+$(document).ready(function(){
+if(proboards.data("user").is_staff=="0"){
+$('div.shoutbox.container.full').remove();
+}});
+// -->

@@ -1,0 +1,42 @@
+function watch_recipients()
+{
+    var rec = document.getElementsByTagName('input');
+    for(r=0; r<rec.length; r++)
+    {
+        if(rec[r].name == 'user_search_box_input')
+        {
+            rec = rec[r];
+            break;
+        }
+    }
+    
+    var staff = new String(pb.plugin.get('staff_pms').settings.staff);
+    rec.onkeyup = function(){if(this.value.match(/^staff$/i)){proboards.confirm('PM all staff members?',function(){document.location.href = '/conversation/new/'+staff});}}
+    
+    return;
+}
+
+function add_PMButton()
+{
+    var staff = pb.plugin.get('staff_pms').settings.staff;
+    
+    var userNum = parseInt(document.location.href.split(/user\//)[1]);
+    
+    for(s=0; s<staff.length; s++)
+    {
+        if(staff[s] == userNum)
+        {
+			var button = $('[href^="/conversation/new/"]');
+            var staffbutton = $(button[0]).clone(true);
+            var newHREF = '/conversation/new/'+staff.join(',');
+            $(staffbutton).html('Send Staff Message').attr('href',newHREF);
+			$(button[0]).after(staffbutton);
+            
+            break;
+        }
+    }
+    
+    return;
+}
+
+var SPB = pb.plugin.get('staff_pms').settings.staff_pm_button;

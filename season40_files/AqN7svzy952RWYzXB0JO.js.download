@@ -1,0 +1,14 @@
+$(document).ready(function(){
+    if(proboards.data('route').name == "conversation") {
+		$('.mini-profile .user-link.user--5.group--5').parents('.mini-profile').addClass('mini-welcome');
+        if(proboards.plugin.get('miniprofile_welcomepm').settings.css) {
+            var i = 0;
+            while(i<proboards.plugin.get('miniprofile_welcomepm').settings.css.length) {
+                $('.mini-welcome').css(proboards.plugin.get('miniprofile_welcomepm').settings.css[i].prop,proboards.plugin.get('miniprofile_welcomepm').settings.css[i].val);
+                i++;
+            }
+        }
+        if(proboards.plugin.get('miniprofile_welcomepm').settings.html)
+            $('.mini-welcome').html(proboards.plugin.get('miniprofile_welcomepm').settings.html);
+    }
+});

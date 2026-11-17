@@ -1,0 +1,31 @@
+$(document).ready(function() {
+    function recycleBin() {
+        var removeB = (proboards.plugin.get('recycle_bin').settings.remove_delete_button == 'yes')? true:false;
+        if(proboards.data('route').name.match(/^thread|board$/) && (proboards.data('page').board && proboards.data('page').board.id != parseInt(proboards.plugin.get('recycle_bin').settings.board[0]))) {
+            if($('.recycle_bin').length == 0) {
+                $('.delete_thread').after('<li class="recycle_bin" style="display: list-item;"><a href="#"><span class="icon"></span>'+proboards.plugin.get('recycle_bin').settings.option_text+'</a><span class="arrow right"><span></span></span></li>');
+            }
+            $('li.modFunctions a').mouseover(function() {
+                if(removeB) {
+                	$('.delete_thread').hide();
+                }
+                if($('.recycle_bin').css('display') != 'list-item') {
+                    $('.recycle_bin').css('display','list-item');
+                }
+            });
+            $('.recycle_bin').click(function() {
+                $('li.move_thread > ul > li.move_thread').trigger('click');
+                var timer = setInterval(function() {
+                    if($('div[aria-labelledby="ui-dialog-title-move-threads-container"]').length && $('div[aria-labelledby="ui-dialog-title-move-threads-container"]').css('display') == 'block') {
+                        $('div[aria-labelledby="ui-dialog-title-move-threads-container"] a.ui-dialog-titlebar-close').trigger('click');
+                        $('div.board-select-list > span.board-option > input[name="board_id"][value="'+parseInt(proboards.plugin.get('recycle_bin').settings.board[0])+'"]').attr('checked','checked');
+                        $('div.ui-dialog-buttonpane button').trigger('click');
+                        clearInterval(timer);
+                    }
+                },1);
+            });
+        }
+    }
+    recycleBin();
+    proboards.on('afterSearch',recycleBin);
+});

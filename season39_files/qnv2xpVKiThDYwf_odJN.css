@@ -1,0 +1,2 @@
+.utility-links a:not([class~="button"]) {padding:0 0.6em;}
+/*.utility-links a:not([class|="button"]):after {content: "|";}*/

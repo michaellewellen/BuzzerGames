@@ -1,0 +1,36 @@
+function whatIP() {
+$('.button.quote-button').each(function( index ) {
+    var ip=$('.searchIP:eq('+index+') a:first').text();
+    if(proboards.plugin.get('ip_lookup').settings.WMIPA==1){
+                var wmip=ip.replace(/\s/g, '/');
+$('<a class="button" target="_blank" title="whatismyipaddress.com" href="http://whatismyipaddress.com/'+wmip+'">'+proboards.plugin.get('ip_lookup').settings.whatsmyipaddress_text+'</a>').insertBefore($('.button.quote-button:eq('+index+')'));
+    };
+    if(proboards.plugin.get('ip_lookup').settings.SFS==1){
+                var sfs=ip.replace(/IP\s/g, '');
+$('<a class="button" target="_blank" title="stopforumspam.com" href="http://www.stopforumspam.com/ipcheck/'+sfs+'">'+proboards.plugin.get('ip_lookup').settings.stopforumspam_text+'</a>').insertBefore($('.button.quote-button:eq('+index+')'));
+};   
+});
+}
+
+$(document).ready(function() {
+ if(proboards.data('user').is_staff==1){ 
+  if(proboards.data('route').name=="thread" || proboards.data('route').name=="posts_by_ip"){
+ /*  if ($.browser.msie) {whatIP()}; */
+      
+      
+      whatIP();
+/*    $('.ui-autosearch').on('autosearchaftersearch', function () {whatIP();}); */
+      proboards.on("pageChange", function(){whatIP()});
+} else {
+   if(proboards.data('route').name=="user"){
+     var ip=$('.searchIP a:first').text()
+     var patt=/IP/g;
+       if(patt.test(ip)){           
+         if(proboards.plugin.get('ip_lookup').settings.WMIPA==1){
+           var wmip=ip.replace(/\s/g, '/');
+             $('<a class="button" target="_blank" title="whatismyipaddress.com" href="http://whatismyipaddress.com/'+wmip+'">'+proboards.plugin.get('ip_lookup').settings.whatsmyipaddress_text+'</a>').insertBefore($('a.button:eq(0)'));   
+            };
+                if(proboards.plugin.get('ip_lookup').settings.SFS==1){
+                  var sfs=ip.replace(/IP\s/g, '');
+                    $('<a class="button" target="_blank" title="stopforumspam.com" href="http://www.stopforumspam.com/ipcheck/'+sfs+'">'+proboards.plugin.get('ip_lookup').settings.stopforumspam_text+'</a>').insertBefore($('a.button:eq(0)'));   
+           }}}}}});

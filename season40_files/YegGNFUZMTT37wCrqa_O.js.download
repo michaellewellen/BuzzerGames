@@ -1,0 +1,18 @@
+function sigres(){
+ var RSsrt=proboards.plugin.get('signature_image_height').settings;
+ var MHsrt=RSsrt.max_height_of_signature_image;
+  $('.signature img').each(function() {
+if($(this).height()>MHsrt){
+ if(RSsrt.replace_or_resize_oversize_sigsnatures==1){$(this).attr("src", RSsrt.replacement_image_url)} else
+  {$(this).css({'height' : MHsrt+'px'})}
+}
+});
+}
+
+function imrs(){
+ if($.browser.msie){sigres()};
+    $('.ui-autosearch').on('autosearchaftersearch',function(){
+sigres();
+}); 
+};
+(window.attachEvent)?window.attachEvent("onload",imrs):window.addEventListener("load",imrs,false);

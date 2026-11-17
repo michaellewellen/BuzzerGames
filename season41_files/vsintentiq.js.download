@@ -1,0 +1,152 @@
+function readCookie(name) {
+    const nameEQ = `${name}=`;
+    const ca = document.cookie.replace(/ /g, "").split(";");
+    let cValue = null;
+
+    ca.forEach((entry) => {
+        if (entry.indexOf(nameEQ) === 0) {
+            cValue = entry.substring(nameEQ.length, entry.length);
+        }
+    });
+
+    return cValue;
+}
+
+function createScoreCookie() {
+    let score = Math.floor(Math.random() * 100) + 1;
+    document.cookie = 'vsScore=' + score + ';' + new Date().getTime() + 60 * 60 * 24 * 365 + ';path=/';
+    return score;
+}
+let vsScore = readCookie('vsScore');
+if (vsScore == null || vsScore > 100 || vsScore < 1) {
+    vsScore = createScoreCookie();
+}
+
+function vsAddScripts() {
+    let vsStatus = 'lo';
+    // VB Variable
+    if (typeof LOGGEDIN !== 'undefined' && LOGGEDIN) {
+        vsStatus = 'li';
+    }
+    let vsIdentity = document.createElement('script');
+    vsIdentity.type = 'text/javascript';
+    vsIdentity.async = true;
+    vsIdentity.src = 'https://config.htplayground.com/test-scripts/intent?status=' + vsStatus + '&score=' + vsScore;
+    document.getElementsByTagName('head')[0].appendChild(vsIdentity);
+
+    window.waitingForOptiyield = true;
+
+    let vsOptiyield = document.createElement('script');
+    vsOptiyield.type = 'text/javascript';
+    vsOptiyield.async = true;
+    vsOptiyield.src = 'https://config.htplayground.com/test-scripts/optiyield';
+    document.getElementsByTagName('head')[0].appendChild(vsOptiyield);
+}
+
+let exclusionList = [
+    'redflagdeals.com',
+    'forums.redflagdeals.com',
+    'ratemds.com',
+    'fixya.com',
+];
+
+let vsSite = location.hostname.replace(/www.|forums./i,'');
+if (!exclusionList.includes(vsSite)) {
+    vsAddScripts();
+} else {
+    /**
+    * Determines if the browser is a cookieless browser (not allowing 3rd party cookies)
+    *
+    * Example User Agents:
+    * - Chrome: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+    * - Safari: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15"
+    *
+    * @return boolean
+    */
+    function isUsingCookielessBrowser() {
+        let cookielessBrowsers = ['Chrome Edge', 'Firefox', 'Safari'];
+        return cookielessBrowsers.includes(browserCheck());
+    }
+
+    /**
+     * Iterates through a predefined list of browsers to detect the exact browser
+     *
+     * @return string
+     */
+    function browserCheck() {
+        // Order matters here since useragents have overlap - check apps first, then Browsers
+        let checks = ['Pinterest', 'Facebook', 'ChromeEdge', 'Edge', 'Firefox', 'Chrome', 'Safari', 'IE'];
+        for (let check in checks) {
+            let browserCheck = 'is'+checks[check];
+            // First validate that our function to check this specific browser exists
+            let functionExists = (typeof window[browserCheck] === "function")
+            if (!functionExists) {
+                console.log("function does not exist");
+                return false;
+            }
+            // Run the check, and return the browser name if found
+            let fn = window[browserCheck];
+            let browser = fn.call()
+            if (browser) {
+                return browser;
+            }
+        };
+        return 'Other';
+    }
+
+    function userAgentTest(browser='') {
+        let userAgent = navigator.userAgent;
+        return userAgent.indexOf(browser) >= 0;
+    }
+
+    function isChrome() {
+        return (userAgentTest('Chrome')) ? 'Chrome' : false;
+    }
+
+    function isFirefox() {
+        return (userAgentTest('Firefox')) ? 'Firefox' : false;
+    }
+
+    function isSafari() {
+        return (userAgentTest('iPhone') ||
+                userAgentTest('iPad') ||
+                userAgentTest('Macintosh') ||
+                userAgentTest('iPod'))
+                ? 'Safari' : false;
+    }
+
+    function isEdge() {
+        return (userAgentTest('Edge')) ? 'Edge' : false;
+    }
+
+    function isChromeEdge(userAgent) {
+        return (userAgentTest('Edge') ||
+                userAgentTest('Edg'))
+                ? 'Chrome Edge' : false;
+    }
+
+    function isIE() {
+        return (userAgentTest('Trident')) ? 'IE' : false;
+    }
+
+    function isFacebook() {
+        return (userAgentTest('FB')) ? 'Facebook' : false;
+    }
+
+    function isPinterest() {
+        return (userAgentTest('Pinterest')) ? 'Pinterest' : false;
+    }
+
+    /**
+     * Injects the VS IntentIQ script for Cookieless browsers only
+     */
+    if (isUsingCookielessBrowser()) {
+        let intentiq = document.createElement('script');
+        intentiq.type = 'text/javascript';
+        intentiq.async = true;
+        intentiq.onload = function() { window.dispatchEvent(new Event('intentIqLoaded'));
+        };
+        intentiq.src = 'https://storage.googleapis.com/vs-scripts/intentiq/intentiq.js';
+        document.getElementsByTagName('head')[0].appendChild(intentiq);
+    }
+}
