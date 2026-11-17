@@ -1,0 +1,98 @@
+@using System.Globalization
+
+@*
+    The wheel, drawn as SVG. Angles are degrees clockwise from the top, as everywhere else. The spinning part (id wf-rotor) is turned only by
+    wheel.js, so this markup never sets its transform; the Angle parameter is handed to wheel.sync() after each render for when the wheel is at
+    rest (a new puzzle, a refreshed page). The three clickers (Red, Yellow, Blue) are fixed at the bottom of the rim, and the one for the
+    player up is bigger and glows.
+*@
+
+<svg class="wf-wheel-svg" viewBox="-350 -350 700 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The wheel">
+    <circle r="346" class="wf-rim-outer" />
+    <g id="wf-rotor">
+        @foreach (var slice in Slices)
+        {
+            <path d="@Wedge(slice, 0, 322)" class="@SliceClass(slice)" />
+            @Text(slice)
+        }
+        @foreach (var slice in Slices)
+        {
+            <circle cx="@Num(322 * Math.Sin(Rad(slice.Start)))" cy="@Num(-322 * Math.Cos(Rad(slice.Start)))" r="5" class="wf-peg" />
+        }
+    </g>
+    <circle r="322" class="wf-rim-line" />
+    <circle r="70" class="wf-hub" />
+    @for (var i = 0; i < ClickerAngles.Count; i++)
+    {
+        var active = i == Active;
+        <g transform="rotate(@Num(ClickerAngles[i]))">
+            <g id="wf-flap-@i" class="wf-flap wf-flap-@Colors[i].ToLowerInvariant() @(active ? "active" : "")">
+                <polygon points="-13,-345 13,-345 0,-292" />
+            </g>
+        </g>
+    }
+</svg>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<WheelSlice> Slices { get; set; } = [];
+    [Parameter] public int Active { get; set; }
+    [Parameter] public double Angle { get; set; }
+
+    /// <summary>True while a spin is being played: the wheel's turning belongs to wheel.js then, so the resting angle is not applied.</summary>
+    [Parameter] public bool Hold { get; set; }
+
+    private static IReadOnlyList<double> ClickerAngles => WheelRules.ClickerAngles;
+    private static IReadOnlyList<string> Colors => WheelRules.PlayerColors;
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Hold) return;
+        try { await JS.InvokeVoidAsync("wheel.sync", "wf-rotor", Angle); }
+        catch (JSDisconnectedException) { }
+        catch (InvalidOperationException) { }
+    }
+
+    private static double Rad(double degrees) => degrees * Math.PI / 180.0;
+
+    private static string Num(double v) => v.ToString("0.###", CultureInfo.InvariantCulture);
+
+    private static string Wedge(WheelSlice s, double inner, double outer)
+    {
+        var a0 = Rad(s.Start);
+        var a1 = Rad(s.End);
+        string P(double r, double a) => $"{Num(r * Math.Sin(a))} {Num(-r * Math.Cos(a))}";
+        var large = s.End - s.Start > 180 ? 1 : 0;
+        return $"M 0 0 L {P(outer, a0)} A {Num(outer)} {Num(outer)} 0 {large} 1 {P(outer, a1)} Z";
+    }
+
+    // Cash wedges cycle through the show's bright colors by position; the rest are fixed.
+    private static readonly string[] CashColors = ["red", "orange", "yellow", "blue", "purple", "green", "pink"];
+
+    private static string SliceClass(WheelSlice s) => s.Kind switch
+    {
+        SliceKind.Bankrupt => "wf-slice wf-bankrupt",
+        SliceKind.LoseATurn => "wf-slice wf-lose",
+        SliceKind.Million => "wf-slice wf-million",
+        _ => "wf-slice wf-cash-" + CashColors[s.Wedge % CashColors.Length]
+    };
+
+    // The label reads along the spoke, from near the hub outward. Narrow slices (the Million slice is 5 degrees) get small print.
+    private RenderFragment Text(WheelSlice s) => builder =>
+    {
+        var width = s.End - s.Start;
+        var size = width < 10 ? 13 : s.Kind is SliceKind.Bankrupt or SliceKind.LoseATurn ? 27 : 33;
+        var inner = s.Kind switch { SliceKind.Cash => 175, SliceKind.Million => 105, SliceKind.Bankrupt when width < 10 => 0, _ => 120 };
+        if (s.Kind == SliceKind.Bankrupt && width < 10) return;   // the thin Bankrupt slices beside the Million slice stay plain black
+        var text = s.Kind == SliceKind.Million ? "$1,000,000" : s.Label.ToUpperInvariant();
+        var seq = 0;
+        builder.OpenElement(seq++, "text");
+        builder.AddAttribute(seq++, "transform", $"rotate({Num(s.Start + width / 2)}) translate(0 {Num(-inner)}) rotate(-90)");
+        builder.AddAttribute(seq++, "class", "wf-slice-text " + (s.Kind == SliceKind.Cash ? "wf-text-cash" : "wf-text-" + s.Kind.ToString().ToLowerInvariant()));
+        builder.AddAttribute(seq++, "font-size", size);
+        builder.AddAttribute(seq++, "dominant-baseline", "central");
+        builder.AddContent(seq++, text);
+        builder.CloseElement();
+    };
+}

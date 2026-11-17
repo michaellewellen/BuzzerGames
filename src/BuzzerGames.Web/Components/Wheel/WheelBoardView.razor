@@ -1,0 +1,50 @@
+@*
+    The puzzle board on the big screen: green for tiles not in use, white for a letter not yet found, blue (and a ding) for the tiles that
+    just matched, then the letters appear. While the room page plays a reveal, Shown says how many of the blue tiles have turned into their
+    letter so far; once the game has revealed them they come in as plain letters. Hidden tiles carry no letter, so nothing can leak.
+*@
+
+<div class="wf-tvboard" aria-label="Puzzle board">
+    @for (var r = 0; r < WheelBoard.Rows; r++)
+    {
+        <div class="wf-tvrow">
+            @for (var c = 0; c < WheelBoard.Columns; c++)
+            {
+                var inRow = c >= WheelBoard.RowOffsets[r] && c < WheelBoard.RowOffsets[r] + WheelBoard.RowWidths[r];
+                var tile = TileAt(r, c);
+                if (!inRow)
+                {
+                    <span class="wf-t wf-none"></span>
+                }
+                else if (tile is null)
+                {
+                    <span class="wf-t wf-blank"></span>
+                }
+                else if (tile.State == TileState.Revealed)
+                {
+                    <span class="wf-t wf-letter wf-show">@tile.Letter</span>
+                }
+                else if (tile.State == TileState.Lit)
+                {
+                    var turned = LitIndex(tile) < Shown;
+                    <span class="wf-t @(turned ? "wf-letter wf-show wf-turn" : "wf-lit")">@(turned ? RevealLetter : null)</span>
+                }
+                else
+                {
+                    <span class="wf-t wf-letter"></span>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<BoardTileInfo> Tiles { get; set; } = [];
+    [Parameter] public char? RevealLetter { get; set; }
+    [Parameter] public int Shown { get; set; }
+
+    private BoardTileInfo? TileAt(int row, int column) => Tiles.FirstOrDefault(t => t.Row == row && t.Column == column);
+
+    private int LitIndex(BoardTileInfo tile) =>
+        Tiles.Where(t => t.State == TileState.Lit).TakeWhile(t => t != tile).Count();
+}

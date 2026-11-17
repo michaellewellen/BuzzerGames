@@ -182,6 +182,21 @@ static class Render
     /// <summary>The board preview on the puzzles page.</summary>
     public static string WfPreview(string? text) => Html<WheelBoardPreview>(new() { ["Text"] = text });
 
+    public static string WfLobby(WheelSnapshot s, Seat seat, bool boardMode) =>
+        Html<WheelLobbyView>(new() { ["Snapshot"] = s, ["Seat"] = seat, ["BoardMode"] = boardMode });
+
+    public static string WfTv(WheelTable t, bool watching = false) =>
+        Html<WheelTvView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Watching"] = watching });
+
+    public static string WfEmcee(WheelTable t) =>
+        Html<WheelEmceeView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Emcee });
+
+    public static string WfPlayer(WheelTable t, int player) =>
+        Html<WheelPlayerView>(new() { ["Game"] = t.Game, ["Snapshot"] = t.S, ["Token"] = t.Tokens[player], ["PlayerId"] = t.S.Players[player].Id });
+
+    public static string WfDisc(WheelSnapshot s) =>
+        Html<WheelDisc>(new() { ["Slices"] = s.Slices, ["Active"] = Math.Max(0, s.Active), ["Angle"] = s.WheelAngle });
+
     // ---- Match Game ----
 
     public static string MgTv(MatchSnapshot s) => Html<MatchTvView>(new() { ["Snapshot"] = s });

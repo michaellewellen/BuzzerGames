@@ -166,9 +166,14 @@ Pictures and the list of used-up topics live in a folder, so on Railway they nee
 
 On your own computer neither variable is needed: pictures go in a `floor-data` folder (ignored by git) and the topics page opens without a passcode.
 
-## Wheel of Fortune (in progress)
+## How a Wheel of Fortune game works
 
-Step one is built: the rules engine and the puzzle bank. The TV board, wheel and phones come next, so the game isn't on the pick-a-game list yet.
+Create it on the TV at `/wheel-of-fortune`. The emcee and three players scan the QR code: the players take Red, Yellow and Blue in the order they join, and the emcee taps **Start Game**. Six regular puzzles are played (quick rounds and the bonus round are still to come).
+
+- **The TV** shows the board, the category, the letters used and everyone's money. When someone spins, the wheel fills the screen in a tilted view, then swings in close on that player's clicker. Matching letters light blue with a ding, then turn into the letters one by one. Tap **Tap for sound** once on the TV (the first click also does it).
+- **Players' phones** have a 0 to 1000 power slider and a SPIN button on their turn. Everything else is said out loud.
+- **The emcee's phone** shows the secret answer. They tap the letter the player says, see **Confirm K**, then confirm (so a typo can't cost anyone a turn), buy a vowel for a player, mark a solve **Correct** or **Incorrect**, skip a puzzle, and **Undo** any step.
+- If the TV page is closed, the emcee's phone finishes the spin and the reveal itself a few seconds late, so the game never gets stuck.
 
 **Rules as built.** Three players, six regular puzzles (puzzle n starts with player (n-1) % 3). The wheel has 24 wedges of 15 degrees: 21 cash wedges ($500 to $5,000), one Bankrupt, one Lose a Turn, and one wedge split into three 5-degree slices (Bankrupt, $1,000,000, Bankrupt). Landing on the Million slice picks up the wedge and pays $1,500 a letter; the wedge then becomes a plain 15-degree Bankrupt for the rest of the puzzle. Consonants pay the wedge value per letter, vowels cost $250 from the round bank (charged even on a miss), a wrong letter passes the turn, Bankrupt wipes the round bank (and a held Million wedge is lost for good). Only the puzzle solver banks the round money. The emcee types each letter, confirms it (typos happen), and judges solves. Undo is available all game.
 

@@ -1,0 +1,55 @@
+@page "/wheel-of-fortune"
+@inject WheelRoomManager Rooms
+@inject NavigationManager Navigation
+
+<PageTitle>Wheel of Fortune</PageTitle>
+
+<main class="card center jeopardy-home">
+    <h1>Wheel of Fortune</h1>
+    <p class="muted">Create the game on the big screen (the TV). The emcee and the three players (Red, Yellow and Blue) scan its QR code, or open this site on their phones and type the room code below. Players spin from their own phone; the emcee runs everything else.</p>
+
+    <button class="btn btn-start" @onclick="CreateGame">Create a new game</button>
+
+    <hr />
+
+    <h2>Have a room code?</h2>
+    <div class="button-row">
+        <input class="text-input code-input" placeholder="ABCD" maxlength="4"
+               @bind="_code" @bind:event="oninput" @onkeydown="OnKeyDown" />
+        <button class="btn" @onclick="JoinGame">Go</button>
+    </div>
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    <p class="muted"><a href="/wheel-of-fortune/puzzles">Puzzle bank</a> (add or import puzzles; needs the admin passcode)</p>
+    <a class="back-link" href="/">All games</a>
+</main>
+
+@code {
+    private string _code = "";
+    private string? _error;
+
+    private void CreateGame()
+    {
+        var game = Rooms.Create();
+        Navigation.NavigateTo($"/wheel-of-fortune/{game.Code}/board");
+    }
+
+    private void JoinGame()
+    {
+        var game = Rooms.Find(_code);
+        if (game is null)
+        {
+            _error = "We couldn't find a game with that code.";
+            return;
+        }
+        Navigation.NavigateTo($"/wheel-of-fortune/{game.Code}");
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") JoinGame();
+    }
+}

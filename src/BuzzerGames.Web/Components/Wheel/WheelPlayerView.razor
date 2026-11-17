@@ -1,0 +1,103 @@
+@*
+    A player's phone: their name and money, and, on their turn, the power slider and the SPIN button. Everything else (letters, vowels,
+    solving) is said out loud and run by the emcee. The slider shows its number on purpose: one setting returns the wheel to the same
+    wedge, and finding it is the trick.
+*@
+
+@if (Me is null)
+{
+    <main class="card center"><p class="muted">Finding your seat…</p></main>
+}
+else
+{
+    <main class="wf-phone wf-@Me.Color.ToLowerInvariant()">
+        <header class="wf-phone-head">
+            <span class="wf-phone-name">@Me.Name</span>
+            <span class="wf-phone-color">@Me.Color</span>
+        </header>
+
+        <section class="wf-phone-money">
+            <div><span class="muted">This round</span><strong>$@Me.RoundBank.ToString("N0")</strong></div>
+            <div><span class="muted">Total</span><strong>$@Me.Total.ToString("N0")</strong></div>
+            @if (Me.HoldsMillion || Me.WonMillion)
+            {
+                <div class="wf-million-badge">$1,000,000 wedge@(Me.WonMillion ? " (won)" : "")</div>
+            }
+        </section>
+
+        <p class="wf-phone-status">@Status</p>
+
+        @if (MyTurn && Snapshot.Phase == WheelPhase.Turn)
+        {
+            <section class="wf-spin">
+                <div class="wf-power-read">@_power</div>
+                <input type="range" class="wf-power" min="0" max="@WheelRules.PowerMax" step="1" @bind="_power" @bind:event="oninput" aria-label="Spin power" />
+                <div class="wf-nudge">
+                    <button class="btn btn-quiet" @onclick="() => Nudge(-10)">−10</button>
+                    <button class="btn btn-quiet" @onclick="() => Nudge(-1)">−1</button>
+                    <button class="btn btn-quiet" @onclick="() => Nudge(1)">+1</button>
+                    <button class="btn btn-quiet" @onclick="() => Nudge(10)">+10</button>
+                </div>
+                <button class="btn btn-start btn-wide wf-spin-button" disabled="@(!Snapshot.CanSpin)" @onclick="DoSpin">SPIN</button>
+                @if (!Snapshot.CanSpin)
+                {
+                    <p class="muted">No consonants are left. Ask the emcee about a vowel or solving.</p>
+                }
+            </section>
+        }
+
+        @if (_error is not null)
+        {
+            <p class="error">@_error</p>
+        }
+
+        @if (Snapshot.Phase == WheelPhase.GameOver)
+        {
+            <p class="wf-phone-status">@(Snapshot.Winners.Contains(Me.Id) ? "You won!" : "Game over.")</p>
+        }
+    </main>
+}
+
+@code {
+    [Parameter, EditorRequired] public WheelGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public WheelSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public Guid Token { get; set; }
+    [Parameter] public Guid PlayerId { get; set; }
+
+    private int _power = 500;
+    private string? _error;
+
+    private WheelPlayerInfo? Me => Snapshot.Players.FirstOrDefault(p => p.Id == PlayerId);
+    private bool MyTurn => Me is not null && Snapshot.Active >= 0 && Snapshot.Players[Snapshot.Active].Id == PlayerId;
+
+    private string Status
+    {
+        get
+        {
+            if (Snapshot.Phase == WheelPhase.GameOver) return Snapshot.Message ?? "";
+            if (Snapshot.Active < 0) return "";
+            var active = Snapshot.Players[Snapshot.Active];
+            if (MyTurn)
+                return Snapshot.Phase switch
+                {
+                    WheelPhase.Turn => "Your turn. Set your power and spin, or tell the emcee you want a vowel or to solve.",
+                    WheelPhase.Spinning => "Spinning…",
+                    WheelPhase.Consonant => "Call a consonant out loud.",
+                    WheelPhase.Vowel => "Call a vowel out loud.",
+                    WheelPhase.Reveal => "Let's see…",
+                    WheelPhase.Solving => "Say your answer out loud.",
+                    WheelPhase.PuzzleOver => Snapshot.Message ?? "",
+                    _ => ""
+                };
+            return Snapshot.Phase == WheelPhase.PuzzleOver ? Snapshot.Message ?? "" : $"{active.Name} ({active.Color}) is up.";
+        }
+    }
+
+    private void Nudge(int by) => _power = Math.Clamp(_power + by, 0, WheelRules.PowerMax);
+
+    private void DoSpin()
+    {
+        var result = Game.Spin(Token, _power);
+        _error = result.Ok ? null : result.Error;
+    }
+}

@@ -35,6 +35,7 @@ public sealed record WheelSnapshot(
     string Answer,                       // SECRET: for the emcee's phone only, never the TV
     string CalledLetters,
     char? StagedLetter,                  // typed by the emcee, waiting for Confirm
+    char? RevealLetter,                  // while tiles are lit: the letter they are about to show (already said aloud, so not a secret)
     IReadOnlyList<WheelSlice> Slices,
     double WheelAngle,
     SpinPlan? Spin,
@@ -451,6 +452,7 @@ public sealed class WheelGame
             return new WheelSnapshot(
                 Code, s.Phase, _emceeName, players, s.Active, s.PuzzleNumber, WheelRules.RegularPuzzles, s.Category,
                 board, s.Board?.Answer ?? "", string.Concat(s.Called.OrderBy(c => c)), s.Staged,
+                s.Phase == WheelPhase.Reveal && s.Lit.Count > 0 ? s.Board!.Tiles[s.Lit[0]].Letter : null,
                 s.Wheel?.Slices ?? [], s.WheelAngle, s.Spin, s.SpinValue, s.Message,
                 CanStart: s.Phase == WheelPhase.Lobby && _emceeToken is not null && _players.Count == WheelRules.Players,
                 CanSpin: onTurn && HiddenLetters(c => !IsVowel(c)) > 0,

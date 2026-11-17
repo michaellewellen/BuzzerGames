@@ -1,0 +1,170 @@
+@implements IDisposable
+
+@*
+    The emcee's phone. It shows the secret answer, and gives the buttons for every step: spin for a player whose phone died, buy a
+    vowel, the A to Z keypad with a Confirm step (so a typo can't cost anyone a turn), solve and judge, skip, continue, and Undo.
+*@
+
+<main class="wf-emcee">
+    <header class="wf-emcee-head">
+        <span>Puzzle @Snapshot.PuzzleNumber of @Snapshot.PuzzleCount</span>
+        <span class="muted">Room @Snapshot.Code</span>
+    </header>
+
+    <section class="card wf-answer-card">
+        <div class="muted">@Snapshot.Category</div>
+        <div class="wf-answer">@Snapshot.Answer</div>
+    </section>
+
+    <section class="wf-emcee-players">
+        @for (var i = 0; i < Snapshot.Players.Count; i++)
+        {
+            var p = Snapshot.Players[i];
+            <div class="wf-chip wf-@p.Color.ToLowerInvariant() @(i == Snapshot.Active ? "active" : "")">
+                <strong>@p.Name</strong>
+                <span>$@p.RoundBank.ToString("N0") · $@p.Total.ToString("N0")@(p.HoldsMillion ? " ◆" : "")</span>
+            </div>
+        }
+    </section>
+
+    @if (!string.IsNullOrEmpty(Snapshot.Message))
+    {
+        <p class="wf-message">@Snapshot.Message</p>
+    }
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case WheelPhase.Turn:
+            <div class="wf-actions">
+                <div class="wf-spin-for">
+                    <input type="range" min="0" max="@WheelRules.PowerMax" @bind="_power" @bind:event="oninput" aria-label="Spin power" />
+                    <span class="wf-power-read small">@_power</span>
+                    <button class="btn" disabled="@(!Snapshot.CanSpin)" @onclick="() => Do(g => g.Spin(Token, _power))">Spin for them</button>
+                </div>
+                <button class="btn" disabled="@(!Snapshot.CanBuyVowel)" @onclick="() => Do(g => g.BuyVowel(Token))">Buy a vowel ($@WheelRules.VowelCost)</button>
+                <button class="btn" disabled="@(!Snapshot.CanSolve)" @onclick="() => Do(g => g.BeginSolve(Token))">They're solving</button>
+            </div>
+            break;
+
+        case WheelPhase.Spinning:
+            <p class="muted">The wheel is spinning…</p>
+            break;
+
+        case WheelPhase.Consonant:
+        case WheelPhase.Vowel:
+            @if (Snapshot.StagedLetter is { } staged)
+            {
+                <div class="wf-confirm">
+                    <div class="wf-confirm-letter">@staged</div>
+                    <button class="btn btn-start" @onclick="() => Do(g => g.ConfirmLetter(Token))">Confirm @staged</button>
+                    <button class="btn btn-quiet" @onclick="() => Do(g => g.CancelLetter(Token))">Wrong key</button>
+                </div>
+            }
+            else
+            {
+                <p class="muted">Type the letter they say@(Snapshot.Phase == WheelPhase.Vowel ? " (vowels only)" : " (consonants only)").</p>
+                <button class="btn btn-quiet" @onclick="() => Do(g => g.CancelLetter(Token))">@(Snapshot.Phase == WheelPhase.Vowel ? "Never mind, no vowel" : "Cancel")</button>
+            }
+            <div class="wf-keys">
+                @foreach (var c in Letters)
+                {
+                    var called = Snapshot.CalledLetters.Contains(c);
+                    var wrongKind = (Snapshot.Phase == WheelPhase.Vowel) != "AEIOU".Contains(c);
+                    <button class="wf-key @(called ? "called" : "") @(Snapshot.StagedLetter == c ? "staged" : "")" disabled="@(called || wrongKind)"
+                            @onclick="() => Do(g => g.StageLetter(Token, c))">@c</button>
+                }
+            </div>
+            break;
+
+        case WheelPhase.Reveal:
+            <p class="muted">Revealing the letters…</p>
+            break;
+
+        case WheelPhase.Solving:
+            <div class="wf-actions">
+                <button class="btn btn-start" @onclick="() => Do(g => g.JudgeSolve(Token, true))">Correct</button>
+                <button class="btn" @onclick="() => Do(g => g.JudgeSolve(Token, false))">Incorrect</button>
+                <button class="btn btn-quiet" @onclick="() => Do(g => g.CancelSolve(Token))">Back</button>
+            </div>
+            break;
+
+        case WheelPhase.PuzzleOver:
+            <button class="btn btn-start btn-wide" @onclick="() => Do(g => g.Continue(Token))">
+                @(Snapshot.PuzzleNumber >= Snapshot.PuzzleCount ? "Finish the game" : "Next puzzle")
+            </button>
+            break;
+
+        case WheelPhase.GameOver:
+            <p class="wf-message">Game over. Thanks for playing!</p>
+            break;
+    }
+
+    <footer class="wf-emcee-foot">
+        <button class="btn btn-quiet" disabled="@(!Snapshot.CanUndo)" @onclick="() => Do(g => g.Undo(Token))">Undo</button>
+        @if (Snapshot.Phase is WheelPhase.Turn or WheelPhase.Consonant or WheelPhase.Vowel or WheelPhase.Solving)
+        {
+            @if (_confirmSkip)
+            {
+                <button class="btn" @onclick="Skip">Yes, skip this puzzle</button>
+                <button class="btn btn-quiet" @onclick="() => _confirmSkip = false">No</button>
+            }
+            else
+            {
+                <button class="btn btn-quiet" @onclick="() => _confirmSkip = true">Skip puzzle</button>
+            }
+        }
+    </footer>
+</main>
+
+@code {
+    private static readonly char[] Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+
+    [Parameter, EditorRequired] public WheelGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public WheelSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public Guid Token { get; set; }
+
+    private string? _error;
+    private int _power = 500;
+    private bool _confirmSkip;
+    private CancellationTokenSource? _watchdog;
+    private object? _watchKey;
+
+    // The big screen finishes each spin itself. If it isn't there (or its page was closed), the emcee's phone steps in a few seconds late
+    // so the game never gets stuck. Doing it twice is harmless: the second call just says nothing is spinning.
+    protected override void OnParametersSet()
+    {
+        object? key = Snapshot.Phase is WheelPhase.Spinning or WheelPhase.Reveal ? (Snapshot.Phase, Snapshot.Spin?.StartAngle, Snapshot.CalledLetters) : null;
+        if (Equals(key, _watchKey)) return;
+        _watchKey = key;
+        _watchdog?.Cancel();
+        _watchdog = null;
+        if (key is null) return;
+
+        var wait = Snapshot.Phase == WheelPhase.Spinning ? (Snapshot.Spin?.DurationSeconds ?? 5) + 8 : 10 + 1.0 * Snapshot.Board.Count(t => t.State == TileState.Lit);
+        var cts = _watchdog = new CancellationTokenSource();
+        _ = WatchAsync(Snapshot.Phase, wait, cts.Token);
+    }
+
+    private async Task WatchAsync(WheelPhase phase, double seconds, CancellationToken cancel)
+    {
+        try { await Task.Delay(TimeSpan.FromSeconds(seconds), cancel); }
+        catch (TaskCanceledException) { return; }
+        if (phase == WheelPhase.Spinning) Game.FinishSpin();
+        else Game.FinishReveal();
+    }
+
+    private void Do(Func<WheelGame, Result> action)
+    {
+        var result = action(Game);
+        _error = result.Ok ? null : result.Error;
+        _confirmSkip = false;
+    }
+
+    private void Skip() => Do(g => g.SkipPuzzle(Token));
+
+    public void Dispose() => _watchdog?.Cancel();
+}

@@ -1,0 +1,195 @@
+@implements IDisposable
+@inject IJSRuntime JS
+
+@*
+    The big screen. The board, the category, the letters used so far and the three players' money. When someone spins, the wheel fills the
+    screen in a tilted "spin" camera, then swings in close on the clicker of the player who spun, shows what it landed on, and the game moves on.
+    When letters match, the tiles light blue with a ding and then turn into the letter one by one. This page is also what tells the game the wheel
+    has stopped (FinishSpin) and the reveal is done (FinishReveal); the emcee's phone steps in if the TV isn't there.
+    Watching = a spectator's phone showing the same picture without driving anything.
+*@
+
+<div class="wf-tv @(Snapshot.Phase == WheelPhase.GameOver ? "wf-over" : "")">
+    <header class="wf-tv-top">
+        <span class="wf-tv-title">WHEEL OF FORTUNE</span>
+        <span class="wf-tv-puzzle">Puzzle @Snapshot.PuzzleNumber of @Snapshot.PuzzleCount</span>
+        @if (!Watching)
+        {
+            <button class="wf-sound" onclick="wheel.enableSound()">Tap for sound</button>
+        }
+    </header>
+
+    <section class="wf-tv-board">
+        <WheelBoardView Tiles="Snapshot.Board" RevealLetter="Snapshot.RevealLetter" Shown="_shown" />
+        <div class="wf-category">@Snapshot.Category</div>
+    </section>
+
+    <div class="wf-alphabet" aria-label="Letters called">
+        @foreach (var c in Alphabet)
+        {
+            <span class="wf-ltr @(Snapshot.CalledLetters.Contains(c) ? "used" : "")">@c</span>
+        }
+    </div>
+
+    <p class="wf-tv-message">@Snapshot.Message</p>
+
+    <section class="wf-scores">
+        @for (var i = 0; i < Snapshot.Players.Count; i++)
+        {
+            var p = Snapshot.Players[i];
+            <div class="wf-score wf-@p.Color.ToLowerInvariant() @(i == Snapshot.Active && Snapshot.Phase != WheelPhase.GameOver ? "active" : "") @(Snapshot.Winners.Contains(p.Id) ? "winner" : "")">
+                <div class="wf-score-name">@p.Name</div>
+                <div class="wf-score-round">$@p.RoundBank.ToString("N0")</div>
+                <div class="wf-score-total">Total $@p.Total.ToString("N0")</div>
+                @if (p.HoldsMillion || p.WonMillion)
+                {
+                    <div class="wf-score-million">◆ $1,000,000 wedge</div>
+                }
+            </div>
+        }
+    </section>
+
+    <div class="wf-stage cam-@_cam" style="--cx:@CloseX; --cy:@CloseY">
+        <WheelDisc Slices="Snapshot.Slices" Active="Math.Max(0, Snapshot.Active)" Angle="Snapshot.WheelAngle" Hold="@(Snapshot.Phase == WheelPhase.Spinning || _cam != "none")" />
+        <div class="wf-landed @(_showLanded ? "show" : "")">@LandedText</div>
+    </div>
+</div>
+
+@code {
+    private static readonly char[] Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+
+    [Parameter, EditorRequired] public WheelGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public WheelSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public bool Watching { get; set; }
+
+    private string _cam = "none";
+    private bool _showLanded;
+    private string LandedText = "";
+    private int _shown;
+    private bool _disposed;
+
+    private string? _spinKey;
+    private string? _revealKey;
+    private WheelPhase _lastPhase;
+    private string? _lastMessage;
+
+    // Where the active clicker sits on the 700-wide wheel drawing, as a percentage, so the close-up camera can swing to it.
+    private string CloseX => Num(100.0 * 330 * Math.Sin(Radians(ClickerAngle)) / 700);
+    private string CloseY => Num(-100.0 * 330 * Math.Cos(Radians(ClickerAngle)) / 700);
+    private double ClickerAngle => WheelRules.ClickerAngles[Math.Clamp(Snapshot.Active, 0, WheelRules.Players - 1)];
+
+    private static double Radians(double d) => d * Math.PI / 180.0;
+    private static string Num(double v) => v.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    protected override void OnParametersSet()
+    {
+        if (Watching) { _lastPhase = Snapshot.Phase; return; }
+
+        if (Snapshot.Phase == WheelPhase.Spinning && Snapshot.Spin is { } plan)
+        {
+            var key = $"{Snapshot.PuzzleNumber}:{plan.StartAngle:0.###}:{plan.Power}";
+            if (key != _spinKey)
+            {
+                _spinKey = key;
+                _ = RunSpinAsync(plan, Snapshot.Slices.Select(s => s.Start).ToArray());
+            }
+        }
+        else if (Snapshot.Phase == WheelPhase.Reveal)
+        {
+            var key = $"{Snapshot.PuzzleNumber}:{Snapshot.CalledLetters}";
+            if (key != _revealKey)
+            {
+                _revealKey = key;
+                _ = RunRevealAsync(Snapshot.Board.Count(t => t.State == TileState.Lit));
+            }
+        }
+        else if (Snapshot.Phase != WheelPhase.Reveal)
+        {
+            _shown = 0;
+        }
+
+        // Sounds for what just happened, once per change.
+        if (Snapshot.Phase != _lastPhase || Snapshot.Message != _lastMessage)
+        {
+            if (_lastPhase is WheelPhase.Consonant or WheelPhase.Vowel && Snapshot.Phase == WheelPhase.Turn && Snapshot.Message?.StartsWith("No ") == true)
+                _ = Sound("buzz");
+            else if (Snapshot.Phase == WheelPhase.PuzzleOver && _lastPhase != WheelPhase.PuzzleOver && Snapshot.Message?.Contains("solved it") == true)
+                _ = Sound("solve");
+            else if (Snapshot.Phase == WheelPhase.GameOver && _lastPhase != WheelPhase.GameOver)
+                _ = Sound("solve");
+            _lastPhase = Snapshot.Phase;
+            _lastMessage = Snapshot.Message;
+        }
+    }
+
+    private async Task RunSpinAsync(SpinPlan plan, double[] sliceStarts)
+    {
+        try
+        {
+            _showLanded = false;
+            _cam = "wide";
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(600);   // let the camera swing in before the wheel moves
+
+            // The browser's spin() finishes when the wheel stops, but if the browser can't play it we still wait out the same time.
+            var clock = System.Diagnostics.Stopwatch.StartNew();
+            await Js("wheel.spin", "wf-rotor", plan.StartAngle, plan.SettledAngle, plan.DurationSeconds, plan.ClickerAngle, sliceStarts, WheelRules.ClickerAngles.ToArray(), Snapshot.Active);
+            var rest = plan.DurationSeconds + 0.25 - clock.Elapsed.TotalSeconds;
+            if (rest > 0) await Task.Delay(TimeSpan.FromSeconds(rest));
+
+            LandedText = plan.Landed.Kind == SliceKind.Million ? "$1,000,000 WEDGE!" : plan.Landed.Label.ToUpperInvariant();
+            _cam = "close";
+            _showLanded = true;
+            await InvokeAsync(StateHasChanged);
+            await Sound(plan.Landed.Kind switch { SliceKind.Bankrupt => "bankrupt", SliceKind.LoseATurn => "lose", SliceKind.Million => "million", _ => "land" });
+            await Task.Delay(2600);
+        }
+        catch (TaskCanceledException) { }
+        finally
+        {
+            if (!_disposed)
+            {
+                Game.FinishSpin();
+                _cam = "none";
+                _showLanded = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+
+    private async Task RunRevealAsync(int count)
+    {
+        try
+        {
+            _shown = 0;
+            await InvokeAsync(StateHasChanged);
+            await Sound("ding");
+            await Task.Delay(1200);
+            for (var i = 1; i <= count && !_disposed; i++)
+            {
+                _shown = i;
+                await InvokeAsync(StateHasChanged);
+                await Sound("tick");
+                await Task.Delay(600);
+            }
+            await Task.Delay(500);
+        }
+        catch (TaskCanceledException) { }
+        finally
+        {
+            if (!_disposed) Game.FinishReveal();
+        }
+    }
+
+    private async Task Js(string fn, params object?[] args)
+    {
+        try { await JS.InvokeVoidAsync(fn, args); }
+        catch (JSDisconnectedException) { }
+        catch (InvalidOperationException) { }
+        catch (JSException) { }
+    }
+
+    private Task Sound(string name) => Js("wheel.play", name);
+
+    public void Dispose() => _disposed = true;
+}
