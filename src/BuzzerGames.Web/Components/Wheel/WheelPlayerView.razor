@@ -110,6 +110,14 @@ else
         catch (JSDisconnectedException) { }
     }
 
+    /// <summary>A finger just touched the pad: tell the room right away so the TV can swing to the wheel.</summary>
+    [JSInvokable]
+    public Task Grabbed() { Game.Grab(Token); return Task.CompletedTask; }
+
+    /// <summary>The finger lifted without a real spin (a tap, or too slow).</summary>
+    [JSInvokable]
+    public Task Dropped() { Game.Drop(Token); return Task.CompletedTask; }
+
     /// <summary>Called by the pad when a finger lets go. <paramref name="power"/> is 0 to 1000, worked out from how fast the swirl was.</summary>
     [JSInvokable]
     public Task Swirled(int power) => InvokeAsync(() =>

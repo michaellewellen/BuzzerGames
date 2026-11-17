@@ -47,7 +47,8 @@ public sealed record WheelSnapshot(
     bool CanSolve,
     bool CanUndo,
     IReadOnlyList<Guid> Winners,
-    Guid? PuzzleWinner);                 // who solved the puzzle just finished: their round money is still on the board until the emcee continues
+    Guid? PuzzleWinner,
+    bool Swirling);                      // the player up has a finger on the spin pad, so the TV can swing to the wheel before the spin is thrown                 // who solved the puzzle just finished: their round money is still on the board until the emcee continues
 
 /// <summary>
 /// One game of Wheel of Fortune: an emcee and three players (Red, Yellow, Blue) who spin from their phones while the emcee runs everything else.
@@ -108,6 +109,7 @@ public sealed class WheelGame
     private readonly double _jitter;
     private readonly List<Player> _players = [];
     private readonly List<State> _history = [];
+    private bool _swirling;   // a finger is on the spin pad. Kept outside State on purpose: it is not a game action, so Undo never touches it.
     private Guid? _emceeToken;
     private string? _emceeName;
     private WheelDeal? _deal;
@@ -184,6 +186,7 @@ public sealed class WheelGame
         if (HiddenLetters(c => !IsVowel(c)) == 0) return Result.Fail("There are no consonants left. Buy a vowel or solve the puzzle.");
         if (power is < 0 or > WheelRules.PowerMax) return Result.Fail($"The spin power goes from 0 to {WheelRules.PowerMax}.");
 
+        _swirling = false;
         Remember();
         var jitter = _jitter == 0 ? 0 : (_rng.NextDouble() * 2 - 1) * _jitter;
         var plan = WheelPhysics.Plan(_s.Wheel!, _s.WheelAngle, WheelRules.ClickerAngles[_s.Active], power, jitter);
@@ -191,6 +194,26 @@ public sealed class WheelGame
         _s.WheelAngle = plan.SettledAngle;
         _s.Phase = WheelPhase.Spinning;
         _s.Message = $"{ActiveName()} spins...";
+        return Result.Success;
+    });
+
+    /// <summary>
+    /// A finger has just touched the player's spin pad. Nothing in the game changes, but the TV hears about it straight away and starts
+    /// swinging to the wheel, so the camera is already there when the spin is thrown.
+    /// </summary>
+    public Result Grab(Guid token) => Run(() =>
+    {
+        if (!IsEmcee(token) && !IsActivePlayer(token)) return Result.Fail("It isn't your turn to spin.");
+        if (_s.Phase != WheelPhase.Turn) return Result.Fail("You can't spin right now.");
+        _swirling = true;
+        return Result.Success;
+    });
+
+    /// <summary>The finger lifted without a real spin (a tap, or too slow): the TV swings back.</summary>
+    public Result Drop(Guid token) => Run(() =>
+    {
+        if (!IsEmcee(token) && !IsActivePlayer(token)) return Result.Fail("It isn't your turn to spin.");
+        _swirling = false;
         return Result.Success;
     });
 
@@ -469,7 +492,8 @@ public sealed class WheelGame
                 CanSolve: onTurn,
                 CanUndo: inPlay && s.Phase is not (WheelPhase.Spinning or WheelPhase.Reveal) && _history.Count > 0,
                 Winners: s.Winners.Select(i => _players[i].Id).ToList(),
-                PuzzleWinner: s.PuzzleWinner >= 0 && s.Phase == WheelPhase.PuzzleOver ? _players[s.PuzzleWinner].Id : null);
+                PuzzleWinner: s.PuzzleWinner >= 0 && s.Phase == WheelPhase.PuzzleOver ? _players[s.PuzzleWinner].Id : null,
+                Swirling: _swirling && s.Phase == WheelPhase.Turn);
         }
     }
 
@@ -563,6 +587,7 @@ public sealed class WheelGame
         lock (_gate)
         {
             result = action();
+            if (_s.Phase != WheelPhase.Turn) _swirling = false;   // whatever happened, nobody is swirling a pad that has gone away
         }
         if (result.Ok) Changed?.Invoke();
         return result;

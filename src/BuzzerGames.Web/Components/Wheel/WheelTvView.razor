@@ -54,6 +54,7 @@
     private int _shown;   // how many of the matched tiles have turned into their letter
     private int _lit;     // how many of the matched tiles have turned blue so far
     private bool _disposed;
+    private bool _spinRunning;   // RunSpinAsync is in charge of the camera
 
     private string? _spinKey;
     private string? _revealKey;
@@ -96,6 +97,10 @@
             _lit = 0;
         }
 
+        // A finger is on the spin pad: swing to the wheel now, so it is already there when the spin is thrown. (Back again if the finger lifts.)
+        if (Snapshot.Phase == WheelPhase.Turn && !_spinRunning)
+            _cam = Snapshot.Swirling ? "wide" : "none";
+
         // Sounds for what just happened, once per change.
         if (Snapshot.Phase != _lastPhase || Snapshot.Message != _lastMessage)
         {
@@ -117,10 +122,12 @@
     {
         try
         {
+            _spinRunning = true;
             _showLanded = false;
+            var alreadyThere = _cam == "wide";   // the camera started swinging when the finger touched the pad
             _cam = "wide";
             await InvokeAsync(StateHasChanged);
-            await Task.Delay(600);   // let the camera swing in before the wheel moves
+            await Task.Delay(alreadyThere ? 60 : 600);   // otherwise let the camera swing in before the wheel moves
 
             // The browser's spin() finishes when the wheel stops, but if the browser can't play it we still wait out the same time.
             var clock = System.Diagnostics.Stopwatch.StartNew();
@@ -138,6 +145,7 @@
         catch (TaskCanceledException) { }
         finally
         {
+            _spinRunning = false;
             if (!_disposed)
             {
                 Game.FinishSpin();
@@ -169,7 +177,6 @@
             {
                 _shown = i;
                 await InvokeAsync(StateHasChanged);
-                await Sound("bell");
                 await Task.Delay(650);
             }
             await Task.Delay(500);

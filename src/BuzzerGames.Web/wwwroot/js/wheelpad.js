@@ -57,6 +57,7 @@ window.wheelpad = (function () {
         samples = [{ t: e.timeStamp, c: 0 }];
         say('');
         el.classList.add('touching');
+        dotnetRef.invokeMethodAsync('Grabbed');   // the TV starts swinging to the wheel now, not when the finger lets go
       });
 
       el.addEventListener('pointermove', function (e) {
@@ -87,6 +88,7 @@ window.wheelpad = (function () {
 
         if (e.type === 'pointercancel' || total < MIN_SWEPT || speed < TOO_SLOW) {
           say(total < MIN_SWEPT ? 'Swirl your finger around the wheel, then let go.' : 'Too slow! Swirl faster and let go while still moving.');
+          dotnetRef.invokeMethodAsync('Dropped');
           return;
         }
 

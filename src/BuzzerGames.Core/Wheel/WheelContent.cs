@@ -237,14 +237,14 @@ public sealed class FolderWheelContent : IWheelContent
             error = "";
             var used = _bank.Used.ToHashSet();
 
-            var regular = Pick(_bank.Regular, p => p.Id, WheelRules.RegularPuzzles, used, rng);
+            var regular = Pick(_bank.Regular, p => p.Id, p => p.Category, WheelRules.RegularPuzzles, used, rng);
             if (regular.Count < WheelRules.RegularPuzzles)
             {
                 error = $"The puzzle bank has {_bank.Regular.Count} regular puzzles; a game needs {WheelRules.RegularPuzzles}. Add some on the puzzles page.";
                 return false;
             }
 
-            var quick = Pick(_bank.Quick, q => q.Id, 2, used, rng);
+            var quick = Pick(_bank.Quick, q => q.Id, q => q.Theme, 2, used, rng);
 
             var chosenCategories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var bonus = new List<WheelPuzzle>();
@@ -273,11 +273,35 @@ public sealed class FolderWheelContent : IWheelContent
 
     private static List<T> Shuffled<T>(IEnumerable<T> items, Random rng) => items.OrderBy(_ => rng.Next()).ToList();
 
-    private static List<T> Pick<T>(List<T> all, Func<T, string> id, int count, HashSet<string> used, Random rng)
+    /// <summary>
+    /// Picks <paramref name="count"/> items. In order of preference: fresh ones from a category not used yet in this pick, then any other fresh ones, then used
+    /// ones from a new category, then anything. So with a decent bank no category appears twice and nothing repeats, and a thin
+    /// bank still deals a game instead of failing.
+    /// </summary>
+    private static List<T> Pick<T>(List<T> all, Func<T, string> id, Func<T, string> group, int count, HashSet<string> used, Random rng)
     {
         var fresh = Shuffled(all.Where(x => !used.Contains(id(x))), rng);
         var old = Shuffled(all.Where(x => used.Contains(id(x))), rng);
-        return fresh.Concat(old).Take(count).ToList();
+        var picked = new List<T>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        void Take(List<T> from, bool newCategoryOnly)
+        {
+            foreach (var x in from)
+            {
+                if (picked.Count == count) return;
+                if (picked.Contains(x)) continue;
+                if (newCategoryOnly && seen.Contains(group(x).Trim())) continue;
+                picked.Add(x);
+                seen.Add(group(x).Trim());
+            }
+        }
+
+        Take(fresh, newCategoryOnly: true);
+        Take(fresh, newCategoryOnly: false);
+        Take(old, newCategoryOnly: true);
+        Take(old, newCategoryOnly: false);
+        return picked;
     }
 
     private T Locked<T>(Func<T> action)

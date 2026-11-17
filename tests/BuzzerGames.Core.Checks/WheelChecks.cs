@@ -739,6 +739,50 @@ static class WheelChecks
             Check.True(table.S.Message!.Contains("BANKRUPT"), "the message says so");
         });
 
+        run("grab and drop: a finger on the pad is visible to the TV, is not a game action, and goes away on a spin, a drop or a phase change", () =>
+        {
+            var table = new WheelTable();
+            Check.True(!table.S.Swirling, "nobody swirling at first");
+            Check.Fails(table.Game.Grab(table.Tokens[1]), "Yellow isn't up");
+            Check.Ok(table.Game.Grab(table.Tokens[0]));
+            Check.True(table.S.Swirling, "the TV can see the finger");
+            Check.True(!table.S.CanUndo, "and it is not something Undo would take back");
+            Check.Ok(table.Game.Drop(table.Tokens[0]));
+            Check.True(!table.S.Swirling, "dropped: the TV swings back");
+
+            Check.Ok(table.Game.Grab(table.Tokens[0]));
+            Check.Ok(table.Game.Spin(table.Tokens[0], 400));
+            Check.True(!table.S.Swirling, "spinning ends it");
+            Check.Fails(table.Game.Grab(table.Tokens[0]), "no grabbing while the wheel turns");
+            Check.Ok(table.Game.FinishSpin());
+
+            var other = new WheelTable();
+            Check.Ok(other.Game.Grab(other.Tokens[0]));
+            Check.Ok(other.Game.BeginSolve(other.Emcee));
+            Check.True(!other.S.Swirling, "going to solve ends it");
+            Check.Ok(other.Game.JudgeSolve(other.Emcee, false));
+            Check.True(!other.S.Swirling, "and it does not come back by itself");
+        });
+
+        run("a deal never uses the same category twice while there are enough different ones, and still deals when there aren't", () =>
+        {
+            using var dir = new TempDir();
+            var bank = new FolderWheelContent(dir.Path, seedStarters: false);
+            // 12 puzzles in 6 categories: every deal of 6 has to take exactly one from each.
+            var cats = new[] { "Same Name", "Phrase", "Place", "Thing", "Person", "Food & Drink" };
+            for (var i = 0; i < 12; i++) Check.True(bank.AddRegular(cats[i % 6], "PUZZLE " + (char)('A' + i)).Ok, "added");
+            for (var seed = 0; seed < 100; seed++)
+            {
+                Check.True(bank.TryCreateDeal(new Random(seed), out var deal, out _), "deals");
+                Check.Equal(6, deal.Regular.Select(p => p.Category.ToUpperInvariant()).Distinct().Count(), "six different categories");
+            }
+
+            using var dir2 = new TempDir();
+            var thin = new FolderWheelContent(dir2.Path, seedStarters: false);
+            for (var i = 0; i < 8; i++) Check.True(thin.AddRegular("Same Name", "PUZZLE " + (char)('A' + i)).Ok, "added");
+            Check.True(thin.TryCreateDeal(new Random(1), out var repeated, out _) && repeated.Regular.Count == 6, "one category only: it still deals six rather than failing");
+        });
+
         run("lose a turn: the turn passes and money stays", () =>
         {
             var table = new WheelTable(["BREAK THE ICE", "X", "X", "X", "X", "X"]);
