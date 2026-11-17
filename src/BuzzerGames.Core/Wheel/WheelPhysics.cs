@@ -3,7 +3,7 @@ namespace BuzzerGames.Core.Wheel;
 /// <summary>
 /// Everything the screens need to animate one spin. The wheel turns clockwise, easing out, from <see cref="StartAngle"/> to
 /// <see cref="EndAngle"/> over <see cref="DurationSeconds"/>, then nudges a few degrees to <see cref="SettledAngle"/> so the clicker rests
-/// in the middle of the slice it landed on. Angles are cumulative degrees (they keep growing; they are not wrapped to 0-360).
+/// between two pegs, in the middle of the 5-degree gap it landed in. Angles are cumulative degrees (they keep growing; they are not wrapped to 0-360).
 /// </summary>
 public sealed record SpinPlan(
     int Power,
@@ -67,8 +67,12 @@ public static class WheelPhysics
 
         // A point on the wheel at angle w shows up on the screen at w + (how far the wheel has turned), so the clicker sees w = clicker - turned.
         var under = WheelLayout.Normalize(clickerAngle - end);
-        var landed = layout.SliceAt(under);
-        var settled = end + (under - landed.Mid);
+
+        // The wheel comes to rest with the clicker between two pegs, in the middle of whichever 5-degree gap it was in. Wedges start and end on
+        // pegs, so a gap always sits inside one wedge: a 15-degree wedge has three places to stop (three pegs' worth of gaps), a 5-degree slice one.
+        var gapMid = Math.Floor(under / WheelRules.PegDegrees) * WheelRules.PegDegrees + WheelRules.PegDegrees / 2;
+        var landed = layout.SliceAt(gapMid);
+        var settled = end + (under - gapMid);
         var duration = DurationFor(travel);
 
         var clicks = new List<double>();

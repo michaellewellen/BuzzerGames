@@ -227,7 +227,7 @@ static class WheelChecks
             Check.True(narrow.Width / 0.45 > 10 && narrow.Width / 0.45 < 12, "the Million slice's window is about 11 slider units wide");
         });
 
-        run("spin: the wheel settles with the clicker in the middle of the slice it landed on", () =>
+        run("spin: the wheel settles with the clicker between two pegs, in the middle of the 5-degree gap it landed in", () =>
         {
             for (var seed = 0; seed < 200; seed++)
             {
@@ -235,10 +235,32 @@ static class WheelChecks
                 var clicker = WheelRules.ClickerAngles[seed % 3];
                 var start = Dice.NextDouble() * 720 - 360;
                 var plan = WheelPhysics.Plan(wheel, start, clicker, Dice.Next(0, 1001), (Dice.NextDouble() * 2 - 1) * 1.5);
-                var seen = wheel.SliceAt(clicker - plan.SettledAngle);
-                Check.Equal(plan.Landed, seen, "the settled wheel shows the landed slice");
-                Check.True(Math.Abs(WheelLayout.Normalize(clicker - plan.SettledAngle) - plan.Landed.Mid) < 1e-6, "right in the middle");
-                Check.True(Math.Abs(plan.SettledAngle - plan.EndAngle) <= plan.Landed.Width / 2 + 1e-6, "the settle is only a small nudge");
+                var under = WheelLayout.Normalize(clicker - plan.SettledAngle);
+                Check.Equal(plan.Landed, wheel.SliceAt(under), "the settled wheel shows the landed slice");
+                var intoGap = under % WheelRules.PegDegrees;
+                Check.True(Math.Abs(intoGap - WheelRules.PegDegrees / 2) < 1e-6, "dead centre between two pegs");
+                Check.True(under > plan.Landed.Start && under < plan.Landed.End, "that gap is inside the landed wedge");
+                Check.True(Math.Abs(plan.SettledAngle - plan.EndAngle) <= WheelRules.PegDegrees / 2 + 1e-6, "the settle is only a small nudge, never past the neighbouring peg");
+            }
+        });
+
+        run("spin: a 15-degree wedge can be landed on at any of its three gaps, and the Million slice at its one", () =>
+        {
+            var wheel = WheelLayout.Create(new Random(8));
+            var clicker = WheelRules.ClickerAngles[1];
+            var gapsByWedge = new Dictionary<int, HashSet<int>>();
+            for (var power = 0; power <= WheelRules.PowerMax; power++)
+            {
+                var plan = WheelPhysics.Plan(wheel, 0, clicker, power, 0);
+                var gap = (int)Math.Floor(WheelLayout.Normalize(clicker - plan.SettledAngle) / WheelRules.PegDegrees);
+                if (!gapsByWedge.TryGetValue(plan.Landed.Wedge, out var set)) gapsByWedge[plan.Landed.Wedge] = set = [];
+                set.Add(gap);
+            }
+            foreach (var slice in wheel.Slices)
+            {
+                var expected = (int)Math.Round(slice.Width / WheelRules.PegDegrees);
+                var reached = gapsByWedge.TryGetValue(slice.Wedge, out var got) ? got.Count(g => g * WheelRules.PegDegrees >= slice.Start - 1e-9 && (g + 1) * WheelRules.PegDegrees <= slice.End + 1e-9) : 0;
+                Check.Equal(expected, reached, $"every gap of the {slice.Label} slice at {slice.Start}° can be reached");
             }
         });
 
