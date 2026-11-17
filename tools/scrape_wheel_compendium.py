@@ -30,6 +30,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from html.parser import HTMLParser
 from pathlib import Path
 
 BASE = "https://buyavowel.boards.net/page/"
@@ -62,13 +63,61 @@ def clean_cell(raw):
     return " ".join(text.split())
 
 
+class _TableReader(HTMLParser):
+    """Collects rows of cell text. A new <tr> or <td> closes the previous one, so missing end tags (common in
+    hand-written forum HTML) don't matter."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.rows = []
+        self._row = None
+        self._cell = None
+
+    def _close_cell(self):
+        if self._cell is not None and self._row is not None:
+            self._row.append(" ".join("".join(self._cell).replace("\xa0", " ").split()))
+        self._cell = None
+
+    def _close_row(self):
+        self._close_cell()
+        if self._row:
+            self.rows.append(self._row)
+        self._row = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "tr":
+            self._close_row()
+            self._row = []
+        elif tag in ("td", "th"):
+            self._close_cell()
+            if self._row is None:
+                self._row = []
+            self._cell = []
+        elif tag == "br" and self._cell is not None:
+            self._cell.append(" ")
+
+    def handle_endtag(self, tag):
+        if tag in ("td", "th"):
+            self._close_cell()
+        elif tag in ("tr", "table", "tbody"):
+            self._close_row()
+
+    def handle_data(self, data):
+        if self._cell is not None:
+            self._cell.append(data)
+
+    def close(self):
+        super().close()
+        self._close_row()
+
+
 def parse_rows(page_html):
     """Yield dicts with puzzle, category, episode, round for every puzzle row of one compendium page."""
+    reader = _TableReader()
+    reader.feed(page_html)
+    reader.close()
     columns = None
-    for row in ROW_RE.findall(page_html):
-        cells = [clean_cell(c) for c in CELL_RE.findall(row)]
-        if not cells:
-            continue
+    for cells in reader.rows:
         upper = [c.upper() for c in cells]
         if "PUZZLE" in upper and "CATEGORY" in upper and "ROUND" in upper:
             columns = {name: upper.index(name) for name in ("PUZZLE", "CATEGORY", "ROUND")}
@@ -85,6 +134,13 @@ def parse_rows(page_html):
             "episode": episode or date,
             "round": cells[columns["ROUND"]].replace(" ", ""),
         }
+
+
+def describe_page(page_html):
+    """A few facts for when a page doesn't parse, so the layout can be worked out from the output alone."""
+    i = page_html.upper().find("PUZZLE")
+    around = page_html[max(0, i - 150): i + 350].replace("\n", " ") if i >= 0 else "(the word PUZZLE never appears)"
+    return f"{len(page_html)} characters, <tr> x{page_html.lower().count('<tr')}, <td> x{page_html.lower().count('<td')}; near the first PUZZLE: {around}"
 
 
 def normalize_puzzle(text):
@@ -247,6 +303,8 @@ SAMPLE_PAGE = """
 def selftest():
     rows = list(parse_rows(SAMPLE_PAGE))
     assert len(rows) == 9, len(rows)
+    loose = "<table><tr><td>PUZZLE<td>CATEGORY<td>ROUND<tr><td>A B<td>Phrase<td>R1<tr><td>C&amp;D<br>E<td>Thing<td>R2*</table>"
+    assert [r["puzzle"] for r in parse_rows(loose)] == ["A B", "C&D E"], list(parse_rows(loose))
     regular, quick, bonus, ignored = collect(rows)
     assert [t for _, t in regular] == ["BREAK A LEG", "OLIVE OIL AND FETA CHEESE", "COFFEE BREAK"], regular
     assert quick == [("Up In The Air", ["HOT-AIR BALLOONS", "THE BIRDS AND THE BEES", "UNIDENTIFIED FLYING OBJECTS"])], quick
@@ -311,6 +369,7 @@ def main():
         regular, quick, bonus, ignored = collect(rows, ff=args.ff, crosswords=args.crosswords)
         if not rows:
             print(f"  {name}: no puzzle table found (different layout?)", file=sys.stderr)
+            print(f"    {describe_page(page)}", file=sys.stderr)
         all_regular += regular
         all_quick += quick
         all_bonus += bonus
