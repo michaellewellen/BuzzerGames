@@ -38,7 +38,37 @@ window.wheel = (function () {
     osc.stop(t0 + length + 0.05);
   }
 
+  // A crowd clapping: filtered noise whose loudness crackles with lots of little overlapping claps, swelling in and fading out over ~3.5 s.
+  function applause() {
+    var a = audio();
+    if (!a) return;
+    var seconds = 3.5, rate = a.sampleRate, n = Math.floor(seconds * rate);
+    var buffer = a.createBuffer(1, n, rate);
+    var data = buffer.getChannelData(0);
+    var clap = 0;
+    for (var i = 0; i < n; i++) {
+      var t = i / rate;
+      var swell = Math.min(t / 0.35, 1) * (t < 2.6 ? 1 : Math.max((seconds - t) / (seconds - 2.6), 0));
+      if (Math.random() < 0.0022) clap = 0.6 + Math.random() * 0.4;   // someone claps
+      clap *= 0.9985;                                                   // and the clap dies away
+      data[i] = (Math.random() * 2 - 1) * (0.18 + clap) * swell;
+    }
+    var src = a.createBufferSource();
+    src.buffer = buffer;
+    var band = a.createBiquadFilter();
+    band.type = 'bandpass';
+    band.frequency.value = 2200;
+    band.Q.value = 0.45;
+    var gain = a.createGain();
+    gain.gain.value = 1.6;
+    src.connect(band);
+    band.connect(gain);
+    gain.connect(a.destination);
+    src.start();
+  }
+
   var sounds = {
+    applause: applause,
     click: function () { tone(1500, 0, 0.03, 'square', 0.07, 700); },
     tick: function () { tone(1250, 0, 0.09, 'triangle', 0.18); },
     bell: function () { tone(1046, 0, 0.8, 'sine', 0.22); tone(1568, 0, 0.6, 'sine', 0.1); },

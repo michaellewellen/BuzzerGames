@@ -46,7 +46,8 @@ public sealed record WheelSnapshot(
     bool CanBuyVowel,
     bool CanSolve,
     bool CanUndo,
-    IReadOnlyList<Guid> Winners);
+    IReadOnlyList<Guid> Winners,
+    Guid? PuzzleWinner);                 // who solved the puzzle just finished: their round money is still on the board until the emcee continues
 
 /// <summary>
 /// One game of Wheel of Fortune: an emcee and three players (Red, Yellow, Blue) who spin from their phones while the emcee runs everything else.
@@ -83,6 +84,7 @@ public sealed class WheelGame
         public int SpinValue;
         public string? Message;
         public List<int> Winners = [];
+        public int PuzzleWinner = -1;   // set when a puzzle is solved; the money moves into their total when the emcee continues
 
         public State Clone()
         {
@@ -377,14 +379,15 @@ public sealed class WheelGame
             return Result.Success;
         }
 
+        // The money stays in their round bank for now so the room can celebrate; Continue moves it into their total.
         var won = _s.RoundBank[_s.Active];
-        _s.Total[_s.Active] += won;
         var million = _s.MillionHolder == _s.Active;
         if (million) _s.MillionWon[_s.Active] = true;
+        else _s.MillionHolder = -1;   // someone else solved it: the wedge is lost, so it stops showing on its holder
+        _s.PuzzleWinner = _s.Active;
         RevealEverything();
         _s.Phase = WheelPhase.PuzzleOver;
         _s.Message = $"{name} solved it and banks ${won:N0}{(million ? " and keeps the Million Dollar Wedge!" : ".")}";
-        ClearRound();
         return Result.Success;
     });
 
@@ -407,6 +410,12 @@ public sealed class WheelGame
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
         if (_s.Phase != WheelPhase.PuzzleOver) return Result.Fail("The puzzle isn't over yet.");
         Remember();
+        if (_s.PuzzleWinner >= 0)
+        {
+            _s.Total[_s.PuzzleWinner] += _s.RoundBank[_s.PuzzleWinner];
+            _s.PuzzleWinner = -1;
+        }
+        ClearRound();
         if (_s.PuzzleNumber >= WheelRules.RegularPuzzles) EndGame();
         else StartPuzzle(_s.PuzzleNumber + 1);
         return Result.Success;
@@ -459,7 +468,8 @@ public sealed class WheelGame
                 CanBuyVowel: onTurn && s.RoundBank[s.Active] >= WheelRules.VowelCost && HiddenLetters(IsVowel) > 0,
                 CanSolve: onTurn,
                 CanUndo: inPlay && s.Phase is not (WheelPhase.Spinning or WheelPhase.Reveal) && _history.Count > 0,
-                Winners: s.Winners.Select(i => _players[i].Id).ToList());
+                Winners: s.Winners.Select(i => _players[i].Id).ToList(),
+                PuzzleWinner: s.PuzzleWinner >= 0 && s.Phase == WheelPhase.PuzzleOver ? _players[s.PuzzleWinner].Id : null);
         }
     }
 
@@ -480,6 +490,7 @@ public sealed class WheelGame
         s.RoundBank = new int[WheelRules.Players];
         s.MillionHolder = -1;
         s.MillionAvailable = true;
+        s.PuzzleWinner = -1;
         s.Active = (number - 1) % WheelRules.Players;
         s.Wheel = WheelLayout.Create(_rng);
 

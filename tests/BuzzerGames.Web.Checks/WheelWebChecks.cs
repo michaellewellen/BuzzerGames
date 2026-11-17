@@ -123,7 +123,7 @@ static class WheelWebChecks
             Check.True(Render.Has(disc, "wf-flap-red") && Render.Has(disc, "wf-flap-yellow") && Render.Has(disc, "wf-flap-blue"), "in the three colors");
             // The labels are stacked: one <text> per character, so "$1,000,000" is no longer one run of text.
             Check.Equal(21, Render.Count(disc, ">$</text>"), "a $ starts each of the 21 cash stacks");
-            Check.Equal(1, Render.Count(disc, ">K</text>"), "BANKRUPT is stacked letter by letter (its K appears once, on the one whole Bankrupt wedge)");
+            Check.Equal(3, Render.Count(disc, ">K</text>"), "BANKRUPT is stacked letter by letter on the whole Bankrupt wedge and on the two thin ones beside the Million (none is left blank)");
             Check.True(Render.Has(disc, ">LOSE</text>") && Render.Has(disc, ">A</text>") && Render.Has(disc, ">TURN</text>"), "Lose a Turn is one word per line");
             Check.True(Render.Has(disc, ">ONE</text>") && Render.Count(disc, ">M</text>") >= 1 && Render.Count(disc, ">I</text>") >= 2, "the Million slice reads ONE, then M I L L I O N");
             Check.Equal(1, Render.Count(disc, "wf-flap-red active"), "the first player's clicker is the active one");
@@ -174,6 +174,23 @@ static class WheelWebChecks
             var over = Render.WfEmcee(t);
             Check.True(Render.Has(over, "Next puzzle"), "continue to the next puzzle");
             Check.True(!Render.ButtonDisabled(over, "Undo"), "Undo is there");
+        });
+
+        run("TV: the solver's panel lights up while the puzzle is over, with their money still showing; it stops when the emcee continues", () =>
+        {
+            var t = new WheelTable(["BREAK THE ICE", "X", "X", "X", "X", "X"]);
+            t.Call('K');
+            var money = t.Bank(0);
+            Check.Ok(t.Game.BeginSolve(t.Emcee));
+            Check.True(!Render.Has(Render.WfTv(t, watching: true), "celebrate"), "nobody celebrates before the ruling");
+            Check.Ok(t.Game.JudgeSolve(t.Emcee, true));
+            var tv = Render.WfTv(t, watching: true);
+            Check.Equal(1, Render.Count(tv, "celebrate"), "exactly one panel celebrates");
+            Check.True(Render.Has(tv, $"${money:N0}") && Render.Has(tv, "Total $0"), "the money is still the round's money, not yet in the total");
+            Check.Ok(t.Game.Continue(t.Emcee));
+            var next = Render.WfTv(t, watching: true);
+            Check.True(!Render.Has(next, "celebrate"), "no celebration in the next puzzle");
+            Check.True(Render.Has(next, $"Total ${money:N0}"), "the money moved into Red's total");
         });
 
         run("game list: Wheel of Fortune is playable and points at /wheel-of-fortune", () =>

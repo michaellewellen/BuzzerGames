@@ -1055,6 +1055,11 @@ body.wf-sound-on .wf-sound { display: none; }
 .wf-score { background: var(--seat); color: #fff; border-radius: .8rem; padding: .6vh 1vw; text-align: center; opacity: .72; transition: transform .3s, opacity .3s; }
 .wf-score.wf-yellow { color: #1a1a1a; }
 .wf-score.active { opacity: 1; transform: scale(1.06); box-shadow: 0 0 2.5vh 3px #fff; }
+.wf-score.celebrate { opacity: 1; transform: scale(1.1); box-shadow: 0 0 3vh 6px var(--gold); animation: wf-cheer .5s ease-in-out 5; }
+@keyframes wf-cheer {
+    0%, 100% { filter: brightness(1); box-shadow: 0 0 1.5vh 2px var(--gold); transform: scale(1.1); }
+    50% { filter: brightness(1.7); box-shadow: 0 0 6vh 16px #fff; transform: scale(1.2); }
+}
 .wf-score.winner { opacity: 1; box-shadow: 0 0 3vh 6px var(--gold); }
 .wf-score-name { font-size: min(2.4vw, 4vh); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
 .wf-score-round { font-size: min(5vw, 9vh); font-weight: 700; line-height: 1.05; }

@@ -25,7 +25,7 @@
         @for (var i = 0; i < Snapshot.Players.Count; i++)
         {
             var p = Snapshot.Players[i];
-            <div class="wf-score wf-@p.Color.ToLowerInvariant() @(i == Snapshot.Active && Snapshot.Phase != WheelPhase.GameOver ? "active" : "") @(Snapshot.Winners.Contains(p.Id) ? "winner" : "")">
+            <div class="wf-score wf-@p.Color.ToLowerInvariant() @(i == Snapshot.Active && Snapshot.Phase != WheelPhase.GameOver ? "active" : "") @(Snapshot.Winners.Contains(p.Id) ? "winner" : "") @(Snapshot.PuzzleWinner == p.Id ? "celebrate" : "")">
                 <div class="wf-score-name">@p.Name</div>
                 <div class="wf-score-round">$@p.RoundBank.ToString("N0")</div>
                 <div class="wf-score-total">Total $@p.Total.ToString("N0")</div>
@@ -102,7 +102,10 @@
             if (_lastPhase is WheelPhase.Consonant or WheelPhase.Vowel && Snapshot.Phase == WheelPhase.Turn && Snapshot.Message?.StartsWith("No ") == true)
                 _ = Sound("buzz");
             else if (Snapshot.Phase == WheelPhase.PuzzleOver && _lastPhase != WheelPhase.PuzzleOver && Snapshot.Message?.Contains("solved it") == true)
+            {
                 _ = Sound("solve");
+                _ = Sound("applause");
+            }
             else if (Snapshot.Phase == WheelPhase.GameOver && _lastPhase != WheelPhase.GameOver)
                 _ = Sound("solve");
             _lastPhase = Snapshot.Phase;

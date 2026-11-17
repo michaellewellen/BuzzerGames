@@ -141,7 +141,6 @@
     private RenderFragment Text(WheelSlice s) => builder =>
     {
         var width = s.End - s.Start;
-        if (s.Kind == SliceKind.Bankrupt && width < 10) return;   // the thin Bankrupt slices beside the Million slice stay plain black
 
         List<StackLine> lines = s.Kind switch
         {

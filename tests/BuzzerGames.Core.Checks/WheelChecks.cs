@@ -725,9 +725,9 @@ static class WheelChecks
             var table = new WheelTable(["BREAK THE ICE", "BETTER LATE THAN NEVER", "X", "X", "X", "X"]);
             table.Call('T');
             table.Solve();
+            table.NextPuzzle();
             var banked = table.Total(0);
             Check.True(banked > 0, "Red banked something");
-            table.NextPuzzle();
             Check.Equal(1, table.S.Active, "puzzle 2 starts with Yellow");
             table.Call('T');
             Check.True(table.Bank(1) > 0, "Yellow has round money");
@@ -787,14 +787,19 @@ static class WheelChecks
             var s = table.S;
             Check.Equal(WheelPhase.PuzzleOver, s.Phase, "phase");
             Check.True(s.Board.All(t => t.State == TileState.Revealed && t.Letter is not null), "every tile shows at once");
-            Check.Equal(bank, s.Players[0].Total, "Red banked this round's money");
-            Check.True(s.Players.All(p => p.RoundBank == 0), "round money is cleared");
+            // The celebration: the solver is named and their money is still showing as this round's money, not yet in their total.
+            Check.Equal(s.Players[0].Id, s.PuzzleWinner, "the solver is named so the TV can celebrate them");
+            Check.Equal(bank, s.Players[0].RoundBank, "their round money is still on display");
+            Check.Equal(0, s.Players[0].Total, "and not in their total yet");
             Check.Equal(0, s.Players[1].Total + s.Players[2].Total, "nobody else got anything");
             Check.True(s.Message!.Contains("Ann"), "the message names the solver");
             Check.Fails(table.Game.Spin(table.Tokens[0], 400), "spinning when the puzzle is over");
 
             table.NextPuzzle();
             s = table.S;
+            Check.Equal(bank, s.Players[0].Total, "continuing moves Red's round money into their total");
+            Check.True(s.Players.All(p => p.RoundBank == 0), "round money is cleared");
+            Check.True(s.PuzzleWinner is null, "no celebration in the new puzzle");
             Check.Equal(2, s.PuzzleNumber, "puzzle 2");
             Check.Equal(1, s.Active, "Yellow starts puzzle 2");
             Check.Equal(WheelPhase.Turn, s.Phase, "phase");
@@ -904,14 +909,18 @@ static class WheelChecks
             table.Solve();
             table.NextPuzzle();
             Check.Equal(2, table.S.PuzzleNumber, "on puzzle 2");
+            Check.Equal(bank, table.Total(0), "the money moved into the total");
             Check.Ok(table.Game.Undo(table.Emcee));
             Check.Equal(1, table.S.PuzzleNumber, "back on puzzle 1");
             Check.Equal(WheelPhase.PuzzleOver, table.S.Phase, "waiting at the end of the puzzle");
-            Check.Equal(bank, table.Total(0), "the banked money is still there");
+            Check.Equal(0, table.Total(0), "the money is back out of the total");
+            Check.Equal(bank, table.Bank(0), "and waiting in the round, with the celebration on");
+            Check.True(table.S.PuzzleWinner is not null, "the solver is celebrated again");
             Check.Ok(table.Game.Undo(table.Emcee));
             Check.Equal(WheelPhase.Solving, table.S.Phase, "the ruling is taken back");
-            Check.Equal(0, table.Total(0), "the money is un-banked");
-            Check.Equal(bank, table.Bank(0), "and back in the round");
+            Check.Equal(0, table.Total(0), "still not banked");
+            Check.Equal(bank, table.Bank(0), "and still in the round");
+            Check.True(table.S.PuzzleWinner is null, "no celebration while the ruling is open");
             Check.True(table.S.Board.Any(t => t.State == TileState.Hidden), "the board is hidden again");
             Check.Ok(table.Game.JudgeSolve(table.Emcee, false));
             Check.Equal(1, table.S.Active, "now it is Yellow's turn instead");
@@ -944,8 +953,11 @@ static class WheelChecks
                 var bank = table.Bank(solver);
                 table.Solve();
                 expected[solver] += bank;
-                Check.Equal(expected[solver], table.Total(solver), $"puzzle {puzzle}: the solver's total");
-                if (puzzle < 6) table.NextPuzzle();
+                if (puzzle < 6)
+                {
+                    table.NextPuzzle();
+                    Check.Equal(expected[solver], table.Total(solver), $"puzzle {puzzle}: the solver's total");
+                }
             }
             Check.Equal(WheelPhase.PuzzleOver, table.S.Phase, "waiting after the last puzzle");
             Check.Ok(table.Game.Continue(table.Emcee));
