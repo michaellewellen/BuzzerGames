@@ -28,12 +28,13 @@ import random
 import re
 import sys
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
 BASE = "https://buyavowel.boards.net/page/"
 INDEX = BASE + "compendiumindex"
-USER_AGENT = "BuzzerGames-party-game-puzzle-import (one slow personal pull; contact via the repo owner)"
+USER_AGENT = "Mozilla/5.0 (compatible; BuzzerGamesPuzzleImport/1.0; one slow personal pull for a party game)"
 
 BOARD_CAPACITY = 52          # tiles on the board
 BOARD_LONGEST_WORD = 14      # widest row
@@ -162,7 +163,11 @@ def fetch(url, cache_dir, delay):
     if path.exists():
         return path.read_text(encoding="utf-8", errors="replace")
     time.sleep(delay)
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    request = urllib.request.Request(url, headers={
+        "User-Agent": USER_AGENT,
+        "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+    })
     with urllib.request.urlopen(request, timeout=60) as response:
         body = response.read().decode("utf-8", errors="replace")
     path.write_text(body, encoding="utf-8")
@@ -285,7 +290,12 @@ def main():
     else:
         cache = Path(args.cache)
         print("Fetching the index...", file=sys.stderr)
-        index_html = fetch(INDEX, cache, args.delay)
+        try:
+            index_html = fetch(INDEX, cache, args.delay)
+        except urllib.error.HTTPError as ex:
+            sys.exit(f"The site answered {ex.code} {ex.reason}. It may not accept scripts. Fallback: open the season pages in your "
+                     "browser, press Ctrl+S to save each as 'Webpage, HTML only', then run:\n"
+                     "  python tools\\scrape_wheel_compendium.py --from-files season43.html season44.html ...")
         numbers = season_pages(index_html, parse_seasons(args.seasons))
         print(f"{len(numbers)} season pages to read (3 s apart, cached for next time).", file=sys.stderr)
         for n in numbers:
