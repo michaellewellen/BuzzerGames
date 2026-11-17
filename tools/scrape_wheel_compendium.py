@@ -226,6 +226,11 @@ def fetch(url, cache_dir, delay):
     })
     with urllib.request.urlopen(request, timeout=60) as response:
         body = response.read().decode("utf-8", errors="replace")
+    if "compendium" in url and len(body) < 20000:
+        # Real season pages are hundreds of KB. A small page means the site served a block/challenge page, not the puzzles.
+        sys.exit(f"The site returned a {len(body)}-character page instead of the puzzles, so it is blocking scripts. "
+                 "Please don't try to get around that. Save the season pages from your browser (Ctrl+S, 'Webpage, HTML only') "
+                 "and run with --from-files season44.html season43.html ...")
     path.write_text(body, encoding="utf-8")
     return body
 
