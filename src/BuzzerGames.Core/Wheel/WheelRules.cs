@@ -14,6 +14,37 @@ public static class WheelRules
 
     public const int VowelCost = 250;
 
+    // ---- Quick rounds (the triple toss-up) ----
+
+    /// <summary>What each of a quick round's three puzzles is worth, in order. The winner of a puzzle gets it straight into their total.</summary>
+    public static readonly IReadOnlyList<int> QuickPrizes = [1000, 2000, 3000];
+
+    /// <summary>A quick round's letters appear on their own, one at a time, this many milliseconds apart at the quickest.</summary>
+    public const int QuickTickMillis = 1000;
+
+    /// <summary>Once every letter is showing and nobody has solved it, the puzzle ends after this many more ticks.</summary>
+    public const int QuickIdleTicks = 3;
+
+    // ---- The bonus round ----
+
+    public const int BonusCards = 24;
+
+    /// <summary>The bonus player has this long, from "your time starts now", to solve it.</summary>
+    public const int BonusSeconds = 10;
+
+    /// <summary>Already showing when the bonus puzzle appears; the player then adds three more consonants and one vowel.</summary>
+    public const string BonusGivenLetters = "RSTLNE";
+    public const int BonusConsonants = 3;
+    public const int BonusVowels = 1;
+
+    /// <summary>The 24 prize cards (face down until the end): $40,000 to $100,000. If the bonus player has won the Million Dollar Wedge, one of them becomes $1,000,000.</summary>
+    public static readonly IReadOnlyList<int> BonusPrizes =
+    [
+        40000, 40000, 45000, 45000, 50000, 50000, 55000, 55000, 60000, 60000, 65000, 65000,
+        70000, 70000, 75000, 75000, 80000, 80000, 85000, 85000, 90000, 90000, 95000, 100000
+    ];
+    public const int MillionCardValue = 1_000_000;
+
     /// <summary>Landing on the Million Dollar slice pays this much, like any other cash wedge. The wedge itself is the prize.</summary>
     public const int MillionSliceValue = 1500;
 

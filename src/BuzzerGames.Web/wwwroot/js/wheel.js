@@ -69,6 +69,7 @@ window.wheel = (function () {
 
   var sounds = {
     applause: applause,
+    buzzin: function () { tone(880, 0, 0.12, 'square', 0.2); tone(1175, 0.1, 0.35, 'square', 0.2); },
     click: function () { tone(1500, 0, 0.03, 'square', 0.07, 700); },
     tick: function () { tone(1250, 0, 0.09, 'triangle', 0.18); },
     bell: function () { tone(1046, 0, 0.8, 'sine', 0.22); tone(1568, 0, 0.6, 'sine', 0.1); },

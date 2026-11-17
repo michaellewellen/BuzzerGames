@@ -16,10 +16,57 @@
         <button class="wf-sound" onclick="wheel.enableSound()">Tap for sound</button>
     }
 
-    <section class="wf-tv-board">
-        <WheelBoardView Tiles="Snapshot.Board" RevealLetter="Snapshot.RevealLetter" Shown="_shown" LitShown="@(Watching ? int.MaxValue : _lit)" />
-        <div class="wf-category">@Snapshot.Category</div>
-    </section>
+    @if (Snapshot.Board.Count > 0 || Snapshot.Bonus is null)
+    {
+        <section class="wf-tv-board">
+            <WheelBoardView Tiles="Snapshot.Board" RevealLetter="Snapshot.RevealLetter" Shown="_shown" LitShown="@(Watching ? int.MaxValue : _lit)" />
+            <div class="wf-category">@Snapshot.Category@(Snapshot.Prize > 0 ? $" · ${Snapshot.Prize:N0}" : "")</div>
+        </section>
+    }
+
+    @if (Snapshot.Bonus is { } bonus)
+    {
+        <section class="wf-bonus">
+            @if (Snapshot.Phase is WheelPhase.BonusPick or WheelPhase.BonusCategory)
+            {
+                <div class="wf-bonus-title">BONUS ROUND</div>
+                <div class="wf-cards">
+                    @for (var i = 0; i < WheelRules.BonusCards; i++)
+                    {
+                        <div class="wf-card @(bonus.Picked == i ? "picked" : "")">@(i + 1)</div>
+                    }
+                </div>
+                @if (bonus.Choices.Count > 0)
+                {
+                    <div class="wf-bonus-choices">
+                        @foreach (var choice in bonus.Choices)
+                        {
+                            <span>@choice</span>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="wf-bonus-strip">
+                    <div class="wf-card picked big @(bonus.Prize is not null ? "turned" : "")">
+                        @if (bonus.Prize is { } prize)
+                        {
+                            <span>$@prize.ToString("N0")</span>
+                        }
+                        else
+                        {
+                            @(bonus.Picked + 1)
+                        }
+                    </div>
+                    @if (Snapshot.Phase == WheelPhase.BonusSolve)
+                    {
+                        <div class="wf-clock @(bonus.TimeUp ? "over" : _bonusLeft <= 3 ? "low" : "")">@(bonus.TimeUp ? "TIME!" : _bonusLeft.ToString())</div>
+                    }
+                </div>
+            }
+        </section>
+    }
 
     <section class="wf-scores">
         @for (var i = 0; i < Snapshot.Players.Count; i++)
@@ -55,6 +102,9 @@
     private int _lit;     // how many of the matched tiles have turned blue so far
     private bool _disposed;
     private bool _spinRunning;   // RunSpinAsync is in charge of the camera
+    private bool _tickerRunning; // a toss-up's letters are being fed in
+    private bool _clockRunning;  // the bonus clock is running
+    private int _bonusLeft = WheelRules.BonusSeconds;
 
     private string? _spinKey;
     private string? _revealKey;
@@ -101,16 +151,29 @@
         if (Snapshot.Phase == WheelPhase.Turn && !_spinRunning)
             _cam = Snapshot.Swirling ? "wide" : "none";
 
+        // A toss-up: this screen feeds in the letters. A bonus clock: this screen counts it down and calls time.
+        if (Snapshot.Phase == WheelPhase.QuickPlay && !_tickerRunning) _ = RunQuickAsync();
+        if (Snapshot.Phase == WheelPhase.BonusSolve && Snapshot.Bonus is { TimeUp: false } running && !_clockRunning)
+            _ = RunClockAsync(running.SecondsLeft ?? WheelRules.BonusSeconds);
+
         // Sounds for what just happened, once per change.
         if (Snapshot.Phase != _lastPhase || Snapshot.Message != _lastMessage)
         {
             if (_lastPhase is WheelPhase.Consonant or WheelPhase.Vowel && Snapshot.Phase == WheelPhase.Turn && Snapshot.Message?.StartsWith("No ") == true)
                 _ = Sound("buzz");
-            else if (Snapshot.Phase == WheelPhase.PuzzleOver && _lastPhase != WheelPhase.PuzzleOver && Snapshot.Message?.Contains("solved it") == true)
+            else if (Snapshot.Phase is WheelPhase.PuzzleOver or WheelPhase.BonusOver && _lastPhase != Snapshot.Phase && Snapshot.Message?.Contains("solved it") == true)
             {
-                _ = Sound("solve");
+                _ = Sound(Snapshot.Message.Contains("MILLION") ? "million" : "solve");
                 _ = Sound("applause");
             }
+            else if (Snapshot.Phase == WheelPhase.QuickAnswer && _lastPhase != WheelPhase.QuickAnswer)
+                _ = Sound("buzzin");
+            else if (Snapshot.Phase == WheelPhase.QuickPlay && _lastPhase == WheelPhase.QuickAnswer)
+                _ = Sound("buzz");
+            else if (Snapshot.Phase == WheelPhase.BonusSolve && _lastPhase != WheelPhase.BonusSolve)
+                _ = Sound("ding");
+            else if (Snapshot.Phase == WheelPhase.BonusOver && _lastPhase != WheelPhase.BonusOver)
+                _ = Sound("bankrupt");
             else if (Snapshot.Phase == WheelPhase.GameOver && _lastPhase != WheelPhase.GameOver)
                 _ = Sound("solve");
             _lastPhase = Snapshot.Phase;
@@ -185,6 +248,58 @@
         finally
         {
             if (!_disposed) Game.FinishReveal();
+        }
+    }
+
+    // A toss-up's letters come in one at a time, about a second apart (the game itself ignores calls that come too soon).
+    private async Task RunQuickAsync()
+    {
+        _tickerRunning = true;
+        try
+        {
+            await Task.Delay(1500);
+            while (!_disposed && Game.Phase is WheelPhase.QuickPlay or WheelPhase.QuickAnswer)
+            {
+                await Task.Delay(WheelRules.QuickTickMillis + 100);
+                if (_disposed || Game.Phase != WheelPhase.QuickPlay) continue;
+                if (Game.QuickTick().Ok) await Sound("tick");
+            }
+        }
+        catch (TaskCanceledException) { }
+        finally { _tickerRunning = false; }
+    }
+
+    // The bonus clock: counted down here from what the game says was left when it started, with a tick for the last five seconds and a buzzer at zero.
+    private async Task RunClockAsync(double seconds)
+    {
+        _clockRunning = true;
+        try
+        {
+            var end = DateTime.UtcNow.AddSeconds(seconds);
+            while (!_disposed && Game.Phase == WheelPhase.BonusSolve)
+            {
+                var left = (end - DateTime.UtcNow).TotalSeconds;
+                var shown = (int)Math.Ceiling(Math.Max(left, 0));
+                if (shown != _bonusLeft)
+                {
+                    _bonusLeft = shown;
+                    if (shown is > 0 and <= 5) _ = Sound("tick");
+                    await InvokeAsync(StateHasChanged);
+                }
+                if (left <= 0)
+                {
+                    Game.BonusTimeUp();
+                    await Sound("buzz");
+                    break;
+                }
+                await Task.Delay(100);
+            }
+        }
+        catch (TaskCanceledException) { }
+        finally
+        {
+            _clockRunning = false;
+            if (Game.Phase != WheelPhase.BonusSolve) _bonusLeft = WheelRules.BonusSeconds;
         }
     }
 

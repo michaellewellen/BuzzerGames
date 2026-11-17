@@ -12,10 +12,11 @@ sealed class WheelTable
     public List<Guid> Tokens { get; } = [];
     public FixedWheelContent Content { get; }
 
-    public WheelTable(IEnumerable<string>? puzzles = null, int seed = 1, double jitter = 0, bool start = true)
+    public WheelTable(IEnumerable<string>? puzzles = null, int seed = 1, double jitter = 0, bool start = true,
+        IEnumerable<WheelQuickSet>? quick = null, IEnumerable<WheelPuzzle>? bonus = null)
     {
-        Content = new FixedWheelContent(puzzles);
-        Game = new WheelGame("TEST", Content, new Random(seed), jitter);
+        Content = new FixedWheelContent(puzzles, quick, bonus);
+        Game = new WheelGame("TEST", Content, new Random(seed), jitter, quickTickMillis: 0);
         Emcee = Game.JoinEmcee("Host").Token;
         foreach (var name in new[] { "Ann", "Bob", "Cy" }) Tokens.Add(Game.JoinPlayer(name).Token);
         if (start) Check.Ok(Game.Start(Emcee));
@@ -1018,6 +1019,244 @@ static class WheelChecks
             Check.Equal(WheelPhase.PuzzleOver, table.S.Phase, "undone: waiting after the last puzzle again");
             Check.Equal(6, table.S.PuzzleNumber, "still puzzle 6");
             Check.True(table.S.Winners.Count == 0, "no winner announced yet");
+        });
+
+        // ---- Quick rounds and the bonus round ----
+
+        static IEnumerable<WheelQuickSet> QuickSets() =>
+        [
+            new WheelQuickSet("q1", "Things With Wheels", ["BICYCLE", "SKATEBOARD", "ROLLER COASTER"]),
+            new WheelQuickSet("q2", "Kitchen Tools", ["WOODEN SPOON", "CHEESE GRATER", "MIXING BOWL"])
+        ];
+        static IEnumerable<WheelPuzzle> BonusChoices() =>
+        [
+            new WheelPuzzle("b1", "Place", "THE GRAND CANYON"),
+            new WheelPuzzle("b2", "Thing", "CHOCOLATE CAKE"),
+            new WheelPuzzle("b3", "Person", "ABRAHAM LINCOLN")
+        ];
+        string[] SixPuzzles() => ["BREAK THE ICE", "A PIECE OF CAKE", "FRESH FALLEN SNOW", "THE GRAND CANYON", "HOMEMADE APPLE PIE", "A QUIET LAKE CABIN"];
+
+        /// <summary>Plays on without scoring: skips whatever is on until the bonus round's card pick comes up.</summary>
+        void SkipToBonus(WheelTable t)
+        {
+            for (var guard = 0; guard < 40 && t.S.Phase != WheelPhase.BonusPick; guard++)
+            {
+                if (t.S.Phase == WheelPhase.PuzzleOver) Check.Ok(t.Game.Continue(t.Emcee));
+                else Check.Ok(t.Game.SkipPuzzle(t.Emcee));
+            }
+            Check.Equal(WheelPhase.BonusPick, t.S.Phase, "reached the bonus round");
+        }
+
+        run("the plan: two puzzles, a toss-up of three, two puzzles, a second toss-up, two puzzles, then the bonus; the bonus winner is whoever leads", () =>
+        {
+            var t = new WheelTable(SixPuzzles(), quick: QuickSets(), bonus: BonusChoices());
+            var seen = new List<string>();
+            for (var guard = 0; guard < 40 && t.S.Phase != WheelPhase.BonusPick; guard++)
+            {
+                if (seen.Count == 0 || seen[^1] != t.S.StepLabel) seen.Add(t.S.StepLabel);
+                if (t.S.Phase == WheelPhase.PuzzleOver) Check.Ok(t.Game.Continue(t.Emcee));
+                else Check.Ok(t.Game.SkipPuzzle(t.Emcee));
+            }
+            Check.True(seen.SequenceEqual(["Puzzle 1 of 6", "Puzzle 2 of 6", "Toss-up 1 of 3", "Toss-up 2 of 3", "Toss-up 3 of 3", "Puzzle 3 of 6", "Puzzle 4 of 6",
+                "Toss-up 1 of 3", "Toss-up 2 of 3", "Toss-up 3 of 3", "Puzzle 5 of 6", "Puzzle 6 of 6"]), "steps in order: " + string.Join(", ", seen));
+            Check.Equal("Bonus round", t.S.StepLabel, "then the bonus");
+
+            var plain = new WheelTable(SixPuzzles());
+            SkipThroughRegular(plain);
+            Check.Equal(WheelPhase.GameOver, plain.S.Phase, "a bank with no quick sets or bonus puzzles just plays the six puzzles");
+            void SkipThroughRegular(WheelTable x)
+            {
+                for (var i = 0; i < 6; i++) { Check.Ok(x.Game.SkipPuzzle(x.Emcee)); Check.Ok(x.Game.Continue(x.Emcee)); }
+            }
+        });
+
+        run("toss-up: letters appear at random and the emcee starts it; buzz in, a wrong answer locks that buzzer, a right one wins the prize", () =>
+        {
+            var t = new WheelTable(SixPuzzles(), quick: QuickSets(), bonus: BonusChoices());
+            Check.Ok(t.Game.SkipPuzzle(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Ok(t.Game.SkipPuzzle(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee));
+            var s = t.S;
+            Check.Equal(WheelPhase.QuickReady, s.Phase, "the toss-up is waiting");
+            Check.Equal(1000, s.Prize, "the first is worth $1,000");
+            Check.Equal("Things With Wheels", s.Category, "the theme is the category");
+            Check.Equal(-1, s.Active, "nobody is up");
+            Check.True(s.Board.Where(x => x.Letter is not null && x.State != TileState.Revealed).Count() == 0 && s.Board.Count(x => x.State == TileState.Hidden) == 7, "all seven letters hidden, none leaked");
+            Check.Fails(t.Game.Buzz(t.Tokens[0]), "no buzzing before the emcee starts it");
+            Check.Fails(t.Game.StartQuickRound(t.Tokens[0]), "a player starting it");
+            Check.Ok(t.Game.StartQuickRound(t.Emcee));
+
+            Check.Ok(t.Game.QuickTick());
+            Check.Equal(1, t.S.Board.Count(x => x.State == TileState.Revealed && x.Letter is not null), "one letter showed");
+            Check.Ok(t.Game.QuickTick());
+            Check.Equal(2, t.S.Board.Count(x => x.State == TileState.Revealed && x.Letter is not null), "then another");
+
+            Check.Fails(t.Game.Buzz(Guid.NewGuid()), "a stranger can't buzz");
+            Check.Fails(t.Game.Buzz(t.Emcee), "the emcee has no buzzer of their own");
+            Check.Ok(t.Game.Buzz(t.Tokens[1]));
+            Check.Equal(WheelPhase.QuickAnswer, t.S.Phase, "Bob buzzed in");
+            Check.Equal(1, t.S.Active, "and is the one up");
+            Check.Fails(t.Game.Buzz(t.Tokens[0]), "too late, Ann");
+            Check.Fails(t.Game.QuickTick(), "the letters stop while someone is answering");
+            Check.Fails(t.Game.JudgeQuick(t.Tokens[1], true), "a player can't judge");
+            Check.Ok(t.Game.JudgeQuick(t.Emcee, false));
+            Check.Equal(WheelPhase.QuickPlay, t.S.Phase, "back to the letters");
+            Check.True(t.S.Players[1].LockedOut && !t.S.Players[0].LockedOut, "Bob's buzzer is dead");
+            Check.Fails(t.Game.Buzz(t.Tokens[1]), "Bob can't buzz again");
+
+            Check.Ok(t.Game.Buzz(t.Tokens[0]));
+            Check.Ok(t.Game.JudgeQuick(t.Emcee, true));
+            s = t.S;
+            Check.Equal(WheelPhase.PuzzleOver, s.Phase, "solved");
+            Check.True(s.Board.All(x => x.State == TileState.Revealed), "the whole board shows");
+            Check.Equal(s.Players[0].Id, s.PuzzleWinner, "Ann is celebrated");
+            Check.Equal(1000, s.Players[0].RoundBank, "her prize is on display");
+            Check.Equal(0, s.Players[0].Total, "not banked yet");
+            Check.True(s.Message!.Contains("solved it") && s.Message.Contains("$1,000"), "the message says so");
+
+            Check.Ok(t.Game.Continue(t.Emcee));
+            Check.Equal(1000, t.Total(0), "now it's in her total");
+            Check.Equal(WheelPhase.QuickReady, t.S.Phase, "the second toss-up");
+            Check.Equal(2000, t.S.Prize, "worth $2,000");
+            Check.True(!t.S.Players[1].LockedOut, "everyone's buzzer is live again");
+        });
+
+        run("toss-up: everyone locked out ends it, running out of letters ends it, Undo can take back a buzz but not stop the letters", () =>
+        {
+            var t = new WheelTable(SixPuzzles(), quick: QuickSets(), bonus: BonusChoices());
+            for (var i = 0; i < 2; i++) { Check.Ok(t.Game.SkipPuzzle(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee)); }
+            Check.Ok(t.Game.StartQuickRound(t.Emcee));
+            Check.True(!t.S.CanUndo, "no Undo while the letters are coming");
+            Check.Fails(t.Game.Undo(t.Emcee), "and the game says so");
+            Check.Ok(t.Game.Buzz(t.Tokens[2]));
+            Check.True(t.S.CanUndo, "but a buzz can be taken back");
+            Check.Ok(t.Game.Undo(t.Emcee));
+            Check.Equal(WheelPhase.QuickPlay, t.S.Phase, "back to the letters");
+            Check.Equal(-1, t.S.Active, "with nobody buzzed in");
+
+            for (var i = 0; i < 3; i++)
+            {
+                Check.Ok(t.Game.BuzzFor(t.Emcee, i));
+                Check.Ok(t.Game.JudgeQuick(t.Emcee, false));
+            }
+            Check.Equal(WheelPhase.PuzzleOver, t.S.Phase, "all three locked out");
+            Check.True(t.S.PuzzleWinner is null, "no winner");
+            Check.True(t.S.Players.All(p => p.RoundBank == 0 && p.Total == 0), "no money moved");
+            Check.Ok(t.Game.Continue(t.Emcee));
+
+            Check.Ok(t.Game.StartQuickRound(t.Emcee));
+            var guard = 0;
+            while (t.S.Phase == WheelPhase.QuickPlay && guard++ < 100) Check.Ok(t.Game.QuickTick());
+            Check.Equal(WheelPhase.PuzzleOver, t.S.Phase, "nobody buzzed: the letters ran out");
+            Check.True(t.S.Message!.Contains("Nobody got it"), "and it says so");
+            Check.True(t.S.Board.All(x => x.State == TileState.Revealed), "with the answer showing");
+        });
+
+        run("bonus: the leader picks a card, the emcee picks the category, RSTLNE show, three consonants and a vowel, a 10 second clock, then the card turns over", () =>
+        {
+            var t = new WheelTable(SixPuzzles(), quick: QuickSets(), bonus: BonusChoices());
+            t.Call('K');                       // Ann earns round money in puzzle 1...
+            Check.Ok(t.Game.BeginSolve(t.Emcee)); Check.Ok(t.Game.JudgeSolve(t.Emcee, true)); Check.Ok(t.Game.Continue(t.Emcee));   // ...and banks it
+            var lead = t.Total(0);
+            Check.True(lead > 0, "Ann leads");
+            SkipToBonus(t);
+            var s = t.S;
+            Check.Equal(0, s.Active, "Ann plays the bonus");
+            Check.True(s.Bonus is not null && s.Bonus.Prize is null && s.Bonus.Picked == -1, "no card picked, and no prize shown");
+            Check.Equal("", s.Answer, "no puzzle yet");
+
+            Check.Fails(t.Game.PickCard(t.Tokens[1], 3), "Bob can't pick Ann's card");
+            Check.Fails(t.Game.PickCard(t.Tokens[0], 24), "there's no card 25");
+            Check.Fails(t.Game.PickCard(t.Tokens[0], -1), "a player has to choose; only the emcee may pick at random");
+            Check.Ok(t.Game.PickCard(t.Tokens[0], 6));
+            s = t.S;
+            Check.Equal(WheelPhase.BonusCategory, s.Phase, "now the category");
+            Check.Equal(6, s.Bonus!.Picked, "card 7 is hers");
+            Check.True(s.Bonus.Prize is null, "still nothing about what's on it");
+            Check.True(s.Bonus.Choices.SequenceEqual(["Place", "Thing", "Person"]), "three categories to choose from");
+            Check.Fails(t.Game.ChooseBonusCategory(t.Tokens[0], 0), "only the emcee taps the category");
+            Check.Fails(t.Game.ChooseBonusCategory(t.Emcee, 3), "there's no fourth");
+            Check.Ok(t.Game.ChooseBonusCategory(t.Emcee, 1));
+
+            s = t.S;
+            Check.Equal(WheelPhase.BonusLetters, s.Phase, "letters");
+            Check.Equal("Thing", s.Category, "the chosen category");
+            Check.Equal("RSTLNE", string.Concat("RSTLNE".Where(c => s.CalledLetters.Contains(c))), "R S T L N E count as called");
+            Check.True(s.Board.Where(x => x.Letter is not null).All(x => "RSTLNE".Contains(x.Letter!.Value)), "only those letters show on the board");
+            Check.Equal(3, s.Bonus!.ConsonantsLeft, "three consonants to call"); Check.Equal(1, s.Bonus.VowelsLeft, "and one vowel");
+            Check.Fails(t.Game.StageLetter(t.Emcee, 'R'), "R is already given");
+            Check.Ok(t.Game.StageLetter(t.Emcee, 'C'));
+            Check.Ok(t.Game.ConfirmLetter(t.Emcee));
+            Check.Equal(WheelPhase.Reveal, t.S.Phase, "C is in CHOCOLATE CAKE: tiles light up");
+            Check.Ok(t.Game.FinishReveal());
+            Check.Equal(WheelPhase.BonusLetters, t.S.Phase, "back to calling letters");
+            Check.Ok(t.Game.StageLetter(t.Emcee, 'Z'));
+            Check.Ok(t.Game.ConfirmLetter(t.Emcee));
+            Check.Equal(WheelPhase.BonusLetters, t.S.Phase, "a letter that isn't there just uses up the pick");
+            Check.Ok(t.Game.StageLetter(t.Emcee, 'H')); Check.Ok(t.Game.ConfirmLetter(t.Emcee)); Check.Ok(t.Game.FinishReveal());
+            Check.Equal(0, t.S.Bonus!.ConsonantsLeft, "three consonants used");
+            Check.Fails(t.Game.StageLetter(t.Emcee, 'K'), "no fourth consonant");
+            Check.Fails(t.Game.StartBonusClock(t.Emcee), "the vowel hasn't been called yet");
+            Check.Ok(t.Game.StageLetter(t.Emcee, 'O')); Check.Ok(t.Game.ConfirmLetter(t.Emcee)); Check.Ok(t.Game.FinishReveal());
+            Check.Equal(WheelPhase.BonusReady, t.S.Phase, "all four are in");
+            Check.Fails(t.Game.StageLetter(t.Emcee, 'U'), "no second vowel");
+
+            Check.Fails(t.Game.StartBonusClock(t.Tokens[0]), "only the emcee starts the clock");
+            Check.Ok(t.Game.StartBonusClock(t.Emcee));
+            s = t.S;
+            Check.Equal(WheelPhase.BonusSolve, s.Phase, "the clock is running");
+            Check.True(s.Bonus!.SecondsLeft is > 9 and <= 10, "ten seconds on it");
+            Check.Fails(t.Game.BonusTimeUp(), "it can't be called early");
+            Check.True(s.Bonus.Prize is null, "the card is still face down");
+
+            Check.Ok(t.Game.JudgeBonus(t.Emcee, true));
+            s = t.S;
+            Check.Equal(WheelPhase.BonusOver, s.Phase, "judged");
+            Check.True(s.Bonus!.Prize is >= 40000 and <= 100000, "the card was worth $40,000 to $100,000");
+            Check.True(s.Board.All(x => x.State == TileState.Revealed), "the whole puzzle shows");
+            Check.Equal(s.Players[0].Id, s.PuzzleWinner, "Ann is celebrated");
+            Check.Equal(lead, s.Players[0].Total, "not banked until the emcee finishes");
+            var prize = s.Bonus.Prize!.Value;
+            Check.Ok(t.Game.Continue(t.Emcee));
+            s = t.S;
+            Check.Equal(WheelPhase.GameOver, s.Phase, "and that's the game");
+            Check.Equal(lead + prize, s.Players[0].Total, "the card's money is in Ann's final total");
+        });
+
+        run("bonus: winning the Million Dollar Wedge turns exactly one of the 24 cards into $1,000,000; without it none is", () =>
+        {
+            int Prize(bool withWedge, int card)
+            {
+                var t = new WheelTable(["BETTER LATE THAN NEVER", "A", "A", "A", "A", "A"], quick: QuickSets(), bonus: BonusChoices());
+                if (withWedge)
+                {
+                    t.SpinTo(x => x.Kind == SliceKind.Million);
+                    Check.Ok(t.Game.StageLetter(t.Emcee, 'T')); Check.Ok(t.Game.ConfirmLetter(t.Emcee)); Check.Ok(t.Game.FinishReveal());
+                }
+                else t.Call('T');
+                t.Solve();
+                Check.True(t.S.Players[0].WonMillion == withWedge, "Ann's wedge status");
+                Check.Ok(t.Game.Continue(t.Emcee));
+                SkipToBonus(t);
+                Check.Equal(0, t.S.Active, "Ann leads");
+                Check.Ok(t.Game.PickCard(t.Tokens[0], card));
+                Check.Ok(t.Game.ChooseBonusCategory(t.Emcee, 0));
+                foreach (var letter in "DGCA")
+                {
+                    Check.Ok(t.Game.StageLetter(t.Emcee, letter)); Check.Ok(t.Game.ConfirmLetter(t.Emcee));
+                    if (t.S.Phase == WheelPhase.Reveal) Check.Ok(t.Game.FinishReveal());
+                }
+                Check.Ok(t.Game.StartBonusClock(t.Emcee));
+                Check.Ok(t.Game.JudgeBonus(t.Emcee, false));
+                Check.True(t.S.Players[0].RoundBank == 0 && t.S.PuzzleWinner is null, "a wrong answer pays nothing and nobody is celebrated");
+                return t.S.Bonus!.Prize!.Value;
+            }
+
+            var withWedge = Enumerable.Range(0, 24).Select(c => Prize(true, c)).ToList();
+            Check.Equal(1, withWedge.Count(p => p == 1_000_000), "one million-dollar card");
+            Check.Equal(23, withWedge.Count(p => p is >= 40000 and <= 100000), "and 23 ordinary ones");
+            var without = Enumerable.Range(0, 24).Select(c => Prize(false, c)).ToList();
+            Check.True(without.All(p => p is >= 40000 and <= 100000), "no million card without the wedge");
+            Check.True(without.OrderBy(x => x).SequenceEqual(WheelRules.BonusPrizes.OrderBy(x => x)), "the 24 cards are exactly the 24 prizes");
         });
 
         run("a tie at the end names every winner", () =>

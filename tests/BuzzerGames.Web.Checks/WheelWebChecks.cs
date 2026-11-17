@@ -193,6 +193,85 @@ static class WheelWebChecks
             Check.True(Render.Has(next, $"Total ${money:N0}"), "the money moved into Red's total");
         });
 
+        run("toss-up screens: the TV shows the theme and prize but no letters, phones get a buzzer, the emcee gets the controls", () =>
+        {
+            var quick = new[] { new WheelQuickSet("q1", "Things With Wheels", ["BICYCLE", "SKATEBOARD", "ROLLER COASTER"]) };
+            var t = new WheelTable(["BREAK THE ICE", "A PIECE OF CAKE", "FRESH FALLEN SNOW", "THE GRAND CANYON", "HOMEMADE APPLE PIE", "A QUIET LAKE CABIN"], quick: quick);
+            for (var i = 0; i < 2; i++) { Check.Ok(t.Game.SkipPuzzle(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee)); }
+
+            var tv = Render.WfTv(t, watching: true);
+            Check.True(Render.ShowsAnyCase(tv, "Things With Wheels") && Render.Has(tv, "$1,000"), "the theme and the prize are on the TV");
+            Check.True(!Render.Has(tv, "BICYCLE"), "the answer isn't");
+            Check.True(Render.Has(Render.WfEmcee(t), "Start the toss-up") && Render.Has(Render.WfEmcee(t), "BICYCLE"), "the emcee can start it and sees the answer");
+            Check.True(!Render.Has(Render.WfPlayer(t, 0), "wf-buzz"), "no buzzer until it starts");
+
+            Check.Ok(t.Game.StartQuickRound(t.Emcee));
+            Check.True(Render.Has(Render.WfPlayer(t, 0), "wf-buzz") && Render.Has(Render.WfPlayer(t, 2), "wf-buzz"), "every player has a buzzer");
+            Check.True(!Render.Has(Render.WfPlayer(t, 0), "wf-letterboard"), "and no used-letter board");
+            var emcee = Render.WfEmcee(t);
+            Check.True(Render.Has(emcee, "Show another letter") && Render.Has(emcee, "Ann buzzed") && Render.Has(emcee, "Cy buzzed"), "the emcee's fallbacks");
+
+            Check.Ok(t.Game.Buzz(t.Tokens[1]));
+            Check.True(Render.Has(Render.WfEmcee(t), "Correct") && Render.Has(Render.WfEmcee(t), "Incorrect"), "judging buttons");
+            Check.True(Render.Has(Render.WfPlayer(t, 1), "You buzzed in"), "Bob is told");
+            Check.True(Render.Has(Render.WfPlayer(t, 0), "Bob buzzed in"), "the others see who got there first");
+            Check.True(!Render.Has(Render.WfPlayer(t, 0), "wf-buzz"), "and can't buzz");
+
+            Check.Ok(t.Game.JudgeQuick(t.Emcee, false));
+            Check.True(!Render.Has(Render.WfPlayer(t, 1), "wf-buzz") && Render.Has(Render.WfPlayer(t, 1), "locked out"), "Bob is locked out");
+            Check.True(Render.Has(Render.WfPlayer(t, 0), "wf-buzz"), "Ann's buzzer is still live");
+
+            Check.Ok(t.Game.Buzz(t.Tokens[0]));
+            Check.Ok(t.Game.JudgeQuick(t.Emcee, true));
+            Check.Equal(1, Render.Count(Render.WfTv(t, watching: true), "celebrate"), "the toss-up winner is celebrated on the TV");
+            Check.True(Render.Has(Render.WfEmcee(t), "Next puzzle"), "the emcee continues");
+        });
+
+        run("bonus screens: 24 face-down cards with no values, the category choice, the clock, and the card turning over at the end", () =>
+        {
+            var bonus = new[] { new WheelPuzzle("b1", "Place", "THE GRAND CANYON"), new WheelPuzzle("b2", "Thing", "CHOCOLATE CAKE"), new WheelPuzzle("b3", "Person", "ABRAHAM LINCOLN") };
+            var t = new WheelTable(["BREAK THE ICE", "A PIECE OF CAKE", "FRESH FALLEN SNOW", "THE GRAND CANYON", "HOMEMADE APPLE PIE", "A QUIET LAKE CABIN"], bonus: bonus);
+            for (var guard = 0; guard < 20 && t.S.Phase != WheelPhase.BonusPick; guard++)
+                Check.Ok(t.S.Phase == WheelPhase.PuzzleOver ? t.Game.Continue(t.Emcee) : t.Game.SkipPuzzle(t.Emcee));
+            Check.Equal(WheelPhase.BonusPick, t.S.Phase, "bonus round");
+            var up = t.S.Active;
+
+            var tv = Render.WfTv(t, watching: true);
+            Check.True(Render.Has(tv, "BONUS ROUND"), "titled");
+            Check.Equal(24, Render.Count(tv, "class=\"wf-card "), "24 cards");
+            Check.True(!tv.Contains("40,000") && !tv.Contains("100,000"), "and no prize values on them");
+            Check.True(Render.Has(Render.WfPlayer(t, up), "wf-cardbtn") && Render.Count(Render.WfPlayer(t, up), "wf-cardbtn") == 24, "the bonus player has 24 cards to pick from");
+            Check.True(!Render.Has(Render.WfPlayer(t, (up + 1) % 3), "wf-cardbtn"), "the others don't");
+            Check.True(Render.Has(Render.WfEmcee(t), "Pick one at random"), "the emcee can pick for them");
+
+            Check.Ok(t.Game.PickCard(t.Tokens[up], 11));
+            tv = Render.WfTv(t, watching: true);
+            Check.True(Render.Has(tv, "picked") && Render.Has(tv, "Place") && Render.Has(tv, "Thing") && Render.Has(tv, "Person"), "the picked card and the three categories show");
+            var emcee = Render.WfEmcee(t);
+            Check.True(Render.Has(emcee, "Place") && Render.Has(emcee, "Thing") && Render.Has(emcee, "Person"), "the emcee taps one");
+
+            Check.Ok(t.Game.ChooseBonusCategory(t.Emcee, 1));
+            Check.True(Render.Has(Render.WfEmcee(t), "consonants to go") || Render.Has(Render.WfEmcee(t), "consonant"), "the emcee is told what's left to call");
+            foreach (var letter in "CHZO")
+            {
+                Check.Ok(t.Game.StageLetter(t.Emcee, letter)); Check.Ok(t.Game.ConfirmLetter(t.Emcee));
+                if (t.S.Phase == WheelPhase.Reveal) Check.Ok(t.Game.FinishReveal());
+            }
+            Check.True(Render.Has(Render.WfEmcee(t), "Your time starts now"), "the clock button");
+            Check.Ok(t.Game.StartBonusClock(t.Emcee));
+            tv = Render.WfTv(t, watching: true);
+            Check.True(Render.Has(tv, "wf-clock"), "a clock is on the TV");
+            Check.True(!Render.Has(tv, "CHOCOLATE"), "without the answer");
+            Check.True(Render.Has(Render.WfEmcee(t), "Correct") && Render.Has(Render.WfEmcee(t), "Incorrect"), "the emcee rules");
+
+            Check.Ok(t.Game.JudgeBonus(t.Emcee, true));
+            tv = Render.WfTv(t, watching: true);
+            var prize = t.S.Bonus!.Prize!.Value;
+            Check.True(Render.Has(tv, $"${prize:N0}") && Render.Has(tv, "turned"), "the card is turned over to show the prize");
+            Check.Equal(1, Render.Count(tv, "celebrate"), "the winner is celebrated");
+            Check.True(Render.Has(Render.WfEmcee(t), "Finish the game"), "the emcee finishes the game");
+        });
+
         run("game list: Wheel of Fortune is playable and points at /wheel-of-fortune", () =>
         {
             var tile = BuzzerGames.Web.Games.GameCatalog.All.Single(g => g.Name == "Wheel of Fortune");

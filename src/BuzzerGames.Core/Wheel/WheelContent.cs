@@ -380,9 +380,13 @@ public sealed class FolderWheelContent : IWheelContent
 public sealed class FixedWheelContent : IWheelContent
 {
     private readonly List<WheelPuzzle> _regular;
+    private readonly List<WheelQuickSet> _quick;
+    private readonly List<WheelPuzzle> _bonus;
 
-    public FixedWheelContent(IEnumerable<string>? regularTexts = null)
+    public FixedWheelContent(IEnumerable<string>? regularTexts = null, IEnumerable<WheelQuickSet>? quick = null, IEnumerable<WheelPuzzle>? bonus = null)
     {
+        _quick = quick?.ToList() ?? [];
+        _bonus = bonus?.ToList() ?? [];
         var texts = regularTexts ?? ["BREAK THE ICE", "A PIECE OF CAKE", "FRESH FALLEN SNOW", "THE GRAND CANYON", "HOMEMADE APPLE PIE", "A QUIET LAKE CABIN", "SHERLOCK HOLMES", "BETTER LATE THAN NEVER"];
         _regular = texts.Select((t, i) => new WheelPuzzle($"r{i}", "Phrase", t)).ToList();
     }
@@ -400,7 +404,7 @@ public sealed class FixedWheelContent : IWheelContent
             error = "Not enough puzzles.";
             return false;
         }
-        deal = new WheelDeal(_regular.Take(WheelRules.RegularPuzzles).ToList(), [], []);
+        deal = new WheelDeal(_regular.Take(WheelRules.RegularPuzzles).ToList(), _quick, _bonus);
         return true;
     }
 

@@ -31,8 +31,42 @@ else
 
         @if (Snapshot.Phase != WheelPhase.GameOver)
         {
-            <div class="wf-phone-category">@Snapshot.Category</div>
-            <WheelLetterBoard Called="@Snapshot.CalledLetters" />
+            @if (!string.IsNullOrEmpty(Snapshot.Category))
+            {
+                <div class="wf-phone-category">@Snapshot.Category@(Snapshot.Prize > 0 ? $" · ${Snapshot.Prize:N0}" : "")</div>
+            }
+            @if (Snapshot.Phase is not (WheelPhase.QuickReady or WheelPhase.QuickPlay or WheelPhase.QuickAnswer or WheelPhase.BonusPick or WheelPhase.BonusCategory))
+            {
+                <WheelLetterBoard Called="@Snapshot.CalledLetters" />
+            }
+        }
+
+        @if (Snapshot.Phase == WheelPhase.QuickPlay)
+        {
+            <section class="wf-spin">
+                @if (Me.LockedOut)
+                {
+                    <p class="wf-pad-msg">You're locked out of this one.</p>
+                }
+                else
+                {
+                    <button class="wf-buzz" @onpointerdown="Buzz">BUZZ!</button>
+                }
+            </section>
+        }
+
+        @if (Snapshot.Phase == WheelPhase.BonusPick && MyTurn)
+        {
+            <section class="wf-spin">
+                <p class="wf-swirl-hint">Pick a card. Nobody knows what's on it yet.</p>
+                <div class="wf-cardgrid">
+                    @for (var i = 0; i < WheelRules.BonusCards; i++)
+                    {
+                        var card = i;
+                        <button class="wf-cardbtn" @onclick="() => PickCard(card)">@(i + 1)</button>
+                    }
+                </div>
+            </section>
         }
 
         @if (MyTurn && Snapshot.Phase == WheelPhase.Turn)
@@ -83,6 +117,15 @@ else
         get
         {
             if (Snapshot.Phase == WheelPhase.GameOver) return Snapshot.Message ?? "";
+            switch (Snapshot.Phase)
+            {
+                case WheelPhase.QuickReady: return Snapshot.Message ?? "";
+                case WheelPhase.QuickPlay: return Me?.LockedOut == true ? "Your buzzer is dead for this one." : "Buzz in when you know it!";
+                case WheelPhase.QuickAnswer: return MyTurn ? "You buzzed in! Say your answer." : $"{Snapshot.Players[Snapshot.Active].Name} buzzed in.";
+                case WheelPhase.BonusPick: return MyTurn ? "You play the bonus round!" : $"{Snapshot.Players[Snapshot.Active].Name} plays the bonus round.";
+                case WheelPhase.BonusCategory or WheelPhase.BonusLetters or WheelPhase.BonusReady or WheelPhase.BonusSolve or WheelPhase.BonusOver or WheelPhase.Reveal when Snapshot.Bonus is not null:
+                    return Snapshot.Message ?? "";
+            }
             if (Snapshot.Active < 0) return "";
             var active = Snapshot.Players[Snapshot.Active];
             if (MyTurn)
@@ -108,6 +151,19 @@ else
         _self ??= DotNetObjectReference.Create(this);
         try { await JS.InvokeVoidAsync("wheelpad.attach", "wf-pad", _self); }
         catch (JSDisconnectedException) { }
+    }
+
+    // pointerdown, not click: a click waits for the finger to lift, and a toss-up is won by milliseconds.
+    private void Buzz()
+    {
+        var result = Game.Buzz(Token);
+        _error = result.Ok ? null : result.Error;
+    }
+
+    private void PickCard(int card)
+    {
+        var result = Game.PickCard(Token, card);
+        _error = result.Ok ? null : result.Error;
     }
 
     /// <summary>A finger just touched the pad: tell the room right away so the TV can swing to the wheel.</summary>

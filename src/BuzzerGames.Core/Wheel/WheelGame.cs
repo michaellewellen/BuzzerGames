@@ -11,13 +11,25 @@ public enum WheelPhase
     Vowel,       // the player is buying a vowel: the emcee enters it and confirms
     Reveal,      // matching tiles are lit; the room page calls FinishReveal when the hand has touched them all
     Solving,     // the player is saying the answer; the emcee judges it
-    PuzzleOver,  // the puzzle is done (solved or skipped); the emcee continues
+    PuzzleOver,  // the puzzle is done (solved or skipped, regular or quick); the emcee continues
+    QuickReady,  // a quick round puzzle is on the board with no letters yet; the emcee starts it
+    QuickPlay,   // letters appear one by one; anyone not locked out can buzz in. The TV calls QuickTick
+    QuickAnswer, // someone buzzed in; the emcee judges their answer
+    BonusPick,   // the bonus player picks one of 24 face-down cards
+    BonusCategory, // the emcee taps the category the bonus player chose
+    BonusLetters,  // R S T L N E are showing; three more consonants and one vowel are called
+    BonusReady,    // all letters are in; the emcee says "your time starts now"
+    BonusSolve,    // the clock is running; the emcee judges
+    BonusOver,     // the card is turned over; the emcee finishes the game
     GameOver
 }
 
 public enum TileState { Hidden, Lit, Revealed }
 
-public sealed record WheelPlayerInfo(Guid Id, string Name, string Color, int RoundBank, int Total, bool HoldsMillion, bool WonMillion);
+public sealed record WheelPlayerInfo(Guid Id, string Name, string Color, int RoundBank, int Total, bool HoldsMillion, bool WonMillion, bool LockedOut = false);
+
+/// <summary>The bonus round as the screens see it. The card values are secret until the end: only <see cref="Prize"/> at the very end, never before.</summary>
+public sealed record WheelBonusInfo(int Picked, IReadOnlyList<string> Choices, int? Prize, double? SecondsLeft, bool TimeUp, int ConsonantsLeft, int VowelsLeft);
 
 /// <summary>A tile on the board. The letter is only filled in once it is revealed, so the TV can't leak it.</summary>
 public sealed record BoardTileInfo(int Row, int Column, TileState State, char? Letter);
@@ -48,7 +60,11 @@ public sealed record WheelSnapshot(
     bool CanUndo,
     IReadOnlyList<Guid> Winners,
     Guid? PuzzleWinner,
-    bool Swirling);                      // the player up has a finger on the spin pad, so the TV can swing to the wheel before the spin is thrown                 // who solved the puzzle just finished: their round money is still on the board until the emcee continues
+    bool Swirling,
+    string StepLabel,                    // "Puzzle 3 of 6", "Toss-up 2 of 3", "Bonus round"
+    int Prize,                           // what the quick round puzzle on the board is worth (0 otherwise)
+    WheelBonusInfo? Bonus,               // set during the bonus round
+    bool LastStep);                      // the step in play is the last one, so continuing ends the game                      // the player up has a finger on the spin pad, so the TV can swing to the wheel before the spin is thrown                 // who solved the puzzle just finished: their round money is still on the board until the emcee continues
 
 /// <summary>
 /// One game of Wheel of Fortune: an emcee and three players (Red, Yellow, Blue) who spin from their phones while the emcee runs everything else.
@@ -58,7 +74,7 @@ public sealed record WheelSnapshot(
 /// Players say their letters out loud. The emcee types the letter, sees "Confirm T?", and only then does it count, so a typo can't cost anyone a turn.
 /// Every emcee action can be undone, one step at a time.
 /// </summary>
-public sealed class WheelGame
+public sealed partial class WheelGame
 {
     private sealed record Player(Guid Token, Guid Id, string Name);
 
@@ -85,6 +101,18 @@ public sealed class WheelGame
         public int SpinValue;
         public string? Message;
         public List<int> Winners = [];
+        public int Step;                                 // where we are in the plan (regular puzzles, quick rounds, the bonus)
+        public bool[] LockedOut = new bool[WheelRules.Players];   // quick round: buzzed wrong on this puzzle
+        public int QuickPrize;
+        public int QuickIdle;
+        public int BonusPlayer = -1;
+        public int[] BonusCards = [];
+        public int BonusPicked = -1;
+        public int BonusChosen = -1;
+        public int BonusConsonantsLeft;
+        public int BonusVowelsLeft;
+        public DateTime? BonusStartedUtc;
+        public bool BonusTimeUp;
         public int PuzzleWinner = -1;   // set when a puzzle is solved; the money moves into their total when the emcee continues
 
         public State Clone()
@@ -97,6 +125,8 @@ public sealed class WheelGame
             copy.Called = [.. Called];
             copy.Lit = [.. Lit];
             copy.Winners = [.. Winners];
+            copy.LockedOut = (bool[])LockedOut.Clone();
+            copy.BonusCards = (int[])BonusCards.Clone();
             return copy;
         }
     }
@@ -109,6 +139,8 @@ public sealed class WheelGame
     private readonly double _jitter;
     private readonly List<Player> _players = [];
     private readonly List<State> _history = [];
+    private readonly int _quickTickMillis;
+    private long _lastTickMs;
     private bool _swirling;   // a finger is on the spin pad. Kept outside State on purpose: it is not a game action, so Undo never touches it.
     private Guid? _emceeToken;
     private string? _emceeName;
@@ -116,8 +148,9 @@ public sealed class WheelGame
     private List<BoardLayout> _boards = [];
     private State _s = new();
 
-    public WheelGame(string code, IWheelContent content, Random? rng = null, double jitterDegrees = WheelRules.SpinJitterDegrees)
+    public WheelGame(string code, IWheelContent content, Random? rng = null, double jitterDegrees = WheelRules.SpinJitterDegrees, int quickTickMillis = WheelRules.QuickTickMillis)
     {
+        _quickTickMillis = quickTickMillis;
         Code = code;
         _content = content;
         _rng = rng ?? new Random();
@@ -126,6 +159,9 @@ public sealed class WheelGame
     }
 
     public string Code { get; }
+
+    /// <summary>The phase right now, without building a whole snapshot (the TV's quick-round ticker polls it).</summary>
+    public WheelPhase Phase { get { lock (_gate) return _s.Phase; } }
     public DateTime CreatedAtUtc { get; }
     public event Action? Changed;
 
@@ -168,8 +204,10 @@ public sealed class WheelGame
 
         _deal = deal;
         _boards = boards;
-        _content.MarkUsed(deal.Regular.Select(p => p.Id));
-        StartPuzzle(1);
+        BuildPlan(deal);
+        _content.MarkUsed(deal.Regular.Select(p => p.Id).Concat(deal.Quick.Select(q => q.Id)).Concat(deal.BonusChoices.Select(p => p.Id)));
+        _s.Step = 0;
+        BeginStep();
         return Result.Success;
     });
 
@@ -282,10 +320,18 @@ public sealed class WheelGame
     public Result StageLetter(Guid emceeToken, char letter) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
-        if (_s.Phase is not (WheelPhase.Consonant or WheelPhase.Vowel)) return Result.Fail("It isn't time to call a letter.");
+        if (_s.Phase is not (WheelPhase.Consonant or WheelPhase.Vowel or WheelPhase.BonusLetters)) return Result.Fail("It isn't time to call a letter.");
         var c = char.ToUpperInvariant(letter);
         if (c is < 'A' or > 'Z') return Result.Fail("Letters only.");
         if (_s.Called.Contains(c)) return Result.Fail($"{c} has already been called.");
+        if (_s.Phase == WheelPhase.BonusLetters)
+        {
+            if (IsVowel(c) && _s.BonusVowelsLeft == 0) return Result.Fail("The bonus player's vowel has been used.");
+            if (!IsVowel(c) && _s.BonusConsonantsLeft == 0) return Result.Fail("All three bonus consonants have been used.");
+            _s.Staged = c;
+            _s.Message = $"Confirm {c}?";
+            return Result.Success;
+        }
         if (_s.Phase == WheelPhase.Consonant && IsVowel(c)) return Result.Fail("That's a vowel. Call a consonant; vowels are bought before a spin.");
         if (_s.Phase == WheelPhase.Vowel && !IsVowel(c)) return Result.Fail("A bought letter must be A, E, I, O or U.");
 
@@ -301,7 +347,7 @@ public sealed class WheelGame
         if (_s.Staged is not null)
         {
             _s.Staged = null;
-            _s.Message = _s.Phase == WheelPhase.Vowel ? $"Which vowel?" : $"{ActiveName()}: call a consonant.";
+            _s.Message = _s.Phase == WheelPhase.BonusLetters ? BonusLettersMessage() : _s.Phase == WheelPhase.Vowel ? $"Which vowel?" : $"{ActiveName()}: call a consonant.";
             return Result.Success;
         }
         if (_s.Phase == WheelPhase.Vowel)
@@ -317,8 +363,10 @@ public sealed class WheelGame
     public Result ConfirmLetter(Guid emceeToken) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
-        if (_s.Phase is not (WheelPhase.Consonant or WheelPhase.Vowel)) return Result.Fail("It isn't time to call a letter.");
+        if (_s.Phase is not (WheelPhase.Consonant or WheelPhase.Vowel or WheelPhase.BonusLetters)) return Result.Fail("It isn't time to call a letter.");
         if (_s.Staged is not { } letter) return Result.Fail("Type the letter first.");
+
+        if (_s.Phase == WheelPhase.BonusLetters) return ConfirmBonusLetter(letter);
 
         Remember();
         var buying = _s.Phase == WheelPhase.Vowel;
@@ -353,6 +401,11 @@ public sealed class WheelGame
         if (_s.Phase != WheelPhase.Reveal) return Result.Fail("Nothing is being revealed.");
         foreach (var i in _s.Lit) _s.Tiles[i] = TileState.Revealed;
         _s.Lit = [];
+        if (InBonus)
+        {
+            AfterBonusLetter();
+            return Result.Success;
+        }
         _s.Phase = WheelPhase.Turn;
         _s.Message = HiddenLetters(_ => true) == 0
             ? $"The board is full. {ActiveName()}, solve it!"
@@ -418,7 +471,7 @@ public sealed class WheelGame
     public Result SkipPuzzle(Guid emceeToken) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
-        if (_s.Phase is not (WheelPhase.Turn or WheelPhase.Consonant or WheelPhase.Vowel or WheelPhase.Solving)) return Result.Fail("You can't skip the puzzle right now.");
+        if (_s.Phase is not (WheelPhase.Turn or WheelPhase.Consonant or WheelPhase.Vowel or WheelPhase.Solving or WheelPhase.QuickReady or WheelPhase.QuickPlay or WheelPhase.QuickAnswer)) return Result.Fail("You can't skip the puzzle right now.");
         Remember();
         RevealEverything();
         _s.Phase = WheelPhase.PuzzleOver;
@@ -431,7 +484,7 @@ public sealed class WheelGame
     public Result Continue(Guid emceeToken) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
-        if (_s.Phase != WheelPhase.PuzzleOver) return Result.Fail("The puzzle isn't over yet.");
+        if (_s.Phase is not (WheelPhase.PuzzleOver or WheelPhase.BonusOver)) return Result.Fail("The puzzle isn't over yet.");
         Remember();
         if (_s.PuzzleWinner >= 0)
         {
@@ -439,8 +492,9 @@ public sealed class WheelGame
             _s.PuzzleWinner = -1;
         }
         ClearRound();
-        if (_s.PuzzleNumber >= WheelRules.RegularPuzzles) EndGame();
-        else StartPuzzle(_s.PuzzleNumber + 1);
+        _s.Step++;
+        if (_s.Step >= _plan.Count) EndGame();
+        else BeginStep();
         return Result.Success;
     });
 
@@ -448,7 +502,7 @@ public sealed class WheelGame
     public Result Undo(Guid emceeToken) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
-        if (_s.Phase is WheelPhase.Spinning or WheelPhase.Reveal) return Result.Fail("Wait for the wheel or the reveal to finish first.");
+        if (_s.Phase is WheelPhase.Spinning or WheelPhase.Reveal or WheelPhase.QuickPlay) return Result.Fail("Wait for the wheel, the reveal or the toss-up to finish first.");
         if (_history.Count == 0) return Result.Fail("There's nothing to undo.");
         _s = _history[^1];
         _history.RemoveAt(_history.Count - 1);
@@ -473,7 +527,8 @@ public sealed class WheelGame
         {
             var s = _s;
             var players = _players.Select((p, i) => new WheelPlayerInfo(
-                p.Id, p.Name, WheelRules.PlayerColors[i], s.RoundBank[i], s.Total[i], s.MillionHolder == i, s.MillionWon[i])).ToList();
+                p.Id, p.Name, WheelRules.PlayerColors[i], s.RoundBank[i], s.Total[i], s.MillionHolder == i, s.MillionWon[i],
+                s.Phase is WheelPhase.QuickPlay or WheelPhase.QuickAnswer && s.LockedOut[i])).ToList();
 
             var board = s.Board is null
                 ? []
@@ -490,10 +545,14 @@ public sealed class WheelGame
                 CanSpin: onTurn && HiddenLetters(c => !IsVowel(c)) > 0,
                 CanBuyVowel: onTurn && s.RoundBank[s.Active] >= WheelRules.VowelCost && HiddenLetters(IsVowel) > 0,
                 CanSolve: onTurn,
-                CanUndo: inPlay && s.Phase is not (WheelPhase.Spinning or WheelPhase.Reveal) && _history.Count > 0,
+                CanUndo: inPlay && s.Phase is not (WheelPhase.Spinning or WheelPhase.Reveal or WheelPhase.QuickPlay) && _history.Count > 0,
                 Winners: s.Winners.Select(i => _players[i].Id).ToList(),
-                PuzzleWinner: s.PuzzleWinner >= 0 && s.Phase == WheelPhase.PuzzleOver ? _players[s.PuzzleWinner].Id : null,
-                Swirling: _swirling && s.Phase == WheelPhase.Turn);
+                PuzzleWinner: s.PuzzleWinner >= 0 && s.Phase is WheelPhase.PuzzleOver or WheelPhase.BonusOver ? _players[s.PuzzleWinner].Id : null,
+                Swirling: _swirling && s.Phase == WheelPhase.Turn,
+                StepLabel: StepLabel(),
+                Prize: InQuick ? s.QuickPrize : 0,
+                Bonus: BonusInfo(),
+                LastStep: _plan.Count > 0 && s.Step >= _plan.Count - 1);
         }
     }
 

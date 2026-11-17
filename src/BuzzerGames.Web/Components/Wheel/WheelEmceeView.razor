@@ -7,14 +7,17 @@
 
 <main class="wf-emcee">
     <header class="wf-emcee-head">
-        <span>Puzzle @Snapshot.PuzzleNumber of @Snapshot.PuzzleCount</span>
+        <span>@Snapshot.StepLabel</span>
         <span class="muted">Room @Snapshot.Code</span>
     </header>
 
-    <section class="card wf-answer-card">
-        <div class="muted">@Snapshot.Category</div>
-        <div class="wf-answer">@Snapshot.Answer</div>
-    </section>
+    @if (!string.IsNullOrEmpty(Snapshot.Answer))
+    {
+        <section class="card wf-answer-card">
+            <div class="muted">@Snapshot.Category@(Snapshot.Prize > 0 ? $" · ${Snapshot.Prize:N0}" : "")</div>
+            <div class="wf-answer">@Snapshot.Answer</div>
+        </section>
+    }
 
     <section class="wf-emcee-players">
         @for (var i = 0; i < Snapshot.Players.Count; i++)
@@ -94,9 +97,95 @@
             break;
 
         case WheelPhase.PuzzleOver:
+        case WheelPhase.BonusOver:
             <button class="btn btn-start btn-wide" @onclick="() => Do(g => g.Continue(Token))">
-                @(Snapshot.PuzzleNumber >= Snapshot.PuzzleCount ? "Finish the game" : "Next puzzle")
+                @(Snapshot.LastStep ? "Finish the game" : "Next puzzle")
             </button>
+            break;
+
+        case WheelPhase.QuickReady:
+            <button class="btn btn-start btn-wide" @onclick="() => Do(g => g.StartQuickRound(Token))">Start the toss-up</button>
+            break;
+
+        case WheelPhase.QuickPlay:
+            <p class="muted">Letters are coming in. Whoever buzzes first answers. If a phone isn't working, tap their name:</p>
+            <div class="wf-actions">
+                @for (var i = 0; i < Snapshot.Players.Count; i++)
+                {
+                    var who = i;
+                    var player = Snapshot.Players[i];
+                    <button class="btn" disabled="@player.LockedOut" @onclick="() => Do(g => g.BuzzFor(Token, who))">@player.Name buzzed</button>
+                }
+            </div>
+            <button class="btn btn-quiet" @onclick="() => Do(g => g.QuickTick())">Show another letter</button>
+            break;
+
+        case WheelPhase.QuickAnswer:
+            <div class="wf-actions">
+                <button class="btn btn-start" @onclick="() => Do(g => g.JudgeQuick(Token, true))">Correct</button>
+                <button class="btn" @onclick="() => Do(g => g.JudgeQuick(Token, false))">Incorrect</button>
+            </div>
+            break;
+
+        case WheelPhase.BonusPick:
+            <p class="muted">@Snapshot.Players[Snapshot.Active].Name picks a card on their phone. If it isn't working, tap one for them:</p>
+            <div class="wf-cardgrid">
+                @for (var i = 0; i < WheelRules.BonusCards; i++)
+                {
+                    var card = i;
+                    <button class="wf-cardbtn" @onclick="() => Do(g => g.PickCard(Token, card))">@(i + 1)</button>
+                }
+            </div>
+            <button class="btn btn-quiet" @onclick="() => Do(g => g.PickCard(Token, -1))">Pick one at random</button>
+            break;
+
+        case WheelPhase.BonusCategory:
+            <p class="muted">Tap the category they choose:</p>
+            <div class="wf-actions">
+                @for (var i = 0; i < (Snapshot.Bonus?.Choices.Count ?? 0); i++)
+                {
+                    var choice = i;
+                    <button class="btn" @onclick="() => Do(g => g.ChooseBonusCategory(Token, choice))">@Snapshot.Bonus!.Choices[i]</button>
+                }
+            </div>
+            break;
+
+        case WheelPhase.BonusLetters:
+            <WheelLetterBoard Called="@Snapshot.CalledLetters" />
+            @if (Snapshot.StagedLetter is { } bonusStaged)
+            {
+                <div class="wf-confirm">
+                    <div class="wf-confirm-letter">@bonusStaged</div>
+                    <button class="btn btn-start" @onclick="() => Do(g => g.ConfirmLetter(Token))">Confirm @bonusStaged</button>
+                    <button class="btn btn-quiet" @onclick="() => Do(g => g.CancelLetter(Token))">Wrong key</button>
+                </div>
+            }
+            else
+            {
+                <p class="muted">Type the letters they say: @Snapshot.Bonus!.ConsonantsLeft consonant@(Snapshot.Bonus.ConsonantsLeft == 1 ? "" : "s") and @Snapshot.Bonus.VowelsLeft vowel@(Snapshot.Bonus.VowelsLeft == 1 ? "" : "s") to go.</p>
+            }
+            <div class="wf-keys">
+                @foreach (var c in Letters)
+                {
+                    var vowel = "AEIOU".Contains(c);
+                    var spent = vowel ? Snapshot.Bonus!.VowelsLeft == 0 : Snapshot.Bonus!.ConsonantsLeft == 0;
+                    var called = Snapshot.CalledLetters.Contains(c);
+                    <button class="wf-key @(called ? "called" : "") @(Snapshot.StagedLetter == c ? "staged" : "")" disabled="@(called || spent)"
+                            @onclick="() => Do(g => g.StageLetter(Token, c))">@c</button>
+                }
+            </div>
+            break;
+
+        case WheelPhase.BonusReady:
+            <button class="btn btn-start btn-wide" @onclick="() => Do(g => g.StartBonusClock(Token))">Your time starts now (@WheelRules.BonusSeconds seconds)</button>
+            break;
+
+        case WheelPhase.BonusSolve:
+            <p class="muted">The clock is running on the big screen. Rule on what you hear:</p>
+            <div class="wf-actions">
+                <button class="btn btn-start" @onclick="() => Do(g => g.JudgeBonus(Token, true))">Correct</button>
+                <button class="btn" @onclick="() => Do(g => g.JudgeBonus(Token, false))">Incorrect</button>
+            </div>
             break;
 
         case WheelPhase.GameOver:
@@ -106,7 +195,7 @@
 
     <footer class="wf-emcee-foot">
         <button class="btn btn-quiet" disabled="@(!Snapshot.CanUndo)" @onclick="() => Do(g => g.Undo(Token))">Undo</button>
-        @if (Snapshot.Phase is WheelPhase.Turn or WheelPhase.Consonant or WheelPhase.Vowel or WheelPhase.Solving)
+        @if (Snapshot.Phase is WheelPhase.Turn or WheelPhase.Consonant or WheelPhase.Vowel or WheelPhase.Solving or WheelPhase.QuickReady or WheelPhase.QuickPlay or WheelPhase.QuickAnswer)
         {
             @if (_confirmSkip)
             {
