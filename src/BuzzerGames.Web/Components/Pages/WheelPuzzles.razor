@@ -123,7 +123,7 @@
                 A line starting with <code># regular</code>, <code># quick</code> or <code># bonus</code> switches kinds (it starts as regular).
                 Lines with problems are listed below; the good ones are still added.
             </p>
-            <textarea class="text-input fl-textarea" rows="8" placeholder="# regular&#10;Phrase | A PIECE OF CAKE&#10;# quick&#10;Things With Wheels | SHOPPING CART | ROLLER SKATES | FERRIS WHEEL&#10;# bonus&#10;Place | NIAGARA FALLS" @bind="_paste" @bind:event="oninput"></textarea>
+            <textarea class="text-input fl-textarea" rows="8" placeholder="# regular&#10;Phrase | A PIECE OF CAKE&#10;# quick&#10;Things With Wheels | SHOPPING CART | ROLLER SKATES | FERRIS WHEEL&#10;# bonus&#10;Place | NIAGARA FALLS" @bind="_paste"></textarea>
             <button class="btn" @onclick="Import">Import</button>
             @if (_report is not null)
             {

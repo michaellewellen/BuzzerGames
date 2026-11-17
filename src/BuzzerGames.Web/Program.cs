@@ -23,6 +23,12 @@ builder.Services.AddRazorComponents()
         // Shows the real error text in the browser's console (F12) instead of the generic "unhandled exception" line.
         // Fine for a private party game; the details are only ever internal error messages.
         options.DetailedErrors = true;
+    })
+    .AddHubOptions(options =>
+    {
+        // The default is 32 KB, and a big paste (hundreds of puzzles in the Wheel import box) is more than that. Over the limit the
+        // browser's connection is cut and the page silently stops responding. 8 MB is plenty for any paste.
+        options.MaximumReceiveMessageSize = 8 * 1024 * 1024;
     });
 
 // Where Jeopardy questions come from. To use a real dataset later, write a class that
