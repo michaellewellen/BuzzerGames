@@ -148,7 +148,7 @@
             SliceKind.Bankrupt => TaperedStack("BANKRUPT".Select(c => c.ToString()).ToList(), Enumerable.Repeat(0.7, 8).ToList(), width, neverGrow: false),
             SliceKind.Million => TaperedStack(["ONE", .. "MILLION".Select(c => c.ToString())], [2.2, .. Enumerable.Repeat(1.0, 7)], width, neverGrow: false),
             SliceKind.LoseATurn => TaperedStack(["LOSE", "A", "TURN"], [2.5, 0.7, 2.5], width, neverGrow: true),
-            _ => EvenStack(s.Label.ToUpperInvariant(), width)
+            _ => EvenStack(s.Label.ToUpperInvariant().Replace(",", ""), width)   // "$1000", not "$1,000": the comma looks odd in a stack
         };
 
         var cls = "wf-slice-text " + (s.Kind == SliceKind.Cash ? "wf-text-cash" : "wf-text-" + s.Kind.ToString().ToLowerInvariant());

@@ -1078,7 +1078,7 @@ body.wf-sound-on .wf-sound { display: none; }
 .wf-cash-purple { fill: #7b2cbf; } .wf-cash-green { fill: #2a9d4b; } .wf-cash-pink { fill: #e5489c; }
 .wf-bankrupt { fill: #050505; } .wf-lose { fill: #f2f2f2; } .wf-million { fill: #ffd35a; }
 .wf-peg { fill: #f6f6f6; stroke: #444; stroke-width: 1; }
-.wf-slice-text { font-family: var(--wf-wheel-font); font-weight: 700; fill: #fff; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: 3px; }
+.wf-slice-text { font-family: var(--wf-wheel-font); font-weight: 700; fill: #111; stroke: none; }   /* black lettering; only BANKRUPT is white (it sits on black) */
 .wf-text-bankrupt { fill: #fff; stroke: none; } .wf-text-loseaturn { fill: #111; stroke: none; } .wf-text-million { fill: #111; stroke: none; }
 .wf-flap polygon { fill: #fff; stroke: #111; stroke-width: 3; }
 .wf-flap-red polygon { fill: var(--wf-red); } .wf-flap-yellow polygon { fill: var(--wf-yellow); } .wf-flap-blue polygon { fill: var(--wf-blue); }
