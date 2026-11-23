@@ -75,6 +75,7 @@ window.wheel = (function () {
     bell: function () { tone(1046, 0, 0.8, 'sine', 0.22); tone(1568, 0, 0.6, 'sine', 0.1); },
     ding: function () { tone(1318, 0, 0.9, 'sine', 0.25); tone(1976, 0, 0.9, 'sine', 0.12); },
     land: function () { tone(660, 0, 0.18, 'triangle', 0.18); },
+    timeup: function () { tone(110, 0, 0.5, 'sawtooth', 0.3, 100); tone(110, 0.6, 0.5, 'sawtooth', 0.3, 100); tone(220, 0, 1.1, 'square', 0.12, 200); },
     buzz: function () { tone(150, 0, 0.55, 'sawtooth', 0.22, 110); },
     bankrupt: function () { tone(300, 0, 0.35, 'sawtooth', 0.22, 120); tone(200, 0.35, 0.6, 'sawtooth', 0.22, 70); },
     lose: function () { tone(520, 0, 0.25, 'triangle', 0.2); tone(390, 0.25, 0.4, 'triangle', 0.2); },

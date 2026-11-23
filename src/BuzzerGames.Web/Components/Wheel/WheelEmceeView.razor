@@ -181,10 +181,17 @@
             break;
 
         case WheelPhase.BonusSolve:
-            <p class="muted">The clock is running on the big screen. Rule on what you hear:</p>
+            @if (Snapshot.Bonus is { TimeUp: true })
+            {
+                <p class="muted">The buzzer has sounded. Take no more answers. Was it said in time?</p>
+            }
+            else
+            {
+                <p class="muted">The clock is running on the big screen. Rule on what you hear:</p>
+            }
             <div class="wf-actions">
-                <button class="btn btn-start" @onclick="() => Do(g => g.JudgeBonus(Token, true))">Correct</button>
-                <button class="btn" @onclick="() => Do(g => g.JudgeBonus(Token, false))">Incorrect</button>
+                <button class="btn btn-start" @onclick="() => Do(g => g.JudgeBonus(Token, true))">Solved</button>
+                <button class="btn" @onclick="() => Do(g => g.JudgeBonus(Token, false))">Reveal</button>
             </div>
             break;
 

@@ -172,8 +172,6 @@
                 _ = Sound("buzz");
             else if (Snapshot.Phase == WheelPhase.BonusSolve && _lastPhase != WheelPhase.BonusSolve)
                 _ = Sound("ding");
-            else if (Snapshot.Phase == WheelPhase.BonusOver && _lastPhase != WheelPhase.BonusOver)
-                _ = Sound("bankrupt");
             else if (Snapshot.Phase == WheelPhase.GameOver && _lastPhase != WheelPhase.GameOver)
                 _ = Sound("solve");
             _lastPhase = Snapshot.Phase;
@@ -289,7 +287,7 @@
                 if (left <= 0)
                 {
                     Game.BonusTimeUp();
-                    await Sound("buzz");
+                    await Sound("timeup");
                     break;
                 }
                 await Task.Delay(100);

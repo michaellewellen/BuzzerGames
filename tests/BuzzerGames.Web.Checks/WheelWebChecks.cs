@@ -262,7 +262,7 @@ static class WheelWebChecks
             tv = Render.WfTv(t, watching: true);
             Check.True(Render.Has(tv, "wf-clock"), "a clock is on the TV");
             Check.True(!Render.Has(tv, "CHOCOLATE"), "without the answer");
-            Check.True(Render.Has(Render.WfEmcee(t), "Correct") && Render.Has(Render.WfEmcee(t), "Incorrect"), "the emcee rules");
+            Check.True(Render.Has(Render.WfEmcee(t), "Solved") && Render.Has(Render.WfEmcee(t), "Reveal"), "the emcee rules");
 
             Check.Ok(t.Game.JudgeBonus(t.Emcee, true));
             tv = Render.WfTv(t, watching: true);
