@@ -188,6 +188,14 @@ static class FloorChecks
                 Check.True(added.Ok && n == 1, "added a text prompt");
                 Check.Equal(before + 1, store.ListTopics().Single(t => t.Name == "Acronyms").Total, "starters plus the new one");
 
+                var texts = store.ListTextPrompts("Acronyms");
+                Check.Equal(before + 1, texts.Count, "the topic's clue/answer sets can be listed");
+                Check.Equal("SPAM", texts[^1].Clue, "newest last");
+                Check.True(!store.DeleteTextPrompt("Acronyms", texts.Count - 1, "not the clue").Ok, "a stale delete is refused");
+                Check.True(store.DeleteTextPrompt("Acronyms", texts.Count - 1, "SPAM").Ok, "delete a text prompt");
+                Check.Equal(before, store.ListTextPrompts("Acronyms").Count, "one fewer");
+                Check.Equal(before, new FolderFloorContent(dir, 3).ListTextPrompts("Acronyms").Count, "and it stays deleted after a restart");
+
                 var firstFile = store.ListImages("Dog Breeds")[0].File;
                 Check.True(store.DeleteImage("Dog Breeds", firstFile).Ok, "delete a picture");
                 Check.True(!store.DeleteImage("Dog Breeds", "../x.jpg").Ok, "no path tricks when deleting");

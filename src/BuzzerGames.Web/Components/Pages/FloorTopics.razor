@@ -77,7 +77,22 @@
                         }
                     </div>
 
-                    <h3>Text prompts</h3>
+                    <h3>Text prompts (@_texts.Count)</h3>
+                    @if (_texts.Count > 0)
+                    {
+                        <table class="wf-table">
+                            @for (var i = 0; i < _texts.Count; i++)
+                            {
+                                var n = i;
+                                var t = _texts[i];
+                                <tr @key="@($"{n}-{t.Clue}")">
+                                    <td class="wf-text">@t.Clue</td>
+                                    <td>@t.Answer@(t.Alternates.Count > 0 ? " (also: " + string.Join("; ", t.Alternates) + ")" : "")</td>
+                                    <td><button class="btn btn-quiet btn-small" @onclick="() => DeleteText(n, t.Clue)">Delete</button></td>
+                                </tr>
+                            }
+                        </table>
+                    }
                     <p class="muted">One per line: <code>clue | answer | other accepted answers separated by ;</code></p>
                     <textarea class="text-input fl-textarea" rows="5" placeholder="Capital of France | Paris" @bind="_textLines" @bind:event="oninput"></textarea>
                     <button class="btn" @onclick="AddText">Add text prompts</button>
@@ -107,6 +122,7 @@
     private string? _passError;
     private List<FloorTopicInfo> _topics = [];
     private IReadOnlyList<FloorImageInfo> _images = [];
+    private IReadOnlyList<FloorTextPrompt> _texts = [];
     private string? _selected;
     private string _newTopic = "";
     private string _textLines = "";
@@ -161,6 +177,7 @@
     {
         _topics = Store.ListTopics().ToList();
         _images = _selected is null ? [] : Store.ListImages(_selected);
+        _texts = _selected is null ? [] : Store.ListTextPrompts(_selected);
     }
 
     private async Task SelectAsync(string name)
@@ -208,6 +225,13 @@
     {
         var result = Store.DeleteImage(_selected!, file);
         Say(result.Ok ? "Picture deleted." : result.Error!, !result.Ok);
+        Reload();
+    }
+
+    private void DeleteText(int index, string clue)
+    {
+        var result = Store.DeleteTextPrompt(_selected!, index, clue);
+        Say(result.Ok ? "Prompt deleted." : result.Error!, !result.Ok);
         Reload();
     }
 

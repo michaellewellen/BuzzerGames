@@ -378,6 +378,36 @@ public sealed class FolderFloorContent : IFloorContent
         }
     }
 
+    /// <summary>The text prompts in a topic, in the order they were added, for the topics page.</summary>
+    public IReadOnlyList<FloorTextPrompt> ListTextPrompts(string topic)
+    {
+        lock (_gate)
+        {
+            if (!TryResolve(topic, out var name, out var dir)) return [];
+            return TextPromptsFor(name, dir);
+        }
+    }
+
+    /// <summary>Removes one text prompt. The clue must match what is at that position, so a stale page can't delete the wrong line.</summary>
+    public FloorOpResult DeleteTextPrompt(string topic, int index, string clue)
+    {
+        lock (_gate)
+        {
+            if (!TryResolve(topic, out var name, out var dir)) return FloorOpResult.Fail("That topic doesn't exist.");
+            var all = TextPromptsFor(name, dir).ToList();
+            if (index < 0 || index >= all.Count || all[index].Clue != clue) return FloorOpResult.Fail("That prompt has already changed. Reload the topic.");
+            all.RemoveAt(index);
+            return Guard(() =>
+            {
+                dir ??= Directory.CreateDirectory(Path.Combine(_topicsDir, name)).FullName;
+                // Rewriting the file also takes a built-in topic's prompts out of the program, so a deletion sticks.
+                File.WriteAllText(Path.Combine(dir, TextFile), $"# Topic: {name}{Environment.NewLine}" + string.Concat(all.Select(FormatLine)));
+                _listCache = null;
+                return FloorOpResult.Success();
+            });
+        }
+    }
+
     public FloorOpResult DeleteImage(string topic, string file)
     {
         lock (_gate)
