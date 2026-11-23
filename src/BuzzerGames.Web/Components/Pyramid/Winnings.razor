@@ -1,0 +1,14 @@
+@* What each bonus round paid out so far in this match. *@
+@if (Snapshot.Winnings.Count > 0)
+{
+    <ul class="pyr-winnings">
+        @foreach (var w in Snapshot.Winnings)
+        {
+            <li>Game @w.Game · @PyramidRules.TeamNames[w.Team] · @(w.AllSix ? "ALL SIX " : "")@PyramidBoard.Money(w.Amount) <small>(played for @PyramidBoard.Money(w.Prize))</small></li>
+        }
+    </ul>
+}
+
+@code {
+    [Parameter, EditorRequired] public PyramidSnapshot Snapshot { get; set; } = default!;
+}

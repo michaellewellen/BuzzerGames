@@ -1,0 +1,55 @@
+@page "/pyramid"
+@inject PyramidRoomManager Rooms
+@inject NavigationManager Navigation
+
+<PageTitle>$100,000 Pyramid</PageTitle>
+
+<main class="card center jeopardy-home">
+    <h1>$100,000 Pyramid</h1>
+    <p class="muted">Create the game on the TV. It shows a QR code: the emcee scans it with their phone, taps "I'm the emcee", and runs the whole game from there. Nobody else needs a phone.</p>
+
+    <button class="btn btn-start" @onclick="CreateGame">Create a new game</button>
+
+    <hr />
+
+    <h2>Have a room code?</h2>
+    <div class="button-row">
+        <input class="text-input code-input" placeholder="ABCD" maxlength="4"
+               @bind="_code" @bind:event="oninput" @onkeydown="OnKeyDown" />
+        <button class="btn" @onclick="JoinGame">Go</button>
+    </div>
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    <p class="muted"><a href="/pyramid/topics">Topic bank</a> (add or import topics; needs the admin passcode)</p>
+    <a class="back-link" href="/">All games</a>
+</main>
+
+@code {
+    private string _code = "";
+    private string? _error;
+
+    private void CreateGame()
+    {
+        var game = Rooms.Create();
+        Navigation.NavigateTo($"/pyramid/{game.Code}/board");
+    }
+
+    private void JoinGame()
+    {
+        var game = Rooms.Find(_code);
+        if (game is null)
+        {
+            _error = "We couldn't find a game with that code.";
+            return;
+        }
+        Navigation.NavigateTo($"/pyramid/{game.Code}");
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") JoinGame();
+    }
+}

@@ -1,0 +1,273 @@
+@page "/pyramid/topics"
+@inject FolderPyramidContent Store
+@inject FloorAdminAccess Access
+@inject IJSRuntime JS
+
+<PageTitle>$100,000 Pyramid · Topics</PageTitle>
+
+@*
+    Where Pyramid's topics are added and removed: main-game topics (a title, the line the emcee reads, and seven words), bonus topics in six
+    difficulty tiers, and the tiebreaker lists (seven words for each letter). Locked behind FLOOR_ADMIN_PASSCODE on Railway, the same passcode as
+    The Floor's and Wheel's admin pages.
+*@
+
+<main class="fl-admin">
+    <header class="fl-admin-head">
+        <h1>$100,000 Pyramid · Topics</h1>
+        <a href="/">All games</a>
+    </header>
+
+    @if (Access.Problem is not null)
+    {
+        <section class="card"><p class="error">@Access.Problem</p></section>
+    }
+    else if (!_unlocked)
+    {
+        <section class="card">
+            <h2>Passcode</h2>
+            <input class="text-input" type="password" placeholder="Passcode" @bind="_pass" @bind:event="oninput" @onkeydown="OnPassKey" />
+            <button class="btn" @onclick="Unlock">Unlock</button>
+            @if (_passError is not null) { <p class="error">@_passError</p> }
+        </section>
+    }
+    else
+    {
+        var counts = Store.Counts();
+        <div class="fl-admin-grid">
+            <section class="card">
+                <h2>The bank</h2>
+                <p>
+                    <strong>@counts.Main</strong> main topics (@counts.MainUnused fresh)<br />
+                    <strong>@counts.Bonus</strong> bonus topics (@counts.BonusUnused fresh); per tier: @string.Join(" · ", counts.BonusPerTier.Select((n, i) => $"{i + 1}: {n}"))<br />
+                    <strong>@counts.LettersReady</strong> of 26 tiebreaker letters ready
+                </p>
+                <p class="muted">A game deals 6 main topics and the bonus deals one topic from each of the 6 tiers, using fresh ones first. A match needs at least 12 main topics to avoid a repeat.</p>
+                <button class="btn btn-quiet btn-small" @onclick="ClearUsed">Make every topic fresh again</button>
+            </section>
+
+            <section class="card">
+                <h2>Add</h2>
+                <div class="wf-tabs">
+                    <button class="btn btn-small @(_kind == "main" ? "active" : "")" @onclick='() => Pick("main")'>Main topic</button>
+                    <button class="btn btn-small @(_kind == "bonus" ? "active" : "")" @onclick='() => Pick("bonus")'>Bonus topic</button>
+                    <button class="btn btn-small @(_kind == "letter" ? "active" : "")" @onclick='() => Pick("letter")'>Letter list</button>
+                </div>
+
+                @if (_kind == "main")
+                {
+                    <input class="text-input" placeholder="Title the teams see (Press Your Luck)" maxlength="@PyramidRules.TitleMaxLength" @bind="_title" @bind:event="oninput" />
+                    <input class="text-input" placeholder="What the emcee reads (Name these things that you press)" maxlength="@PyramidRules.DescriptionMaxLength" @bind="_description" @bind:event="oninput" />
+                    <textarea class="text-input fl-textarea" rows="4" placeholder="Seven words, one per line or separated by commas" @bind="_words" @bind:event="oninput"></textarea>
+                }
+                else if (_kind == "bonus")
+                {
+                    <select class="text-input" @bind="_tier">
+                        @for (var i = 1; i <= PyramidRules.TileCount; i++) { <option value="@i">Tier @i @(i == 1 ? "(easiest)" : i == PyramidRules.TileCount ? "(hardest)" : "")</option> }
+                    </select>
+                    <input class="text-input" placeholder="Things a toaster might say" maxlength="@PyramidRules.SubjectMaxLength" @bind="_subject" @bind:event="oninput" @onkeydown="OnAddKey" />
+                }
+                else
+                {
+                    <select class="text-input" @bind="_letter">
+                        @for (var c = 'A'; c <= 'Z'; c++) { <option value="@c">@c@(Store.LetterWords(c).Count > 0 ? " ✓" : "")</option> }
+                    </select>
+                    <textarea class="text-input fl-textarea" rows="4" placeholder="Seven or more words that all start with the letter (replaces the list)" @bind="_words" @bind:event="oninput"></textarea>
+                }
+
+                <button class="btn" @onclick="Add">Save</button>
+                @if (_message is not null) { <p class="@(_messageIsError ? "error" : "hint")">@_message</p> }
+                @foreach (var warning in _warnings) { <p class="error">@warning</p> }
+            </section>
+        </div>
+
+        <section class="card">
+            <h2>What's in the bank</h2>
+            <div class="wf-tabs">
+                <button class="btn btn-small @(_tab == "main" ? "active" : "")" @onclick='() => _tab = "main"'>Main (@counts.Main)</button>
+                <button class="btn btn-small @(_tab == "bonus" ? "active" : "")" @onclick='() => _tab = "bonus"'>Bonus (@counts.Bonus)</button>
+                <button class="btn btn-small @(_tab == "letter" ? "active" : "")" @onclick='() => _tab = "letter"'>Letters (@counts.LettersReady)</button>
+            </div>
+            <table class="wf-table">
+                @if (_tab == "main")
+                {
+                    @foreach (var t in Store.Main().Reverse().Take(MaxRows))
+                    {
+                        <tr class="@(Store.IsUsed(t.Id) ? "wf-used" : "")">
+                            <td>@t.Title</td>
+                            <td class="wf-text">@t.Description<br /><small>@string.Join(", ", t.Words)</small></td>
+                            <td>@(Store.IsUsed(t.Id) ? "used" : "")</td>
+                            <td><button class="btn btn-quiet btn-small" @onclick="() => Delete(t.Id)">Delete</button></td>
+                        </tr>
+                    }
+                }
+                else if (_tab == "bonus")
+                {
+                    @foreach (var b in Store.Bonus().Take(MaxRows))
+                    {
+                        <tr class="@(Store.IsUsed(b.Id) ? "wf-used" : "")">
+                            <td>Tier @b.Tier</td>
+                            <td class="wf-text">@b.Subject</td>
+                            <td>@(Store.IsUsed(b.Id) ? "used" : "")</td>
+                            <td><button class="btn btn-quiet btn-small" @onclick="() => Delete(b.Id)">Delete</button></td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    @foreach (var l in Store.Letters())
+                    {
+                        <tr>
+                            <td>@l.Letter</td>
+                            <td class="wf-text">@string.Join(", ", l.Words)</td>
+                        </tr>
+                    }
+                }
+            </table>
+            <p class="muted">Newest first, up to @MaxRows shown.</p>
+        </section>
+
+        <section class="card">
+            <h2>Paste a lot at once</h2>
+            <p class="muted">
+                One per line. Main: <code>title | what the emcee reads | word, word, word, word, word, word, word</code>.
+                Bonus: <code>tier (1 to 6) | subject</code>. Letters: <code>M | seven or more words</code>.
+                A line starting with <code># main</code>, <code># bonus</code> or <code># letters</code> switches kinds (it starts as main).
+                Lines with problems are listed below; the good ones are still added.
+            </p>
+            <textarea class="text-input fl-textarea" rows="8" placeholder="# main&#10;Press Your Luck | Name these things that you press | Luck, Garlic, Button, Accelerator, Tortilla, Clothing, Brake&#10;# bonus&#10;5 | Things a toaster might say&#10;# letters&#10;M | Mouse, Moon, Map, Mud, Milk, Mat, Mop" @bind="_paste"></textarea>
+            <button class="btn" @onclick="Import">Import</button>
+            @if (_report is not null)
+            {
+                <div class="wf-report">
+                    <p class="hint">
+                        Added @_report.Added@(_report.Duplicates > 0 ? $", skipped {_report.Duplicates} already in the bank" : "")@(_report.Problems.Count > 0 ? $", {_report.Problems.Count} need fixing" : "").
+                    </p>
+                    @if (_report.Problems.Count > 0)
+                    {
+                        <ul>@foreach (var problem in _report.Problems) { <li class="error">@problem</li> }</ul>
+                    }
+                    @if (_report.Warnings.Count > 0)
+                    {
+                        <ul>@foreach (var warning in _report.Warnings) { <li>@warning</li> }</ul>
+                    }
+                </div>
+            }
+        </section>
+    }
+</main>
+
+@code {
+    private const int MaxRows = 200;
+
+    private bool _unlocked;
+    private string _pass = "";
+    private string? _passError;
+    private string _tab = "main";
+    private string _kind = "main";
+    private string _title = "";
+    private string _description = "";
+    private string _words = "";
+    private int _tier = 1;
+    private string _subject = "";
+    private char _letter = 'A';
+    private string? _message;
+    private bool _messageIsError;
+    private IReadOnlyList<string> _warnings = [];
+    private string _paste = "";
+    private PyramidImportReport? _report;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Access.Problem is null)
+        {
+            // The same remembered passcode as The Floor's and Wheel's admin pages, so one unlock covers all of them.
+            var saved = await JS.InvokeAsync<string?>("bg.getItem", "bg.floor.pass");
+            if (Access.IsAllowed(saved))
+            {
+                _pass = saved ?? "";
+                _unlocked = true;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task Unlock()
+    {
+        if (!Access.IsAllowed(_pass))
+        {
+            _passError = "That isn't the passcode.";
+            return;
+        }
+        _passError = null;
+        _unlocked = true;
+        await JS.InvokeVoidAsync("bg.setItem", "bg.floor.pass", _pass);
+    }
+
+    private async Task OnPassKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Unlock();
+    }
+
+    private void Pick(string kind)
+    {
+        _kind = kind;
+        _tab = kind;
+        _message = null;
+        _warnings = [];
+    }
+
+    private void Say(string text, bool error = false)
+    {
+        _message = text;
+        _messageIsError = error;
+    }
+
+    private static string[] SplitWords(string text) =>
+        text.Split(['\n', '\r', ',', ';'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    private void Add()
+    {
+        var result = _kind switch
+        {
+            "bonus" => Store.AddBonus(_tier, _subject),
+            "letter" => Store.SetLetter(_letter, SplitWords(_words)),
+            _ => Store.AddMain(_title, _description, SplitWords(_words))
+        };
+
+        if (!result.Ok)
+        {
+            _warnings = [];
+            Say(result.Error!, true);
+            return;
+        }
+
+        _warnings = result.Warnings ?? [];
+        Say("Saved.");
+        _title = ""; _description = ""; _words = ""; _subject = "";
+    }
+
+    private void OnAddKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") Add();
+    }
+
+    private void Delete(string id)
+    {
+        var result = Store.Delete(id);
+        Say(result.Ok ? "Deleted." : result.Error!, !result.Ok);
+        _warnings = [];
+    }
+
+    private void ClearUsed()
+    {
+        Store.ClearUsed();
+        Say("Every topic is fresh again.");
+        _warnings = [];
+    }
+
+    private void Import()
+    {
+        _report = Store.Import(_paste);
+        if (_report.Problems.Count == 0) _paste = "";
+    }
+}

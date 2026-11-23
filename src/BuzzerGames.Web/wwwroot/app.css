@@ -1129,3 +1129,226 @@ body.wf-sound-on .wf-sound { display: none; }
 .wf-clock { font-size: min(15vw, 28vh); font-weight: 700; color: #fff; text-shadow: 0 0 2vh rgba(0, 0, 0, .4); font-variant-numeric: tabular-nums; min-width: 1.5em; text-align: center; line-height: 1; }
 .wf-clock.low { color: var(--gold); }
 .wf-clock.over { color: #ff5a5a; animation: wf-cheer .4s ease-in-out 4; }
+
+/* ===================== $100,000 Pyramid ===================== */
+/* Colours from the show's set: a dark navy stage, glowing blue-and-white beams, a dark blue header with chrome-gold lettering,
+   and red-orange squares with a white frame and a gold pyramid emblem that flip over to show their topic or their money. */
+.pyr-tv {
+    --pyr-navy: #020a1f;
+    --pyr-blue: #1e90ff;
+    --pyr-glow: #7fd0ff;
+    --pyr-red-1: #ff7a2f;
+    --pyr-red-2: #c4161c;
+    --pyr-gold-1: #fff3b0;
+    --pyr-gold-2: #f2b632;
+    --pyr-gold-3: #a8700d;
+    --tw: min(21vw, 31vh);            /* one square's width */
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 38%, #0c3b86 0%, #06173d 45%, var(--pyr-navy) 85%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.2vh;
+    color: #fff;
+    font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+}
+
+/* The set's A-frame: four slanted glowing beams. */
+.pyr-beams { position: absolute; inset: 0; pointer-events: none; }
+.pyr-beams i {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #fff 0 9%, var(--pyr-glow) 9% 22%, #1566d6 22% 70%, #0a2f78 70% 100%);
+    filter: drop-shadow(0 0 1.4vw rgba(70, 170, 255, .85));
+    opacity: .92;
+}
+.pyr-beams i:nth-child(1) { clip-path: polygon(27% 0, 33% 0, 8% 100%, 0 100%); }
+.pyr-beams i:nth-child(2) { clip-path: polygon(36% 0, 38% 0, 17% 100%, 14% 100%); opacity: .6; }
+.pyr-beams i:nth-child(3) { clip-path: polygon(73% 0, 67% 0, 92% 100%, 100% 100%); background: linear-gradient(270deg, #fff 0 9%, var(--pyr-glow) 9% 22%, #1566d6 22% 70%, #0a2f78 70% 100%); }
+.pyr-beams i:nth-child(4) { clip-path: polygon(64% 0, 62% 0, 83% 100%, 86% 100%); opacity: .6; background: linear-gradient(270deg, #fff 0 9%, var(--pyr-glow) 9% 22%, #1566d6 22% 70%, #0a2f78 70% 100%); }
+.pyr-tv > :not(.pyr-beams) { position: relative; z-index: 1; }
+
+/* The header plate: dark blue with chrome-gold lettering. */
+.pyr-header {
+    width: min(78vw, 150vh);
+    padding: 1.2vh 0;
+    text-align: center;
+    background: linear-gradient(180deg, #123a8a 0%, #0a2360 55%, #081a48 100%);
+    border: .35vh solid #8fb5ff;
+    border-radius: .6vh;
+    box-shadow: 0 0 2.4vw rgba(70, 160, 255, .55), inset 0 0 3vh rgba(0, 0, 0, .45);
+}
+.pyr-header span, .pyr-title {
+    font-weight: 900;
+    letter-spacing: .04em;
+    background: linear-gradient(180deg, var(--pyr-gold-1) 0%, var(--pyr-gold-2) 48%, var(--pyr-gold-3) 52%, #ffe9a0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 .3vh .3vh rgba(0, 0, 0, .55));
+}
+.pyr-header span { font-size: min(8vw, 12vh); line-height: 1; }
+.pyr-title { font-size: min(16vw, 26vh); line-height: 1; }
+.pyr-sub { font-size: min(4vw, 6vh); letter-spacing: .35em; color: var(--pyr-glow); font-weight: 800; text-shadow: 0 0 1vw rgba(80, 170, 255, .9); }
+.pyr-center { display: flex; flex-direction: column; align-items: center; gap: 2vh; text-align: center; }
+.pyr-pick { font-size: min(8vw, 12vh); font-weight: 900; text-shadow: 0 0 1.5vw rgba(80, 170, 255, .9); }
+
+/* The pyramid of flip squares. */
+.pyr-board { display: flex; flex-direction: column; align-items: center; gap: calc(var(--tw) * .09); }
+.pyr-row { display: flex; gap: calc(var(--tw) * .09); justify-content: center; }
+.pyr-small { --tw: min(15vw, 17vh); }
+.pyr-cell { width: var(--tw); height: calc(var(--tw) * .62); perspective: 90vw; transition: opacity .6s ease .35s, transform .6s ease .35s; }
+.pyr-cell[role=button] { cursor: pointer; }
+.pyr-card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, .1, .2, 1); }
+.pyr-flipped { transform: rotateY(180deg); }
+.pyr-front, .pyr-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: calc(var(--tw) * .028) solid #fff;
+    border-radius: calc(var(--tw) * .02);
+    box-shadow: 0 0 calc(var(--tw) * .07) rgba(160, 210, 255, .8), 0 calc(var(--tw) * .04) calc(var(--tw) * .08) rgba(0, 0, 0, .6);
+}
+.pyr-front { background: linear-gradient(180deg, var(--pyr-red-1) 0%, #e4481f 45%, var(--pyr-red-2) 100%); }
+.pyr-back { transform: rotateY(180deg); background: linear-gradient(180deg, #1d5fd0 0%, #0c2f84 100%); padding: 0 .4em; text-align: center; }
+.pyr-emblem {
+    display: block;
+    width: 44%;
+    height: 66%;
+    clip-path: polygon(24% 0, 76% 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, var(--pyr-gold-1) 0%, var(--pyr-gold-2) 55%, var(--pyr-gold-3) 100%);
+    filter: drop-shadow(0 0 calc(var(--tw) * .03) rgba(255, 220, 120, .9));
+    position: relative;
+}
+.pyr-emblem::after {
+    content: "";
+    position: absolute;
+    inset: 26% 27% 0 27%;
+    clip-path: polygon(24% 0, 76% 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, #d9801d, #8a4b05);
+    opacity: .55;
+}
+.pyr-text { display: block; width: 100%; color: #fff; font-size: calc(var(--tw) * .12); font-weight: 900; line-height: 1.05; text-shadow: 0 .2vh .4vh rgba(0, 0, 0, .6); overflow-wrap: break-word; }
+.pyr-small .pyr-text { font-size: calc(var(--tw) * .17); }
+.pyr-s-money .pyr-back { background: linear-gradient(180deg, #fff3b0 0%, #f2b632 55%, #a8700d 100%); }
+.pyr-s-money .pyr-text { color: #3b2100; text-shadow: none; font-size: calc(var(--tw) * .2); }
+.pyr-s-passed .pyr-back { background: linear-gradient(180deg, #f2b632, #b9761a); }
+.pyr-s-dead .pyr-back { background: #1a1d2b; border-color: #6b1c1c; }
+.pyr-s-dead .pyr-text { color: #e24b4b; font-size: calc(var(--tw) * .3); }
+.pyr-s-gone { opacity: 0; transform: translateY(-4vh) scale(.6); pointer-events: none; }
+.pyr-current .pyr-front, .pyr-current .pyr-back { box-shadow: 0 0 calc(var(--tw) * .16) #ffe27a, 0 0 calc(var(--tw) * .3) #ffb21a; }
+
+/* A Mystery 7 lights the whole pyramid up for a second. */
+.pyr-mystery { animation: pyr-flash 1.1s ease-out 1; }
+@keyframes pyr-flash { 0%, 100% { filter: none; } 20%, 60% { filter: brightness(1.9) drop-shadow(0 0 3vw #ffd24d); } }
+
+/* Team scores under the pyramid. */
+.pyr-scores { display: flex; gap: 3vw; }
+.pyr-team {
+    min-width: 20vw;
+    padding: .8vh 2vw;
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5vw;
+    font-size: min(3.2vw, 5vh);
+    font-weight: 800;
+    background: rgba(5, 18, 60, .85);
+    border: .3vh solid #2b5fc7;
+    border-radius: .8vh;
+    opacity: .8;
+}
+.pyr-team b { color: var(--pyr-gold-2); }
+.pyr-up { opacity: 1; border-color: #fff; box-shadow: 0 0 2vw rgba(255, 230, 140, .8); }
+
+/* While the clock runs: clock on top, the word in the middle, the score along the bottom. */
+.pyr-play { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 4vh 4vw; }
+.pyr-clock { font-size: min(16vw, 24vh); font-weight: 900; line-height: 1; color: var(--pyr-gold-1); text-shadow: 0 0 2vw rgba(255, 210, 80, .75); }
+.pyr-clock.low { color: #ff5a4a; text-shadow: 0 0 2vw rgba(255, 60, 40, .9); }
+.pyr-word, .pyr-subject {
+    max-width: 92vw;
+    text-align: center;
+    font-size: min(15vw, 24vh);
+    font-weight: 900;
+    line-height: 1.05;
+    text-shadow: 0 0 2.5vw rgba(80, 170, 255, .95);
+    overflow-wrap: anywhere;
+}
+.pyr-subject { font-size: min(8.5vw, 15vh); }
+.pyr-total { font-size: min(6vw, 9vh); font-weight: 800; display: flex; gap: 2vw; align-items: baseline; }
+.pyr-total b { color: var(--pyr-gold-2); font-size: 1.3em; }
+.pyr-bonusplay { gap: 2vh; }
+
+/* After a round and between games. */
+.pyr-over { display: flex; flex-direction: column; align-items: center; gap: 1.6vh; padding: 3vh 4vw; text-align: center; }
+.pyr-over-label { font-size: min(7vw, 10vh); font-weight: 900; color: var(--pyr-gold-1); }
+.pyr-over-desc { font-size: min(3.5vw, 5vh); color: var(--pyr-glow); }
+.pyr-words { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .6vh 4vw; font-size: min(4vw, 6.4vh); font-weight: 800; text-align: left; }
+.pyr-words li { white-space: nowrap; }
+.pyr-mark { display: inline-block; width: 1.2em; font-weight: 900; }
+.pyr-w-correct .pyr-mark { color: #3ddc84; }
+.pyr-w-wrong { color: #ff7a6a; }
+.pyr-w-wrong .pyr-mark { color: #ff4a3a; }
+.pyr-w-pending { opacity: .55; }
+.pyr-prize, .pyr-banner { font-size: min(5vw, 8vh); font-weight: 900; color: var(--pyr-gold-1); text-shadow: 0 0 2vw rgba(255, 200, 60, .9); }
+.pyr-banner { text-align: center; }
+.pyr-letters { display: flex; gap: 6vw; }
+.pyr-letter {
+    width: min(22vw, 34vh);
+    height: min(22vw, 34vh);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: min(16vw, 25vh);
+    font-weight: 900;
+    background: linear-gradient(180deg, var(--pyr-red-1), var(--pyr-red-2));
+    border: .6vh solid #fff;
+    border-radius: 1vh;
+    box-shadow: 0 0 2.5vw rgba(160, 210, 255, .8);
+}
+.pyr-winnings { list-style: none; margin: 0; padding: 0; font-size: min(3.2vw, 5vh); font-weight: 800; color: var(--pyr-gold-1); }
+.pyr-winnings small { color: var(--pyr-glow); font-weight: 600; }
+
+/* ---- Pyramid: lobby QR and the emcee's phone ---- */
+.pyr-qr-wrap { display: flex; gap: 3vw; align-items: center; background: rgba(5, 18, 60, .85); border: .3vh solid #2b5fc7; border-radius: 1.2vh; padding: 2vh 3vw; margin-top: 2vh; }
+.pyr-qr { width: min(26vw, 40vh); max-width: none; margin: 0; }
+.pyr-qr-text { display: flex; flex-direction: column; gap: 1vh; text-align: left; font-size: min(2.6vw, 4.4vh); }
+.pyr-qr-text b { font-size: 1.2em; color: var(--pyr-gold-1); }
+.pyr-qr-text em { font-style: normal; color: var(--pyr-glow); font-size: .7em; }
+.pyr-ok { color: #3ddc84; font-weight: 800; }
+
+.pyr-emcee { max-width: 34rem; margin: 0 auto; padding: .8rem; display: flex; flex-direction: column; gap: .8rem; }
+.pyr-e-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .4rem; }
+.pyr-e-scores { display: flex; gap: .8rem; }
+.pyr-e-scores span { opacity: .7; }
+.pyr-e-scores .pyr-e-up { opacity: 1; color: var(--gold); }
+.pyr-e-msg { background: #14217a; border-left: .3rem solid var(--gold); padding: .5rem .7rem; border-radius: .3rem; margin: 0; }
+.pyr-e-hint { margin: 0; color: #b8c4ff; text-align: center; }
+.pyr-e-big { width: 100%; padding: 1.1rem; font-size: 1.3rem; }
+.pyr-e-card { display: flex; flex-direction: column; gap: .5rem; }
+.pyr-e-script { font-size: 1.15rem; font-style: italic; color: var(--gold); margin: 0; }
+.pyr-e-mystery { color: #ff9ae6; font-weight: 800; margin: 0; }
+.pyr-e-clock { text-align: center; font-size: 4rem; font-weight: 900; color: var(--gold); line-height: 1; }
+.pyr-e-clock.low { color: #ff5a4a; }
+.pyr-e-word { text-align: center; font-size: 2.6rem; font-weight: 900; line-height: 1.1; padding: .6rem 0; overflow-wrap: anywhere; }
+.pyr-e-subject { font-size: 1.8rem; }
+.pyr-e-marks { display: flex; gap: .6rem; }
+.pyr-e-marks .btn { flex: 1; padding: 1.2rem .4rem; font-size: 1.5rem; font-weight: 900; }
+.pyr-ok-btn { background: #1f9d55 !important; color: #fff !important; }
+.pyr-no-btn { background: #c0392b !important; color: #fff !important; }
+.pyr-pass-btn { background: #8a7a2a !important; color: #fff !important; }
+.pyr-letter-btn { font-size: 3rem !important; }
+.pyr-e-words { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
+.pyr-e-words .btn { width: 100%; text-align: left; }
+.pyr-e-w-correct { color: #3ddc84 !important; }
+.pyr-e-w-wrong { color: #ff7a6a !important; }
+.pyr-e-undo { align-self: center; }
+.pyr-emcee .pyr-board { --tw: min(28vw, 9.5rem); --pyr-gold-1: #fff3b0; --pyr-gold-2: #f2b632; --pyr-gold-3: #a8700d; --pyr-red-1: #ff7a2f; --pyr-red-2: #c4161c; --pyr-glow: #7fd0ff; }
+.pyr-emcee .pyr-small { --tw: min(28vw, 9.5rem); }
+.pyr-emcee .pyr-text { font-size: calc(var(--tw) * .13); }

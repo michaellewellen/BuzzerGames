@@ -2,8 +2,8 @@
 
 Making our favorite game shows playable, on phones, with a big screen in the middle of the room.
 
-Right now there are six games: **Jeopardy**, **Press Your Luck**, **Password Plus**, **Match Game**, **Card Sharks** and **The Floor**. The site opens on a
-"pick a game" page, with Wheel of Fortune and Classic Concentration waiting in the wings.
+Right now there are eight games: **Jeopardy**, **Press Your Luck**, **Password Plus**, **Match Game**, **Card Sharks**, **The Floor**, **Wheel of Fortune** and **$100,000 Pyramid**. The site opens on a
+"pick a game" page.
 
 ## How a Jeopardy game works
 
@@ -166,6 +166,15 @@ Pictures and the list of used-up topics live in a folder, so on Railway they nee
 
 On your own computer neither variable is needed: pictures go in a `floor-data` folder (ignored by git) and the topics page opens without a passcode.
 
+## How a $100,000 Pyramid game works
+
+- Only an **emcee** (one phone) and a **TV**. Create the game on the TV (`/pyramid`); it shows a QR code. The emcee scans it, taps **I'm the emcee** (no name, no password) and **Start Game**. The emcee organizes two teams offline ("Team A" and "Team B").
+- A **game** is six topics in a pyramid, three per team, 7 words each (21 is perfect). The emcee reveals the topics one at a time, the team up picks one, and the emcee taps it. The clue giver faces the TV, the guesser doesn't. The emcee reads the description, taps **Start the clock**, and the TV shows the clock, the current word and the team's score. The emcee marks each word ✓, ✗ (dead) or **Pass** (goes to the back). A round is 30 seconds for 7 words, 1 point each.
+- The team with the lower score picks first each round; a tie keeps the order. One topic per game is a **Mystery 7**: the team only gets the title, and the emcee reveals what the words had in common afterward (7 of 7 wins a special prize).
+- A tie after six topics goes to the **tiebreaker**: a coin flip decides who picks one of two letters, the other team gets the other, and each gets seven words starting with it. Repeat until someone wins.
+- The winner plays the **bonus pyramid**: 60 seconds, six subjects ("Things a toaster might say"), the emcee marks **Valid** (the square turns to dollars), **Invalid** (gone for good) or **Pass** (tap a passed square to come back). $25,000 for all six (the squares alone add up to $12,000), or $100,000 (squares add up to $40,000) when the same team reaches the pyramid twice. The emcee can override the prize.
+- A **match** is two games; between them the emcee swaps the celebrities. Topics are managed at `/pyramid/topics` (same passcode as The Floor and Wheel).
+
 ## How a Wheel of Fortune game works
 
 Create it on the TV at `/wheel-of-fortune`. The emcee and three players scan the QR code: the players take Red, Yellow and Blue in the order they join, and the emcee taps **Start Game**. Six regular puzzles are played, with a Triple Toss-Up set after puzzles 2 and 4 and the Bonus Round at the end (any of those is skipped if the puzzle store has none of it).
@@ -279,6 +288,8 @@ src/BuzzerGames.Web/           The website
   wwwroot/js/pyl.js              the flashing Big Board and its sounds
   Wheel/                         Wheel of Fortune: engine, wheel layout and spin physics, board layout, puzzle store
   Data/Wheel/                    the starter puzzles (wheel-starter.json)
+  Pyramid/                       $100,000 Pyramid: engine, topic store
+  Data/Pyramid/                  the starter topics (pyramid-starter.json)
   Components/Floor/              the Floor screens (TV, emcee, player, lobby, the floor map, topic picker)
   FloorServices.cs               Floor setup: the data folder, the topics passcode, the picture and upload addresses
   wwwroot/js/floor.js            the Floor clocks and the picture uploader

@@ -16,6 +16,7 @@
     <EmbeddedResource Include="Data\CardSharks\*.json" />
     <EmbeddedResource Include="Data\Floor\*.txt" />
     <EmbeddedResource Include="Data\Wheel\*.json" />
+    <EmbeddedResource Include="Data\Pyramid\*.json" />
   </ItemGroup>
 
 </Project>

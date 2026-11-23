@@ -1,0 +1,111 @@
+@page "/pyramid/{Code}"
+@page "/pyramid/{Code}/board"
+@implements IDisposable
+@inject PyramidRoomManager Rooms
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<PageTitle>$100,000 Pyramid · @Code.ToUpperInvariant()</PageTitle>
+
+@*
+    Two web addresses for one game:
+      /pyramid/ABCD         the emcee's phone (and anyone else who opens it, who just watches).
+      /pyramid/ABCD/board   the TV. It never joins.
+    There is no name and no password: the first phone to tap "I'm the emcee" is the emcee.
+*@
+
+@if (_game is null)
+{
+    <main class="card center">
+        <h1>Game not found</h1>
+        <p>There's no game with the code <strong>@Code.ToUpperInvariant()</strong>. It may have ended, or the server may have restarted.</p>
+        <a class="btn" href="/pyramid">Start or join a game</a>
+    </main>
+}
+else if (!_ready)
+{
+    <main class="card center"><p class="muted">Connecting…</p></main>
+}
+else if (_snapshot.Phase == PyramidPhase.Lobby)
+{
+    <PyramidLobbyView Snapshot="_snapshot" Seat="_seat" BoardMode="_boardMode" Error="@_error" OnJoin="JoinAsync" OnStart="Start" />
+}
+else if (!_boardMode && _seat.Role == Role.Emcee)
+{
+    <PyramidEmceeView Game="_game" Snapshot="_snapshot" Token="_token" />
+}
+else
+{
+    <PyramidTvView Game="_game" Snapshot="_snapshot" />
+}
+
+@code {
+    [Parameter] public string Code { get; set; } = "";
+
+    private PyramidGame? _game;
+    private PyramidSnapshot _snapshot = default!;
+    private Seat _seat = new(Role.Spectator);
+    private Guid _token;
+    private bool _ready;
+    private bool _boardMode;
+    private string? _error;
+
+    private string StorageKey => $"bg.pyramid.{Code.ToUpperInvariant()}";
+
+    protected override void OnInitialized()
+    {
+        _boardMode = new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/').EndsWith("/board", StringComparison.OrdinalIgnoreCase);
+        _game = Rooms.Find(Code);
+        if (_game is null) return;
+
+        _snapshot = _game.Snapshot();
+        _game.Changed += OnGameChanged;
+        if (_boardMode) _ready = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _game is null || _boardMode) return;
+
+        var saved = await JS.InvokeAsync<string?>("bg.getItem", StorageKey);
+        if (Guid.TryParse(saved, out var token))
+        {
+            _token = token;
+            _seat = _game.GetSeat(token);
+        }
+        _ready = true;
+        StateHasChanged();
+    }
+
+    private void OnGameChanged() => _ = InvokeAsync(() =>
+    {
+        _snapshot = _game!.Snapshot();
+        if (_token != Guid.Empty) _seat = _game.GetSeat(_token);
+        StateHasChanged();
+    });
+
+    private async Task JoinAsync()
+    {
+        _error = null;
+        var result = _game!.JoinEmcee();
+        if (!result.Ok)
+        {
+            _error = result.Error;
+            return;
+        }
+        _token = result.Token;
+        _seat = _game.GetSeat(_token);
+        await JS.InvokeVoidAsync("bg.setItem", StorageKey, _token.ToString());
+    }
+
+    private void Start()
+    {
+        var result = _game!.Start(_token);
+        _error = result.Ok ? null : result.Error;
+    }
+
+    public void Dispose()
+    {
+        if (_game is not null) _game.Changed -= OnGameChanged;
+    }
+}

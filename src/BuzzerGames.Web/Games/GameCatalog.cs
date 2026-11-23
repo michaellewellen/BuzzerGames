@@ -18,6 +18,6 @@ public static class GameCatalog
         new("Card Sharks", "/card-sharks", "Higher or lower: a survey duel for control, then race across your row of cards.", IsPlayable: true),
         new("The Floor", "/the-floor", "Win the floor one picture duel at a time: name it before your clock runs out and take their territory.", IsPlayable: true),
         new("Wheel of Fortune", "/wheel-of-fortune", "Spin, solve, and buy a vowel. Three players spin from their phones; the emcee runs the board.", IsPlayable: true),
-        new("Classic Concentration", "/classic-concentration", "Match the prizes to reveal the rebus.", IsPlayable: false),
+        new("$100,000 Pyramid", "/pyramid", "Two teams, six topics, seven words in thirty seconds. Win the game and take the bonus pyramid.", IsPlayable: true),
     ];
 }

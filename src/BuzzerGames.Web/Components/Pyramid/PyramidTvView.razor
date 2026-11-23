@@ -1,0 +1,196 @@
+@implements IDisposable
+
+@*
+    The big screen for $100,000 Pyramid. It is only ever shown what the audience may see:
+      the pyramid (titles only on squares that have been turned over), then while the clock runs just the clock, the word on screen and the team's score,
+      and after a round the words and how each went. It never shows the emcee's script, a Mystery 7's description before the reveal, or an unseen bonus subject.
+    This screen also runs the clock: when time is up it tells the game (the emcee's phone does the same as a backup).
+*@
+
+<div class="pyr-tv pyr-phase-@Snapshot.Phase.ToString().ToLowerInvariant()">
+    <div class="pyr-beams"><i></i><i></i><i></i><i></i></div>
+
+    @switch (Snapshot.Phase)
+    {
+        case PyramidPhase.Playing when Snapshot.Play is { } play:
+            <div class="pyr-play">
+                <div class="pyr-clock @(play.SecondsLeft is <= 5 ? "low" : "")" data-clock-end="@play.ClockKey" data-clock-ms="@Ms(play.SecondsLeft)">@Math.Ceiling(play.SecondsLeft ?? play.Seconds)</div>
+                <div class="pyr-word" @key="play.CurrentWord">@play.CurrentWord</div>
+                <div class="pyr-total"><span>@PyramidRules.TeamNames[play.Team]</span> <b>@Snapshot.Teams[play.Team].Score</b></div>
+            </div>
+            break;
+
+        case PyramidPhase.BonusPlay when Snapshot.Bonus is { } bonus:
+            <div class="pyr-play pyr-bonusplay">
+                <div class="pyr-clock @(bonus.SecondsLeft is <= 10 ? "low" : "")" data-clock-end="@bonus.ClockKey" data-clock-ms="@Ms(bonus.SecondsLeft)">@Math.Ceiling(bonus.SecondsLeft ?? bonus.Seconds)</div>
+                <div class="pyr-subject" @key="bonus.CurrentSubject">@bonus.CurrentSubject</div>
+                <PyramidBoard Small="true" Rows="PyramidBoard.BonusLayout" Cells="PyramidBoard.BonusCells(bonus, false)" />
+            </div>
+            break;
+
+        case PyramidPhase.Lobby:
+            <div class="pyr-center">
+                <div class="pyr-title">$100,000</div>
+                <div class="pyr-sub">PYRAMID</div>
+            </div>
+            break;
+
+        case PyramidPhase.RoundOver when Snapshot.Play is { } play:
+            <div class="pyr-over">
+                <div class="pyr-over-label">@(play.Kind == PlayKind.Letter ? $"The letter {play.Label}" : play.Label)</div>
+                @if (play.Mystery && play.DescriptionShown)
+                {
+                    <div class="pyr-over-desc">@play.Description</div>
+                }
+                <ul class="pyr-words">
+                    @foreach (var w in play.Words)
+                    {
+                        <li class="pyr-w-@w.Result.ToString().ToLowerInvariant()"><span class="pyr-mark">@(w.Result switch { WordResult.Correct => "✓", WordResult.Wrong => "✗", _ => "·" })</span> @w.Text</li>
+                    }
+                </ul>
+                <div class="pyr-total"><span>@PyramidRules.TeamNames[play.Team]</span> <b>@play.Correct / @PyramidRules.WordsPerTopic</b></div>
+                @if (play.Mystery && play.Correct == PyramidRules.WordsPerTopic)
+                {
+                    <div class="pyr-prize">MYSTERY 7 · SPECIAL PRIZE!</div>
+                }
+            </div>
+            break;
+
+        case PyramidPhase.LetterPick when Snapshot.Tiebreak is { } tie:
+            <div class="pyr-center">
+                <div class="pyr-sub">TIEBREAKER</div>
+                <div class="pyr-pick">@PyramidRules.TeamNames[tie.Chooser] chooses</div>
+                <div class="pyr-letters">
+                    @foreach (var c in tie.Choices)
+                    {
+                        <span class="pyr-letter">@c</span>
+                    }
+                </div>
+            </div>
+            break;
+
+        case PyramidPhase.Ready when Snapshot.Play is { Kind: PlayKind.Letter } letter && Snapshot.Tiebreak is { } tb:
+            <div class="pyr-center">
+                <div class="pyr-sub">TIEBREAKER</div>
+                <div class="pyr-pick">@PyramidRules.TeamNames[letter.Team]</div>
+                <div class="pyr-letters"><span class="pyr-letter">@tb.TeamLetters[letter.Team]</span></div>
+            </div>
+            break;
+
+        case PyramidPhase.GameWon:
+            <div class="pyr-center">
+                <div class="pyr-sub">GAME @Snapshot.GameNumber</div>
+                <div class="pyr-pick">@(Snapshot.GameWinner is { } gw ? PyramidRules.TeamNames[gw] : "") wins!</div>
+                <div class="pyr-scores">
+                    @foreach (var t in Snapshot.Teams)
+                    {
+                        <div class="pyr-team @(t.Index == Snapshot.GameWinner ? "pyr-up" : "")"><span>@t.Name</span><b>@t.Score</b></div>
+                    }
+                </div>
+            </div>
+            break;
+
+        case PyramidPhase.BonusReady or PyramidPhase.BonusOver when Snapshot.Bonus is { } bonus:
+            <div class="pyr-header"><span>@PyramidBoard.Money(bonus.Prize)</span></div>
+            <PyramidBoard Rows="PyramidBoard.BonusLayout" Cells="PyramidBoard.BonusCells(bonus, Snapshot.Phase == PyramidPhase.BonusOver)" />
+            <div class="pyr-banner">
+                @if (Snapshot.Phase == PyramidPhase.BonusReady)
+                {
+                    <span>@PyramidRules.TeamNames[bonus.Team] plays for @PyramidBoard.Money(bonus.Prize)</span>
+                }
+                else if (bonus.AllSix)
+                {
+                    <span class="pyr-prize">ALL SIX! @PyramidBoard.Money(bonus.Winnings)</span>
+                }
+                else
+                {
+                    <span>@PyramidRules.TeamNames[bonus.Team] wins @PyramidBoard.Money(bonus.Winnings)</span>
+                }
+            </div>
+            break;
+
+        case PyramidPhase.BetweenGames:
+            <div class="pyr-center">
+                <div class="pyr-sub">END OF GAME @Snapshot.GameNumber</div>
+                <div class="pyr-pick">Switch celebrities!</div>
+                <Winnings Snapshot="Snapshot" />
+            </div>
+            break;
+
+        case PyramidPhase.MatchOver:
+            <div class="pyr-center">
+                <div class="pyr-sub">THAT'S THE MATCH</div>
+                <div class="pyr-scores">
+                    @foreach (var t in Snapshot.Teams)
+                    {
+                        <div class="pyr-team"><span>@t.Name</span><b>@t.GamesWon @(t.GamesWon == 1 ? "game" : "games")</b></div>
+                    }
+                </div>
+                <Winnings Snapshot="Snapshot" />
+            </div>
+            break;
+
+        default:
+            @* Reveal, Choosing, Ready: nothing but the pyramid (and who is up). *@
+            <div class="pyr-header"><span>$100,000</span></div>
+            <div @key="@($"{Snapshot.GameNumber}-{Snapshot.Phase == PyramidPhase.Ready}-{Snapshot.Tiles.Count(t => t.State == PyramidTileState.Used)}")"
+                 class="pyr-stage @(Snapshot.Phase == PyramidPhase.Ready && Snapshot.Play is { Mystery: true } ? "pyr-mystery" : "")">
+                <PyramidBoard Rows="PyramidBoard.MainLayout" Cells="PyramidBoard.MainCells(Snapshot)" />
+            </div>
+            <div class="pyr-scores">
+                @foreach (var t in Snapshot.Teams)
+                {
+                    <div class="pyr-team @(t.Index == Snapshot.Up && Snapshot.Phase is PyramidPhase.Choosing or PyramidPhase.Ready ? "pyr-up" : "")"><span>@t.Name</span><b>@t.Score</b></div>
+                }
+            </div>
+            break;
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public PyramidGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public PyramidSnapshot Snapshot { get; set; } = default!;
+
+    private string? _runningKey;
+    private bool _disposed;
+
+    private static int Ms(double? seconds) => (int)((seconds ?? 0) * 1000);
+
+    protected override void OnParametersSet()
+    {
+        var key = Snapshot.Phase switch
+        {
+            PyramidPhase.Playing => Snapshot.Play?.ClockKey,
+            PyramidPhase.BonusPlay => Snapshot.Bonus?.ClockKey,
+            _ => null
+        };
+        var left = Snapshot.Phase == PyramidPhase.Playing ? Snapshot.Play?.SecondsLeft : Snapshot.Bonus?.SecondsLeft;
+        if (key is not null && key != _runningKey && left is not null)
+        {
+            _runningKey = key;
+            _ = WatchClockAsync(key, left.Value);
+        }
+        else if (key is null) _runningKey = null;
+    }
+
+    /// <summary>Waits out the clock this screen was told about, then tells the game time is up (a second caller is harmless).</summary>
+    private async Task WatchClockAsync(string key, double seconds)
+    {
+        try
+        {
+            var end = DateTime.UtcNow.AddSeconds(seconds);
+            while (!_disposed && _runningKey == key)
+            {
+                if (DateTime.UtcNow >= end)
+                {
+                    Game.TimeUp();
+                    return;
+                }
+                await Task.Delay(100);
+            }
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    public void Dispose() => _disposed = true;
+}

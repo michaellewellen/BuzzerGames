@@ -1,0 +1,205 @@
+@implements IDisposable
+
+@*
+    The emcee's phone: the only device that controls the game. It shows the script (descriptions, the Mystery 7), every word, and
+    every button for the current phase. Failed taps show their reason in red and change nothing.
+    It also keeps an eye on the clock, so time is called even if the TV isn't there.
+*@
+
+<main class="pyr-emcee">
+    <header class="pyr-e-head">
+        <b>@(Snapshot.Phase is PyramidPhase.BonusReady or PyramidPhase.BonusPlay or PyramidPhase.BonusOver ? "Bonus pyramid" : Snapshot.Round == 0 ? $"Game {Snapshot.GameNumber} · Tiebreaker" : $"Game {Snapshot.GameNumber} · Round {Snapshot.Round}")</b>
+        <span class="pyr-e-scores">
+            @foreach (var t in Snapshot.Teams)
+            {
+                <span class="@(t.Index == Snapshot.Up && Snapshot.Phase is not PyramidPhase.BetweenGames and not PyramidPhase.MatchOver ? "pyr-e-up" : "")">@t.Name <b>@t.Score</b></span>
+            }
+        </span>
+    </header>
+
+    @if (Snapshot.Message is not null)
+    {
+        <p class="pyr-e-msg">@Snapshot.Message</p>
+    }
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case PyramidPhase.Reveal:
+            <button class="btn btn-start pyr-e-big" @onclick="() => Do(Game.RevealNext(Token))">Reveal topic @(Snapshot.Revealed + 1) of @PyramidRules.TileCount</button>
+            <PyramidBoard Rows="PyramidBoard.MainLayout" Cells="PyramidBoard.MainCells(Snapshot)" Small="true" />
+            break;
+
+        case PyramidPhase.Choosing:
+            <p class="pyr-e-hint">Tap the topic they choose.</p>
+            <PyramidBoard Rows="PyramidBoard.MainLayout" Cells="PyramidBoard.MainCells(Snapshot)" Small="true" Pick="i => Do(Game.PickTile(Token, i))" />
+            break;
+
+        case PyramidPhase.Ready when Snapshot.Play is { } play:
+            <section class="card pyr-e-card">
+                <h2>@(play.Kind == PlayKind.Letter ? $"Words starting with {play.Label}" : play.Label)</h2>
+                @if (play.Mystery) { <p class="pyr-e-mystery">★ MYSTERY 7 ★ They only get the title.</p> }
+                @if (play.Description.Length > 0 && !play.Mystery) { <p class="pyr-e-script">“@play.Description”</p> }
+                @if (play.Description.Length > 0 && play.Mystery) { <p class="pyr-e-script">Secret: @play.Description</p> }
+                <p class="muted">@PyramidRules.TeamNames[play.Team]: clue giver faces the TV, guesser has their back to it.</p>
+                <p class="muted">Coming up: @string.Join(", ", play.Words.Select(w => w.Text))</p>
+            </section>
+            <button class="btn btn-start pyr-e-big" @onclick="() => Do(Game.StartRound(Token))">Start the clock</button>
+            break;
+
+        case PyramidPhase.Playing when Snapshot.Play is { } play:
+            <div class="pyr-e-clock @(play.SecondsLeft is <= 5 ? "low" : "")" data-clock-end="@play.ClockKey" data-clock-ms="@Ms(play.SecondsLeft)">@Math.Ceiling(play.SecondsLeft ?? play.Seconds)</div>
+            <div class="pyr-e-word">@play.CurrentWord</div>
+            <p class="pyr-e-hint">@play.Correct right · @play.Wrong out · @play.Remaining to go</p>
+            <div class="pyr-e-marks">
+                <button class="btn pyr-ok-btn" @onclick="() => Do(Game.Mark(Token, WordMark.Correct))">✓</button>
+                <button class="btn pyr-pass-btn" @onclick="() => Do(Game.Mark(Token, WordMark.Pass))">Pass</button>
+                <button class="btn pyr-no-btn" @onclick="() => Do(Game.Mark(Token, WordMark.Wrong))">✗</button>
+            </div>
+            break;
+
+        case PyramidPhase.RoundOver when Snapshot.Play is { } play:
+            <section class="card pyr-e-card">
+                <h2>@(play.Kind == PlayKind.Letter ? $"The letter {play.Label}" : play.Label): @play.Correct of @PyramidRules.WordsPerTopic</h2>
+                <p class="muted">Tap a word to change it.</p>
+                <ul class="pyr-e-words">
+                    @for (var i = 0; i < play.Words.Count; i++)
+                    {
+                        var n = i;
+                        var w = play.Words[i];
+                        <li><button class="btn btn-quiet pyr-e-w-@w.Result.ToString().ToLowerInvariant()" @onclick="() => Do(Game.FixWord(Token, n, Next(w.Result)))">@(w.Result switch { WordResult.Correct => "✓", WordResult.Wrong => "✗", _ => "·" }) @w.Text</button></li>
+                    }
+                </ul>
+                @if (play.Mystery && !play.DescriptionShown)
+                {
+                    <button class="btn" @onclick="() => Do(Game.RevealDescription(Token))">Reveal what they had in common</button>
+                }
+                @if (play.Mystery && play.DescriptionShown) { <p class="pyr-e-script">@play.Description</p> }
+            </section>
+            <button class="btn btn-start pyr-e-big" @onclick="() => Do(Game.Continue(Token))">Next</button>
+            break;
+
+        case PyramidPhase.LetterPick when Snapshot.Tiebreak is { } tie:
+            <p class="pyr-e-hint">@PyramidRules.TeamNames[tie.Chooser] picks a letter; the other team gets the other one.</p>
+            <div class="pyr-e-marks">
+                @foreach (var c in tie.Choices)
+                {
+                    var letter = c;
+                    <button class="btn pyr-letter-btn" @onclick="() => Do(Game.PickLetter(Token, letter))">@c</button>
+                }
+            </div>
+            break;
+
+        case PyramidPhase.GameWon:
+            <button class="btn btn-start pyr-e-big" @onclick="() => Do(Game.Continue(Token))">On to the bonus pyramid</button>
+            break;
+
+        case PyramidPhase.BonusReady when Snapshot.Bonus is { } bonus:
+            <section class="card pyr-e-card">
+                <h2>@PyramidRules.TeamNames[bonus.Team] plays for @PyramidBoard.Money(bonus.Prize)</h2>
+                <p class="muted">Change the prize if you need to:</p>
+                <div class="pyr-e-marks">
+                    <button class="btn @(bonus.Prize == PyramidRules.LowPrize ? "active" : "btn-quiet")" @onclick="() => Do(Game.SetBonusPrize(Token, PyramidRules.LowPrize))">$25,000</button>
+                    <button class="btn @(bonus.Prize == PyramidRules.HighPrize ? "active" : "btn-quiet")" @onclick="() => Do(Game.SetBonusPrize(Token, PyramidRules.HighPrize))">$100,000</button>
+                </div>
+            </section>
+            <button class="btn btn-start pyr-e-big" @onclick="() => Do(Game.StartBonus(Token))">Start the 60 seconds</button>
+            break;
+
+        case PyramidPhase.BonusPlay when Snapshot.Bonus is { } bonus:
+            <div class="pyr-e-clock @(bonus.SecondsLeft is <= 10 ? "low" : "")" data-clock-end="@bonus.ClockKey" data-clock-ms="@Ms(bonus.SecondsLeft)">@Math.Ceiling(bonus.SecondsLeft ?? bonus.Seconds)</div>
+            <div class="pyr-e-word pyr-e-subject">@bonus.CurrentSubject</div>
+            <div class="pyr-e-marks">
+                <button class="btn pyr-ok-btn" @onclick="() => Do(Game.MarkBonus(Token, BonusMark.Valid))">Valid</button>
+                <button class="btn pyr-pass-btn" @onclick="() => Do(Game.MarkBonus(Token, BonusMark.Pass))">Pass</button>
+                <button class="btn pyr-no-btn" @onclick="() => Do(Game.MarkBonus(Token, BonusMark.Invalid))">Invalid</button>
+            </div>
+            <p class="pyr-e-hint">Tap a passed square to go back to it.</p>
+            <PyramidBoard Rows="PyramidBoard.BonusLayout" Cells="PyramidBoard.BonusCells(bonus, true)" Small="true" Pick="i => Do(Game.SelectBonus(Token, i))" />
+            break;
+
+        case PyramidPhase.BonusOver when Snapshot.Bonus is { } bonus:
+            <p class="pyr-e-hint">Tap a square to change it (valid / invalid).</p>
+            <PyramidBoard Rows="PyramidBoard.BonusLayout" Cells="PyramidBoard.BonusCells(bonus, true)" Small="true"
+                          Pick="i => Do(Game.FixBonus(Token, i, bonus.Tiles[i].State == BonusTileState.Valid ? BonusTileState.Invalid : BonusTileState.Valid))" />
+            <button class="btn btn-start pyr-e-big" @onclick="() => Do(Game.Continue(Token))">Next</button>
+            break;
+
+        case PyramidPhase.BetweenGames:
+            <Winnings Snapshot="Snapshot" />
+            <button class="btn btn-start pyr-e-big" @onclick="() => Do(Game.Continue(Token))">Start game 2</button>
+            break;
+
+        case PyramidPhase.MatchOver:
+            <Winnings Snapshot="Snapshot" />
+            <button class="btn btn-start pyr-e-big" @onclick="() => Do(Game.Continue(Token))">Start a new match</button>
+            break;
+    }
+
+    @if (Snapshot.CanUndo)
+    {
+        <button class="btn btn-quiet btn-small pyr-e-undo" @onclick="() => Do(Game.Undo(Token))">Undo</button>
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public PyramidGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public PyramidSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+
+    private string? _error;
+    private string? _runningKey;
+    private bool _disposed;
+
+    private static int Ms(double? seconds) => (int)((seconds ?? 0) * 1000);
+
+    private static WordResult Next(WordResult r) => r switch
+    {
+        WordResult.Pending => WordResult.Correct,
+        WordResult.Correct => WordResult.Wrong,
+        _ => WordResult.Correct
+    };
+
+    private void Do(Result result) => _error = result.Ok ? null : result.Error;
+
+    protected override void OnParametersSet()
+    {
+        var key = Snapshot.Phase switch
+        {
+            PyramidPhase.Playing => Snapshot.Play?.ClockKey,
+            PyramidPhase.BonusPlay => Snapshot.Bonus?.ClockKey,
+            _ => null
+        };
+        var left = Snapshot.Phase == PyramidPhase.Playing ? Snapshot.Play?.SecondsLeft : Snapshot.Bonus?.SecondsLeft;
+        if (key is not null && key != _runningKey && left is not null)
+        {
+            _runningKey = key;
+            _ = WatchClockAsync(key, left.Value);
+        }
+        else if (key is null) _runningKey = null;
+    }
+
+    // A backup for the TV: a second TimeUp call is harmless, and it waits a beat longer so the TV normally gets there first.
+    private async Task WatchClockAsync(string key, double seconds)
+    {
+        try
+        {
+            var end = DateTime.UtcNow.AddSeconds(seconds + 1);
+            while (!_disposed && _runningKey == key)
+            {
+                if (DateTime.UtcNow >= end)
+                {
+                    Game.TimeUp();
+                    return;
+                }
+                await Task.Delay(200);
+            }
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    public void Dispose() => _disposed = true;
+}

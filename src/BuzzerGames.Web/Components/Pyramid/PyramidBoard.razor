@@ -1,0 +1,66 @@
+@*
+    The pyramid, drawn as rows of squares that flip over. Used on the TV (look only) and on the emcee's phone (Pick makes a square tappable).
+    Rows lists which cells go where, top row first; the cell numbers match PyramidCell.Index.
+*@
+
+<div class="pyr-board @(Small ? "pyr-small" : "") @Class">
+    @foreach (var row in Rows)
+    {
+        <div class="pyr-row">
+            @foreach (var index in row)
+            {
+                var cell = Cells.FirstOrDefault(c => c.Index == index) ?? new PyramidCell(index, "face", "");
+                var flipped = cell.State is not "face" and not "gone";
+                var tappable = Pick.HasDelegate && cell.State is not "gone";
+                <div class="pyr-cell pyr-s-@cell.State @(cell.Current ? "pyr-current" : "")" @key="index"
+                     @onclick="() => Tapped(cell, tappable)" role="@(tappable ? "button" : null)">
+                    <div class="pyr-card @(flipped ? "pyr-flipped" : "")">
+                        <div class="pyr-front"><span class="pyr-emblem"></span></div>
+                        <div class="pyr-back"><span class="pyr-text">@cell.Text</span></div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<PyramidCell> Cells { get; set; } = [];
+    [Parameter, EditorRequired] public IReadOnlyList<IReadOnlyList<int>> Rows { get; set; } = [];
+    [Parameter] public bool Small { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public EventCallback<int> Pick { get; set; }
+
+    private Task Tapped(PyramidCell cell, bool tappable) => tappable ? Pick.InvokeAsync(cell.Index) : Task.CompletedTask;
+
+    /// <summary>The main game's 1-2-3 pyramid: square 0 on top, then 1 and 2, then 3, 4 and 5.</summary>
+    public static IReadOnlyList<IReadOnlyList<int>> MainLayout { get; } = [[0], [1, 2], [3, 4, 5]];
+
+    /// <summary>The bonus pyramid: the hardest square (5) on top, the first three along the bottom.</summary>
+    public static IReadOnlyList<IReadOnlyList<int>> BonusLayout { get; } = [[5], [3, 4], [0, 1, 2]];
+
+    public static IReadOnlyList<PyramidCell> MainCells(PyramidSnapshot s) =>
+        s.Tiles.Select(t => new PyramidCell(t.Index, t.State switch
+        {
+            PyramidTileState.Hidden => "face",
+            PyramidTileState.Revealed => "title",
+            _ => "gone"
+        }, t.Title)).ToList();
+
+    public static IReadOnlyList<PyramidCell> BonusCells(PyramidBonusInfo b, bool showSubjects) =>
+        b.Tiles.Select(t => new PyramidCell(t.Index, t.State switch
+        {
+            BonusTileState.Valid => "money",
+            BonusTileState.Invalid => "dead",
+            BonusTileState.Passed => "passed",
+            _ => "face"
+        }, t.State switch
+        {
+            BonusTileState.Valid => Money(t.Value),
+            BonusTileState.Invalid => "✗",
+            BonusTileState.Passed => t.Subject,
+            _ => showSubjects ? t.Subject : ""
+        }, t.Index == b.Current)).ToList();
+
+    public static string Money(int amount) => "$" + amount.ToString("N0");
+}

@@ -1,0 +1,74 @@
+@inject IJSRuntime JS
+
+@*
+    The lobby. The TV (BoardMode) shows the title and a QR code. On a phone, one tap makes you the emcee (no name, no password), and the
+    emcee gets the Start button.
+*@
+
+@if (BoardMode)
+{
+    <div class="pyr-tv pyr-lobby">
+        <div class="pyr-beams"><i></i><i></i><i></i><i></i></div>
+        <div class="pyr-center">
+            <div class="pyr-title">$100,000</div>
+            <div class="pyr-sub">PYRAMID</div>
+            <div class="pyr-qr-wrap">
+                <div id="qr-@Snapshot.Code" class="qr pyr-qr"></div>
+                <div class="pyr-qr-text">
+                    <b>Emcee: scan to run the game</b>
+                    <span>or go to <em>@_joinUrl</em></span>
+                    <span>Room <strong>@Snapshot.Code</strong></span>
+                    @if (Snapshot.HasEmcee) { <span class="pyr-ok">✓ The emcee is here</span> }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <main class="lobby">
+        <header class="lobby-header">
+            <h1 class="logo">$100,000 PYRAMID</h1>
+            <p class="room-line">Room <span class="room-code">@Snapshot.Code</span></p>
+        </header>
+        <section class="card">
+            @if (Seat.Role == Role.Emcee)
+            {
+                <h2>You're the emcee</h2>
+                <p>Line the teams up, then start. You'll run everything from this phone.</p>
+                <button class="btn btn-start" @onclick="OnStart">Start Game</button>
+            }
+            else if (Snapshot.HasEmcee)
+            {
+                <h2>An emcee is already running this game</h2>
+                <p class="muted">Watch the TV!</p>
+            }
+            else
+            {
+                <h2>Run the game?</h2>
+                <button class="btn btn-start" @onclick="OnJoin">I'm the emcee</button>
+            }
+            @if (Error is not null) { <p class="error">@Error</p> }
+        </section>
+    </main>
+}
+
+@code {
+    [Parameter, EditorRequired] public PyramidSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Seat Seat { get; set; } = default!;
+    [Parameter] public bool BoardMode { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback OnJoin { get; set; }
+    [Parameter] public EventCallback OnStart { get; set; }
+
+    private string _joinUrl = "";
+    private bool _drawn;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!BoardMode || _drawn) return;
+        _drawn = true;
+        _joinUrl = await JS.InvokeAsync<string>("bg.renderQr", $"qr-{Snapshot.Code}", $"/pyramid/{Snapshot.Code}");
+        StateHasChanged();
+    }
+}

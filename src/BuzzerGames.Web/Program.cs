@@ -56,6 +56,7 @@ builder.Services.AddFloor();
 
 // Wheel of Fortune keeps its puzzles in the same data folder as The Floor (a wheel/ sub-folder) and uses the same admin passcode.
 builder.Services.AddWheel();
+builder.Services.AddPyramid();
 
 var app = builder.Build();
 
