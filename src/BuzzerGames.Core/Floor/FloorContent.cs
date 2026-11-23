@@ -266,6 +266,16 @@ public sealed class FolderFloorContent : IFloorContent
         }
     }
 
+    /// <summary>The text prompts in a topic (clue, answer, other accepted answers), for the topics page.</summary>
+    public IReadOnlyList<FloorTextPrompt> ListTextPrompts(string topic)
+    {
+        lock (_gate)
+        {
+            if (!TryResolve(topic, out var name, out var dir)) return [];
+            return TextPromptsFor(name, dir);
+        }
+    }
+
     /// <summary>Finds a picture by its opaque key, for the web address that serves it.</summary>
     public bool TryGetImage(string key, out string path, out string contentType)
     {

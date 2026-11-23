@@ -77,7 +77,23 @@
                         }
                     </div>
 
-                    <h3>Text prompts</h3>
+                    <h3>Text prompts (@_texts.Count)</h3>
+                    @if (_texts.Count > 0)
+                    {
+                        <table class="fl-text-list">
+                            <thead><tr><th>Clue</th><th>Answer</th><th>Also accepted</th></tr></thead>
+                            <tbody>
+                                @foreach (var t in _texts)
+                                {
+                                    <tr>
+                                        <td>@t.Clue</td>
+                                        <td>@t.Answer</td>
+                                        <td>@string.Join("; ", t.Alternates)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
                     <p class="muted">One per line: <code>clue | answer | other accepted answers separated by ;</code></p>
                     <textarea class="text-input fl-textarea" rows="5" placeholder="Capital of France | Paris" @bind="_textLines" @bind:event="oninput"></textarea>
                     <button class="btn" @onclick="AddText">Add text prompts</button>
@@ -107,6 +123,7 @@
     private string? _passError;
     private List<FloorTopicInfo> _topics = [];
     private IReadOnlyList<FloorImageInfo> _images = [];
+    private IReadOnlyList<FloorTextPrompt> _texts = [];
     private string? _selected;
     private string _newTopic = "";
     private string _textLines = "";
@@ -161,6 +178,7 @@
     {
         _topics = Store.ListTopics().ToList();
         _images = _selected is null ? [] : Store.ListImages(_selected);
+        _texts = _selected is null ? [] : Store.ListTextPrompts(_selected);
     }
 
     private async Task SelectAsync(string name)

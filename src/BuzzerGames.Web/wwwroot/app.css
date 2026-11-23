@@ -960,6 +960,10 @@ a.game-tile:hover { border-color: var(--gold); }
 .fl-gallery img { width: 100%; height: 6rem; object-fit: contain; background: #fff; border-radius: .3rem; }
 .fl-gallery figcaption { font-size: .85rem; margin: .3rem 0; word-break: break-word; }
 .fl-textarea { font-family: inherit; }
+.fl-text-list { width: 100%; border-collapse: collapse; margin: .4rem 0 1rem; font-size: .9rem; }
+.fl-text-list th { text-align: left; font-size: .8rem; opacity: .75; padding: .3rem .5rem; }
+.fl-text-list td { padding: .35rem .5rem; border-top: 1px solid var(--blue-dark); vertical-align: top; word-break: break-word; }
+.fl-text-list td:nth-child(2) { font-weight: 600; white-space: nowrap; }
 
 /* Sound button on the big screen */
 .fl-top-right { display: inline-flex; align-items: center; gap: 1.5vw; }
