@@ -90,12 +90,13 @@ hr { border: 0; border-top: 1px solid var(--edge); margin: 1.5rem 0; opacity: .5
 
 /* ---------- pick a game ---------- */
 
-.picker { max-width: 80rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; text-align: center; }
+.picker { max-width: 84rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; text-align: center; }
 .site-title { margin: 0 auto .5rem; max-width: 34rem; line-height: 0; }
 .site-title img { width: 100%; height: auto; display: block; }
 .tagline { opacity: .8; margin-bottom: 2rem; }
-.game-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
-.game-grid > .game-tile { flex: 0 1 25rem; }
+.game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+@media (max-width: 62rem) { .game-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 40rem) { .game-grid { grid-template-columns: 1fr; } }
 .game-tile {
     display: block;
     background: var(--panel);
