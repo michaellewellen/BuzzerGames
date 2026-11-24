@@ -642,6 +642,7 @@ public sealed class FeudGame
         var seconds = s.FastPlayer == 0 ? _firstSeconds : _secondSeconds;
         double? left = s.Phase == FeudPhase.FastPlay && s.FastStartedUtc is { } started ? Math.Max(0, seconds - Elapsed(started)) : null;
         var playing = s.Phase == FeudPhase.FastPlay && s.FastQ < FeudRules.FastQuestions;
+        var ready = s.Phase == FeudPhase.FastReady && s.FastQ < FeudRules.FastQuestions;   // the emcee reads question one before starting the clock
         var entries = Enumerable.Range(0, 2).Select(p => (IReadOnlyList<FeudFastEntryInfo>)Enumerable.Range(0, FeudRules.FastQuestions).Select(q =>
         {
             var i = p * FeudRules.FastQuestions + q;
@@ -654,7 +655,7 @@ public sealed class FeudGame
             : [];
         var total = FastTotal();
         return new FeudFastInfo(
-            s.FastTeam, s.FastNames, s.FastPlayer, s.FastQ, playing ? _fast[s.FastQ].Question : "", boardInfo, entries,
+            s.FastTeam, s.FastNames, s.FastPlayer, s.FastQ, playing || ready ? _fast[s.FastQ].Question : "", boardInfo, entries,
             seconds, left, s.FastStartedUtc?.Ticks.ToString() ?? "", s.FastTimeUp,
             s.FastStep, s.Phase is FeudPhase.FastReveal or FeudPhase.FastOver ? FastTotalShown() : 0, total, FeudRules.FastGoal,
             s.Phase == FeudPhase.FastOver && total >= FeudRules.FastGoal, s.FastBuzzes);

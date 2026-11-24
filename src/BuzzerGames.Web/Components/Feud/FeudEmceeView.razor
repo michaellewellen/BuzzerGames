@@ -113,6 +113,11 @@
                 <h2>@fast.Players[fast.Player] is up</h2>
                 <p class="muted">@(fast.Player == 0 ? "Player 2 must not hear this." : $"Remind them: no repeating {fast.Players[0]}'s answers.") They get @fast.Seconds.ToString("0") seconds for five questions.</p>
             </section>
+            <section class="card fd-e-card">
+                <p class="fd-e-qno">Question 1 of @FeudRules.FastQuestions</p>
+                <h2>@fast.QuestionText</h2>
+                <p class="muted">Read it out, then start the clock.</p>
+            </section>
             <button class="btn btn-start fd-e-big" @onclick="() => Do(Game.StartFastClock(Token))">Start the clock</button>
             break;
 

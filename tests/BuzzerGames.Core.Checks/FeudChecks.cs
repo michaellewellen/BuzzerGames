@@ -523,6 +523,18 @@ static class FeudChecks
             Check.Equal(1, t.S.Fast!.Question, "a different answer moves on");
         });
 
+        run("feud: the emcee sees question one before starting the clock, and the TV never gets the question text", () =>
+        {
+            var t = new FeudTable();
+            t.WinTheGame(0);
+            t.BeginFast();
+            Check.Equal(FeudPhase.FastReady, t.S.Phase, "waiting on the clock");
+            Check.True(t.S.Fast!.QuestionText.Length > 0, "the emcee can read question one first");
+            Check.True(t.S.Fast!.SecondsLeft is null, "and the clock hasn't started");
+            Check.Ok(t.Game.StartFastClock(t.Emcee));
+            Check.True(t.S.Fast!.SecondsLeft is not null, "the clock is running now");
+        });
+
         run("feud: a pass by the first player doesn't block the second player", () =>
         {
             var t = new FeudTable();
