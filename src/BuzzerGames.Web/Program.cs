@@ -58,6 +58,9 @@ builder.Services.AddFloor();
 builder.Services.AddWheel();
 builder.Services.AddPyramid();
 
+// Family Feud keeps its survey questions in the same data folder (a feud/ sub-folder) and uses the same admin passcode.
+builder.Services.AddFeud();
+
 var app = builder.Build();
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);

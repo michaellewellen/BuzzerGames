@@ -1,0 +1,40 @@
+@using System.Globalization
+
+@*
+    The survey board: eight squares in two columns (answers 1 to 4 down the left, 5 to 8 down the right). Every square is a blue panel with its
+    number on it. When an answer is said, the panel slides off to the left and the answer and its points are underneath. An answer's text is
+    only ever written into the page once it is revealed, so the TV can't leak one that hasn't been said. When the round is over (ShowAll), the
+    answers nobody said slide open one after another.
+*@
+
+<div class="fd-board" role="list">
+    @for (var i = 0; i < FeudRules.MaxAnswers; i++)
+    {
+        var a = i < Snapshot.Answers.Count ? Snapshot.Answers[i] : null;
+        var open = a is not null && (a.Revealed || ShowAll);
+        var late = a is not null && !a.Revealed && ShowAll;
+        var delay = late ? (0.6 + i * 0.45).ToString("0.00", CultureInfo.InvariantCulture) : "0";
+        <div class="fd-slot @(a is null ? "empty" : "") @(open ? "open" : "") @(late ? "late" : "")" style="--d:@(delay)s" role="listitem">
+            <div class="fd-under">
+                @if (open)
+                {
+                    <span class="fd-ans">@a!.Text</span>
+                    <span class="fd-pts">@a.Points</span>
+                }
+            </div>
+            <div class="fd-cover">
+                @if (a is not null)
+                {
+                    <span class="fd-num">@a.Rank</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public FeudSnapshot Snapshot { get; set; } = default!;
+
+    /// <summary>The round is over: show every answer, the unsaid ones late.</summary>
+    [Parameter] public bool ShowAll { get; set; }
+}

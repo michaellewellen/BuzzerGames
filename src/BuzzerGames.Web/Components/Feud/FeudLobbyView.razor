@@ -1,0 +1,87 @@
+@inject IJSRuntime JS
+
+@*
+    The lobby. The TV (BoardMode) shows the logo, a QR code and a reminder of which mouse button is which family. On a phone, one tap makes you
+    the emcee (no name, no password); the emcee can name the two families and gets the Start button.
+*@
+
+@if (BoardMode)
+{
+    <div class="fd-tv fd-lobby">
+        <img class="fd-logo fd-logo-big" src="images/games/family-feud.jpg" alt="Family Feud" />
+        <div class="fd-qr-wrap">
+            <div id="qr-@Snapshot.Code" class="qr fd-qr"></div>
+            <div class="fd-qr-text">
+                <b>Emcee: scan to run the game</b>
+                <span>or go to <em>@_joinUrl</em></span>
+                <span>Room <strong>@Snapshot.Code</strong></span>
+                @if (Snapshot.HasEmcee) { <span class="fd-ok">✓ The emcee is here</span> }
+            </div>
+        </div>
+        <div class="fd-mouse-help">
+            <div class="fd-team-a"><b>@Snapshot.Teams[0].Name</b><span>🖱 LEFT click to buzz</span></div>
+            <div class="fd-team-b"><b>@Snapshot.Teams[1].Name</b><span>RIGHT click to buzz 🖱</span></div>
+        </div>
+    </div>
+}
+else
+{
+    <main class="lobby">
+        <header class="lobby-header">
+            <h1 class="logo">FAMILY FEUD</h1>
+            <p class="room-line">Room <span class="room-code">@Snapshot.Code</span></p>
+        </header>
+        <section class="card">
+            @if (Seat.Role == Role.Emcee)
+            {
+                <h2>You're the emcee</h2>
+                <p>Name the two families if you like (family 1 buzzes with the left mouse button, family 2 with the right), then start. You'll run everything from this phone.</p>
+                <input class="text-input" placeholder="Family 1 (left click)" maxlength="@FeudRules.NameMaxLength" @bind="_name0" @bind:event="oninput" />
+                <input class="text-input" placeholder="Family 2 (right click)" maxlength="@FeudRules.NameMaxLength" @bind="_name1" @bind:event="oninput" />
+                <button class="btn btn-start" @onclick="StartAsync">Start Game</button>
+            }
+            else if (Snapshot.HasEmcee)
+            {
+                <h2>An emcee is already running this game</h2>
+                <p class="muted">Watch the TV!</p>
+            }
+            else
+            {
+                <h2>Run the game?</h2>
+                <button class="btn btn-start" @onclick="OnJoin">I'm the emcee</button>
+            }
+            @if (Error is not null) { <p class="error">@Error</p> }
+        </section>
+    </main>
+}
+
+@code {
+    [Parameter, EditorRequired] public FeudSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Seat Seat { get; set; } = default!;
+    [Parameter] public FeudGame? Game { get; set; }
+    [Parameter] public Guid Token { get; set; }
+    [Parameter] public bool BoardMode { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback OnJoin { get; set; }
+    [Parameter] public EventCallback OnStart { get; set; }
+
+    private string _joinUrl = "";
+    private string _name0 = "";
+    private string _name1 = "";
+    private bool _drawn;
+
+    private async Task StartAsync()
+    {
+        Game?.SetTeamName(Token, 0, _name0);
+        Game?.SetTeamName(Token, 1, _name1);
+        await OnStart.InvokeAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!BoardMode || _drawn) return;
+        _drawn = true;
+        _joinUrl = await JS.InvokeAsync<string>("bg.renderQr", $"qr-{Snapshot.Code}", $"/family-feud/{Snapshot.Code}");
+        StateHasChanged();
+    }
+}

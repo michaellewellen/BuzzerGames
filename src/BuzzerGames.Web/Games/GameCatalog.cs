@@ -20,6 +20,7 @@ public static class GameCatalog
         new("Card Sharks", "/card-sharks", "Higher or lower: a survey duel for control, then race across your row of cards.", IsPlayable: true, Logo: "card-sharks.png", Fit: "contain", Backdrop: "radial-gradient(circle at 50% 40%, #2a6f4b, #0d2a1c)"),
         new("The Floor", "/the-floor", "Win the floor one picture duel at a time: name it before your clock runs out and take their territory.", IsPlayable: true, Logo: "the-floor.jpg"),
         new("Wheel of Fortune", "/wheel-of-fortune", "Spin, solve, and buy a vowel. Three players spin from their phones; the emcee runs the board.", IsPlayable: true, Logo: "wheel-of-fortune.png", Fit: "contain", Backdrop: "radial-gradient(circle at 50% 40%, #2b3fd0, #070b3c)"),
+        new("Family Feud", "/family-feud", "Two families, one survey board: name the top answers, dodge the strikes, and race to 300 before Fast Money.", IsPlayable: true, Logo: "family-feud.jpg"),
         new("$100,000 Pyramid", "/pyramid", "Two teams, six topics, seven words in thirty seconds. Win the game and take the bonus pyramid.", IsPlayable: true, Logo: "pyramid.jpg"),
     ];
 }

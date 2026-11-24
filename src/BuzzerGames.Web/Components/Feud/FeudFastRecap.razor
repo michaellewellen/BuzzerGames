@@ -1,0 +1,22 @@
+@*
+    What each Fast Money player said and scored, for the emcee's phone only (the TV shows an answer only once it has been revealed).
+*@
+
+<div class="fd-e-recap">
+    @for (var p = 0; p < 2; p++)
+    {
+        var mine = p;
+        <div>
+            <h3>@Fast.Players[mine]</h3>
+            @for (var q = 0; q < FeudRules.FastQuestions; q++)
+            {
+                var e = Fast.Entries[mine][q];
+                <div class="fd-e-recap-row @(e.ShowPoints ? "shown" : "")"><span>@(e.Entered ? e.Text : "—")</span><b>@(e.Entered ? e.Points : 0)</b></div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public FeudFastInfo Fast { get; set; } = default!;
+}

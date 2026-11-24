@@ -1090,6 +1090,7 @@ CardSharksWebChecks.Run(Run);
 FloorWebChecks.Run(Run);
 WheelWebChecks.Run(Run);
 PyramidWebChecks.Run(Run);
+FeudWebChecks.Run(Run);
 
 Console.WriteLine();
 Console.WriteLine($"{passed} passed, {failed} failed");

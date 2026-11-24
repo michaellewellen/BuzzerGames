@@ -1,0 +1,25 @@
+@*
+    The survey answers on the emcee's phone, best first. Live: each is a button (tap the one a family said). Otherwise they are just there to
+    read. Answers already up are greyed out and can't be tapped twice.
+*@
+
+<div class="fd-e-list">
+    @foreach (var a in Snapshot.Answers)
+    {
+        var i = a.Rank - 1;
+        @if (Live)
+        {
+            <button class="fd-e-ans @(a.Revealed ? "done" : "")" disabled="@a.Revealed" @onclick="() => OnPick.InvokeAsync(i)"><b>@a.Rank</b> @a.Text <em>@a.Points</em></button>
+        }
+        else
+        {
+            <div class="fd-e-ans @(a.Revealed ? "done" : "")"><b>@a.Rank</b> @a.Text <em>@a.Points</em></div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public FeudSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public bool Live { get; set; }
+    [Parameter] public EventCallback<int> OnPick { get; set; }
+}

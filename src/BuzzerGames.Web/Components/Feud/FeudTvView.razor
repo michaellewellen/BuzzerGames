@@ -1,0 +1,215 @@
+@implements IDisposable
+@inject IJSRuntime JS
+
+@*
+    The big screen. It only shows: the emcee's phone runs the game. The one thing it does besides show is listen to the mouse: during a face-off,
+    the left mouse button buzzes for family 1 and the right one for family 2 (Interactive is true only on the board's own address, so a phone that
+    wanders onto this page can't buzz). It also runs Fast Money's clock and tells the game when the buzzer sounds.
+    Nothing here writes an answer into the page until it has been revealed.
+*@
+
+<div class="fd-tv" @onmousedown="OnMouse" @oncontextmenu="NoOp" @oncontextmenu:preventDefault="true">
+    <button class="wf-sound" onclick="feud.enableSound()">Tap for sound</button>
+
+    <header class="fd-head">
+        <img class="fd-logo" src="images/games/family-feud.jpg" alt="Family Feud" />
+    </header>
+
+    @if (Snapshot.Fast is { } fast)
+    {
+        <FeudFastTv Snapshot="Snapshot" Fast="fast" ClockLeft="_clockLeft" />
+    }
+    else
+    {
+        var buzzing = Snapshot.Phase == FeudPhase.FaceOffBuzz;
+        var over = Snapshot.Phase == FeudPhase.RoundOver;
+
+        <div class="fd-ribbon">
+            @if (Snapshot.Phase == FeudPhase.RoundIntro)
+            {
+                <span class="fd-round">ROUND @Snapshot.Round@(Snapshot.Multiplier > 1 ? " · " + FeudRules.MultiplierLabel(Snapshot.Round) : "")</span>
+            }
+            else if (Snapshot.Multiplier > 1)
+            {
+                <span class="fd-mult">@FeudRules.MultiplierLabel(Snapshot.Round)</span>
+                <span class="fd-question">@Snapshot.Question</span>
+            }
+            else
+            {
+                <span class="fd-question">@Snapshot.Question</span>
+            }
+        </div>
+
+        <FeudBoardView Snapshot="Snapshot" ShowAll="over" />
+
+        <p class="fd-message">@Snapshot.Message</p>
+
+        <footer class="fd-foot">
+            @foreach (var t in Snapshot.Teams)
+            {
+                var winner = over && Snapshot.RoundWinner == t.Index;
+                var up = (Snapshot.Turn == t.Index) || (Snapshot.Phase is FeudPhase.Play && Snapshot.Control == t.Index) || (Snapshot.Phase is FeudPhase.Steal && Snapshot.Stealer == t.Index);
+                <div class="fd-team fd-team-@(t.Index == 0 ? "a" : "b") @(winner ? "celebrate" : "") @(up ? "up" : "")">
+                    <span class="fd-team-name">@t.Name</span>
+                    <span class="fd-team-score">@t.Score</span>
+                    @if (buzzing)
+                    {
+                        <span class="fd-click">@(t.Index == 0 ? "◀ LEFT CLICK" : "RIGHT CLICK ▶")</span>
+                    }
+                </div>
+                @if (t.Index == 0)
+                {
+                    <div class="fd-bank">
+                        <span class="fd-bank-label">BANK</span>
+                        <span class="fd-bank-value">@Snapshot.Bank</span>
+                        <span class="fd-strikes">
+                            @for (var i = 0; i < FeudRules.StrikesAllowed; i++)
+                            {
+                                <i class="@(i < Snapshot.Strikes ? "on" : "")">✗</i>
+                            }
+                        </span>
+                    </div>
+                }
+            }
+        </footer>
+    }
+
+    @if (_flash > 0)
+    {
+        <div class="fd-strike-flash" @key="_flashKey">
+            @for (var i = 0; i < _flash; i++) { <span>✗</span> }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public FeudGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public FeudSnapshot Snapshot { get; set; } = default!;
+    [Parameter] public bool Interactive { get; set; }
+
+    private FeudSnapshot? _prev;
+    private bool _disposed;
+    private string _clockKey = "";
+    private double _clockLeft;
+    private int _flash;
+    private int _flashKey;
+
+    private void NoOp() { }
+
+    private void OnMouse(MouseEventArgs e)
+    {
+        if (!Interactive || Snapshot.Phase != FeudPhase.FaceOffBuzz) return;
+        if (e.Button == 0) Game.Buzz(0);
+        else if (e.Button == 2) Game.Buzz(1);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var s = Snapshot;
+        var p = _prev;
+        _prev = s;
+
+        if (Interactive && s.Fast is { } f && s.Phase == FeudPhase.FastPlay && f.SecondsLeft is { } left && f.ClockKey != _clockKey)
+        {
+            _clockKey = f.ClockKey;
+            _ = RunClockAsync(f.ClockKey, left);
+        }
+
+        if (p is null || !Interactive) return;
+
+        // Sounds for what just happened, once per change.
+        var struck = s.StrikeEvents > p.StrikeEvents;
+        var revealedMore = s.Answers.Count(a => a.Revealed) > p.Answers.Count(a => a.Revealed) && s.Round == p.Round;
+        if (struck)
+        {
+            _ = Sound("strike");
+            _ = FlashStrikeAsync(s.Phase is FeudPhase.Play or FeudPhase.Steal ? Math.Clamp(s.Strikes, 1, FeudRules.StrikesAllowed) : 1);
+        }
+        else if (revealedMore && s.Phase != FeudPhase.RoundOver) _ = Sound("ding");
+        else if (s.Phase == FeudPhase.FaceOffAnswer && p.Phase == FeudPhase.FaceOffBuzz) _ = Sound("buzzin");
+
+        if (s.Phase == FeudPhase.RoundOver && p.Phase != FeudPhase.RoundOver) _ = CelebrateAsync(revealedMore, struck);
+
+        if (s.Fast is { } now && p.Fast is { } before)
+        {
+            if (s.Phase == FeudPhase.FastReveal && now.RevealStep > before.RevealStep) _ = Sound(FastRevealSound(now, now.RevealStep - 1));
+            else if (s.Phase == FeudPhase.FastOver && p.Phase == FeudPhase.FastReveal)
+            {
+                _ = Sound(FastRevealSound(now, FeudRules.FastQuestions * 4 - 1));
+                _ = FastVerdictAsync(now.Won);
+            }
+        }
+    }
+
+    // Step n of the reveal: even steps slide an answer open, odd steps slide its points open.
+    private static string FastRevealSound(FeudFastInfo f, int step) =>
+        step % 2 == 0 ? "slide" : f.Entries[step / 10][(step % 10) / 2].Points > 0 ? "ding" : "dud";
+
+    private async Task CelebrateAsync(bool dingFirst, bool afterStrike)
+    {
+        if (dingFirst) await Sound("ding");
+        if (afterStrike) await Task.Delay(1100);
+        await Sound("solve");
+        await Sound("applause");
+    }
+
+    private async Task FastVerdictAsync(bool won)
+    {
+        await Task.Delay(900);
+        if (won) { await Sound("solve"); await Sound("applause"); }
+        else await Sound("strike");
+    }
+
+    private async Task FlashStrikeAsync(int count)
+    {
+        _flash = count;
+        _flashKey++;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(1400);
+        if (_disposed) return;
+        _flash = 0;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    // Fast Money's clock: counted down here from what the game said was left, with a tick for the last five seconds and a buzzer at zero.
+    private async Task RunClockAsync(string key, double seconds)
+    {
+        try
+        {
+            var end = DateTime.UtcNow.AddSeconds(seconds);
+            var shown = -1;
+            while (!_disposed && Game.Phase == FeudPhase.FastPlay && Snapshot.Fast?.ClockKey == key)
+            {
+                var left = (end - DateTime.UtcNow).TotalSeconds;
+                var whole = (int)Math.Ceiling(Math.Max(left, 0));
+                if (whole != shown)
+                {
+                    shown = whole;
+                    _clockLeft = whole;
+                    if (whole is > 0 and <= 5) _ = Sound("tick");
+                    await InvokeAsync(StateHasChanged);
+                }
+                if (left <= 0)
+                {
+                    Game.FastTimeUp();
+                    await Sound("timeup");
+                    break;
+                }
+                await Task.Delay(100);
+            }
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private async Task Js(string fn, params object?[] args)
+    {
+        try { await JS.InvokeVoidAsync(fn, args); }
+        catch (JSDisconnectedException) { }
+        catch (InvalidOperationException) { }
+        catch (JSException) { }
+    }
+
+    private Task Sound(string name) => Js("feud.play", name);
+
+    public void Dispose() => _disposed = true;
+}

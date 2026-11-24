@@ -1,0 +1,71 @@
+@*
+    Fast Money on the big screen. Two panels of five rows, one panel per player. Each row is an answer square and a points square; both are
+    blue panels that slide off to the left when the emcee reveals them. Nothing a player said is written into the page until its square has
+    been revealed, so the second player (who is supposed to be out of earshot) can't read the first player's answers off the screen.
+*@
+
+<div class="fd-fast">
+    <div class="fd-fast-title">
+        FAST MONEY<span> · @Snapshot.Teams[Fast.Team].Name</span>
+    </div>
+
+    <div class="fd-fast-panels">
+        @for (var p = 0; p < 2; p++)
+        {
+            var mine = p;
+            var active = Snapshot.Phase is FeudPhase.FastReady or FeudPhase.FastPlay && Fast.Player == mine;
+            <section class="fd-fast-panel @(active ? "active" : "")">
+                <h2>@Fast.Players[mine]</h2>
+                @for (var q = 0; q < FeudRules.FastQuestions; q++)
+                {
+                    var e = Fast.Entries[mine][q];
+                    var now = Snapshot.Phase == FeudPhase.FastPlay && Fast.Player == mine && Fast.Question == q;
+                    <div class="fd-fast-row @(now ? "now" : "")">
+                        <div class="fd-slot fd-fast-ans @(e.ShowText ? "open" : "")">
+                            <div class="fd-under">@if (e.ShowText) { <span class="fd-ans">@e.Text</span> }</div>
+                            <div class="fd-cover"><span class="fd-num @(e.Entered ? "lit" : "")">@(e.Entered ? "✓" : (q + 1).ToString())</span></div>
+                        </div>
+                        <div class="fd-slot fd-fast-pts @(e.ShowPoints ? "open" : "")">
+                            <div class="fd-under">@if (e.ShowPoints) { <span class="fd-pts">@e.Points</span> }</div>
+                            <div class="fd-cover"></div>
+                        </div>
+                    </div>
+                }
+            </section>
+        }
+    </div>
+
+    <div class="fd-fast-foot">
+        @switch (Snapshot.Phase)
+        {
+            case FeudPhase.FastIntro:
+                <span class="fd-fast-say">@Snapshot.Teams[Fast.Team].Name won! Who's playing Fast Money?</span>
+                break;
+            case FeudPhase.FastReady:
+                <span class="fd-fast-say">@Fast.Players[Fast.Player], step up! @(Fast.Seconds.ToString("0")) seconds.@(Fast.Player == 1 ? " No repeating." : "")</span>
+                break;
+            case FeudPhase.FastPlay:
+                <span class="fd-clock @(Fast.TimeUp ? "over" : ClockLeft <= 5 && ClockLeft > 0 ? "low" : "")">@(Fast.TimeUp ? "TIME!" : ((int)(ClockLeft > 0 ? ClockLeft : Fast.SecondsLeft ?? Fast.Seconds)).ToString())</span>
+                <span class="fd-fast-say">Question @(Fast.Question + 1) of @FeudRules.FastQuestions</span>
+                break;
+            default:
+                <span class="fd-fast-say">@Snapshot.Message</span>
+                break;
+        }
+
+        @if (Snapshot.Phase is FeudPhase.FastReveal or FeudPhase.FastOver)
+        {
+            <div class="fd-fast-total @(Snapshot.Phase == FeudPhase.FastOver ? (Fast.Won ? "win celebrate" : "lose") : "")">
+                <small>TOTAL</small>
+                <b>@Fast.TotalShown</b>
+                <small>of @Fast.Goal</small>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public FeudSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public FeudFastInfo Fast { get; set; } = default!;
+    [Parameter] public double ClockLeft { get; set; }
+}

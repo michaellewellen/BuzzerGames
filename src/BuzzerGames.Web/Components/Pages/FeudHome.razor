@@ -1,0 +1,55 @@
+@page "/family-feud"
+@inject FeudRoomManager Rooms
+@inject NavigationManager Navigation
+
+<PageTitle>Family Feud</PageTitle>
+
+<main class="card center jeopardy-home">
+    <h1>Family Feud</h1>
+    <p class="muted">Create the game on the TV (a laptop works best: the two players at the face-off click its mouse, left button for family 1 and right button for family 2). It shows a QR code: the emcee scans it with their phone, taps "I'm the emcee", and runs the whole game from there. Nobody else needs a phone.</p>
+
+    <button class="btn btn-start" @onclick="CreateGame">Create a new game</button>
+
+    <hr />
+
+    <h2>Have a room code?</h2>
+    <div class="button-row">
+        <input class="text-input code-input" placeholder="ABCD" maxlength="4"
+               @bind="_code" @bind:event="oninput" @onkeydown="OnKeyDown" />
+        <button class="btn" @onclick="JoinGame">Go</button>
+    </div>
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    <p class="muted"><a href="/family-feud/questions">Question bank</a> (add or import survey questions; needs the admin passcode)</p>
+    <a class="back-link" href="/">All games</a>
+</main>
+
+@code {
+    private string _code = "";
+    private string? _error;
+
+    private void CreateGame()
+    {
+        var game = Rooms.Create();
+        Navigation.NavigateTo($"/family-feud/{game.Code}/board");
+    }
+
+    private void JoinGame()
+    {
+        var game = Rooms.Find(_code);
+        if (game is null)
+        {
+            _error = "We couldn't find a game with that code.";
+            return;
+        }
+        Navigation.NavigateTo($"/family-feud/{game.Code}");
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") JoinGame();
+    }
+}

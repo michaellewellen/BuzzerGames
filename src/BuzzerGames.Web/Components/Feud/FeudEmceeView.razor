@@ -1,0 +1,208 @@
+@*
+    The emcee's phone: the only device that controls the game. It has the survey answers (the TV never does), so the emcee taps the answer a
+    family said, or a strike. Failed taps show their reason in red and change nothing. Undo is always at the bottom.
+*@
+
+<main class="fd-emcee">
+    <header class="fd-e-head">
+        <b>@HeadLine()</b>
+        <span class="fd-e-scores">
+            @foreach (var t in Snapshot.Teams)
+            {
+                <span class="fd-e-team-@(t.Index == 0 ? "a" : "b") @(t.Index == Snapshot.Turn || t.Index == Snapshot.Control ? "fd-e-up" : "")">@t.Name <b>@t.Score</b></span>
+            }
+        </span>
+    </header>
+
+    @if (Snapshot.Message is not null)
+    {
+        <p class="fd-e-msg">@Snapshot.Message</p>
+    }
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
+    }
+
+    @switch (Snapshot.Phase)
+    {
+        case FeudPhase.RoundIntro:
+            <section class="card fd-e-card">
+                <h2>@Snapshot.Question</h2>
+                <p class="muted">The TV doesn't show the question until you tap Read the question.</p>
+            </section>
+            <FeudAnswerList Snapshot="Snapshot" />
+            <button class="btn btn-start fd-e-big" @onclick="() => Do(Game.ReadQuestion(Token))">Read the question</button>
+            <button class="btn btn-quiet" @onclick="() => Do(Game.SkipQuestion(Token))">Skip this question</button>
+            break;
+
+        case FeudPhase.FaceOffBuzz:
+            <section class="card fd-e-card">
+                <h2>@Snapshot.Question</h2>
+                <p class="muted">Waiting for the players: left click is @Snapshot.Teams[0].Name, right click is @Snapshot.Teams[1].Name.</p>
+            </section>
+            <FeudAnswerList Snapshot="Snapshot" />
+            <p class="fd-e-hint">Mouse not working? Say who was first:</p>
+            <div class="fd-e-pair">
+                <button class="btn fd-e-team-a" @onclick="() => Do(Game.AssignBuzz(Token, 0))">@Snapshot.Teams[0].Name</button>
+                <button class="btn fd-e-team-b" @onclick="() => Do(Game.AssignBuzz(Token, 1))">@Snapshot.Teams[1].Name</button>
+            </div>
+            <button class="btn btn-quiet" @onclick="() => Do(Game.SkipQuestion(Token))">Skip this question</button>
+            break;
+
+        case FeudPhase.FaceOffAnswer:
+            <section class="card fd-e-card">
+                <h2>@Snapshot.Question</h2>
+                <p class="fd-e-who">@Snapshot.Teams[Snapshot.Turn].Name's player answers.</p>
+            </section>
+            <button class="btn fd-e-strike" @onclick="() => Do(Game.Strike(Token))">✗ Not on the board</button>
+            <FeudAnswerList Snapshot="Snapshot" Live="true" OnPick="i => Do(Game.Right(Token, i))" />
+            <button class="btn btn-quiet" @onclick="() => Do(Game.SkipQuestion(Token))">Skip this question</button>
+            break;
+
+        case FeudPhase.ControlChoice:
+            <section class="card fd-e-card">
+                <h2>@Snapshot.Teams[Snapshot.FaceOffWinner].Name won the face-off</h2>
+                <p class="muted">Ask: play or pass?</p>
+            </section>
+            <div class="fd-e-pair">
+                <button class="btn btn-start" @onclick="() => Do(Game.Choose(Token, true))">Play</button>
+                <button class="btn" @onclick="() => Do(Game.Choose(Token, false))">Pass</button>
+            </div>
+            <FeudAnswerList Snapshot="Snapshot" />
+            break;
+
+        case FeudPhase.Play:
+            <section class="card fd-e-card">
+                <h2>@Snapshot.Question</h2>
+                <p class="fd-e-who">@Snapshot.Teams[Snapshot.Control].Name is playing · bank @Snapshot.Bank · strikes @Snapshot.Strikes of @FeudRules.StrikesAllowed</p>
+            </section>
+            <button class="btn fd-e-strike" @onclick="() => Do(Game.Strike(Token))">✗ STRIKE</button>
+            <FeudAnswerList Snapshot="Snapshot" Live="true" OnPick="i => Do(Game.Right(Token, i))" />
+            break;
+
+        case FeudPhase.Steal:
+            <section class="card fd-e-card">
+                <h2>@Snapshot.Question</h2>
+                <p class="fd-e-who">Steal! @Snapshot.Teams[Snapshot.Stealer].Name gets one guess at @Snapshot.Bank points.</p>
+            </section>
+            <button class="btn fd-e-strike" @onclick="() => Do(Game.Strike(Token))">✗ Missed it</button>
+            <FeudAnswerList Snapshot="Snapshot" Live="true" OnPick="i => Do(Game.Right(Token, i))" />
+            break;
+
+        case FeudPhase.RoundOver:
+            <section class="card fd-e-card">
+                <h2>@Snapshot.Teams[Snapshot.RoundWinner].Name wins @Snapshot.Bank points</h2>
+                <p class="muted">The TV is celebrating and showing the rest of the board. Tap when you're ready to move on.</p>
+            </section>
+            <button class="btn btn-start fd-e-big" @onclick="() => Do(Game.Continue(Token))">Next</button>
+            <FeudAnswerList Snapshot="Snapshot" />
+            break;
+
+        case FeudPhase.FastIntro when Snapshot.Fast is { } fast:
+            <section class="card fd-e-card">
+                <h2>Fast Money for @Snapshot.Teams[fast.Team].Name</h2>
+                <p class="muted">Two players, five questions each. They need @fast.Goal points together. Name them if you like.</p>
+                <input class="text-input" placeholder="Player 1 (goes first)" maxlength="@FeudRules.NameMaxLength" @bind="_p1" @bind:event="oninput" />
+                <input class="text-input" placeholder="Player 2 (out of earshot)" maxlength="@FeudRules.NameMaxLength" @bind="_p2" @bind:event="oninput" />
+            </section>
+            <button class="btn btn-start fd-e-big" @onclick="BeginFast">Start Fast Money</button>
+            break;
+
+        case FeudPhase.FastReady when Snapshot.Fast is { } fast:
+            <section class="card fd-e-card">
+                <h2>@fast.Players[fast.Player] is up</h2>
+                <p class="muted">@(fast.Player == 0 ? "Player 2 must not hear this." : $"Remind them: no repeating {fast.Players[0]}'s answers.") They get @fast.Seconds.ToString("0") seconds for five questions.</p>
+            </section>
+            <button class="btn btn-start fd-e-big" @onclick="() => Do(Game.StartFastClock(Token))">Start the clock</button>
+            break;
+
+        case FeudPhase.FastPlay when Snapshot.Fast is { } fast:
+            <section class="card fd-e-card">
+                <p class="fd-e-qno">Question @(fast.Question + 1) of @FeudRules.FastQuestions · @fast.Players[fast.Player]@(fast.TimeUp ? " · TIME IS UP" : "")</p>
+                <h2>@fast.QuestionText</h2>
+            </section>
+            <p class="fd-e-hint">Tap the survey answer they said:</p>
+            <div class="fd-e-list">
+                @foreach (var a in fast.Board)
+                {
+                    <button class="fd-e-ans" @onclick="() => Do(Game.FastPick(Token, a.Rank - 1))"><b>@a.Rank</b> @a.Text <em>@a.Points</em></button>
+                }
+            </div>
+            <p class="fd-e-hint">Not on the list? Type what they said:</p>
+            <div class="fd-e-type">
+                <input class="text-input" placeholder="What they said" maxlength="@FeudRules.AnswerMaxLength" @bind="_typed" @bind:event="oninput" @onkeydown="OnTypeKey" />
+                <button class="btn" @onclick="Type">Enter</button>
+            </div>
+            <div class="fd-e-pair">
+                <button class="btn" @onclick="() => Do(Game.FastPass(Token))">Pass</button>
+                <button class="btn btn-quiet" @onclick="() => Do(Game.EndFastTurn(Token))">End turn</button>
+            </div>
+            @if (fast.Players.Count > 0 && fast.Player == 1)
+            {
+                <p class="fd-e-hint">@fast.Players[0] said: <b>@fast.Entries[0][fast.Question].Text</b></p>
+            }
+            break;
+
+        case FeudPhase.FastReveal when Snapshot.Fast is { } fast:
+            <section class="card fd-e-card">
+                <h2>Reveal: @fast.TotalShown of @fast.Goal</h2>
+                <p class="muted">Each tap reveals one answer, then its points, one at a time. @(20 - fast.RevealStep) taps to go.</p>
+            </section>
+            <button class="btn btn-start fd-e-big" @onclick="() => Do(Game.RevealNext(Token))">Reveal next</button>
+            <FeudFastRecap Fast="fast" />
+            break;
+
+        case FeudPhase.FastOver when Snapshot.Fast is { } fast:
+            <section class="card fd-e-card">
+                <h2>@fast.Total points</h2>
+                <p>@(fast.Won ? "They won the big prize!" : $"{fast.Goal - fast.Total} short of {fast.Goal}.")</p>
+            </section>
+            <FeudFastRecap Fast="fast" />
+            <a class="btn" href="/family-feud">Play another game</a>
+            <a class="back-link" href="/">All games</a>
+            break;
+    }
+
+    @if (Snapshot.CanUndo)
+    {
+        <button class="btn btn-quiet fd-e-undo" @onclick="() => Do(Game.Undo(Token))">↶ Undo the last thing</button>
+    }
+</main>
+
+@code {
+    [Parameter, EditorRequired] public FeudGame Game { get; set; } = default!;
+    [Parameter, EditorRequired] public FeudSnapshot Snapshot { get; set; } = default!;
+    [Parameter, EditorRequired] public Guid Token { get; set; }
+
+    private string? _error;
+    private string _typed = "";
+    private string _p1 = "";
+    private string _p2 = "";
+
+    private string HeadLine() => Snapshot.Phase switch
+    {
+        FeudPhase.FastIntro or FeudPhase.FastReady or FeudPhase.FastPlay or FeudPhase.FastReveal or FeudPhase.FastOver => "Fast Money",
+        _ => $"Round {Snapshot.Round}" + (Snapshot.Multiplier > 1 ? $" · ×{Snapshot.Multiplier}" : "")
+    };
+
+    private void Do(Result result) => _error = result.Ok ? null : result.Error;
+
+    private void BeginFast()
+    {
+        Game.SetFastPlayer(Token, 0, _p1);
+        Game.SetFastPlayer(Token, 1, _p2);
+        Do(Game.BeginFastMoney(Token));
+    }
+
+    private void Type()
+    {
+        var result = Game.FastType(Token, _typed);
+        _error = result.Ok ? null : result.Error;
+        if (result.Ok) _typed = "";
+    }
+
+    private void OnTypeKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") Type();
+    }
+}

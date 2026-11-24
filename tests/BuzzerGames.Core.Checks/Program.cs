@@ -596,6 +596,7 @@ CardSharksChecks.Run(Run);
 FloorChecks.Run(Run);
 WheelChecks.Run(Run);
 PyramidChecks.Run(Run);
+FeudChecks.Run(Run);
 
 Console.WriteLine();
 Console.WriteLine($"{passed} passed, {failed} failed");

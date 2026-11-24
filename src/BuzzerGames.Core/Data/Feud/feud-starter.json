@@ -1,0 +1,1650 @@
+{
+ "boards": [
+  {
+   "question": "Name something you put on a hot dog",
+   "answers": [
+    {
+     "text": "Mustard",
+     "points": 34
+    },
+    {
+     "text": "Ketchup",
+     "points": 30
+    },
+    {
+     "text": "Relish",
+     "points": 14
+    },
+    {
+     "text": "Onions",
+     "points": 11
+    },
+    {
+     "text": "Chili",
+     "points": 7
+    },
+    {
+     "text": "Sauerkraut",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name a place where you have to wait in line",
+   "answers": [
+    {
+     "text": "Grocery store",
+     "points": 28
+    },
+    {
+     "text": "DMV",
+     "points": 24
+    },
+    {
+     "text": "Bank",
+     "points": 14
+    },
+    {
+     "text": "Amusement park",
+     "points": 12
+    },
+    {
+     "text": "Airport",
+     "points": 10
+    },
+    {
+     "text": "Movie theater",
+     "points": 7
+    },
+    {
+     "text": "Post office",
+     "points": 5
+    }
+   ]
+  },
+  {
+   "question": "Name something people do before bed",
+   "answers": [
+    {
+     "text": "Brush their teeth",
+     "points": 38
+    },
+    {
+     "text": "Watch TV",
+     "points": 16
+    },
+    {
+     "text": "Read a book",
+     "points": 14
+    },
+    {
+     "text": "Take a shower",
+     "points": 12
+    },
+    {
+     "text": "Set an alarm",
+     "points": 10
+    },
+    {
+     "text": "Use their phone",
+     "points": 10
+    }
+   ]
+  },
+  {
+   "question": "Name something you find in a kitchen junk drawer",
+   "answers": [
+    {
+     "text": "Batteries",
+     "points": 24
+    },
+    {
+     "text": "Tape",
+     "points": 18
+    },
+    {
+     "text": "Rubber bands",
+     "points": 16
+    },
+    {
+     "text": "Scissors",
+     "points": 14
+    },
+    {
+     "text": "Take-out menus",
+     "points": 12
+    },
+    {
+     "text": "Pens",
+     "points": 10
+    },
+    {
+     "text": "Keys",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name a popular Halloween candy",
+   "answers": [
+    {
+     "text": "Snickers",
+     "points": 26
+    },
+    {
+     "text": "Reese's",
+     "points": 22
+    },
+    {
+     "text": "Kit Kat",
+     "points": 14
+    },
+    {
+     "text": "M&M's",
+     "points": 14
+    },
+    {
+     "text": "Skittles",
+     "points": 10
+    },
+    {
+     "text": "Twix",
+     "points": 8
+    },
+    {
+     "text": "Candy corn",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name something you do at a birthday party",
+   "answers": [
+    {
+     "text": "Eat cake",
+     "points": 34
+    },
+    {
+     "text": "Sing",
+     "points": 20
+    },
+    {
+     "text": "Open presents",
+     "points": 18
+    },
+    {
+     "text": "Play games",
+     "points": 12
+    },
+    {
+     "text": "Blow out candles",
+     "points": 10
+    },
+    {
+     "text": "Take pictures",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name an animal you might see at the zoo",
+   "answers": [
+    {
+     "text": "Lion",
+     "points": 26
+    },
+    {
+     "text": "Elephant",
+     "points": 24
+    },
+    {
+     "text": "Monkey",
+     "points": 16
+    },
+    {
+     "text": "Giraffe",
+     "points": 14
+    },
+    {
+     "text": "Tiger",
+     "points": 10
+    },
+    {
+     "text": "Bear",
+     "points": 6
+    },
+    {
+     "text": "Zebra",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something that comes in a pair",
+   "answers": [
+    {
+     "text": "Shoes",
+     "points": 30
+    },
+    {
+     "text": "Socks",
+     "points": 24
+    },
+    {
+     "text": "Gloves",
+     "points": 14
+    },
+    {
+     "text": "Twins",
+     "points": 10
+    },
+    {
+     "text": "Earrings",
+     "points": 10
+    },
+    {
+     "text": "Glasses",
+     "points": 7
+    },
+    {
+     "text": "Dice",
+     "points": 5
+    }
+   ]
+  },
+  {
+   "question": "Name something you take on a camping trip",
+   "answers": [
+    {
+     "text": "Tent",
+     "points": 30
+    },
+    {
+     "text": "Sleeping bag",
+     "points": 24
+    },
+    {
+     "text": "Flashlight",
+     "points": 14
+    },
+    {
+     "text": "Marshmallows",
+     "points": 12
+    },
+    {
+     "text": "Bug spray",
+     "points": 10
+    },
+    {
+     "text": "Firewood",
+     "points": 6
+    },
+    {
+     "text": "Cooler",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name a pizza topping",
+   "answers": [
+    {
+     "text": "Pepperoni",
+     "points": 40
+    },
+    {
+     "text": "Cheese",
+     "points": 18
+    },
+    {
+     "text": "Sausage",
+     "points": 14
+    },
+    {
+     "text": "Mushrooms",
+     "points": 12
+    },
+    {
+     "text": "Olives",
+     "points": 6
+    },
+    {
+     "text": "Pineapple",
+     "points": 6
+    },
+    {
+     "text": "Onions",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something you do when you can't sleep",
+   "answers": [
+    {
+     "text": "Watch TV",
+     "points": 28
+    },
+    {
+     "text": "Read",
+     "points": 22
+    },
+    {
+     "text": "Count sheep",
+     "points": 16
+    },
+    {
+     "text": "Drink warm milk",
+     "points": 10
+    },
+    {
+     "text": "Use your phone",
+     "points": 10
+    },
+    {
+     "text": "Get a snack",
+     "points": 8
+    },
+    {
+     "text": "Take a walk",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name a vegetable kids don't like",
+   "answers": [
+    {
+     "text": "Broccoli",
+     "points": 36
+    },
+    {
+     "text": "Brussels sprouts",
+     "points": 20
+    },
+    {
+     "text": "Spinach",
+     "points": 14
+    },
+    {
+     "text": "Peas",
+     "points": 12
+    },
+    {
+     "text": "Cauliflower",
+     "points": 8
+    },
+    {
+     "text": "Lima beans",
+     "points": 6
+    },
+    {
+     "text": "Asparagus",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name a famous duo",
+   "answers": [
+    {
+     "text": "Batman and Robin",
+     "points": 26
+    },
+    {
+     "text": "Salt and Pepper",
+     "points": 16
+    },
+    {
+     "text": "Peanut butter and jelly",
+     "points": 14
+    },
+    {
+     "text": "Laurel and Hardy",
+     "points": 12
+    },
+    {
+     "text": "Bonnie and Clyde",
+     "points": 10
+    },
+    {
+     "text": "Tom and Jerry",
+     "points": 8
+    },
+    {
+     "text": "Simon and Garfunkel",
+     "points": 6
+    },
+    {
+     "text": "Ernie and Bert",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something you do on a first date",
+   "answers": [
+    {
+     "text": "Eat dinner",
+     "points": 36
+    },
+    {
+     "text": "See a movie",
+     "points": 24
+    },
+    {
+     "text": "Talk",
+     "points": 14
+    },
+    {
+     "text": "Get ice cream",
+     "points": 10
+    },
+    {
+     "text": "Go for a walk",
+     "points": 8
+    },
+    {
+     "text": "Play mini golf",
+     "points": 5
+    },
+    {
+     "text": "Hold hands",
+     "points": 3
+    }
+   ]
+  },
+  {
+   "question": "Name something associated with Christmas",
+   "answers": [
+    {
+     "text": "Santa",
+     "points": 28
+    },
+    {
+     "text": "Presents",
+     "points": 22
+    },
+    {
+     "text": "Tree",
+     "points": 18
+    },
+    {
+     "text": "Lights",
+     "points": 12
+    },
+    {
+     "text": "Snow",
+     "points": 8
+    },
+    {
+     "text": "Reindeer",
+     "points": 6
+    },
+    {
+     "text": "Cookies",
+     "points": 4
+    },
+    {
+     "text": "Carols",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "question": "Name a game you play on a road trip",
+   "answers": [
+    {
+     "text": "I Spy",
+     "points": 32
+    },
+    {
+     "text": "License plate game",
+     "points": 24
+    },
+    {
+     "text": "20 Questions",
+     "points": 16
+    },
+    {
+     "text": "Alphabet game",
+     "points": 12
+    },
+    {
+     "text": "Punch buggy",
+     "points": 8
+    },
+    {
+     "text": "Cards",
+     "points": 5
+    },
+    {
+     "text": "Trivia",
+     "points": 3
+    }
+   ]
+  },
+  {
+   "question": "Name something you'd find in a purse",
+   "answers": [
+    {
+     "text": "Wallet",
+     "points": 28
+    },
+    {
+     "text": "Phone",
+     "points": 20
+    },
+    {
+     "text": "Lipstick",
+     "points": 16
+    },
+    {
+     "text": "Keys",
+     "points": 14
+    },
+    {
+     "text": "Tissues",
+     "points": 8
+    },
+    {
+     "text": "Gum",
+     "points": 8
+    },
+    {
+     "text": "Hand sanitizer",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name a job where you wear a uniform",
+   "answers": [
+    {
+     "text": "Police officer",
+     "points": 28
+    },
+    {
+     "text": "Nurse",
+     "points": 20
+    },
+    {
+     "text": "Firefighter",
+     "points": 18
+    },
+    {
+     "text": "Mail carrier",
+     "points": 12
+    },
+    {
+     "text": "Waiter",
+     "points": 8
+    },
+    {
+     "text": "Soldier",
+     "points": 8
+    },
+    {
+     "text": "Pilot",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name something that gets bigger the more you take away",
+   "answers": [
+    {
+     "text": "Hole",
+     "points": 52
+    },
+    {
+     "text": "Debt",
+     "points": 14
+    },
+    {
+     "text": "Shadow",
+     "points": 10
+    },
+    {
+     "text": "Darkness",
+     "points": 8
+    },
+    {
+     "text": "Pothole",
+     "points": 8
+    },
+    {
+     "text": "Hunger",
+     "points": 4
+    },
+    {
+     "text": "Ditch",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something you do in the morning",
+   "answers": [
+    {
+     "text": "Brush teeth",
+     "points": 30
+    },
+    {
+     "text": "Take a shower",
+     "points": 22
+    },
+    {
+     "text": "Eat breakfast",
+     "points": 20
+    },
+    {
+     "text": "Get dressed",
+     "points": 14
+    },
+    {
+     "text": "Hit snooze",
+     "points": 8
+    },
+    {
+     "text": "Check phone",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name a famous Tom",
+   "answers": [
+    {
+     "text": "Hanks",
+     "points": 34
+    },
+    {
+     "text": "Cruise",
+     "points": 30
+    },
+    {
+     "text": "Brady",
+     "points": 14
+    },
+    {
+     "text": "Hardy",
+     "points": 8
+    },
+    {
+     "text": "Jones",
+     "points": 6
+    },
+    {
+     "text": "Selleck",
+     "points": 4
+    },
+    {
+     "text": "Sawyer",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name a sport played with a ball",
+   "answers": [
+    {
+     "text": "Basketball",
+     "points": 24
+    },
+    {
+     "text": "Football",
+     "points": 22
+    },
+    {
+     "text": "Baseball",
+     "points": 20
+    },
+    {
+     "text": "Soccer",
+     "points": 16
+    },
+    {
+     "text": "Tennis",
+     "points": 8
+    },
+    {
+     "text": "Volleyball",
+     "points": 6
+    },
+    {
+     "text": "Golf",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something you see at a wedding",
+   "answers": [
+    {
+     "text": "Cake",
+     "points": 28
+    },
+    {
+     "text": "Bride",
+     "points": 22
+    },
+    {
+     "text": "Flowers",
+     "points": 16
+    },
+    {
+     "text": "Rings",
+     "points": 12
+    },
+    {
+     "text": "Dancing",
+     "points": 10
+    },
+    {
+     "text": "Tuxedo",
+     "points": 6
+    },
+    {
+     "text": "Bridesmaids",
+     "points": 4
+    },
+    {
+     "text": "Crying",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "question": "Name a kind of bird",
+   "answers": [
+    {
+     "text": "Robin",
+     "points": 26
+    },
+    {
+     "text": "Eagle",
+     "points": 22
+    },
+    {
+     "text": "Blue jay",
+     "points": 14
+    },
+    {
+     "text": "Crow",
+     "points": 12
+    },
+    {
+     "text": "Owl",
+     "points": 10
+    },
+    {
+     "text": "Cardinal",
+     "points": 8
+    },
+    {
+     "text": "Duck",
+     "points": 8
+    }
+   ]
+  },
+  {
+   "question": "Name something people lose all the time",
+   "answers": [
+    {
+     "text": "Keys",
+     "points": 32
+    },
+    {
+     "text": "Phone",
+     "points": 20
+    },
+    {
+     "text": "Wallet",
+     "points": 16
+    },
+    {
+     "text": "Glasses",
+     "points": 12
+    },
+    {
+     "text": "Remote",
+     "points": 10
+    },
+    {
+     "text": "Socks",
+     "points": 6
+    },
+    {
+     "text": "Umbrella",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something a teacher keeps on their desk",
+   "answers": [
+    {
+     "text": "Apple",
+     "points": 26
+    },
+    {
+     "text": "Stapler",
+     "points": 18
+    },
+    {
+     "text": "Pens",
+     "points": 16
+    },
+    {
+     "text": "Papers",
+     "points": 14
+    },
+    {
+     "text": "Coffee mug",
+     "points": 10
+    },
+    {
+     "text": "Calendar",
+     "points": 8
+    },
+    {
+     "text": "Photos",
+     "points": 6
+    },
+    {
+     "text": "Tissues",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "question": "Name a Disney movie",
+   "answers": [
+    {
+     "text": "The Lion King",
+     "points": 24
+    },
+    {
+     "text": "Frozen",
+     "points": 22
+    },
+    {
+     "text": "Aladdin",
+     "points": 14
+    },
+    {
+     "text": "Cinderella",
+     "points": 12
+    },
+    {
+     "text": "Beauty and the Beast",
+     "points": 10
+    },
+    {
+     "text": "Moana",
+     "points": 8
+    },
+    {
+     "text": "Toy Story",
+     "points": 6
+    },
+    {
+     "text": "Bambi",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something you put in a sandwich",
+   "answers": [
+    {
+     "text": "Cheese",
+     "points": 30
+    },
+    {
+     "text": "Lettuce",
+     "points": 20
+    },
+    {
+     "text": "Tomato",
+     "points": 16
+    },
+    {
+     "text": "Turkey",
+     "points": 14
+    },
+    {
+     "text": "Ham",
+     "points": 10
+    },
+    {
+     "text": "Mayo",
+     "points": 6
+    },
+    {
+     "text": "Bacon",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something that has a lot of keys",
+   "answers": [
+    {
+     "text": "Piano",
+     "points": 34
+    },
+    {
+     "text": "Keyboard",
+     "points": 26
+    },
+    {
+     "text": "Computer",
+     "points": 14
+    },
+    {
+     "text": "Typewriter",
+     "points": 10
+    },
+    {
+     "text": "Janitor's ring",
+     "points": 8
+    },
+    {
+     "text": "Cash register",
+     "points": 4
+    },
+    {
+     "text": "Organ",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name a month with a holiday in it",
+   "answers": [
+    {
+     "text": "December",
+     "points": 30
+    },
+    {
+     "text": "October",
+     "points": 18
+    },
+    {
+     "text": "July",
+     "points": 16
+    },
+    {
+     "text": "November",
+     "points": 14
+    },
+    {
+     "text": "February",
+     "points": 10
+    },
+    {
+     "text": "January",
+     "points": 6
+    },
+    {
+     "text": "May",
+     "points": 4
+    },
+    {
+     "text": "March",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "question": "Name a place you'd go on vacation",
+   "answers": [
+    {
+     "text": "Beach",
+     "points": 30
+    },
+    {
+     "text": "Hawaii",
+     "points": 20
+    },
+    {
+     "text": "Disney World",
+     "points": 14
+    },
+    {
+     "text": "Las Vegas",
+     "points": 12
+    },
+    {
+     "text": "Mountains",
+     "points": 10
+    },
+    {
+     "text": "Europe",
+     "points": 8
+    },
+    {
+     "text": "Cruise",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name something a baby needs",
+   "answers": [
+    {
+     "text": "Diapers",
+     "points": 34
+    },
+    {
+     "text": "Bottle",
+     "points": 22
+    },
+    {
+     "text": "Crib",
+     "points": 16
+    },
+    {
+     "text": "Blanket",
+     "points": 10
+    },
+    {
+     "text": "Formula",
+     "points": 8
+    },
+    {
+     "text": "Stroller",
+     "points": 6
+    },
+    {
+     "text": "Pacifier",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something that's hard to do in the dark",
+   "answers": [
+    {
+     "text": "Read",
+     "points": 30
+    },
+    {
+     "text": "Drive",
+     "points": 20
+    },
+    {
+     "text": "Find your way",
+     "points": 18
+    },
+    {
+     "text": "Cook",
+     "points": 10
+    },
+    {
+     "text": "Get dressed",
+     "points": 8
+    },
+    {
+     "text": "Walk",
+     "points": 8
+    },
+    {
+     "text": "Sew",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name something you do with a pen",
+   "answers": [
+    {
+     "text": "Write",
+     "points": 42
+    },
+    {
+     "text": "Sign your name",
+     "points": 20
+    },
+    {
+     "text": "Doodle",
+     "points": 14
+    },
+    {
+     "text": "Chew on it",
+     "points": 10
+    },
+    {
+     "text": "Click it",
+     "points": 8
+    },
+    {
+     "text": "Draw",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name a kind of cheese",
+   "answers": [
+    {
+     "text": "Cheddar",
+     "points": 30
+    },
+    {
+     "text": "Swiss",
+     "points": 20
+    },
+    {
+     "text": "Mozzarella",
+     "points": 16
+    },
+    {
+     "text": "American",
+     "points": 12
+    },
+    {
+     "text": "Provolone",
+     "points": 8
+    },
+    {
+     "text": "Brie",
+     "points": 6
+    },
+    {
+     "text": "Parmesan",
+     "points": 5
+    },
+    {
+     "text": "Gouda",
+     "points": 3
+    }
+   ]
+  },
+  {
+   "question": "Name something that's cold",
+   "answers": [
+    {
+     "text": "Ice",
+     "points": 28
+    },
+    {
+     "text": "Snow",
+     "points": 24
+    },
+    {
+     "text": "Freezer",
+     "points": 16
+    },
+    {
+     "text": "Ice cream",
+     "points": 14
+    },
+    {
+     "text": "Winter",
+     "points": 10
+    },
+    {
+     "text": "Penguin",
+     "points": 4
+    },
+    {
+     "text": "Popsicle",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name a famous Mickey",
+   "answers": [
+    {
+     "text": "Mouse",
+     "points": 72
+    },
+    {
+     "text": "Mantle",
+     "points": 14
+    },
+    {
+     "text": "Rourke",
+     "points": 6
+    },
+    {
+     "text": "Rooney",
+     "points": 4
+    },
+    {
+     "text": "Spillane",
+     "points": 2
+    },
+    {
+     "text": "Gilley",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "question": "Name something you do at the beach",
+   "answers": [
+    {
+     "text": "Swim",
+     "points": 28
+    },
+    {
+     "text": "Build a sandcastle",
+     "points": 22
+    },
+    {
+     "text": "Sunbathe",
+     "points": 20
+    },
+    {
+     "text": "Collect shells",
+     "points": 10
+    },
+    {
+     "text": "Play volleyball",
+     "points": 8
+    },
+    {
+     "text": "Surf",
+     "points": 6
+    },
+    {
+     "text": "Fly a kite",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name a TV game show",
+   "answers": [
+    {
+     "text": "Jeopardy",
+     "points": 28
+    },
+    {
+     "text": "Wheel of Fortune",
+     "points": 26
+    },
+    {
+     "text": "Family Feud",
+     "points": 16
+    },
+    {
+     "text": "The Price Is Right",
+     "points": 14
+    },
+    {
+     "text": "Deal or No Deal",
+     "points": 8
+    },
+    {
+     "text": "Let's Make a Deal",
+     "points": 6
+    },
+    {
+     "text": "Match Game",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "question": "Name something with wheels",
+   "answers": [
+    {
+     "text": "Car",
+     "points": 32
+    },
+    {
+     "text": "Bike",
+     "points": 22
+    },
+    {
+     "text": "Skateboard",
+     "points": 14
+    },
+    {
+     "text": "Wagon",
+     "points": 10
+    },
+    {
+     "text": "Roller skates",
+     "points": 8
+    },
+    {
+     "text": "Shopping cart",
+     "points": 8
+    },
+    {
+     "text": "Wheelchair",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name a reason you'd call in sick",
+   "answers": [
+    {
+     "text": "Cold",
+     "points": 30
+    },
+    {
+     "text": "Flu",
+     "points": 24
+    },
+    {
+     "text": "Headache",
+     "points": 14
+    },
+    {
+     "text": "Stomach bug",
+     "points": 12
+    },
+    {
+     "text": "Fever",
+     "points": 10
+    },
+    {
+     "text": "Sick kid",
+     "points": 6
+    },
+    {
+     "text": "Needed a break",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something you do with a spoon",
+   "answers": [
+    {
+     "text": "Eat soup",
+     "points": 30
+    },
+    {
+     "text": "Stir",
+     "points": 24
+    },
+    {
+     "text": "Eat cereal",
+     "points": 18
+    },
+    {
+     "text": "Eat ice cream",
+     "points": 14
+    },
+    {
+     "text": "Measure",
+     "points": 8
+    },
+    {
+     "text": "Feed a baby",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name a fruit that's red",
+   "answers": [
+    {
+     "text": "Apple",
+     "points": 36
+    },
+    {
+     "text": "Strawberry",
+     "points": 28
+    },
+    {
+     "text": "Cherry",
+     "points": 16
+    },
+    {
+     "text": "Watermelon",
+     "points": 8
+    },
+    {
+     "text": "Raspberry",
+     "points": 6
+    },
+    {
+     "text": "Cranberry",
+     "points": 4
+    },
+    {
+     "text": "Tomato",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "question": "Name something that flies",
+   "answers": [
+    {
+     "text": "Airplane",
+     "points": 30
+    },
+    {
+     "text": "Bird",
+     "points": 28
+    },
+    {
+     "text": "Kite",
+     "points": 14
+    },
+    {
+     "text": "Helicopter",
+     "points": 10
+    },
+    {
+     "text": "Bat",
+     "points": 6
+    },
+    {
+     "text": "Superman",
+     "points": 6
+    },
+    {
+     "text": "Fly",
+     "points": 4
+    },
+    {
+     "text": "Balloon",
+     "points": 2
+    }
+   ]
+  },
+  {
+   "question": "Name something you do on a snow day",
+   "answers": [
+    {
+     "text": "Build a snowman",
+     "points": 30
+    },
+    {
+     "text": "Sled",
+     "points": 26
+    },
+    {
+     "text": "Drink hot chocolate",
+     "points": 16
+    },
+    {
+     "text": "Stay inside",
+     "points": 12
+    },
+    {
+     "text": "Snowball fight",
+     "points": 10
+    },
+    {
+     "text": "Shovel",
+     "points": 6
+    }
+   ]
+  },
+  {
+   "question": "Name something associated with Thanksgiving",
+   "answers": [
+    {
+     "text": "Turkey",
+     "points": 40
+    },
+    {
+     "text": "Pumpkin pie",
+     "points": 16
+    },
+    {
+     "text": "Stuffing",
+     "points": 12
+    },
+    {
+     "text": "Family",
+     "points": 10
+    },
+    {
+     "text": "Football",
+     "points": 8
+    },
+    {
+     "text": "Parade",
+     "points": 6
+    },
+    {
+     "text": "Cranberry sauce",
+     "points": 4
+    },
+    {
+     "text": "Pilgrims",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something that comes in a can",
+   "answers": [
+    {
+     "text": "Soda",
+     "points": 30
+    },
+    {
+     "text": "Soup",
+     "points": 24
+    },
+    {
+     "text": "Beans",
+     "points": 16
+    },
+    {
+     "text": "Tuna",
+     "points": 12
+    },
+    {
+     "text": "Corn",
+     "points": 8
+    },
+    {
+     "text": "Paint",
+     "points": 6
+    },
+    {
+     "text": "Whipped cream",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name a famous Elvis song",
+   "answers": [
+    {
+     "text": "Hound Dog",
+     "points": 28
+    },
+    {
+     "text": "Jailhouse Rock",
+     "points": 24
+    },
+    {
+     "text": "Blue Suede Shoes",
+     "points": 22
+    },
+    {
+     "text": "Love Me Tender",
+     "points": 14
+    },
+    {
+     "text": "Suspicious Minds",
+     "points": 8
+    },
+    {
+     "text": "Viva Las Vegas",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name a place you can find a lot of books",
+   "answers": [
+    {
+     "text": "Library",
+     "points": 50
+    },
+    {
+     "text": "Bookstore",
+     "points": 28
+    },
+    {
+     "text": "School",
+     "points": 8
+    },
+    {
+     "text": "Bedroom",
+     "points": 6
+    },
+    {
+     "text": "Garage sale",
+     "points": 4
+    },
+    {
+     "text": "Used book store",
+     "points": 4
+    }
+   ]
+  },
+  {
+   "question": "Name something you do when you're nervous",
+   "answers": [
+    {
+     "text": "Bite your nails",
+     "points": 30
+    },
+    {
+     "text": "Sweat",
+     "points": 24
+    },
+    {
+     "text": "Pace",
+     "points": 14
+    },
+    {
+     "text": "Fidget",
+     "points": 12
+    },
+    {
+     "text": "Shake",
+     "points": 10
+    },
+    {
+     "text": "Giggle",
+     "points": 6
+    },
+    {
+     "text": "Chew gum",
+     "points": 4
+    }
+   ]
+  }
+ ]
+}

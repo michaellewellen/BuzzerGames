@@ -1,0 +1,213 @@
+@page "/family-feud/questions"
+@inject FolderFeudContent Store
+@inject FloorAdminAccess Access
+@inject IJSRuntime JS
+
+<PageTitle>Family Feud · Questions</PageTitle>
+
+@*
+    Where Family Feud's survey boards are added and removed: a question and up to eight answers worth points. Locked behind
+    FLOOR_ADMIN_PASSCODE on Railway, the same passcode as the other admin pages. Bulk pasting takes lines like
+    "Name something you bring to the beach | Towel: 38 | Sunscreen: 25 | Umbrella (12)", which is what tools/import_protoqa.py writes.
+*@
+
+<main class="fl-admin">
+    <header class="fl-admin-head">
+        <h1>Family Feud · Questions</h1>
+        <a href="/">All games</a>
+    </header>
+
+    @if (Access.Problem is not null)
+    {
+        <section class="card"><p class="error">@Access.Problem</p></section>
+    }
+    else if (!_unlocked)
+    {
+        <section class="card">
+            <h2>Passcode</h2>
+            <input class="text-input" type="password" placeholder="Passcode" @bind="_pass" @bind:event="oninput" @onkeydown="OnPassKey" />
+            <button class="btn" @onclick="Unlock">Unlock</button>
+            @if (_passError is not null) { <p class="error">@_passError</p> }
+        </section>
+    }
+    else
+    {
+        var counts = Store.Counts();
+        <div class="fl-admin-grid">
+            <section class="card">
+                <h2>The bank</h2>
+                <p><strong>@counts.Total</strong> questions (@counts.Fresh fresh)</p>
+                <p class="muted">A game deals @FeudRules.BoardsPerGame questions: the rest of the rounds plus the @FeudRules.FastQuestions for Fast Money, fresh ones first. At least @FeudRules.MinBoardsPerGame are needed to start.</p>
+                <button class="btn btn-quiet btn-small" @onclick="ClearUsed">Make every question fresh again</button>
+            </section>
+
+            <section class="card">
+                <h2>Add</h2>
+                <input class="text-input" placeholder="Name something you bring to the beach" maxlength="@FeudRules.QuestionMaxLength" @bind="_question" @bind:event="oninput" />
+                @for (var i = 0; i < FeudRules.MaxAnswers; i++)
+                {
+                    var n = i;
+                    <div class="fd-e-type">
+                        <input class="text-input" placeholder="Answer @(n + 1)" maxlength="@FeudRules.AnswerMaxLength" value="@_texts[n]" @onchange="e => _texts[n] = e.Value?.ToString() ?? string.Empty" />
+                        <input class="text-input" type="number" min="1" max="@FeudRules.MaxPoints" placeholder="pts" style="max-width:5rem" value="@_points[n]" @onchange="e => _points[n] = e.Value?.ToString() ?? string.Empty" />
+                    </div>
+                }
+                <button class="btn" @onclick="Add">Save</button>
+                @if (_message is not null) { <p class="@(_messageIsError ? "error" : "hint")">@_message</p> }
+                @foreach (var warning in _warnings) { <p class="error">@warning</p> }
+            </section>
+        </div>
+
+        <section class="card">
+            <h2>What's in the bank</h2>
+            <table class="wf-table">
+                @foreach (var b in Store.Boards().Reverse().Take(MaxRows))
+                {
+                    <tr class="@(Store.IsUsed(b.Id) ? "wf-used" : "")">
+                        <td class="wf-text">@b.Question<br /><small>@string.Join(" · ", b.Answers.Select(a => $"{a.Text} {a.Points}"))</small></td>
+                        <td>@(Store.IsUsed(b.Id) ? "used" : "")</td>
+                        <td><button class="btn btn-quiet btn-small" @onclick="() => Delete(b.Id)">Delete</button></td>
+                    </tr>
+                }
+            </table>
+            <p class="muted">Newest first, up to @MaxRows shown.</p>
+        </section>
+
+        <section class="card">
+            <h2>Paste a lot at once</h2>
+            <p class="muted">
+                One question per line: <code>question | answer: points | answer: points | ...</code> (three to eight answers).
+                Lines with problems are listed below; the good ones are still added.
+            </p>
+            <textarea class="text-input fl-textarea" rows="8" placeholder="Name something you bring to the beach | Towel: 38 | Sunscreen: 25 | Umbrella: 15 | Chair: 12 | Cooler: 10" @bind="_paste"></textarea>
+            <button class="btn" @onclick="Import">Import</button>
+            @if (_report is not null)
+            {
+                <div class="wf-report">
+                    <p class="hint">
+                        Added @_report.Added@(_report.Duplicates > 0 ? $", skipped {_report.Duplicates} already in the bank" : "")@(_report.Problems.Count > 0 ? $", {_report.Problems.Count} need fixing" : "").
+                    </p>
+                    @if (_report.Problems.Count > 0)
+                    {
+                        <ul>@foreach (var problem in _report.Problems) { <li class="error">@problem</li> }</ul>
+                    }
+                    @if (_report.Warnings.Count > 0)
+                    {
+                        <ul>@foreach (var warning in _report.Warnings) { <li>@warning</li> }</ul>
+                    }
+                </div>
+            }
+        </section>
+    }
+</main>
+
+@code {
+    private const int MaxRows = 200;
+
+    private bool _unlocked;
+    private string _pass = "";
+    private string? _passError;
+    private string _question = "";
+    private readonly string[] _texts = new string[FeudRules.MaxAnswers];
+    private readonly string[] _points = new string[FeudRules.MaxAnswers];
+    private string? _message;
+    private bool _messageIsError;
+    private IReadOnlyList<string> _warnings = [];
+    private string _paste = "";
+    private FeudImportReport? _report;
+
+    protected override void OnInitialized()
+    {
+        Array.Fill(_texts, string.Empty);
+        Array.Fill(_points, string.Empty);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Access.Problem is null)
+        {
+            var saved = await JS.InvokeAsync<string?>("bg.getItem", "bg.floor.pass");
+            if (Access.IsAllowed(saved))
+            {
+                _pass = saved ?? "";
+                _unlocked = true;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task Unlock()
+    {
+        if (!Access.IsAllowed(_pass))
+        {
+            _passError = "That isn't the passcode.";
+            return;
+        }
+        _passError = null;
+        _unlocked = true;
+        await JS.InvokeVoidAsync("bg.setItem", "bg.floor.pass", _pass);
+    }
+
+    private async Task OnPassKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Unlock();
+    }
+
+    private void Say(string text, bool error = false)
+    {
+        _message = text;
+        _messageIsError = error;
+    }
+
+    private void Add()
+    {
+        var answers = new List<(string? Text, int Points)>();
+        for (var i = 0; i < FeudRules.MaxAnswers; i++)
+        {
+            var text = _texts[i]?.Trim() ?? "";
+            var rawPoints = _points[i]?.Trim() ?? "";
+            if (text.Length == 0 && rawPoints.Length == 0) continue;
+            if (!int.TryParse(rawPoints, out var points))
+            {
+                _warnings = [];
+                Say($"Answer {i + 1} needs a whole number of points.", true);
+                return;
+            }
+            answers.Add((text, points));
+        }
+
+        var result = Store.Add(_question, answers);
+        if (!result.Ok)
+        {
+            _warnings = [];
+            Say(result.Error!, true);
+            return;
+        }
+
+        _warnings = result.Warnings ?? [];
+        Say("Saved.");
+        _question = "";
+        Array.Fill(_texts, string.Empty);
+        Array.Fill(_points, string.Empty);
+    }
+
+    private void Delete(string id)
+    {
+        var result = Store.Delete(id);
+        Say(result.Ok ? "Deleted." : result.Error!, !result.Ok);
+        _warnings = [];
+    }
+
+    private void ClearUsed()
+    {
+        Store.ClearUsed();
+        Say("Every question is fresh again.");
+        _warnings = [];
+    }
+
+    private void Import()
+    {
+        _report = Store.Import(_paste);
+        if (_report.Problems.Count == 0) _paste = "";
+    }
+}

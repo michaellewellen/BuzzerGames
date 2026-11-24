@@ -2,7 +2,7 @@
 
 Making our favorite game shows playable, on phones, with a big screen in the middle of the room.
 
-Right now there are eight games: **Jeopardy**, **Press Your Luck**, **Password Plus**, **Match Game**, **Card Sharks**, **The Floor**, **Wheel of Fortune** and **$100,000 Pyramid**. The site opens on a
+Right now there are nine games: **Jeopardy**, **Press Your Luck**, **Password Plus**, **Match Game**, **Card Sharks**, **The Floor**, **Wheel of Fortune**, **$100,000 Pyramid** and **Family Feud**. The site opens on a
 "pick a game" page.
 
 ## How a Jeopardy game works
@@ -175,6 +175,16 @@ On your own computer neither variable is needed: pictures go in a `floor-data` f
 - The winner plays the **bonus pyramid**: 60 seconds, six subjects ("Things a toaster might say"), the emcee marks **Valid** (the square turns to dollars), **Invalid** (gone for good) or **Pass** (tap a passed square to come back). $25,000 for all six (the squares alone add up to $12,000), or $100,000 (squares add up to $40,000) when the same team reaches the pyramid twice. The emcee can override the prize.
 - A **match** is two games; between them the emcee swaps the celebrities. Topics are managed at `/pyramid/topics` (same passcode as The Floor and Wheel).
 
+## How a Family Feud game works
+
+- Only an **emcee** (one phone) and a **TV** (a laptop on the big screen). Create the game on the TV (`/family-feud`); it shows a QR code. The emcee scans it, taps **I'm the emcee**, names the two families and taps **Start Game**. Nobody else signs in.
+- **Buzzers are the mouse**: for the face-off, one family's player clicks the **left** button on the laptop and the other the **right** button (the right-click menu is suppressed). First click wins the buzz.
+- Each round: the emcee reads the question, the families face off, and the emcee marks the first answer. The better answer chooses to **play or pass**. The family in control keeps going: the emcee taps the answer on his phone when it's on the board (the panel slides left to show the answer and its points) or **Strike** when it isn't. Three strikes and the other family gets one **steal** answer. Whoever wins the round banks the points.
+- Rounds 1 and 2 are worth face value, round 3 is **double**, round 4 onward **triple**, until a family reaches **300**. Points are banked when the emcee taps **Continue**.
+- **Fast Money**: one player from the winning family answers five questions in 20 seconds, then a second player gets 25 seconds on the same questions (repeating an answer is rejected). The emcee types what was said or taps a board answer. Then the answers are revealed one by one, text first, then points, and the total is checked against **200**.
+- A board holds three to eight answers. Questions live on `/family-feud/questions` (behind the same passcode as the other admin pages): add one at a time or paste lines like `Name something you bring to the beach | Towel: 38 | Sunscreen: 25 | Umbrella: 15`. A starter set of 50 ships with the game. For thousands more, run `python tools/import_protoqa.py` on your own computer: it turns the ProtoQA dataset (CC BY 4.0) into a file you paste into that page.
+- The TV never contains an unrevealed answer in its page; only the emcee's phone has the full list.
+
 ## How a Wheel of Fortune game works
 
 Create it on the TV at `/wheel-of-fortune`. The emcee and three players scan the QR code: the players take Red, Yellow and Blue in the order they join, and the emcee taps **Start Game**. Six regular puzzles are played, with a Triple Toss-Up set after puzzles 2 and 4 and the Bonus Round at the end (any of those is skipped if the puzzle store has none of it).
@@ -290,6 +300,8 @@ src/BuzzerGames.Web/           The website
   Data/Wheel/                    the starter puzzles (wheel-starter.json)
   Pyramid/                       $100,000 Pyramid: engine, topic store
   Data/Pyramid/                  the starter topics (pyramid-starter.json)
+  Feud/                          Family Feud: engine, question bank
+  Data/Feud/                     the starter questions (feud-starter.json)
   Components/Floor/              the Floor screens (TV, emcee, player, lobby, the floor map, topic picker)
   FloorServices.cs               Floor setup: the data folder, the topics passcode, the picture and upload addresses
   wwwroot/js/floor.js            the Floor clocks and the picture uploader
