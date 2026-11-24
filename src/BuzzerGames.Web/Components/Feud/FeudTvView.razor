@@ -24,19 +24,12 @@
         var buzzing = Snapshot.Phase == FeudPhase.FaceOffBuzz;
         var over = Snapshot.Phase == FeudPhase.RoundOver;
 
+        @* The question is spoken by the emcee and never shown on the TV. *@
         <div class="fd-ribbon">
-            @if (Snapshot.Phase == FeudPhase.RoundIntro)
-            {
-                <span class="fd-round">ROUND @Snapshot.Round@(Snapshot.Multiplier > 1 ? " · " + FeudRules.MultiplierLabel(Snapshot.Round) : "")</span>
-            }
-            else if (Snapshot.Multiplier > 1)
+            <span class="fd-round">ROUND @Snapshot.Round</span>
+            @if (Snapshot.Multiplier > 1)
             {
                 <span class="fd-mult">@FeudRules.MultiplierLabel(Snapshot.Round)</span>
-                <span class="fd-question">@Snapshot.Question</span>
-            }
-            else
-            {
-                <span class="fd-question">@Snapshot.Question</span>
             }
         </div>
 
@@ -65,7 +58,7 @@
                         <span class="fd-strikes">
                             @for (var i = 0; i < FeudRules.StrikesAllowed; i++)
                             {
-                                <i class="@(i < Snapshot.Strikes ? "on" : "")">✗</i>
+                                <img class="fd-strike-mark @(i < Snapshot.Strikes ? "on" : "")" src="images/strike.png" alt="" />
                             }
                         </span>
                     </div>
@@ -77,7 +70,7 @@
     @if (_flash > 0)
     {
         <div class="fd-strike-flash" @key="_flashKey">
-            @for (var i = 0; i < _flash; i++) { <span>✗</span> }
+            @for (var i = 0; i < _flash; i++) { <img src="images/strike.png" alt="strike" /> }
         </div>
     }
 </div>

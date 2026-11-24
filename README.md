@@ -182,7 +182,10 @@ On your own computer neither variable is needed: pictures go in a `floor-data` f
 - Each round: the emcee reads the question, the families face off, and the emcee marks the first answer. The better answer chooses to **play or pass**. The family in control keeps going: the emcee taps the answer on his phone when it's on the board (the panel slides left to show the answer and its points) or **Strike** when it isn't. Three strikes and the other family gets one **steal** answer. Whoever wins the round banks the points.
 - Rounds 1 and 2 are worth face value, round 3 is **double**, round 4 onward **triple**, until a family reaches **300**. Points are banked when the emcee taps **Continue**.
 - **Fast Money**: one player from the winning family answers five questions in 20 seconds, then a second player gets 25 seconds on the same questions (repeating an answer is rejected). The emcee types what was said or taps a board answer. Then the answers are revealed one by one, text first, then points, and the total is checked against **200**.
-- A board holds three to eight answers. Questions live on `/family-feud/questions` (behind the same passcode as the other admin pages): add one at a time or paste lines like `Name something you bring to the beach | Towel: 38 | Sunscreen: 25 | Umbrella: 15`. A starter set of 50 ships with the game. For thousands more, run `python tools/import_protoqa.py` on your own computer: it turns the ProtoQA dataset (CC BY 4.0) into a file you paste into that page.
+- **The question is never on the TV.** The emcee reads it aloud (and repeats it for each contestant); it is only on his phone, along with every answer. The TV shows just the round, the board, the strikes and the scores.
+- A board holds three to eight answers. Questions live on `/family-feud/questions` (behind the same passcode as the other admin pages): add one at a time or paste lines like `Name something you bring to the beach | Towel: 38 | Sunscreen: 25 | Umbrella: 15`.
+- The bank ships with about 6,500 **real Family Feud boards** (real survey counts) from the ProtoQA dataset, filtered for a family crowd: nothing with drinking, drugs, sex, violence or crude language, and at least four answers. They're bundled as `Data/Feud/feud-starter.json` and loaded the first time the game runs. Redeploying with a newer starter set swaps out the older set's questions and leaves any you added yourself. To rebuild the bundle, or make a smaller file to paste into the questions page: `git clone --depth 1 https://github.com/iesl/protoqa-data`, then `python tools/import_protoqa.py protoqa-data --json src/BuzzerGames.Core/Data/Feud/feud-starter.json` (or `--text feud-import.txt -n 300`).
+- Question data: ProtoQA (Boratko et al., 2020), licensed CC BY 4.0, https://github.com/iesl/protoqa-data.
 - The TV never contains an unrevealed answer in its page; only the emcee's phone has the full list.
 
 ## How a Wheel of Fortune game works
@@ -301,7 +304,7 @@ src/BuzzerGames.Web/           The website
   Pyramid/                       $100,000 Pyramid: engine, topic store
   Data/Pyramid/                  the starter topics (pyramid-starter.json)
   Feud/                          Family Feud: engine, question bank
-  Data/Feud/                     the starter questions (feud-starter.json)
+  Data/Feud/                     the ProtoQA starter questions (feud-starter.json)
   Components/Floor/              the Floor screens (TV, emcee, player, lobby, the floor map, topic picker)
   FloorServices.cs               Floor setup: the data folder, the topics passcode, the picture and upload addresses
   wwwroot/js/floor.js            the Floor clocks and the picture uploader

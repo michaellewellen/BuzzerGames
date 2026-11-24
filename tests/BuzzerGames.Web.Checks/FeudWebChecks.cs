@@ -60,6 +60,8 @@ static class FeudWebChecks
             Dump("play", html);
             Check.True(Render.Has(html, "Q1 answer 1"), "the revealed answer");
             Check.True(!Render.Has(html, "Q1 answer 2") && !Render.Has(html, "Q1 answer 6"), "the hidden ones stay out of the page");
+            Check.True(!Render.Has(html, "Question 1"), "the question is spoken, never shown on the TV");
+            Check.True(Render.Has(html, "ROUND 1"), "the round is shown");
             Check.Equal(8, Render.Count(html, "fd-slot "), "eight slots on the board");
             Check.Equal(2, Render.Count(html, "fd-slot empty"), "two of them unused for a six-answer board");
             Check.Equal(1, Render.Count(html, "fd-slot  open"), "one slid open");

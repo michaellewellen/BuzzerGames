@@ -72,7 +72,13 @@ public sealed class FolderFeudContent : IFeudContent
     {
         public List<FeudBoard> Boards { get; set; } = [];
         public List<string> Used { get; set; } = [];
+
+        /// <summary>Which starter set this file was filled from, so an older one can be swapped for a newer one.</summary>
+        public int Seed { get; set; }
     }
+
+    /// <summary>1 was a small hand-written set (retired); 2 is the ProtoQA survey set.</summary>
+    private const int CurrentSeed = 2;
 
     private sealed record RawBoard(string Question, List<FeudAnswer> Answers);
     private sealed record RawStarter(List<RawBoard>? Boards);
@@ -101,6 +107,16 @@ public sealed class FolderFeudContent : IFeudContent
             try
             {
                 _bank = JsonSerializer.Deserialize<Bank>(File.ReadAllText(_path), Json) ?? new Bank();
+                if (_bank.Seed < CurrentSeed && seedStarters)
+                {
+                    // An older starter set: take out exactly the boards it put there (anything added by hand stays), then add the new set.
+                    var retired = RetiredQuestions();
+                    var gone = _bank.Boards.Where(b => retired.Contains(b.Question)).Select(b => b.Id).ToHashSet();
+                    _bank.Boards.RemoveAll(b => gone.Contains(b.Id));
+                    _bank.Used.RemoveAll(gone.Contains);
+                    SeedStarters();
+                    Save();
+                }
                 return;
             }
             catch (JsonException)
@@ -265,8 +281,17 @@ public sealed class FolderFeudContent : IFeudContent
         File.Move(temp, _path, overwrite: true);
     }
 
+    private static HashSet<string> RetiredQuestions()
+    {
+        var assembly = typeof(FolderFeudContent).Assembly;
+        var name = assembly.GetManifestResourceNames().Single(n => n.EndsWith(".feud-retired.txt", StringComparison.OrdinalIgnoreCase));
+        using var reader = new StreamReader(assembly.GetManifestResourceStream(name)!);
+        return reader.ReadToEnd().Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
+    }
+
     private void SeedStarters()
     {
+        _bank.Seed = CurrentSeed;
         var assembly = typeof(FolderFeudContent).Assembly;
         var name = assembly.GetManifestResourceNames().Single(n => n.EndsWith(".feud-starter.json", StringComparison.OrdinalIgnoreCase));
         using var reader = new StreamReader(assembly.GetManifestResourceStream(name)!);

@@ -758,6 +758,28 @@ static class FeudChecks
             finally { if (Directory.Exists(folder)) Directory.Delete(folder, recursive: true); }
         });
 
+        run("feud bank: an older starter set is swapped for the new one, and questions added by hand stay", () =>
+        {
+            var folder = Path.Combine(Path.GetTempPath(), "feud-test-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var retired = File.ReadLines(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "BuzzerGames.Core", "Data", "Feud", "feud-retired.txt")).First();
+                Directory.CreateDirectory(Path.Combine(folder, "feud"));
+                File.WriteAllText(Path.Combine(folder, "feud", "boards.json"),
+                    "{\"boards\":[{\"id\":\"old1\",\"question\":" + System.Text.Json.JsonSerializer.Serialize(retired) + ",\"answers\":[{\"text\":\"A\",\"points\":50},{\"text\":\"B\",\"points\":30},{\"text\":\"C\",\"points\":10}]}," +
+                    "{\"id\":\"mine\",\"question\":\"Name my own thing\",\"answers\":[{\"text\":\"A\",\"points\":50},{\"text\":\"B\",\"points\":30},{\"text\":\"C\",\"points\":10}]}],\"used\":[\"old1\",\"mine\"]}");
+                var bank = new FolderFeudContent(folder);
+                var all = bank.Boards();
+                Check.True(all.Any(b => b.Id == "mine"), "the hand-added question stays");
+                Check.True(!all.Any(b => b.Id == "old1"), "the retired starter question goes");
+                Check.True(bank.IsUsed("mine") && !bank.IsUsed("old1"), "used marks follow");
+                Check.True(all.Count > 1000, "the new set is in");
+                var again = new FolderFeudContent(folder);
+                Check.Equal(all.Count, again.Boards().Count, "a restart doesn't add the set twice");
+            }
+            finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
+        });
+
         run("feud bank: delete removes a question and clear-used makes everything fresh again", () =>
         {
             var folder = Path.Combine(Path.GetTempPath(), "feud-test-" + Guid.NewGuid().ToString("N"));

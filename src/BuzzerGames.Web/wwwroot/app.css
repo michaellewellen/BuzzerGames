@@ -1514,20 +1514,13 @@ body.wf-sound-on .wf-sound { display: none; }
 .fd-bank { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 17vw; background: #000; border-radius: 1.2vh; border: .4vh solid #cfd7ee; box-shadow: 0 .6vh 1.6vh rgba(0, 0, 0, .4); }
 .fd-bank-label { font-size: min(1.2vw, 2.2vh); letter-spacing: .3em; color: #9db0ff; }
 .fd-bank-value { font-size: min(3.6vw, 6vh); font-weight: 900; line-height: 1; color: #ffd23f; text-shadow: 0 0 1.4vh rgba(255, 210, 63, .6); }
-.fd-strikes { display: flex; gap: .8vw; }
-.fd-strikes i { font-style: normal; width: 2.2vw; text-align: center; font-size: min(1.5vw, 2.6vh); line-height: 1; color: #38425f; border: .2vh solid #38425f; border-radius: .4vh; line-height: 1.2; }
-.fd-strikes i.on { color: #ff3b30; border-color: #ff3b30; text-shadow: 0 0 1vh #ff3b30; }
+.fd-strikes { display: flex; gap: .5vw; }
+.fd-strike-mark { height: 3.6vh; width: auto; opacity: .18; filter: grayscale(1); }
+.fd-strike-mark.on { opacity: 1; filter: none; }
 
 /* The big red X's, flashed over everything for a moment. */
 .fd-strike-flash { position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; gap: 3vw; background: rgba(0, 0, 0, .35); pointer-events: none; animation: fd-flash 1.4s ease-out forwards; }
-.fd-strike-flash span {
-    font-size: min(34vw, 62vh);
-    line-height: 1;
-    font-weight: 900;
-    color: #ff2d1f;
-    -webkit-text-stroke: .8vh #fff;
-    text-shadow: 0 0 5vh rgba(255, 45, 31, .8);
-}
+.fd-strike-flash img { height: min(58vh, 28vw); width: auto; filter: drop-shadow(0 0 4vh rgba(255, 40, 30, .8)); }
 @keyframes fd-flash { 0% { opacity: 0; transform: scale(.7); } 12% { opacity: 1; transform: scale(1.06); } 80% { opacity: 1; } 100% { opacity: 0; } }
 
 /* The lobby on the TV. */
