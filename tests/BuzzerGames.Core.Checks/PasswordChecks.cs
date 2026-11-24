@@ -57,7 +57,7 @@ sealed class PasswordTable
     /// <summary>A clue is given out loud and the guesser guesses; the emcee rules it right or wrong.</summary>
     public void ClueAndJudge(bool right) => Check.Ok(Game.JudgeGuess(Emcee, right));
 
-    /// <summary>Plays all eight clues of a word, every guess wrong.</summary>
+    /// <summary>Plays every clue of a word (three for each side), every guess wrong.</summary>
     public void MissAllClues()
     {
         for (var i = 0; i < PasswordGame.Teams * PasswordGame.CluesPerSide; i++) ClueAndJudge(false);
@@ -304,6 +304,19 @@ static class PasswordChecks
             Check.Equal(1, t.S.TurnTeam, "Team B is up");
         });
 
+        run("password: when the team with control passes, the other team clues first, control stays put, and the snapshot says so", () =>
+        {
+            var t = new PasswordTable();
+            t.Open(1);                                          // control belongs to Team A; Team A passes, so Team B clues first
+            Check.Equal(0, t.S.ControlTeam, "Team A still has control");
+            Check.Equal(1, t.S.TurnTeam, "Team B is on the clock");
+            Check.Equal(1, t.S.StartTeam, "Team B gave the first clue");
+            Check.True(t.S.PassNote is not null && t.S.PassNote.Contains("Team A has control but passed"), "the note explains it");
+            Check.Ok(t.Game.JudgeGuess(t.Emcee, false));
+            Check.Equal(0, t.S.TurnTeam, "then Team A");
+            Check.Equal(0, t.S.ControlTeam, "control hasn't moved");
+        });
+
         run("password: an invalid clue costs only that clue and passes the turn", () =>
         {
             var t = new PasswordTable();
@@ -311,7 +324,7 @@ static class PasswordChecks
             Check.Ok(t.Game.RejectClue(t.Emcee));               // Ann broke a rule: the emcee hits the yellow button
             Check.Equal(PasswordPhase.Clue, t.S.Phase, "back to a clue");
             Check.Equal(1, t.S.TurnTeam, "Team B is next");
-            Check.Equal(3, t.S.Teams[0].CluesLeft, "Team A used one of its four");
+            Check.Equal(PasswordGame.CluesPerSide - 1, t.S.Teams[0].CluesLeft, "Team A used one of its three");
             Check.Equal(WordState.Current, t.S.Words[0].State, "the word is still in play");
 
             Check.Ok(t.Game.JudgeGuess(t.Emcee, false));        // Cy gives, Dee guesses, wrong
@@ -323,20 +336,20 @@ static class PasswordChecks
             Check.Equal(WordState.Solved, t.S.Words[0].State, "the word goes up");
         });
 
-        run("password: after a miss the other team clues, and each side gets four clues", () =>
+        run("password: after a miss the other team clues, and each side gets three tries", () =>
         {
             var t = new PasswordTable();
             t.Open(1);
             var order = new List<int>();
-            for (var i = 0; i < 8; i++)
+            for (var i = 0; i < 6; i++)
             {
                 order.Add(t.S.TurnTeam);
                 Check.Equal(PasswordPhase.Clue, t.S.Phase, $"waiting for clue {i + 1}");
                 Check.Ok(t.Game.JudgeGuess(t.Emcee, false));
                 if (i == 1)
-                    Check.True(t.S.Teams[0].CluesLeft == 3 && t.S.Teams[1].CluesLeft == 3, "after two clues in all, each side has used one");
+                    Check.True(t.S.Teams[0].CluesLeft == 2 && t.S.Teams[1].CluesLeft == 2, "after two clues in all, each side has used one");
             }
-            Check.True(order.SequenceEqual([1, 0, 1, 0, 1, 0, 1, 0]), "the teams alternate, starting with the team that played");
+            Check.True(order.SequenceEqual([1, 0, 1, 0, 1, 0]), "the teams alternate, starting with the team that played");
             Check.Equal(0, t.S.Teams[0].CluesLeft, "Team A is out of clues");
             Check.Equal(0, t.S.Teams[1].CluesLeft, "Team B is out of clues");
         });
@@ -360,20 +373,20 @@ static class PasswordChecks
             t.Open(0);
             Check.Ok(t.Game.RejectClue(t.Emcee));
             var s = t.S;
-            Check.Equal(3, s.Teams[0].CluesLeft, "it counted as one of Team A's four");
+            Check.Equal(PasswordGame.CluesPerSide - 1, s.Teams[0].CluesLeft, "it counted as one of Team A's three");
             Check.Equal(PasswordPhase.Clue, s.Phase, "the other team is up to give a clue");
             Check.Equal(1, s.TurnTeam, "Team B's turn");
             Check.Equal(WordState.Current, s.Words[0].State, "nobody guessed, so the word stays hidden");
         });
 
-        run("password: after eight misses the word is posted, nobody may guess the big word, and control stays put", () =>
+        run("password: after six misses the word is posted, nobody may guess the big word, and control stays put", () =>
         {
             var t = new PasswordTable();
             var control = t.S.ControlTeam;
             t.Open(1 - control);
             t.MissAllClues();
             var s = t.S;
-            Check.Equal(PasswordPhase.WordResult, s.Phase, "phase after eight misses");
+            Check.Equal(PasswordPhase.WordResult, s.Phase, "phase after six misses");
             Check.Equal(WordState.Posted, s.Words[0].State, "the word goes up on the board");
             Check.True(s.Message is not null && s.Message.Contains("Anchor"), "the word is announced");
             Check.Equal(0, s.Teams[0].Score + s.Teams[1].Score, "no points");

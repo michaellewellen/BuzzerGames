@@ -11,8 +11,8 @@ namespace BuzzerGames.Core.Password;
 ///   the emcee rules with three buttons: right, wrong, or an invalid clue (more than one word, part of the password...).
 ///
 ///   The team with control (coin flip first, then whoever last got a word right) chooses to play (they give the first clue) or pass, on every word.
-///   Clues then alternate between the teams. Each side gets at most 4 clues. A wrong guess or an invalid clue passes the turn.
-///   If all 8 clues miss, the word is posted on the board, control stays put, and the
+///   Clues then alternate between the teams. Each side gets at most 3 tries. A wrong guess or an invalid clue passes the turn.
+///   If all 6 miss (3 each), the word is posted on the board, control stays put, and the
 ///   puzzle carries on.
 ///
 ///   When a guesser gets the word, that guesser (and only that guesser) gets one shot at the big word. The exception is the
@@ -36,7 +36,7 @@ public sealed class PasswordGame
     public const int PlayerSeats = Teams * TeamSize;
     public const int NameMaxLength = 20;
     public const int WordsPerPuzzle = 5;
-    public const int CluesPerSide = 4;
+    public const int CluesPerSide = 3;
     public const int WinScore = 500;
 
     // The bonus round: ten words, one per letter in alphabetical order, in 60 seconds.
@@ -327,7 +327,7 @@ public sealed class PasswordGame
         return Result.Success;
     });
 
-    // A clue was wrong or thrown out: the other team is next, unless all eight clues are used up.
+    // A clue was wrong or thrown out: the other team is next, unless every clue (three for each side) is used up.
     private void AfterMiss()
     {
         if (_clueTeams.Count >= Teams * CluesPerSide)
@@ -661,6 +661,7 @@ public sealed class PasswordGame
                 Teams: teams,
                 ControlTeam: playing ? _controlTeam : -1,
                 TurnTeam: _turnTeam,
+                StartTeam: _phase == PasswordPhase.Clue ? _startTeam : -1,
                 PuzzleKind: puzzle?.Kind ?? "",
                 Words: puzzle is null
                     ? []

@@ -91,11 +91,16 @@ public sealed record PasswordSnapshot(
     int BonusMillisLeft,                    // by the game's own clock, when this picture was taken
     int BonusSeconds,
     int BonusCorrect,
-    int BonusEarned)
+    int BonusEarned,
+    int StartTeam = -1)                     // while a word is being clued: the team that gave the first clue, so a screen can say the team with control passed
 {
     public PasswordPlayerInfo? FindPlayer(Guid? id) => id is null ? null : Players.FirstOrDefault(p => p.Id == id);
     public PasswordPlayerInfo? Attempting => FindPlayer(AttemptingId);
     public PasswordPlayerInfo? Giver(int team) => Players.FirstOrDefault(p => p.Team == team && p.IsGiver);
     public PasswordPlayerInfo? Guesser(int team) => Players.FirstOrDefault(p => p.Team == team && p.IsGuesser);
+    /// <summary>While a word is being clued: a sentence saying so when the team with control passed (so the other team is the one giving clues), otherwise null.</summary>
+    public string? PassNote => Phase == PasswordPhase.Clue && StartTeam >= 0 && ControlTeam >= 0 && StartTeam != ControlTeam
+        ? $"{TeamName(ControlTeam)} has control but passed, so {TeamName(StartTeam)} gave the first clue."
+        : null;
     public string TeamName(int team) => team is >= 0 and < PasswordGame.Teams ? Teams[team].Name : "";
 }

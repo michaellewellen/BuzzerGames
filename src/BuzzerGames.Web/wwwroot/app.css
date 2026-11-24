@@ -615,6 +615,7 @@ a.game-tile p { font-size: .9rem; opacity: .8; margin: .7rem .5rem 0; }
 .pw-team.team-b .score-name { color: var(--team-b); }
 .pw-team.clock { box-shadow: 0 0 1rem .15rem rgba(255, 255, 255, .55); }
 .control-tag { display: inline-block; margin-left: .4em; padding: .05em .5em; border-radius: 1em; background: var(--gold); color: #1a1a1a; font-size: .6em; font-weight: 900; vertical-align: middle; }
+.control-tag.pw-giving-tag { background: #fff; }
 .pw-members { display: flex; flex-wrap: wrap; justify-content: center; gap: .1em .9em; font-size: .8rem; opacity: .95; }
 .pw-member small { opacity: .8; }
 .pw-member.attempting { color: var(--gold); font-weight: 800; }

@@ -732,7 +732,7 @@ Run("pw emcee: sees the password, the big word and the other answers, with the r
     Check.True(Render.Has(html, "bonus-right") && Render.Has(html, "bonus-wrong") && Render.Has(html, "bonus-pass"), "the green check, the red X and the yellow button");
     Check.True(Render.Has(html, "✓") && Render.Has(html, "✗") && Render.Has(html, "Bad clue"), "right, wrong and invalid clue");
     Check.True(Render.ShowsAnyCase(html, "Ann") && Render.ShowsAnyCase(html, "Bob"), "says who is giving and who is guessing");
-    Check.True(Render.Has(html, "clue 1 of 4"), "and which clue it is");
+    Check.True(Render.Has(html, "clue 1 of 3"), "and which clue it is");
 
     Check.Ok(t.Game.JudgeGuess(t.Emcee, true));
     html = Render.PwEmcee(t);
