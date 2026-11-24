@@ -33,7 +33,7 @@ else
         {
             @if (!string.IsNullOrEmpty(Snapshot.Category))
             {
-                <div class="wf-phone-category">@Snapshot.Category@(Snapshot.Prize > 0 ? $" · ${Snapshot.Prize:N0}" : "")</div>
+                <div class="wf-phone-category">@(Snapshot.Prize > 0 ? $"${Snapshot.Prize:N0}" : Snapshot.Category)</div>
             }
             @if (Snapshot.Phase is not (WheelPhase.QuickReady or WheelPhase.QuickPlay or WheelPhase.QuickAnswer or WheelPhase.BonusPick or WheelPhase.BonusCategory))
             {

@@ -20,7 +20,7 @@
     {
         <section class="wf-tv-board">
             <WheelBoardView Tiles="Snapshot.Board" RevealLetter="Snapshot.RevealLetter" Shown="_shown" LitShown="@(Watching ? int.MaxValue : _lit)" />
-            <div class="wf-category">@Snapshot.Category@(Snapshot.Prize > 0 ? $" · ${Snapshot.Prize:N0}" : "")</div>
+            <div class="wf-category">@(Snapshot.Prize > 0 ? $"${Snapshot.Prize:N0}" : Snapshot.Category)</div>
         </section>
     }
 

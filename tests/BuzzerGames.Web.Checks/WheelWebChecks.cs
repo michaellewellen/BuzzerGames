@@ -193,14 +193,14 @@ static class WheelWebChecks
             Check.True(Render.Has(next, $"Total ${money:N0}"), "the money moved into Red's total");
         });
 
-        run("toss-up screens: the TV shows the theme and prize but no letters, phones get a buzzer, the emcee gets the controls", () =>
+        run("toss-up screens: the TV shows just the dollar value but no letters, phones get a buzzer, the emcee gets the controls", () =>
         {
             var quick = new[] { new WheelQuickSet("q1", "Things With Wheels", ["BICYCLE", "SKATEBOARD", "ROLLER COASTER"]) };
             var t = new WheelTable(["BREAK THE ICE", "A PIECE OF CAKE", "FRESH FALLEN SNOW", "THE GRAND CANYON", "HOMEMADE APPLE PIE", "A QUIET LAKE CABIN"], quick: quick);
             for (var i = 0; i < 2; i++) { Check.Ok(t.Game.SkipPuzzle(t.Emcee)); Check.Ok(t.Game.Continue(t.Emcee)); }
 
             var tv = Render.WfTv(t, watching: true);
-            Check.True(Render.ShowsAnyCase(tv, "Things With Wheels") && Render.Has(tv, "$1,000"), "the theme and the prize are on the TV");
+            Check.True(Render.Has(tv, "$1,000"), "the TV shows just the dollar value");
             Check.True(!Render.Has(tv, "BICYCLE"), "the answer isn't");
             Check.True(Render.Has(Render.WfEmcee(t), "Start the toss-up") && Render.Has(Render.WfEmcee(t), "BICYCLE"), "the emcee can start it and sees the answer");
             Check.True(!Render.Has(Render.WfPlayer(t, 0), "wf-buzz"), "no buzzer until it starts");

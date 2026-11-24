@@ -14,7 +14,7 @@
     @if (!string.IsNullOrEmpty(Snapshot.Answer))
     {
         <section class="card wf-answer-card">
-            <div class="muted">@Snapshot.Category@(Snapshot.Prize > 0 ? $" · ${Snapshot.Prize:N0}" : "")</div>
+            <div class="muted">@(Snapshot.Prize > 0 ? $"${Snapshot.Prize:N0}" : Snapshot.Category)</div>
             <div class="wf-answer">@Snapshot.Answer</div>
         </section>
     }
