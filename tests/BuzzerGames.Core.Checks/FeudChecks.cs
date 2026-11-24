@@ -808,7 +808,7 @@ static class FeudChecks
                 }
 
                 Check.True(bank.TryDeal(new Random(3), FeudRules.BoardsPerGame, FeudRules.ShortBoardsPerGame, out var dealt, out _), "dealt");
-                Check.Equal(FeudRules.ShortBoardsPerGame, dealt.Count(b => b.Answers.Count <= FeudRules.ShortBoardAnswers), "four short boards in a deal");
+                Check.Equal(FeudRules.ShortBoardsPerGame, dealt.Count(b => b.Answers.Count <= FeudRules.ShortBoardAnswers), "the short boards in a deal");
                 Check.Equal(FeudRules.BoardsPerGame, dealt.Count, "a full deal");
 
                 // A bank with no short boards at all still plays.

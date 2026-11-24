@@ -15,7 +15,7 @@ public static class FeudRules
     public const double FastSecondsSecond = 25;      // the second, who has had longer to think about it
     public const int BoardsPerGame = 17;             // up to 12 regular rounds plus the 5 for Fast Money
     public const int ShortBoardAnswers = 4;          // a board with this many answers or fewer is a short one, saved for the triple rounds
-    public const int ShortBoardsPerGame = 4;         // short boards dealt per game (the triple rounds 4 to 7; after that any board will do)
+    public const int ShortBoardsPerGame = 3;         // short boards dealt per game: two triple rounds at most, plus a spare for a skip
     public const int MinBoardsPerGame = 9;           // 4 regular rounds plus Fast Money
     public const int QuestionMaxLength = 160;
     public const int AnswerMaxLength = 40;
