@@ -44,7 +44,8 @@ public sealed record FeudFastInfo(
     int TotalShown,
     int Total,
     int Goal,
-    bool Won);
+    bool Won,
+    int Buzzes);                                 // how many times the emcee has hit the buzzer in Fast Money, so a screen can tell a new one happened
 
 public sealed record FeudSnapshot(
     string Code,

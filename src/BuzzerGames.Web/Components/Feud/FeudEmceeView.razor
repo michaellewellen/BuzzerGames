@@ -121,18 +121,18 @@
                 <p class="fd-e-qno">Question @(fast.Question + 1) of @FeudRules.FastQuestions · @fast.Players[fast.Player]@(fast.TimeUp ? " · TIME IS UP" : "")</p>
                 <h2>@fast.QuestionText</h2>
             </section>
-            <p class="fd-e-hint">Tap the survey answer they said:</p>
-            <div class="fd-e-list">
-                @foreach (var a in fast.Board)
-                {
-                    <button class="fd-e-ans" @onclick="() => Do(Game.FastPick(Token, a.Rank - 1))"><b>@a.Rank</b> @a.Text <em>@a.Points</em></button>
-                }
-            </div>
-            <p class="fd-e-hint">Not on the list? Type what they said:</p>
+            <p class="fd-e-hint">Type what they said, then tap the survey answer it counts as. The board shows their word and scores that answer's points. Typed and not on the list? Tap Enter for a miss.</p>
             <div class="fd-e-type">
                 <input class="text-input" placeholder="What they said" maxlength="@FeudRules.AnswerMaxLength" @bind="_typed" @bind:event="oninput" @onkeydown="OnTypeKey" />
                 <button class="btn" @onclick="Type">Enter</button>
             </div>
+            <div class="fd-e-list">
+                @foreach (var a in fast.Board)
+                {
+                    <button class="fd-e-ans" @onclick="() => Pick(a.Rank - 1)"><b>@a.Rank</b> @a.Text <em>@a.Points</em></button>
+                }
+            </div>
+            <button class="btn fd-e-strike" @onclick="() => Do(Game.FastBuzzer(Token))">BUZZER: try again</button>
             <div class="fd-e-pair">
                 <button class="btn" @onclick="() => Do(Game.FastPass(Token))">Pass</button>
                 <button class="btn btn-quiet" @onclick="() => Do(Game.EndFastTurn(Token))">End turn</button>
@@ -184,6 +184,12 @@
         FeudPhase.FastIntro or FeudPhase.FastReady or FeudPhase.FastPlay or FeudPhase.FastReveal or FeudPhase.FastOver => "Fast Money",
         _ => $"Round {Snapshot.Round}" + (Snapshot.Multiplier > 1 ? $" · ×{Snapshot.Multiplier}" : "")
     };
+
+    private void Pick(int index)
+    {
+        Do(Game.FastPick(Token, index, _typed));
+        if (_error is null) _typed = "";
+    }
 
     private void Do(Result result) => _error = result.Ok ? null : result.Error;
 

@@ -485,6 +485,44 @@ static class FeudChecks
             Check.Ok(t.Game.FastPick(t.Emcee, 0));
         });
 
+        run("feud: the emcee can type what was said and count it as a survey answer, so 'Sofa' scores as 'Couch'", () =>
+        {
+            var t = new FeudTable();
+            t.WinTheGame(0);
+            t.BeginFast();
+            Check.Ok(t.Game.StartFastClock(t.Emcee));
+            Check.Ok(t.Game.FastPick(t.Emcee, 2, "Sofa"));                       // the third answer is worth 20 in the test bank
+            var entry = t.S.Fast!.Entries[0][0];
+            Check.Equal("Sofa", entry.Text, "the board shows what they said");
+            Check.Equal(20, entry.Points, "and scores the survey answer's points");
+            Check.Ok(t.Game.FastPick(t.Emcee, 1));                               // tapping with nothing typed uses the survey wording
+            Check.True(t.S.Fast!.Entries[0][1].Text.EndsWith("answer 2"), "no typed word: the survey's wording");
+            Check.Ok(t.Game.FastType(t.Emcee, "Banana"));
+            Check.Equal(0, t.S.Fast!.Entries[0][2].Points, "typed and not on the list: a miss");
+            Check.Ok(t.Game.FastType(t.Emcee, "q13 answer 4"));
+            Check.Equal(12, t.S.Fast!.Entries[0][3].Points, "typed exactly as a survey answer: that answer's points");
+        });
+
+        run("feud: the second player can't land on the same survey answer even in other words, and the buzzer records nothing", () =>
+        {
+            var t = new FeudTable();
+            t.WinTheGame(0);
+            t.BeginFast();
+            Check.Ok(t.Game.StartFastClock(t.Emcee));
+            Check.Fails(t.Game.FastBuzzer(Stranger), "a stranger hitting the buzzer");
+            Check.Ok(t.Game.FastPick(t.Emcee, 2, "Couch"));
+            for (var q = 1; q < FeudRules.FastQuestions; q++) Check.Ok(t.Game.FastPick(t.Emcee, 0));
+            Check.Ok(t.Game.StartFastClock(t.Emcee));
+            Check.Fails(t.Game.FastPick(t.Emcee, 2, "Sofa"), "same survey answer in other words");
+            Check.Equal(0, t.S.Fast!.Question, "still on question one");
+            var before = t.S.Fast!.Buzzes;
+            Check.Ok(t.Game.FastBuzzer(t.Emcee));
+            Check.Equal(before + 1, t.S.Fast!.Buzzes, "the buzzer is counted so the TV can sound it");
+            Check.Equal(0, t.S.Fast!.Question, "the buzzer records nothing and the question stays");
+            Check.Ok(t.Game.FastPick(t.Emcee, 1, "Loveseat"));
+            Check.Equal(1, t.S.Fast!.Question, "a different answer moves on");
+        });
+
         run("feud: a pass by the first player doesn't block the second player", () =>
         {
             var t = new FeudTable();

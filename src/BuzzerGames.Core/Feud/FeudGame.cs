@@ -50,6 +50,7 @@ public sealed class FeudGame
         public FastEntry?[] FastEntries = new FastEntry?[FeudRules.FastQuestions * 2];   // [player * 5 + question]
         public DateTime? FastStartedUtc;
         public bool FastTimeUp;
+        public int FastBuzzes;
         public int FastStep;
 
         public string? Message;
@@ -422,36 +423,56 @@ public sealed class FeudGame
         return Result.Success;
     });
 
-    /// <summary>The player's answer matches one of the survey answers: tap it.</summary>
-    public Result FastPick(Guid token, int index) => Run(() =>
+    /// <summary>
+    /// The emcee taps the survey answer that counts for what the player said. Points are that answer's; if <paramref name="said"/> is given it
+    /// is what goes on the board ("Sofa" counting as "Couch"), otherwise the survey answer's own wording is.
+    /// </summary>
+    public Result FastPick(Guid token, int index, string? said = null) => Run(() =>
     {
         if (!IsEmcee(token)) return Result.Fail(NotEmcee);
         if (_s.Phase != FeudPhase.FastPlay) return Result.Fail("Nobody is playing right now.");
         var board = _fast[_s.FastQ];
         if (index < 0 || index >= board.Answers.Count) return Result.Fail("There's no such answer.");
         var answer = board.Answers[index];
-        var dup = FastDuplicate(answer.Text);
+        var spoken = Clean(said, FeudRules.AnswerMaxLength);
+        var text = spoken.Length > 0 ? spoken : answer.Text;
+        var dup = FastDuplicate(text, index);
         if (dup is not null) return Result.Fail(dup);
         Remember();
-        RecordFast(new FastEntry(answer.Text, answer.Points, index));
+        RecordFast(new FastEntry(text, answer.Points, index));
         return Result.Success;
     });
 
-    /// <summary>The emcee typed what the player said. If it matches a survey answer it scores that answer's points; otherwise it scores nothing.</summary>
+    /// <summary>
+    /// The emcee typed what the player said and no survey answer was tapped. An exact match with a survey answer scores its points; anything else
+    /// is a miss (the emcee taps the answer it counts as when it's close enough).
+    /// </summary>
     public Result FastType(Guid token, string? text) => Run(() =>
     {
         if (!IsEmcee(token)) return Result.Fail(NotEmcee);
         if (_s.Phase != FeudPhase.FastPlay) return Result.Fail("Nobody is playing right now.");
         var clean = Clean(text, FeudRules.AnswerMaxLength);
         if (clean.Length == 0) return Result.Fail("Type what they said, or tap Pass.");
-        var dup = FastDuplicate(clean);
-        if (dup is not null) return Result.Fail(dup);
 
         var board = _fast[_s.FastQ];
         var key = FeudContentRules.Normalize(clean);
         var match = board.Answers.Select((a, i) => (a, i)).FirstOrDefault(x => FeudContentRules.Normalize(x.a.Text) == key);
+        var dup = FastDuplicate(clean, match.a is null ? None : match.i);
+        if (dup is not null) return Result.Fail(dup);
         Remember();
         RecordFast(match.a is null ? new FastEntry(clean, 0, None) : new FastEntry(clean, match.a.Points, match.i));
+        return Result.Success;
+    });
+
+    /// <summary>
+    /// The emcee decides an answer isn't acceptable (a repeat, a non-answer) and hits the buzzer: the TV makes the noise and nothing is recorded,
+    /// so the player is asked again and the clock keeps running.
+    /// </summary>
+    public Result FastBuzzer(Guid token) => Run(() =>
+    {
+        if (!IsEmcee(token)) return Result.Fail(NotEmcee);
+        if (_s.Phase != FeudPhase.FastPlay) return Result.Fail("Nobody is playing right now.");
+        _s.FastBuzzes++;
         return Result.Success;
     });
 
@@ -465,14 +486,17 @@ public sealed class FeudGame
         return Result.Success;
     });
 
-    /// <summary>The second player can't say what the first said.</summary>
-    private string? FastDuplicate(string text)
+    /// <summary>The second player can't say what the first said, or anything that counts as the same survey answer.</summary>
+    private string? FastDuplicate(string text, int index)
     {
         if (_s.FastPlayer != 1) return null;
         var first = _s.FastEntries[_s.FastQ];
         if (first is null || first.Text == NoAnswer) return null;
-        return FeudContentRules.Normalize(first.Text) == FeudContentRules.Normalize(text)
-            ? $"\"{first.Text}\" was already said. Ask for another answer." : null;
+        if (FeudContentRules.Normalize(first.Text) == FeudContentRules.Normalize(text))
+            return $"\"{first.Text}\" was already said. Ask for another answer.";
+        if (index >= 0 && first.Index == index)
+            return $"That counts as the same survey answer as \"{first.Text}\". Ask for another answer.";
+        return null;
     }
 
     private void RecordFast(FastEntry entry)
@@ -633,7 +657,7 @@ public sealed class FeudGame
             s.FastTeam, s.FastNames, s.FastPlayer, s.FastQ, playing ? _fast[s.FastQ].Question : "", boardInfo, entries,
             seconds, left, s.FastStartedUtc?.Ticks.ToString() ?? "", s.FastTimeUp,
             s.FastStep, s.Phase is FeudPhase.FastReveal or FeudPhase.FastOver ? FastTotalShown() : 0, total, FeudRules.FastGoal,
-            s.Phase == FeudPhase.FastOver && total >= FeudRules.FastGoal);
+            s.Phase == FeudPhase.FastOver && total >= FeudRules.FastGoal, s.FastBuzzes);
     }
 
     // ---- Plumbing ------------------------------------------------------------------------

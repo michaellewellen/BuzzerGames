@@ -125,6 +125,11 @@
 
         if (s.Fast is { } now && p.Fast is { } before)
         {
+            if (now.Buzzes > before.Buzzes)
+            {
+                _ = Sound("strike");
+                _ = FlashStrikeAsync(1);
+            }
             if (s.Phase == FeudPhase.FastReveal && now.RevealStep > before.RevealStep) _ = Sound(FastRevealSound(now, now.RevealStep - 1));
             else if (s.Phase == FeudPhase.FastOver && p.Phase == FeudPhase.FastReveal)
             {
