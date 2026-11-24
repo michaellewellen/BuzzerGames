@@ -1,4 +1,4 @@
-// Match Game content. Replace all of this with your own.
+// Match Game starter content: the family names and the Super Match blanks. There are no starter questions on purpose: add your own at /match-game/questions.
 //
 // names:      first names that fill the {name} in a question (family, friends). Each name is used once before any repeats.
 //             The questions avoid "he" and "she" on purpose, so any name fits any question.
@@ -15,24 +15,7 @@
     "Marge",
     "Walt"
   ],
-  "questions": [
-    "{name} is so cheap, there's a ___ in the pantry that expired in 1998.",
-    "The one thing {name} is terrible at hiding is ___.",
-    "{name}'s favorite thing to say at a restaurant is, \"Is there anything on the menu with ___?\"",
-    "Nobody wants to be stuck in an elevator with {name} because of the ___.",
-    "{name} once got in trouble for putting ___ in the microwave.",
-    "At 3 a.m., {name} can be found in the kitchen eating ___.",
-    "{name} would win a gold medal for ___.",
-    "If {name} ever became famous, it would be for ___.",
-    "The strangest thing in {name}'s car right now is ___.",
-    "Whenever {name} hosts a party, there's always too much ___.",
-    "{name} takes forever to get ready because of ___.",
-    "{name} is so stubborn, even a ___ couldn't change that mind.",
-    "{name}'s secret talent is ___.",
-    "The worst gift {name} ever gave anyone was ___.",
-    "{name} spends way too much money on ___.",
-    "The first thing {name} would grab in a fire is ___."
-  ],
+  "questions": [],
   "supers": [
     {
       "text": "Super ___",

@@ -249,17 +249,44 @@ static class MatchWebChecks
             }
         });
 
-        run("mg wiring: the app's own service setup hands Match Game the real question bank", () =>
+        run("mg wiring: the app's own service setup hands Match Game the data-folder bank, which starts with no questions", () =>
         {
-            var services = new ServiceCollection().AddMatchGame().BuildServiceProvider();
-            var rooms = (MatchRoomManager)services.GetService(typeof(MatchRoomManager))!;
-            var game = rooms.Create();
-            var emcee = game.JoinEmcee("Host").Token;
-            game.JoinCelebrity("Ann"); game.JoinCelebrity("Bob");
-            Check.Ok(game.Start(emcee));
-            Check.True(game.Snapshot().QuestionText.Contains("___") && !game.Snapshot().QuestionText.Contains("{name}"), $"a real question with a name in it: {game.Snapshot().QuestionText}");
-            var tile = BuzzerGames.Web.Games.GameCatalog.All.Single(g => g.Name == "Match Game");
-            Check.True(tile.IsPlayable && tile.Url == "/match-game", "the Match Game tile points at /match-game");
+            var dir = Path.Combine(Path.GetTempPath(), "match-web-" + Guid.NewGuid().ToString("N"));
+            Environment.SetEnvironmentVariable("MATCH_DATA_DIR", dir);
+            try
+            {
+                var services = new ServiceCollection()
+                    .AddSingleton<Microsoft.Extensions.Hosting.IHostEnvironment>(new Env())
+                    .AddMatchGame().BuildServiceProvider();
+                var store = services.GetRequiredService<FolderMatchContent>();
+                Check.True(ReferenceEquals(store, services.GetRequiredService<IMatchContent>()), "one store for the game and the questions page");
+                Check.Equal(0, store.QuestionCount, "no sample questions");
+
+                var rooms = services.GetRequiredService<MatchRoomManager>();
+                var game = rooms.Create();
+                var emcee = game.JoinEmcee("Host").Token;
+                game.JoinCelebrity("Ann"); game.JoinCelebrity("Bob");
+                Check.Fails(game.Start(emcee), "no questions yet");
+
+                Check.True(store.AddQuestion("{name} is so dumb, he ___.").Ok, "a question added on the page");
+                Check.Ok(game.Start(emcee));
+                Check.True(game.Snapshot().QuestionText.Contains("___") && !game.Snapshot().QuestionText.Contains("{name}"), $"your question with a name in it: {game.Snapshot().QuestionText}");
+                var tile = BuzzerGames.Web.Games.GameCatalog.All.Single(g => g.Name == "Match Game");
+                Check.True(tile.IsPlayable && tile.Url == "/match-game", "the Match Game tile points at /match-game");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("MATCH_DATA_DIR", null);
+                if (Directory.Exists(dir)) Directory.Delete(dir, true);
+            }
         });
+    }
+
+    private sealed class Env : Microsoft.Extensions.Hosting.IHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = "Production";
+        public string ApplicationName { get; set; } = "Test";
+        public string ContentRootPath { get; set; } = Path.GetTempPath();
+        public Microsoft.Extensions.FileProviders.IFileProvider ContentRootFileProvider { get; set; } = new Microsoft.Extensions.FileProviders.NullFileProvider();
     }
 }

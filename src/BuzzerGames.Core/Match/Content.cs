@@ -25,6 +25,8 @@ public sealed record SuperQuestion(string Text, IReadOnlyList<IReadOnlyList<stri
 public interface IMatchContent
 {
     IReadOnlyList<string> Names { get; }
+    int QuestionCount { get; }
+    int SuperCount { get; }
     IReadOnlyList<MatchQuestion> CreateQuestions(Random rng, int count);
     IReadOnlyList<SuperQuestion> CreateSupers(Random rng, int count);
 }
@@ -104,6 +106,10 @@ public sealed class JsonMatchContent : IMatchContent
     }
 
     public IReadOnlyList<string> Names => _names;
+    public IReadOnlyList<MatchQuestion> Questions => _questions;
+    public IReadOnlyList<SuperQuestion> Supers => _supers;
+    public int QuestionCount => _questions.Count;
+    public int SuperCount => _supers.Count;
 
     public IReadOnlyList<MatchQuestion> CreateQuestions(Random rng, int count) => Deal(_questions, rng, count, "questions");
 
@@ -122,6 +128,8 @@ public sealed class JsonMatchContent : IMatchContent
 public sealed class FixedMatchContent : IMatchContent
 {
     public IReadOnlyList<string> Names { get; } = ["Ann", "Bob", "Cy"];
+    public int QuestionCount => 100;
+    public int SuperCount => 100;
 
     public IReadOnlyList<MatchQuestion> CreateQuestions(Random rng, int count) =>
         Enumerable.Range(1, count).Select(i => new MatchQuestion($"Question {i} about {{name}}: ___")).ToList();

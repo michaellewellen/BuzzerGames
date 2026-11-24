@@ -100,9 +100,7 @@ just know which team they are on and speak their answers out loud. Only the emce
 
 Celebrities who join after the start play from the next question. After the game the emcee can play again with the same panel.
 
-**Question bank:** `src/BuzzerGames.Core/Data/Match/match-game.json`. `names` are the family first names that fill `{name}` in each of the `questions`.
-Each of the `supers` has a blank (`text`) and `answers`: three lists, most popular first, each holding the accepted spellings. The computer only
-*suggests* which row an answer matches, by spelling; the emcee always decides. The Super Match blanks and rankings are my own modernized estimates, informed by the show's real ranked answers (see Credits). Replace any you disagree with.
+**Question bank:** there are no built-in questions: write your own at `/match-game/questions` (behind the same admin passcode as the other editors; there is a link on the Match Game start page). Write each question with a blank (`___`) and `{name}` where a family name goes, add them one at a time or paste a list (one per line), and edit the family names and the Super Match blanks on the same page. A game can't start until there is at least one question; with a small bank it just repeats some. The bank lives in `match/bank.json` in the data folder (`MATCH_DATA_DIR`, else `FLOOR_DATA_DIR`, so on Railway it sits on the same Volume and survives deploys). `src/BuzzerGames.Core/Data/Match/match-game.json` only holds the starter names and Super Match blanks used the first time the game runs.
 
 ## How a Card Sharks game works
 
@@ -287,7 +285,7 @@ src/BuzzerGames.Core/          The game itself: plain C#, no web code
   Match/                         the Match Game engine, question dealing, room manager
   Floor/                         The Floor: engine (FloorGame), floor shape, topic folder store, room manager
   Data/Floor/                    the built-in text topics (acronyms, book titles, movie quotes)
-  Data/Match/                    the question bank: names, questions, Super Match blanks (match-game.json)
+  Data/Match/                    the starter names and Super Match blanks (match-game.json); questions are added on the questions page
 
 src/BuzzerGames.Web/           The website
   Program.cs                     startup and wiring

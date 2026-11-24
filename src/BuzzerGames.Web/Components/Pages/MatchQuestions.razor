@@ -1,0 +1,245 @@
+@page "/match-game/questions"
+@inject FolderMatchContent Store
+@inject FloorAdminAccess Access
+@inject IJSRuntime JS
+
+<PageTitle>Match Game · Questions</PageTitle>
+
+@*
+    Where Match Game's questions are written: the fill-in-the-blanks the celebrities answer, the family names that replace {name}, and the
+    Super Match blanks. Locked behind FLOOR_ADMIN_PASSCODE on Railway, the same passcode as the other admin pages.
+*@
+
+<main class="fl-admin">
+    <header class="fl-admin-head">
+        <h1>Match Game · Questions</h1>
+        <a href="/match-game">Back to Match Game</a>
+    </header>
+
+    @if (Access.Problem is not null)
+    {
+        <section class="card"><p class="error">@Access.Problem</p></section>
+    }
+    else if (!_unlocked)
+    {
+        <section class="card">
+            <h2>Passcode</h2>
+            <input class="text-input" type="password" placeholder="Passcode" @bind="_pass" @bind:event="oninput" @onkeydown="OnPassKey" />
+            <button class="btn" @onclick="Unlock">Unlock</button>
+            @if (_passError is not null) { <p class="error">@_passError</p> }
+        </section>
+    }
+    else
+    {
+        var counts = Store.Counts();
+        <section class="card">
+            <h2>The bank</h2>
+            <p><strong>@counts.Questions</strong> questions · <strong>@counts.Supers</strong> Super Match blanks · <strong>@counts.Names</strong> names</p>
+            @if (counts.Questions == 0)
+            {
+                <p class="error">There are no questions yet, so a game can't start. Add some below.</p>
+            }
+            else if (counts.Questions < 12)
+            {
+                <p class="muted">A game asks up to 30 questions, so with this few it will repeat some. The more the better.</p>
+            }
+            @if (_message is not null) { <p class="@(_messageIsError ? "error" : "hint")">@_message</p> }
+        </section>
+
+        <section class="card">
+            <h2>Add questions</h2>
+            <p class="muted">
+                Write the question with a blank for the panel to fill in: <code>___</code>. Put <code>{name}</code> where a family name goes, and it becomes
+                the next name on the list below (everybody gets a turn before anyone repeats). Or just write the name in.
+                Example: <code>{name} is so dumb, he thought a ___ was a kind of fruit.</code>
+            </p>
+            <input class="text-input" placeholder="@("{name} is so dumb, he ___.")" maxlength="@FolderMatchContent.QuestionMaxLength" @bind="_question" @bind:event="oninput" @onkeydown="OnQuestionKey" />
+            <button class="btn" @onclick="AddQuestion">Add</button>
+
+            <h3>Or paste a whole list</h3>
+            <p class="muted">One question per line. Blank lines and lines starting with # are skipped; lines with problems are listed and the rest are still added.</p>
+            <textarea class="text-input fl-textarea" rows="8" placeholder="@("{name} is so dumb, he ___.\n{name} is so cheap, he ___.")" @bind="_paste"></textarea>
+            <button class="btn" @onclick="Import">Add them all</button>
+            @if (_report is not null)
+            {
+                <div class="wf-report">
+                    <p class="hint">Added @_report.Added@(_report.Duplicates > 0 ? $", skipped {_report.Duplicates} already in the bank" : "")@(_report.Problems.Count > 0 ? $", {_report.Problems.Count} need fixing" : "").</p>
+                    @if (_report.Problems.Count > 0)
+                    {
+                        <ul>@foreach (var problem in _report.Problems) { <li class="error">@problem</li> }</ul>
+                    }
+                </div>
+            }
+        </section>
+
+        <section class="card">
+            <h2>Your questions</h2>
+            @if (_questions.Count == 0)
+            {
+                <p class="muted">None yet.</p>
+            }
+            else
+            {
+                <table class="wf-table">
+                    @foreach (var q in _questions.AsEnumerable().Reverse().Take(MaxRows))
+                    {
+                        <tr>
+                            <td class="wf-text">@q.Text</td>
+                            <td><button class="btn btn-quiet btn-small" @onclick="() => DeleteQuestion(q.Id)">Delete</button></td>
+                        </tr>
+                    }
+                </table>
+                <p class="muted">Newest first@(_questions.Count > MaxRows ? $", the latest {MaxRows} of {_questions.Count} shown" : "").</p>
+            }
+        </section>
+
+        <section class="card">
+            <h2>Family names</h2>
+            <p class="muted">These fill in <code>{name}</code>. Separate them with commas or new lines.</p>
+            <textarea class="text-input fl-textarea" rows="3" @bind="_names"></textarea>
+            <button class="btn" @onclick="SaveNames">Save the names</button>
+        </section>
+
+        <section class="card">
+            <h2>Super Match blanks</h2>
+            <p class="muted">
+                The final round's "Super ___". Enter the three most popular answers, best first ($500, $250, $100). Beside each, other spellings that
+                should count as the same answer, separated by commas.
+            </p>
+            <input class="text-input" placeholder="Super ___" maxlength="@FolderMatchContent.QuestionMaxLength" @bind="_superText" @bind:event="oninput" />
+            @for (var i = 0; i < 3; i++)
+            {
+                var n = i;
+                <div class="fd-e-type">
+                    <input class="text-input" placeholder="Answer @(n + 1)" maxlength="@FolderMatchContent.AnswerMaxLength" value="@_superAnswers[n]" @onchange="e => _superAnswers[n] = e.Value?.ToString() ?? string.Empty" />
+                    <input class="text-input" placeholder="Also counts: ..., ..." value="@_superAlso[n]" @onchange="e => _superAlso[n] = e.Value?.ToString() ?? string.Empty" />
+                </div>
+            }
+            <button class="btn" @onclick="AddSuper">Add the blank</button>
+
+            <details>
+                <summary>@_supers.Count blanks in the bank</summary>
+                <table class="wf-table">
+                    @foreach (var s in _supers.AsEnumerable().Reverse().Take(MaxRows))
+                    {
+                        <tr>
+                            <td class="wf-text">@s.Text<br /><small>@string.Join(" · ", s.Answers.Select(a => a[0]))</small></td>
+                            <td><button class="btn btn-quiet btn-small" @onclick="() => DeleteSuper(s.Id)">Delete</button></td>
+                        </tr>
+                    }
+                </table>
+            </details>
+        </section>
+    }
+</main>
+
+@code {
+    private const int MaxRows = 200;
+
+    private bool _unlocked;
+    private string _pass = "";
+    private string? _passError;
+    private string _question = "";
+    private string _paste = "";
+    private string _names = "";
+    private string _superText = "";
+    private readonly string[] _superAnswers = ["", "", ""];
+    private readonly string[] _superAlso = ["", "", ""];
+    private string? _message;
+    private bool _messageIsError;
+    private MatchImportReport? _report;
+    private IReadOnlyList<MatchStoredQuestion> _questions = [];
+    private IReadOnlyList<MatchStoredSuper> _supers = [];
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Access.Problem is null)
+        {
+            var saved = await JS.InvokeAsync<string?>("bg.getItem", "bg.floor.pass");
+            if (Access.IsAllowed(saved))
+            {
+                _pass = saved ?? "";
+                Open();
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void Open()
+    {
+        _unlocked = true;
+        _names = string.Join(", ", Store.Names);
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        _questions = Store.Questions();
+        _supers = Store.Supers();
+    }
+
+    private async Task Unlock()
+    {
+        if (!Access.IsAllowed(_pass))
+        {
+            _passError = "That isn't the passcode.";
+            return;
+        }
+        _passError = null;
+        Open();
+        await JS.InvokeVoidAsync("bg.setItem", "bg.floor.pass", _pass);
+    }
+
+    private async Task OnPassKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Unlock();
+    }
+
+    private void OnQuestionKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") AddQuestion();
+    }
+
+    private void Say(MatchOpResult result, string ok)
+    {
+        _message = result.Ok ? ok : result.Error;
+        _messageIsError = !result.Ok;
+        Refresh();
+    }
+
+    private void AddQuestion()
+    {
+        var result = Store.AddQuestion(_question);
+        if (result.Ok) _question = "";
+        Say(result, "Added.");
+    }
+
+    private void Import()
+    {
+        _report = Store.ImportQuestions(_paste);
+        if (_report.Problems.Count == 0) _paste = "";
+        _message = null;
+        Refresh();
+    }
+
+    private void DeleteQuestion(string id) => Say(Store.DeleteQuestion(id), "Deleted.");
+
+    private void SaveNames() => Say(Store.SetNames(_names), "Names saved.");
+
+    private void AddSuper()
+    {
+        var answers = Enumerable.Range(0, 3)
+            .Select(i => (IReadOnlyList<string>)new[] { _superAnswers[i] }.Concat((_superAlso[i] ?? "").Split(',')).ToList())
+            .ToList();
+        var result = Store.AddSuper(_superText, answers);
+        if (result.Ok)
+        {
+            _superText = "";
+            Array.Fill(_superAnswers, "");
+            Array.Fill(_superAlso, "");
+        }
+        Say(result, "Added.");
+    }
+
+    private void DeleteSuper(string id) => Say(Store.DeleteSuper(id), "Deleted.");
+}

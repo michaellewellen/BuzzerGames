@@ -153,15 +153,23 @@ public sealed class MatchGame
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can start the game.");
         if (_phase != MatchPhase.Lobby) return Result.Fail("The game has already started.");
         if (_celebs.Count < MinCelebrities) return Result.Fail($"You need at least {MinCelebrities} celebrities.");
+        if (BankProblem() is { } problem) return Result.Fail(problem);
         BeginGame();
         return Result.Success;
     });
+
+    /// <summary>The game can't start from a bank with nothing to ask.</summary>
+    private string? BankProblem() =>
+        _content.QuestionCount == 0 ? "There are no questions yet. Add some on the questions page (/match-game/questions)."
+        : _content.SuperCount == 0 ? "There are no Super Match blanks. Add some on the questions page (/match-game/questions)."
+        : null;
 
     /// <summary>After the game: play again with the same panel.</summary>
     public Result Restart(Guid emceeToken) => Run(() =>
     {
         if (!IsEmcee(emceeToken)) return Result.Fail("Only the emcee can do that.");
         if (_phase != MatchPhase.GameOver) return Result.Fail("The game isn't over yet.");
+        if (BankProblem() is { } problem) return Result.Fail(problem);
         BeginGame();
         return Result.Success;
     });

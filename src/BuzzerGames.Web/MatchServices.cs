@@ -5,12 +5,20 @@ namespace BuzzerGames.Web;
 public static class MatchServices
 {
     /// <summary>
-    /// Registers Match Game. The content is built with a factory on purpose, for the same reason as Password Plus: the JSON source
-    /// has a second constructor that takes a string, and a container left to choose would hand it an empty one.
+    /// Registers Match Game. Its questions, family names and Super Match blanks live in <c>match/bank.json</c> inside the same data folder
+    /// The Floor, Wheel, Pyramid and Family Feud use, so on Railway they sit on the same Volume. Set MATCH_DATA_DIR only to put them elsewhere.
     /// </summary>
     public static IServiceCollection AddMatchGame(this IServiceCollection services)
     {
-        services.AddSingleton<IMatchContent>(_ => new JsonMatchContent());
+        services.AddSingleton(sp =>
+        {
+            var env = sp.GetRequiredService<IHostEnvironment>();
+            var folder = Environment.GetEnvironmentVariable("MATCH_DATA_DIR");
+            if (string.IsNullOrWhiteSpace(folder)) folder = Environment.GetEnvironmentVariable("FLOOR_DATA_DIR");
+            if (string.IsNullOrWhiteSpace(folder)) folder = Path.Combine(env.ContentRootPath, "floor-data");
+            return new FolderMatchContent(folder);
+        });
+        services.AddSingleton<IMatchContent>(sp => sp.GetRequiredService<FolderMatchContent>());
         services.AddSingleton<MatchRoomManager>();
         return services;
     }

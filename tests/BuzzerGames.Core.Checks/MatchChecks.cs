@@ -12,9 +12,9 @@ sealed class MatchTable
     public Guid[] Tokens { get; }
     public Guid[] Ids { get; }
 
-    public MatchTable(int celebrities = 6, int seed = 1, bool start = true)
+    public MatchTable(int celebrities = 6, int seed = 1, bool start = true, IMatchContent? content = null)
     {
-        Game = new MatchGame("TEST", new FixedMatchContent(), new Random(seed));
+        Game = new MatchGame("TEST", content ?? new FixedMatchContent(), new Random(seed));
         Emcee = Game.JoinEmcee("Host").Token;
         Tokens = Enumerable.Range(1, celebrities).Select(i => Game.JoinCelebrity("Cel" + i).Token).ToArray();
         Ids = Tokens.Select(t => Game.GetSeat(t).PlayerId!.Value).ToArray();
@@ -438,18 +438,91 @@ static class MatchChecks
             Check.Equal(0, MatchText.SuggestRank(q, ""), "nothing typed");
         });
 
-        run("match: the real question bank loads, and every Super Match blank has three answers", () =>
+        run("match: the starter bank has family names and Super Match blanks, and no sample questions", () =>
         {
             var content = new JsonMatchContent();
             Check.True(content.Names.Count >= 2, "names");
+            Check.Equal(0, content.QuestionCount, "the sample questions are gone");
             var rng = new Random(1);
-            var questions = content.CreateQuestions(rng, 40);
-            Check.Equal(40, questions.Count, "enough questions even for a long game");
-            Check.True(questions.All(q => q.Text.Contains("___")), "every question has a blank");
             var supers = content.CreateSupers(rng, 20);
             Check.True(supers.All(s => s.Text.Contains("___") && s.Answers.Count == 3 && s.Answers.All(a => a.Count > 0)), "every Super blank has three answers");
             var bad = new JsonMatchContent("""{ "names": ["A"], "questions": ["Q ___"], "supers": [ { "text": "Only two ___", "answers": [["x"],["y"]] }, { "text": "Good ___", "answers": [["a"],["b"],["c"]] } ] }""");
             Check.Equal(1, bad.CreateSupers(rng, 5).Select(s => s.Text).Distinct().Count(), "a Super blank without three answers is ignored");
+        });
+
+        run("match bank: your own questions are added, checked, listed, deleted and kept across a restart", () =>
+        {
+            var folder = Path.Combine(Path.GetTempPath(), "match-test-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var bank = new FolderMatchContent(folder);
+                Check.Equal(0, bank.QuestionCount, "starts with no questions");
+                Check.True(bank.SuperCount > 0 && bank.Names.Count >= 2, "but with the starter names and Super blanks");
+
+                Check.True(bank.AddQuestion("{name} is so dumb, he thought a ___ was a fruit.").Ok, "added");
+                Check.True(!bank.AddQuestion("No blank here").Ok, "a question needs a blank");
+                Check.True(!bank.AddQuestion("   ").Ok, "and some text");
+                Check.True(!bank.AddQuestion("{NAME} is so dumb, he thought a ___ was a FRUIT.").Ok, "duplicates (any case) are refused");
+                Check.True(!bank.AddQuestion(new string('x', 230) + " ___").Ok, "too long");
+
+                var report = bank.ImportQuestions("# my list\n{name} is so cheap, he ___.\n\nbroken line\n{name} is so cheap, he ___.\nDonald once ___ at church.");
+                Check.Equal(2, report.Added, "two new ones from the paste");
+                Check.Equal(1, report.Duplicates, "one repeated");
+                Check.Equal(1, report.Problems.Count, "one without a blank, listed");
+                Check.True(report.Problems[0].StartsWith("Line 4"), "with its line number");
+                Check.Equal(3, bank.QuestionCount, "three in all");
+
+                Check.Equal(3, bank.CreateQuestions(new Random(1), 3).Select(q => q.Text).Distinct().Count(), "dealt");
+                Check.Equal(30, bank.CreateQuestions(new Random(1), 30).Count, "a small bank is dealt again to fill a long game");
+
+                var again = new FolderMatchContent(folder);
+                Check.Equal(3, again.QuestionCount, "they are still there after a restart");
+                var id = again.Questions().First(q => q.Text.Contains("church")).Id;
+                Check.True(again.DeleteQuestion(id).Ok && !again.DeleteQuestion(id).Ok, "deleted once");
+                Check.Equal(2, new FolderMatchContent(folder).QuestionCount, "and the delete is kept");
+            }
+            finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
+        });
+
+        run("match bank: names and Super Match blanks can be edited", () =>
+        {
+            var folder = Path.Combine(Path.GetTempPath(), "match-test-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var bank = new FolderMatchContent(folder);
+                Check.True(bank.SetNames("Grandpa Joe, Aunt May\nDonald; donald").Ok, "names saved");
+                Check.True(bank.Names.SequenceEqual(["Grandpa Joe", "Aunt May", "Donald"]), "split, cleaned and de-duplicated");
+                Check.True(!bank.SetNames(" , ").Ok, "at least one name");
+
+                var before = bank.SuperCount;
+                Check.True(bank.AddSuper("Super ___ night", [["Movie", "Movies"], ["Pizza"], ["Game", "Games", "A game"]]).Ok, "super added");
+                Check.Equal(before + 1, bank.SuperCount, "counted");
+                Check.True(!bank.AddSuper("no blank", [["a"], ["b"], ["c"]]).Ok, "a Super blank needs ___");
+                Check.True(!bank.AddSuper("Super ___ two", [["a"], ["b"]]).Ok, "three answers");
+                Check.True(!bank.AddSuper("Super ___ three", [["a"], [" "], ["c"]]).Ok, "no empty answers");
+                var added = bank.Supers().Last();
+                Check.True(added.Answers[0].SequenceEqual(["Movie", "Movies"]), "alternate spellings kept, the first is shown");
+                Check.True(bank.DeleteSuper(added.Id).Ok, "deleted");
+                Check.Equal(before, new FolderMatchContent(folder).SuperCount, "and kept");
+            }
+            finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
+        });
+
+        run("match: a game won't start (or restart) from an empty question bank, and says why", () =>
+        {
+            var folder = Path.Combine(Path.GetTempPath(), "match-test-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var bank = new FolderMatchContent(folder);
+                var t = new MatchTable(start: false, content: bank);
+                var failed = t.Game.Start(t.Emcee);
+                Check.Fails(failed, "starting with no questions");
+                Check.True(failed.Error!.Contains("no questions"), "and it says so");
+                Check.True(bank.AddQuestion("{name} is so ___.").Ok, "one question");
+                Check.Ok(t.Game.Start(t.Emcee));
+                Check.Equal(MatchPhase.Ready, t.S.Phase, "it plays");
+            }
+            finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
         });
 
         run("match: whole games with random play and random panels always finish, with consistent scores", () =>
