@@ -499,7 +499,7 @@ static class FeudChecks
             Check.True(t.S.Fast!.Entries[0][1].Text.EndsWith("answer 2"), "no typed word: the survey's wording");
             Check.Ok(t.Game.FastType(t.Emcee, "Banana"));
             Check.Equal(0, t.S.Fast!.Entries[0][2].Points, "typed and not on the list: a miss");
-            Check.Ok(t.Game.FastType(t.Emcee, "q13 answer 4"));
+            Check.Ok(t.Game.FastType(t.Emcee, t.S.Fast!.Board[3].Text.ToLowerInvariant()));
             Check.Equal(12, t.S.Fast!.Entries[0][3].Points, "typed exactly as a survey answer: that answer's points");
         });
 
