@@ -3,16 +3,26 @@
 <PageTitle>BuzzerGames</PageTitle>
 
 <main class="picker">
-    <h1 class="site-title">BuzzerGames</h1>
+    <h1 class="site-title"><img src="images/games/buzzr.png" alt="BUZZR" /></h1>
     <p class="tagline">Pick a game</p>
 
     <div class="game-grid">
         @foreach (var game in GameCatalog.All)
         {
+            var face = game.Logo is null
+                ? null
+                : $"background: {game.Backdrop}";
             @if (game.IsPlayable)
             {
-                <a class="game-tile" href="@game.Url">
-                    <h2>@game.Name</h2>
+                <a class="game-tile" href="@game.Url" title="@game.Blurb">
+                    @if (game.Logo is not null)
+                    {
+                        <span class="game-art @game.Fit" style="@face"><img src="images/games/@game.Logo" alt="@game.Name" loading="lazy" /></span>
+                    }
+                    else
+                    {
+                        <h2>@game.Name</h2>
+                    }
                     <p>@game.Blurb</p>
                 </a>
             }
