@@ -11,10 +11,10 @@ sealed class FeudTable
     public Guid Emcee { get; }
     public FixedFeudContent Content { get; }
 
-    public FeudTable(int boards = 20, bool start = true, double firstSeconds = 20, double secondSeconds = 25, int seed = 1)
+    public FeudTable(int boards = 20, bool start = true, double firstSeconds = 20, double secondSeconds = 25, int seed = 1, IFeudContent? bank = null)
     {
         Content = new FixedFeudContent(boards);
-        Game = new FeudGame("TEST", Content, new Random(seed), firstSeconds, secondSeconds);
+        Game = new FeudGame("TEST", bank ?? Content, new Random(seed), firstSeconds, secondSeconds);
         Emcee = Game.JoinEmcee().Token;
         if (start) Check.Ok(Game.Start(Emcee));
     }
@@ -776,6 +776,48 @@ static class FeudChecks
                 Check.True(all.Count > 1000, "the new set is in");
                 var again = new FolderFeudContent(folder);
                 Check.Equal(all.Count, again.Boards().Count, "a restart doesn't add the set twice");
+            }
+            finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
+        });
+
+        run("feud rounds: the longer boards go to the early rounds and a four-answer board is the triple round", () =>
+        {
+            var folder = Path.Combine(Path.GetTempPath(), "feud-test-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                var bank = new FolderFeudContent(folder, seedStarters: false);
+                for (var i = 0; i < 30; i++)
+                    Check.True(bank.Add($"Long {i}", [($"a{i}", 30), ($"b{i}", 25), ($"c{i}", 20), ($"d{i}", 10), ($"e{i}", 8), ($"f{i}", 5)]).Ok, "added");
+                for (var i = 0; i < 12; i++)
+                    Check.True(bank.Add($"Short {i}", [($"a{i}", 40), ($"b{i}", 30), ($"c{i}", 20), ($"d{i}", 10)]).Ok, "added");
+
+                for (var seed = 1; seed <= 6; seed++)
+                {
+                    var t = new FeudTable(start: true, seed: seed, bank: bank);
+                    Check.True(t.S.Answers.Count > FeudRules.ShortBoardAnswers, $"round 1 is a long board (seed {seed})");
+                    t.SmallWin(0); t.Continue();
+                    Check.True(t.S.Answers.Count > FeudRules.ShortBoardAnswers, "round 2 is a long board");
+                    t.SmallWin(1); t.Continue();
+                    Check.True(t.S.Answers.Count > FeudRules.ShortBoardAnswers, "round 3 (double) is a long board");
+                    t.SmallWin(0); t.Continue();
+                    Check.Equal(4, t.S.Round, "round 4");
+                    Check.Equal(3, t.S.Multiplier, "round 4 is the triple");
+                    Check.Equal(FeudRules.ShortBoardAnswers, t.S.Answers.Count, "the triple round is a four-answer board");
+                    Check.Ok(t.Game.SkipQuestion(t.Emcee));
+                    Check.Equal(FeudRules.ShortBoardAnswers, t.S.Answers.Count, "a skipped triple round is replaced by another four-answer board");
+                }
+
+                Check.True(bank.TryDeal(new Random(3), FeudRules.BoardsPerGame, FeudRules.ShortBoardsPerGame, out var dealt, out _), "dealt");
+                Check.Equal(FeudRules.ShortBoardsPerGame, dealt.Count(b => b.Answers.Count <= FeudRules.ShortBoardAnswers), "four short boards in a deal");
+                Check.Equal(FeudRules.BoardsPerGame, dealt.Count, "a full deal");
+
+                // A bank with no short boards at all still plays.
+                var longOnly = new FolderFeudContent(Path.Combine(folder, "b"), seedStarters: false);
+                for (var i = 0; i < 20; i++)
+                    Check.True(longOnly.Add($"Long {i}", [($"a{i}", 30), ($"b{i}", 25), ($"c{i}", 20), ($"d{i}", 10), ($"e{i}", 8)]).Ok, "added");
+                var g = new FeudTable(start: true, bank: longOnly);
+                g.SmallWin(0); g.Continue(); g.SmallWin(1); g.Continue(); g.SmallWin(0); g.Continue();
+                Check.Equal(4, g.S.Round, "still gets a fourth round with no short boards");
             }
             finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
         });

@@ -31,7 +31,7 @@ public sealed class FeudGame
 
         public int Round;
         public int BoardIdx;                                    // index into the regular boards
-        public int NextBoard;                                   // the next regular board not yet used
+        public bool[] Taken = [];                               // which regular boards have been used, or skipped, so far
         public bool[] Revealed = [];
         public int Strikes;
         public int StrikeEvents;                                // every strike ever given this game, so a screen can tell a new one happened
@@ -60,6 +60,7 @@ public sealed class FeudGame
             copy.Names = (string[])Names.Clone();
             copy.Scores = (int[])Scores.Clone();
             copy.Revealed = (bool[])Revealed.Clone();
+            copy.Taken = (bool[])Taken.Clone();
             copy.Face = (int[])Face.Clone();
             copy.FastNames = (string[])FastNames.Clone();
             copy.FastEntries = (FastEntry?[])FastEntries.Clone();
@@ -121,22 +122,37 @@ public sealed class FeudGame
     {
         if (!IsEmcee(token)) return Result.Fail(NotEmcee);
         if (_s.Phase != FeudPhase.Lobby) return Result.Fail("The game has already started.");
-        if (!_content.TryDeal(_rng, FeudRules.BoardsPerGame, out var boards, out var error)) return Result.Fail(error);
+        if (!_content.TryDeal(_rng, FeudRules.BoardsPerGame, FeudRules.ShortBoardsPerGame, out var boards, out var error)) return Result.Fail(error);
 
         var fastCount = FeudRules.FastQuestions;
         _rounds = boards.Take(boards.Count - fastCount).ToList();
         _fast = boards.Skip(boards.Count - fastCount).ToList();
         _content.MarkUsed(boards.Select(b => b.Id));
 
+        _s.Taken = new bool[_rounds.Count];
         _s.Round = 1;
-        _s.NextBoard = 1;
-        BeginRound(0);
+        BeginRound(TakeBoard(1));
         return Result.Success;
     });
 
     // ---- A round -------------------------------------------------------------------------
 
     private FeudBoard Board => _rounds[_s.BoardIdx];
+
+    private bool HasSpareBoard => _s.Taken.Any(t => !t);
+
+    /// <summary>
+    /// The next board for <paramref name="round"/>. The triple rounds, the winner-takes-all finish, get a short board (four answers) and the
+    /// others a longer one; if the bank has run out of the right kind, any unused board will do.
+    /// </summary>
+    private int TakeBoard(int round)
+    {
+        var wantShort = FeudRules.Multiplier(round) >= 3;
+        var fits = Enumerable.Range(0, _rounds.Count).Where(i => !_s.Taken[i]).ToList();
+        var pick = fits.Where(i => (_rounds[i].Answers.Count <= FeudRules.ShortBoardAnswers) == wantShort).Cast<int?>().FirstOrDefault() ?? fits[0];
+        _s.Taken[pick] = true;
+        return pick;
+    }
 
     private void BeginRound(int boardIdx)
     {
@@ -323,9 +339,9 @@ public sealed class FeudGame
         if (_s.Phase is not (FeudPhase.RoundIntro or FeudPhase.FaceOffBuzz or FeudPhase.FaceOffAnswer))
             return Result.Fail("Too late to skip this one.");
         if (_s.Revealed.Any(r => r)) return Result.Fail("Too late to skip this one.");
-        if (_s.NextBoard >= _rounds.Count) return Result.Fail("There are no spare questions left in this game.");
+        if (!HasSpareBoard) return Result.Fail("There are no spare questions left in this game.");
         Remember();
-        BeginRound(_s.NextBoard++);
+        BeginRound(TakeBoard(_s.Round));
         _s.Message = "New question. " + _s.Message;
         return Result.Success;
     });
@@ -340,7 +356,7 @@ public sealed class FeudGame
 
         var leader = _s.Scores[0] == _s.Scores[1] ? None : _s.Scores[0] > _s.Scores[1] ? 0 : 1;
         var someoneHasIt = leader >= 0 && _s.Scores[leader] >= FeudRules.WinScore;
-        var outOfBoards = _s.NextBoard >= _rounds.Count;
+        var outOfBoards = !HasSpareBoard;
 
         if (someoneHasIt || outOfBoards)
         {
@@ -351,7 +367,7 @@ public sealed class FeudGame
         }
 
         _s.Round++;
-        BeginRound(_s.NextBoard++);
+        BeginRound(TakeBoard(_s.Round));
         return Result.Success;
     });
 

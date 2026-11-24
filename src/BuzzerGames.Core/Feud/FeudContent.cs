@@ -27,6 +27,12 @@ public interface IFeudContent
     /// <summary>Up to <paramref name="count"/> boards for one game, fresh ones first. Fails only if the bank has fewer than a game needs.</summary>
     bool TryDeal(Random rng, int count, out IReadOnlyList<FeudBoard> boards, out string error);
 
+    /// <summary>
+    /// The same, but with <paramref name="shortBoards"/> of them short (<see cref="FeudRules.ShortBoardAnswers"/> answers or fewer) for the triple
+    /// rounds, listed first, when the bank has that many; the rest have more answers.
+    /// </summary>
+    bool TryDeal(Random rng, int count, int shortBoards, out IReadOnlyList<FeudBoard> boards, out string error);
+
     void MarkUsed(IEnumerable<string> ids);
 }
 
@@ -201,16 +207,37 @@ public sealed class FolderFeudContent : IFeudContent
 
     // ---- Dealing -------------------------------------------------------------------------
 
-    public bool TryDeal(Random rng, int count, out IReadOnlyList<FeudBoard> boards, out string error)
+    public bool TryDeal(Random rng, int count, out IReadOnlyList<FeudBoard> boards, out string error) =>
+        TryDeal(rng, count, 0, out boards, out error);
+
+    public bool TryDeal(Random rng, int count, int shortBoards, out IReadOnlyList<FeudBoard> boards, out string error)
     {
         lock (_gate)
         {
             error = "";
             var used = _bank.Used.ToHashSet();
-            var picked = Shuffled(_bank.Boards.Where(b => !used.Contains(b.Id)), rng)
-                .Concat(Shuffled(_bank.Boards.Where(b => used.Contains(b.Id)), rng))
-                .Take(count)
-                .ToList();
+            List<FeudBoard> Pick(Func<FeudBoard, bool> where, int n, ICollection<string> skip) =>
+                Shuffled(_bank.Boards.Where(b => !used.Contains(b.Id) && where(b) && !skip.Contains(b.Id)), rng)
+                    .Concat(Shuffled(_bank.Boards.Where(b => used.Contains(b.Id) && where(b) && !skip.Contains(b.Id)), rng))
+                    .Take(n)
+                    .ToList();
+
+            var picked = new List<FeudBoard>();
+            if (shortBoards > 0)
+            {
+                var ids = new HashSet<string>();
+                picked.AddRange(Pick(b => b.Answers.Count <= FeudRules.ShortBoardAnswers, Math.Min(shortBoards, count), ids));
+                foreach (var b in picked) ids.Add(b.Id);
+                var longs = Pick(b => b.Answers.Count > FeudRules.ShortBoardAnswers, count - picked.Count, ids);
+                picked.AddRange(longs);
+                foreach (var b in longs) ids.Add(b.Id);
+                if (picked.Count < count) picked.AddRange(Pick(_ => true, count - picked.Count, ids));   // too few of one shape: any board will do
+            }
+            else
+            {
+                picked = Pick(_ => true, count, new HashSet<string>());
+            }
+
             boards = picked;
             if (picked.Count < FeudRules.MinBoardsPerGame)
             {
@@ -330,6 +357,9 @@ public sealed class FixedFeudContent : IFeudContent
         error = boards.Count < FeudRules.MinBoardsPerGame ? "Not enough boards." : "";
         return error.Length == 0;
     }
+
+    public bool TryDeal(Random rng, int count, int shortBoards, out IReadOnlyList<FeudBoard> boards, out string error) =>
+        TryDeal(rng, count, out boards, out error);
 
     public void MarkUsed(IEnumerable<string> ids) => Used.AddRange(ids);
 }
